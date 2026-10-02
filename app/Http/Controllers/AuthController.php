@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
+class AuthController extends Controller
+{
+    // Tampilkan form registrasi member
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
+
+    // Proses pendaftaran member (Validasi -> Simpan -> Redirect)
+    public function register(Request $request)
+    {
+        // 1. Validasi data member sesuai diagram dan skema users
+        $validated = $request->validate([
+            'name'      => ['required', 'string', 'max:255'],
+            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password'  => ['required', 'string', 'min:6', 'confirmed'],
+            'noTelepon' => ['required', 'string', 'max:20'],
+            'alamat'    => ['required', 'string', 'max:500'],
+        ], [
+            'name.required'      => 'Nama lengkap wajib diisi.',
+            'email.required'     => 'Alamat email wajib diisi.',
+            'email.email'        => 'Format email tidak valid.',
+            'email.unique'       => 'Email sudah terdaftar, silakan gunakan email lain.',
+            'password.required'  => 'Password wajib diisi.',
+            'password.min'       => 'Password minimal harus 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'noTelepon.required' => 'Nomor telepon wajib diisi.',
+            'alamat.required'    => 'Alamat domisili wajib diisi.',
+        ]);
+
+        // 2. Simpan data member ke tabel users
+        User::create([
+            'name'      => $validated['name'],
+            'email'     => $validated['email'],
+            'password'  => Hash::make($validated['password']),
+            'role'      => 'member', // Default role member
+            'alamat'    => $validated['alamat'],
+            'noTelepon' => $validated['noTelepon'],
+        ]);
+
+        // 3. Tampilkan pesan berhasil dan arahkan ke halaman login
+        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.');
+    }
+
+    // Menampilkan halaman login
+    public function showLoginForm()
+    {
+        return view('auth.login');
+    }
+
+    // Memproses data login (Validasi & Pembuatan Sesi)
+    public function login(Request $request)
+    {
+        // 1. Validasi input
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'password.required' => 'Password wajib diisi.',
+        ]);
+
+        // 2. Cek apakah data valid
+        if (Auth::attempt($credentials)) {
+            // Buat sesi login baru & amankan dari session fixation
+            $request->session()->regenerate();
+
+            // Redirect ke dashboard sesuai role
+            $user = Auth::user();
+            if ($user->role === 'admin' || $user->role === 'petugas') {
+                return redirect()->intended('/dashboard');
+            }
+
+            return redirect()->intended('/katalog');
+        }
+
+        // 3. Jika login gagal, kembalikan dengan pesan error
+        return back()->withErrors([
+            'login_gagal' => 'Email atau password yang Anda masukkan salah.',
+        ])->onlyInput('email');
+    }
+
+    // Logout
+    public function logout(Request $request)
+    {
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect('/login')->with('success', 'Berhasil keluar.');
+    }
+}
