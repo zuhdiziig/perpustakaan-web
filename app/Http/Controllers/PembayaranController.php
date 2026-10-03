@@ -9,6 +9,72 @@ use Illuminate\Support\Facades\DB;
 
 class PembayaranController extends Controller
 {
+    // Tambahkan di dalam class PembayaranController
+
+// 1. Member buka tagihan & pilih Bayar via QR -> Tampilkan halaman QRIS
+    public function bayarQr($idDenda)
+    {
+        $denda = Denda::with(['pengembalian.peminjaman.member'])->findOrFail($idDenda);
+
+        if ($denda->status === 'Lunas') {
+            return redirect()->route('denda.show', $denda->idDenda)
+                ->with('success', 'Tagihan denda ini sudah lunas.');
+        }
+
+        // Ambil atau buat record pembayaran pending untuk denda ini
+        $pembayaran = Pembayaran::firstOrCreate(
+            [
+                'idDenda' => $denda->idDenda,
+                'status'  => 'Pending',
+            ],
+            [
+                'nominal' => $denda->jumlah,
+                'metode'  => 'QRIS',
+            ]
+        );
+
+        // Mock QR string (menggunakan generator QR gratis Google Chart API / QR Server)
+        $qrData = "PERPUS-QRIS-" . $pembayaran->idPembayaran . "-NOMINAL-" . $pembayaran->nominal;
+        $qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($qrData);
+
+        return view('pembayaran.bayar_qr', compact('denda', 'pembayaran', 'qrImageUrl'));
+    }
+
+    // 2. Simulasi Scan QR & Konfirmasi Pembayaran dari sisi Member
+    public function prosesBayarQr(Request $request, $idPembayaran)
+    {
+        $pembayaran = Pembayaran::with('denda')->findOrFail($idPembayaran);
+
+        // Simulasi hasil pembayaran dari gateway (berhasil atau gagal)
+        $statusInput = $request->input('simulasi_status', 'berhasil');
+
+        if ($statusInput === 'berhasil') {
+            DB::transaction(function () use ($pembayaran) {
+                // Perbarui status pembayaran
+                $pembayaran->update([
+                    'status' => 'Sukses'
+                ]);
+
+                // Perbarui status denda menjadi Lunas
+                if ($pembayaran->denda) {
+                    $pembayaran->denda->update([
+                        'status' => 'Lunas'
+                    ]);
+                }
+            });
+
+            // Tampilkan pembayaran berhasil
+            return redirect()->route('denda.show', $pembayaran->idDenda)
+                ->with('success', 'Pembayaran via QRIS berhasil! Status denda Anda kini telah lunas.');
+        }
+
+        // Tampilkan pembayaran gagal
+        return back()->with('error', 'Pembayaran gagal atau transaksi dibatalkan oleh Payment Gateway.');
+    }
+    
+    
+    
+    
     // Aktor: Buka daftar pembayaran
     public function index()
     {
