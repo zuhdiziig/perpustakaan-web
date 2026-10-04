@@ -20,23 +20,20 @@ class QrController extends Controller
     /**
      * Helper universal untuk generate string SVG QR Code
      */
-    private function generateSvgQr(string $content, int $size = 200): string
+    private function generateSvgQr($text, $size = 200)
     {
-        if (class_exists(\SimpleSoftwareIO\QrCode\Facades\QrCode::class)) {
-            try {
-                return (string) \SimpleSoftwareIO\QrCode\Facades\QrCode::size($size)->generate($content);
-            } catch (\Throwable $e) {
-                // Fallback ke native BaconQrCode jika facade gagal
-            }
+        // Menggunakan API QR gratis (menghasilkan SVG murni langsung tanpa butuh package BaconQrCode)
+        $url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&format=svg&data=" . urlencode($text);
+        
+        // Ambil isi SVG langsung
+        $svg = @file_get_contents($url);
+    
+        if ($svg) {
+            return $svg;
         }
 
-        $renderer = new ImageRenderer(
-            new RendererStyle($size),
-            new SvgImageBackEnd()
-        );
-        $writer = new Writer($renderer);
-
-        return $writer->writeString($content);
+        // Fallback jika offline
+        return '<img src="' . $url . '" width="' . $size . '" height="' . $size . '" alt="QR Code">';
     }
 
     /**
