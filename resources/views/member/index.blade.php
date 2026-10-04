@@ -62,6 +62,7 @@
                         </span>
                     </td>
                     <td>
+                        <a href="{{ route('member.cetak-qr', $m->id) }}" target="_blank" class="btn" style="background: #0284c7; color: white;">Kartu QR</a>
                         <a href="{{ route('member.edit', $m->id) }}" class="btn btn-warning">Ubah</a>
 
                         {{-- Tombol Toggle Aktif / Nonaktif --}}
