@@ -10,7 +10,9 @@ class DetailPeminjaman extends Model
     use HasFactory;
 
     protected $table = 'detail_peminjaman';
-    protected $primaryKey = 'idDetail';
+
+    protected $primaryKey = 'id';
+
     protected $guarded = [];
 
     public function peminjaman()
@@ -21,5 +23,10 @@ class DetailPeminjaman extends Model
     public function buku()
     {
         return $this->belongsTo(Buku::class, 'idBuku', 'idBuku');
+    }
+
+    public function eksemplar()
+    {
+        return $this->belongsTo(BukuEksemplar::class, 'idEksemplar', 'idEksemplar');
     }
 }
