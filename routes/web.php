@@ -1,19 +1,22 @@
 <?php
 
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PembayaranController;
-use App\Http\Controllers\KatalogController;
+use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\DendaController;
+use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\KategoriController;
-use App\Http\Controllers\PetugasController;
+use App\Http\Controllers\KondisiBukuController;
+use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengembalianController;
-use App\Http\Controllers\BarcodeController;
-use App\Http\Controllers\KondisiBukuController;
-use App\Http\Controllers\DendaController;
+use App\Http\Controllers\PetugasController;
+use App\Http\Controllers\QrController;
 use App\Http\Controllers\RiwayatController;
-use App\Http\Controllers\LaporanController;
+
+Route::get('/', fn () => redirect()->route('login'));
 
 // Tamu (Belum login)
 Route::middleware('guest')->group(function () {
@@ -27,10 +30,10 @@ Route::middleware('guest')->group(function () {
 // Sudah login
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-    
+
     // Dashboard
     Route::get('/dashboard', function () {
-    return view('dashboard');
+        return view('dashboard');
     })->name('dashboard');
 
     Route::get('/katalog', [KatalogController::class, 'index'])->name('katalog.index');
@@ -86,8 +89,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/riwayat', [RiwayatController::class, 'index'])->name('riwayat.index');
 
     // Fitur 16 Melihat Denda (Member)
-    Route::get('/denda-saya', [DendaController::class, 'memberDenda'])->name('denda.saya'); 
+    Route::get('/denda-saya', [DendaController::class, 'memberDenda'])->name('denda.saya');
 
     // Fitur 17 Melihat Laporan (Admin)
     Route::get('/laporan', [LaporanController::class, 'index'])->name('laporan.index');
+
+    // Fitur QR Code (Cetak & API Scanner)
+    Route::get('/member/{id}/cetak-qr', [QrController::class, 'cetakMember'])->name('member.cetak-qr');
+    Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])->name('buku.cetak-qr');
+    Route::post('/api/scan/member', [QrController::class, 'apiScanMember'])->name('api.scan.member');
+    Route::post('/api/scan/buku', [QrController::class, 'apiScanBuku'])->name('api.scan.buku');
+    Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])->name('api.scan.pengembalian.member');
 });

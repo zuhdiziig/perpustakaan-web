@@ -18,7 +18,17 @@ class User extends Authenticatable
         'alamat',
         'status',
         'noTelepon',
+        'qr_token',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->qr_token)) {
+                $user->qr_token = 'usr_'.bin2hex(random_bytes(16));
+            }
+        });
+    }
 
     protected $hidden = [
         'password',

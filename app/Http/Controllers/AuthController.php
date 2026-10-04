@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller
 {
@@ -18,30 +20,30 @@ class AuthController extends Controller
     {
         // 1. Validasi data member sesuai diagram dan skema users
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password'  => ['required', 'string', 'min:6', 'confirmed'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
             'noTelepon' => ['required', 'string', 'max:20'],
-            'alamat'    => ['required', 'string', 'max:500'],
+            'alamat' => ['required', 'string', 'max:500'],
         ], [
-            'name.required'      => 'Nama lengkap wajib diisi.',
-            'email.required'     => 'Alamat email wajib diisi.',
-            'email.email'        => 'Format email tidak valid.',
-            'email.unique'       => 'Email sudah terdaftar, silakan gunakan email lain.',
-            'password.required'  => 'Password wajib diisi.',
-            'password.min'       => 'Password minimal harus 6 karakter.',
+            'name.required' => 'Nama lengkap wajib diisi.',
+            'email.required' => 'Alamat email wajib diisi.',
+            'email.email' => 'Format email tidak valid.',
+            'email.unique' => 'Email sudah terdaftar, silakan gunakan email lain.',
+            'password.required' => 'Password wajib diisi.',
+            'password.min' => 'Password minimal harus 6 karakter.',
             'password.confirmed' => 'Konfirmasi password tidak cocok.',
             'noTelepon.required' => 'Nomor telepon wajib diisi.',
-            'alamat.required'    => 'Alamat domisili wajib diisi.',
+            'alamat.required' => 'Alamat domisili wajib diisi.',
         ]);
 
         // 2. Simpan data member ke tabel users
         User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
-            'role'      => 'member', // Default role member
-            'alamat'    => $validated['alamat'],
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'member', // Default role member
+            'alamat' => $validated['alamat'],
             'noTelepon' => $validated['noTelepon'],
         ]);
 

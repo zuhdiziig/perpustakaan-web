@@ -5,16 +5,33 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Barcode extends Model
+class Peminjaman extends Model
 {
     use HasFactory;
 
-    protected $table = 'barcode';
-    protected $primaryKey = 'idBarcode';
+    protected $table = 'peminjaman';
+
+    protected $primaryKey = 'idPeminjaman';
+
     protected $guarded = [];
 
-    public function buku()
+    public function member()
     {
-        return $this->belongsTo(Buku::class, 'idBuku', 'idBuku');
+        return $this->belongsTo(User::class, 'idUserMember', 'id');
+    }
+
+    public function petugas()
+    {
+        return $this->belongsTo(User::class, 'idUserPetugas', 'id');
+    }
+
+    public function details()
+    {
+        return $this->hasMany(DetailPeminjaman::class, 'idPeminjaman', 'idPeminjaman');
+    }
+
+    public function pengembalians()
+    {
+        return $this->hasMany(Pengembalian::class, 'idPeminjaman', 'idPeminjaman');
     }
 }
