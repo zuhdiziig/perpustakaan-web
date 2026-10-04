@@ -2,46 +2,528 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <title>Login - Perpustakaan</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk - BOOKNEST Perpustakaan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background: #f4f6f8; }
-        .card { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 320px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="email"], input[type="password"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-        button { width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
-        .error { color: red; font-size: 13px; margin-bottom: 10px; }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #f7f9fa;
+            color: #1e293b;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 24px;
+        }
+
+        .main-wrapper {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        /* Top Header Navbar */
+        .top-navbar {
+            background: #ffffff;
+            border: 1px solid #e5e9ee;
+            border-radius: 16px;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+            margin-bottom: 40px;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            color: #1e293b;
+        }
+
+        .brand-icon-box {
+            width: 36px;
+            height: 36px;
+            background-color: #345e59;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            flex-shrink: 0;
+        }
+
+        .brand-icon-box svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .brand-name {
+            font-size: 16px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #1e293b;
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .nav-pill-group {
+            border: 1px solid #e2e8f0;
+            border-radius: 9999px;
+            padding: 4px 6px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: #ffffff;
+        }
+
+        .nav-pill-item {
+            text-decoration: none;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #64748b;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            transition: all 0.2s ease;
+        }
+
+        .nav-pill-item:hover {
+            color: #1e293b;
+        }
+
+        .nav-pill-item.active {
+            background-color: #d1fae5;
+            color: #047857;
+            font-weight: 600;
+        }
+
+        .btn-nav-masuk {
+            background-color: #4361ee;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 9px 24px;
+            border-radius: 9px;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.1s ease;
+            display: inline-block;
+        }
+
+        .btn-nav-masuk:hover {
+            background-color: #3651d4;
+        }
+
+        .btn-nav-daftar {
+            background-color: #345e59;
+            color: #ffffff;
+            font-size: 13.5px;
+            font-weight: 600;
+            padding: 9px 24px;
+            border-radius: 9px;
+            text-decoration: none;
+            transition: background 0.2s ease, transform 0.1s ease;
+            display: inline-block;
+        }
+
+        .btn-nav-daftar:hover {
+            background-color: #2a4c48;
+        }
+
+        /* Content Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1fr;
+            gap: 48px;
+            align-items: flex-start;
+        }
+
+        /* Left Hero Section */
+        .hero-section {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero-image-wrapper {
+            width: 100%;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            background-color: #e2e8f0;
+        }
+
+        .hero-image {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4 / 2.9;
+            object-fit: cover;
+            display: block;
+        }
+
+        .hero-heading {
+            font-size: 26px;
+            font-weight: 800;
+            color: #1e293b;
+            margin-top: 26px;
+            margin-bottom: 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-description {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.6;
+            max-width: 480px;
+        }
+
+        /* Right Form Card */
+        .auth-card {
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 24px;
+            padding: 42px 38px;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        .card-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: #1e293b;
+            letter-spacing: -0.02em;
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: #64748b;
+            line-height: 1.5;
+            margin-bottom: 28px;
+        }
+
+        .alert-box {
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 13.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .alert-success {
+            background-color: #ecfdf5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .alert-error {
+            background-color: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 500;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 13px 18px;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 14px;
+            font-family: inherit;
+            color: #1e293b;
+            background-color: #ffffff;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .form-control:focus {
+            border-color: #345e59;
+            box-shadow: 0 0 0 3px rgba(52, 94, 89, 0.12);
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
+        }
+
+        .form-options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 18px;
+            margin-bottom: 24px;
+        }
+
+        .remember-checkbox-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            font-size: 13.5px;
+            color: #334155;
+            user-select: none;
+        }
+
+        .remember-checkbox-label input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #345e59;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .forgot-password-link {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #345e59;
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        .forgot-password-link:hover {
+            color: #223f3c;
+            text-decoration: underline;
+        }
+
+        .btn-submit-masuk {
+            width: 100%;
+            background-color: #345e59;
+            color: #ffffff;
+            border: none;
+            padding: 13px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn-submit-masuk:hover {
+            background-color: #2a4c48;
+        }
+
+        .btn-submit-masuk:active {
+            transform: scale(0.99);
+        }
+
+        .card-switch-link {
+            text-align: center;
+            margin-top: 22px;
+            font-size: 13.5px;
+            color: #64748b;
+        }
+
+        .card-switch-link a {
+            color: #334155;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 4px;
+        }
+
+        .card-switch-link a:hover {
+            text-decoration: underline;
+        }
+
+        .card-bottom-notice {
+            margin-top: 28px;
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        /* Footer */
+        .page-footer {
+            text-align: center;
+            padding-top: 48px;
+            padding-bottom: 12px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        /* Responsive Breakpoint */
+        @media (max-width: 900px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+                gap: 32px;
+            }
+
+            .top-navbar {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .nav-right {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .nav-pill-group {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .btn-nav-masuk, .btn-nav-daftar {
+                text-align: center;
+                width: 100%;
+            }
+
+            .auth-card {
+                padding: 30px 24px;
+            }
+        }
     </style>
 </head>
 <body>
 
-<div class="card">
-    <h2 style="text-align: center;">Login Perpustakaan</h2>
+<div class="main-wrapper">
+    <!-- Top Navbar Card -->
+    <header class="top-navbar">
+        <a href="{{ url('/') }}" class="brand-logo">
+            <div class="brand-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+            </div>
+            <span class="brand-name">BOOKNEST</span>
+        </a>
 
-    {{-- Pesan login gagal sesuai Activity Diagram --}}
-    @if (session('success'))
-    <div style="background: #d4edda; color: #155724; padding: 10px; border-radius: 4px; font-size: 13px; margin-bottom: 15px;">
-        {{ session('success') }}
-    </div>
-    @endif
+        <div class="nav-right">
+            <nav class="nav-pill-group">
+                <a href="{{ url('/') }}" class="nav-pill-item active">Beranda</a>
+                <a href="{{ route('katalog.index') }}" class="nav-pill-item">Katalog</a>
+                <a href="{{ route('dashboard') }}" class="nav-pill-item">Dasbor</a>
+                <a href="#tentang" class="nav-pill-item">Tentang</a>
+            </nav>
 
-    <form action="{{ route('login') }}" method="POST">
-        @csrf
-        <div class="form-group">
-            <label>Email</label>
-            <input type="email" name="email" value="{{ old('email') }}" required autofocus>
-            @error('email') <span class="error">{{ $message }}</span> @enderror
+            <a href="{{ route('login') }}" class="btn-nav-masuk">Masuk</a>
+            <a href="{{ route('register') }}" class="btn-nav-daftar">Daftar</a>
         </div>
+    </header>
 
-        <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" required>
-            @error('password') <span class="error">{{ $message }}</span> @enderror
-        </div>
+    <!-- Main Grid: Left Hero & Right Form -->
+    <main class="content-grid">
+        <!-- Left Section: Image and Slogan -->
+        <section class="hero-section">
+            <div class="hero-image-wrapper">
+                <img src="{{ asset('images/library-table.jpg') }}" alt="Suasana Meja Membaca Perpustakaan" class="hero-image">
+            </div>
+            <h2 class="hero-heading">Temukan. Baca. Berkembang.</h2>
+            <p class="hero-description">Buku berikutnya bisa menjadi awal dari sesuatu yang besar. Kami siap menemanimu menemukannya.</p>
+        </section>
 
-        <button type="submit">Masuk</button>
-    </form>
+        <!-- Right Section: Login Card -->
+        <section class="auth-card">
+            <h1 class="card-title">Selamat datang kembali</h1>
+            <p class="card-subtitle">Masuk untuk melanjutkan perjalanan membaca dan mengelola peminjamanmu.</p>
+
+            @if (session('success'))
+                <div class="alert-box alert-success">
+                    <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span>{{ session('success') }}</span>
+                </div>
+            @endif
+
+            @if ($errors->has('login_gagal'))
+                <div class="alert-box alert-error">
+                    <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                    </svg>
+                    <span>{{ $errors->first('login_gagal') }}</span>
+                </div>
+            @endif
+
+            <form action="{{ route('login') }}" method="POST">
+                @csrf
+
+                <div class="form-group">
+                    <label class="form-label" for="email">Email</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-control" 
+                        placeholder="Masukkan alamat email" 
+                        value="{{ old('email') }}" 
+                        required 
+                        autofocus
+                    >
+                    @error('email')
+                        <div style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Masukkan password" 
+                        required
+                    >
+                    @error('password')
+                        <div style="color: #dc2626; font-size: 12px; margin-top: 5px;">{{ $message }}</div>
+                    @enderror
+                </div>
+
+                <!-- Remember Me & Forgot Password Row -->
+                <div class="form-options-row">
+                    <label class="remember-checkbox-label">
+                        <input type="checkbox" name="remember" id="remember" {{ old('remember') ? 'checked' : '' }}>
+                        <span>Ingat Saya</span>
+                    </label>
+
+                    <a href="{{ route('password.request') }}" class="forgot-password-link">Lupa Password?</a>
+                </div>
+
+                <button type="submit" class="btn-submit-masuk">Masuk</button>
+            </form>
+
+            <div class="card-switch-link">
+                Belum punya akun? <a href="{{ route('register') }}">Daftar</a>
+            </div>
+
+            <p class="card-bottom-notice">
+                Akun anggota, petugas, dan admin menggunakan halaman masuk yang sama.
+            </p>
+        </section>
+    </main>
 </div>
+
+<!-- Page Footer -->
+<footer class="page-footer">
+    © 2026 BOOKNEST · Perpustakaan umum untuk semua
+</footer>
 
 </body>
 </html>

@@ -25,6 +25,8 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
     Route::get('/register', [AuthController::class, 'showRegisterForm'])->name('register');
     Route::post('/register', [AuthController::class, 'register']);
+    Route::get('/forgot-password', [AuthController::class, 'showForgotPasswordForm'])->name('password.request');
+    Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])->name('password.update');
 });
 
 // Sudah login
@@ -44,7 +46,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/denda-saya', [DendaController::class, 'memberDenda'])->name('denda.saya');
     Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])->name('bayar.qr');
     Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])->name('bayar.proses_qr');
-    
+
     // Rute cetak kartu/QR member yang sedang login langsung
     Route::get('/kartu-saya', function () {
         return redirect()->route('member.cetak-qr', auth()->id());

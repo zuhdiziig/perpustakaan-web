@@ -39,7 +39,7 @@ class AuthController extends Controller
         ]);
 
         // Generate token unik QR untuk member (contoh: MBR-UUID)
-        $qrToken = 'MBR-' . strtoupper(Str::random(12));
+        $qrToken = 'MBR-'.strtoupper(Str::random(12));
 
         // 2. Simpan data member ke tabel users
         User::create([
@@ -76,8 +76,10 @@ class AuthController extends Controller
             'password.required' => 'Password wajib diisi.',
         ]);
 
+        $remember = $request->boolean('remember');
+
         // 2. Cek apakah data valid
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials, $remember)) {
             $request->session()->regenerate();
 
             /** @var User $user */
@@ -85,7 +87,7 @@ class AuthController extends Controller
 
             // Auto-generate QR Token jika akun lama belum memiliki token
             if (empty($user->qr_token)) {
-                $user->qr_token = 'MBR-' . strtoupper(Str::random(12));
+                $user->qr_token = 'MBR-'.strtoupper(Str::random(12));
                 $user->save();
             }
 
@@ -101,6 +103,46 @@ class AuthController extends Controller
         return back()->withErrors([
             'login_gagal' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
+    }
+
+    // Tampilkan formulir lupa password
+    public function showForgotPasswordForm()
+    {
+        return view('auth.forgot-password');
+    }
+
+    // Proses reset password
+    public function forgotPassword(Request $request)
+    {
+        $validated = $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+            'noTelepon' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'email.required' => 'Email wajib diisi.',
+            'email.exists' => 'Email tidak ditemukan dalam sistem.',
+            'noTelepon.required' => 'Nomor telepon wajib diisi untuk verifikasi akun.',
+            'password.required' => 'Password baru wajib diisi.',
+            'password.min' => 'Password minimal harus 6 karakter.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+        ]);
+
+        $user = User::where('email', $validated['email'])->first();
+
+        $cleanDbPhone = preg_replace('/[^0-9]/', '', (string) ($user->noTelepon ?? ''));
+        $cleanInputPhone = preg_replace('/[^0-9]/', '', (string) $validated['noTelepon']);
+
+        if (! empty($user->noTelepon) && $cleanDbPhone !== $cleanInputPhone) {
+            return back()->withErrors([
+                'noTelepon' => 'Nomor telepon tidak cocok dengan data terdaftar akun Anda.',
+            ])->withInput($request->except('password', 'password_confirmation'));
+        }
+
+        $user->password = Hash::make($validated['password']);
+        $user->setRememberToken(Str::random(60));
+        $user->save();
+
+        return redirect()->route('login')->with('success', 'Password Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru.');
     }
 
     // Logout
