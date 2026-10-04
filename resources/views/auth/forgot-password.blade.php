@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - BOOKNEST Perpustakaan</title>
+    <title>Lupa Password - BOOKNEST Perpustakaan</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -147,7 +147,7 @@
         /* Content Layout */
         .content-grid {
             display: grid;
-            grid-template-columns: 1fr 1.08fr;
+            grid-template-columns: 1.05fr 1fr;
             gap: 48px;
             align-items: flex-start;
         }
@@ -195,7 +195,7 @@
             background: #ffffff;
             border: 1px solid #eef2f6;
             border-radius: 24px;
-            padding: 40px 36px;
+            padding: 42px 38px;
             box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
         }
 
@@ -228,12 +228,6 @@
             background-color: #fef2f2;
             color: #991b1b;
             border: 1px solid #fecaca;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
         }
 
         .form-group {
@@ -270,11 +264,6 @@
             color: #94a3b8;
         }
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 70px;
-        }
-
         .field-error {
             color: #dc2626;
             font-size: 12px;
@@ -293,7 +282,7 @@
             font-family: inherit;
             cursor: pointer;
             transition: background-color 0.2s ease, transform 0.1s ease;
-            margin-top: 8px;
+            margin-top: 6px;
         }
 
         .btn-submit-masuk:hover {
@@ -306,7 +295,7 @@
 
         .card-switch-link {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 22px;
             font-size: 13.5px;
             color: #64748b;
         }
@@ -343,11 +332,6 @@
             .content-grid {
                 grid-template-columns: 1fr;
                 gap: 32px;
-            }
-
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
             }
 
             .top-navbar {
@@ -416,130 +400,92 @@
             <p class="hero-description">Buku berikutnya bisa menjadi awal dari sesuatu yang besar. Kami siap menemanimu menemukannya.</p>
         </section>
 
-        <!-- Right Section: Register Card -->
+        <!-- Right Section: Forgot Password Card -->
         <section class="auth-card">
-            <h1 class="card-title">Daftar Akun Baru</h1>
-            <p class="card-subtitle">Buat akun anggotamu untuk mulai meminjam buku dan menikmati koleksi literasi kami.</p>
+            <h1 class="card-title">Lupa Password</h1>
+            <p class="card-subtitle">Masukkan email dan nomor telepon terdaftar untuk mereset kata sandi akun Anda.</p>
 
             @if ($errors->any())
                 <div class="alert-box alert-error">
                     <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
-                    <span>Silakan periksa kembali data pendaftaran Anda di bawah.</span>
+                    <span>Periksa data verifikasi yang Anda masukkan di bawah.</span>
                 </div>
             @endif
 
-            <form action="{{ route('register') }}" method="POST">
+            <form action="{{ route('password.update') }}" method="POST">
                 @csrf
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="name">Nama Lengkap</label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            name="name" 
-                            class="form-control" 
-                            placeholder="Masukkan nama lengkap" 
-                            value="{{ old('name') }}" 
-                            required 
-                            autofocus
-                        >
-                        @error('name')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            class="form-control" 
-                            placeholder="contoh@email.com" 
-                            value="{{ old('email') }}" 
-                            required
-                        >
-                        @error('email')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="email">Alamat Email Terdaftar</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-control" 
+                        placeholder="Masukkan alamat email akun" 
+                        value="{{ old('email') }}" 
+                        required 
+                        autofocus
+                    >
+                    @error('email')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="noTelepon">Nomor Telepon</label>
-                        <input 
-                            type="text" 
-                            id="noTelepon" 
-                            name="noTelepon" 
-                            class="form-control" 
-                            placeholder="08123456789" 
-                            value="{{ old('noTelepon') }}" 
-                            required
-                        >
-                        @error('noTelepon')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="alamat">Alamat Domisili</label>
-                        <input 
-                            type="text" 
-                            id="alamat" 
-                            name="alamat" 
-                            class="form-control" 
-                            placeholder="Kota / Alamat lengkap" 
-                            value="{{ old('alamat') }}" 
-                            required
-                        >
-                        @error('alamat')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="noTelepon">Nomor Telepon Akun (Verifikasi)</label>
+                    <input 
+                        type="text" 
+                        id="noTelepon" 
+                        name="noTelepon" 
+                        class="form-control" 
+                        placeholder="Contoh: 08123456789" 
+                        value="{{ old('noTelepon') }}" 
+                        required
+                    >
+                    @error('noTelepon')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="password">Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            class="form-control" 
-                            placeholder="Minimal 6 karakter" 
-                            required
-                        >
-                        @error('password')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="password_confirmation">Konfirmasi Password</label>
-                        <input 
-                            type="password" 
-                            id="password_confirmation" 
-                            name="password_confirmation" 
-                            class="form-control" 
-                            placeholder="Ulangi password" 
-                            required
-                        >
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password Baru</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        class="form-control" 
+                        placeholder="Minimal 6 karakter" 
+                        required
+                    >
+                    @error('password')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
                 </div>
 
-                <button type="submit" class="btn-submit-masuk">Daftar Sekarang</button>
+                <div class="form-group">
+                    <label class="form-label" for="password_confirmation">Konfirmasi Password Baru</label>
+                    <input 
+                        type="password" 
+                        id="password_confirmation" 
+                        name="password_confirmation" 
+                        class="form-control" 
+                        placeholder="Ulangi password baru" 
+                        required
+                    >
+                </div>
+
+                <button type="submit" class="btn-submit-masuk">Perbarui Kata Sandi</button>
             </form>
 
             <div class="card-switch-link">
-                Sudah punya akun? <a href="{{ route('login') }}">Masuk</a>
+                Ingat kata sandi Anda? <a href="{{ route('login') }}">Masuk</a>
             </div>
 
             <p class="card-bottom-notice">
-                Akun anggota, petugas, dan admin menggunakan sistem perpustakaan yang sama.
+                Setelah kata sandi diperbarui, Anda dapat langsung masuk dengan kata sandi baru.
             </p>
         </section>
     </main>
