@@ -56,6 +56,7 @@
                     <td>{{ $item->stok }}</td>
                     <td>{{ $item->kondisi }}</td>
                     <td>
+                        <a href="{{ route('buku.cetak-qr', $item->idBuku) }}" target="_blank" class="btn" style="background: #0f172a; color: white; padding: 4px 8px;">Cetak QR</a>
                         <a href="{{ route('buku.edit', $item->idBuku) }}" class="btn btn-warning" style="padding: 4px 8px;">Ubah</a>
                         <form action="{{ route('buku.destroy', $item->idBuku) }}" method="POST" style="display:inline;" onsubmit="return confirm('Yakin ingin menghapus buku ini?');">
                             @csrf

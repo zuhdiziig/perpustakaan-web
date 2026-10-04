@@ -31,6 +31,23 @@
         </form>
     </div>
 
+    @if (auth()->user()->role === 'member')
+        <div style="background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: white; padding: 20px 24px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);">
+            <div>
+                <h3 style="margin: 0 0 6px 0; font-size: 18px;">Kartu Member Digital Anda</h3>
+                <p style="margin: 0 0 10px 0; font-size: 13px; opacity: 0.9;">Tunjukkan QR Code ini kepada petugas perpustakaan saat meminjam atau mengembalikan buku.</p>
+                <div style="font-family: monospace; font-size: 12px; background: rgba(255,255,255,0.15); padding: 4px 10px; border-radius: 4px; display: inline-block;">
+                    Token ID: {{ auth()->user()->qr_token }}
+                </div>
+            </div>
+            <div>
+                <a href="{{ route('member.cetak-qr', auth()->id()) }}" target="_blank" style="background: white; color: #1e3a8a; text-decoration: none; padding: 10px 18px; border-radius: 6px; font-weight: bold; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <span>📱 Buka Kartu QR</span>
+                </a>
+            </div>
+        </div>
+    @endif
+
     <div class="grid">
         <div class="card" style="border-top-color: #ef4444;">
             <h3>16. Melihat Denda</h3>

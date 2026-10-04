@@ -7,13 +7,38 @@ use App\Models\BukuEksemplar;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use App\Models\User;
+use BaconQrCode\Renderer\Image\SvgImageBackEnd;
+use BaconQrCode\Renderer\ImageRenderer;
+use BaconQrCode\Renderer\RendererStyle\RendererStyle;
+use BaconQrCode\Writer;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrController extends Controller
 {
+    /**
+     * Helper universal untuk generate string SVG QR Code
+     */
+    private function generateSvgQr(string $content, int $size = 200): string
+    {
+        if (class_exists(\SimpleSoftwareIO\QrCode\Facades\QrCode::class)) {
+            try {
+                return (string) \SimpleSoftwareIO\QrCode\Facades\QrCode::size($size)->generate($content);
+            } catch (\Throwable $e) {
+                // Fallback ke native BaconQrCode jika facade gagal
+            }
+        }
+
+        $renderer = new ImageRenderer(
+            new RendererStyle($size),
+            new SvgImageBackEnd()
+        );
+        $writer = new Writer($renderer);
+
+        return $writer->writeString($content);
+    }
+
     /**
      * Pastikan pengguna adalah Petugas atau Admin untuk operasional sirkulasi
      */
@@ -43,11 +68,11 @@ class QrController extends Controller
         $member = User::where('role', 'member')->findOrFail($id);
 
         if (empty($member->qr_token)) {
-            $member->qr_token = 'usr_'.bin2hex(random_bytes(16));
+            $member->qr_token = 'usr_' . bin2hex(random_bytes(16));
             $member->save();
         }
 
-        $qrCodeSvg = QrCode::size(200)->generate($member->qr_token);
+        $qrCodeSvg = $this->generateSvgQr($member->qr_token, 200);
 
         return view('qr.cetak_member', compact('member', 'qrCodeSvg'));
     }
@@ -64,10 +89,9 @@ class QrController extends Controller
 
         $buku = Buku::with(['kategori', 'barcode', 'eksemplar'])->findOrFail($id);
 
-        // Generate QR code SVG untuk tiap eksemplar fisik yang ada
         $eksemplarQr = [];
         foreach ($buku->eksemplar as $eks) {
-            $eksemplarQr[$eks->idEksemplar] = QrCode::size(150)->generate($eks->qr_token);
+            $eksemplarQr[$eks->idEksemplar] = $this->generateSvgQr($eks->qr_token, 150);
         }
 
         return view('qr.cetak_buku', compact('buku', 'eksemplarQr'));
@@ -84,8 +108,7 @@ class QrController extends Controller
         }
 
         $eksemplar = BukuEksemplar::with(['buku.kategori', 'buku.barcode'])->findOrFail($id);
-
-        $qrCodeSvg = QrCode::size(170)->generate($eksemplar->qr_token);
+        $qrCodeSvg = $this->generateSvgQr($eksemplar->qr_token, 170);
 
         return view('qr.cetak_eksemplar', compact('eksemplar', 'qrCodeSvg'));
     }
@@ -131,7 +154,6 @@ class QrController extends Controller
             ], 403);
         }
 
-        // Cek jumlah buku yang sedang dipinjam saat ini
         $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($member) {
             $q->where('idUserMember', $member->id)->where('status', 'Dipinjam');
         })->where('statusBuku', 'Dipinjam')->count();
@@ -170,7 +192,6 @@ class QrController extends Controller
             ], 422);
         }
 
-        // 1. Cari buku fisik di level eksemplar berdasarkan idEksemplar, qr_token, atau kode_barcode
         $eksemplarQuery = BukuEksemplar::with(['buku.kategori', 'buku.barcode']);
         if (is_numeric($token)) {
             $eksemplar = (clone $eksemplarQuery)->where('idEksemplar', $token)->first()
@@ -180,7 +201,6 @@ class QrController extends Controller
         }
 
         if (! $eksemplar) {
-            // Tolak jika yang di-scan adalah title-level QR code
             if (Buku::where('qr_token', $token)->exists()) {
                 return response()->json([
                     'success' => false,
@@ -196,7 +216,6 @@ class QrController extends Controller
 
         $buku = $eksemplar->buku;
 
-        // Validasi ketersediaan eksemplar fisik
         if ($eksemplar->status !== 'Tersedia') {
             return response()->json([
                 'success' => false,
@@ -223,7 +242,7 @@ class QrController extends Controller
                 'tahunTerbit' => $buku->tahunTerbit,
                 'kategori' => $buku->kategori->namaKategori ?? '-',
                 'harga' => (float) $buku->harga,
-                'harga_formatted' => 'Rp '.number_format($buku->harga, 0, ',', '.'),
+                'harga_formatted' => 'Rp ' . number_format($buku->harga, 0, ',', '.'),
                 'stok' => $buku->stok,
                 'kondisi' => $eksemplar->kondisi,
                 'status' => $eksemplar->status,
@@ -259,7 +278,6 @@ class QrController extends Controller
             ], 404);
         }
 
-        // Ambil transaksi peminjaman aktif yang masih memuat buku berstatus 'Dipinjam'
         $peminjamans = Peminjaman::with(['details' => function ($q) {
             $q->where('statusBuku', 'Dipinjam')->with(['buku.barcode', 'eksemplar']);
         }])
@@ -300,7 +318,7 @@ class QrController extends Controller
                         'hariTerlambat' => $hariTerlambat,
                         'mingguTerlambat' => $mingguTerlambat,
                         'estDendaTelat' => $estDendaTelat,
-                        'estDendaTelat_formatted' => 'Rp '.number_format($estDendaTelat, 0, ',', '.'),
+                        'estDendaTelat_formatted' => 'Rp ' . number_format($estDendaTelat, 0, ',', '.'),
                     ];
                 }
             }
