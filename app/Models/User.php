@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -45,5 +46,30 @@ class User extends Authenticatable
     public function pengembalianPetugas()
     {
         return $this->hasMany(Pengembalian::class, 'idUserPetugas', 'id');
+    }
+
+    /**
+     * Nomor keanggotaan yang ditampilkan ke member, contoh: AG-2026-00128.
+     */
+    protected function kodeAnggota(): Attribute
+    {
+        return Attribute::get(fn (): string => sprintf(
+            'AG-%s-%05d',
+            ($this->created_at ?? now())->format('Y'),
+            $this->id
+        ));
+    }
+
+    /**
+     * Dua huruf inisial nama untuk avatar, contoh: Rizky Pratama -> RP.
+     */
+    protected function inisial(): Attribute
+    {
+        return Attribute::get(function (): string {
+            $kata = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+            $inisial = collect($kata)->filter()->take(2)->map(fn (string $k): string => mb_substr($k, 0, 1))->implode('');
+
+            return mb_strtoupper($inisial !== '' ? $inisial : 'U');
+        });
     }
 }

@@ -4,44 +4,91 @@ namespace App\Http\Controllers;
 
 use App\Models\Buku;
 use App\Models\Kategori;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class KatalogController extends Controller
 {
-    // Aktor buka katalog & masukkan kata kunci/filter -> Sistem cari/filter & tampilkan daftar
-    public function index(Request $request)
+    /**
+     * Jumlah buku per halaman (grid 4 kolom x 2 baris).
+     */
+    private const PER_HALAMAN = 8;
+
+    /**
+     * Menampilkan katalog buku untuk umum dan anggota perpustakaan.
+     */
+    public function index(Request $request): View
     {
-        $keyword = $request->query('q');
+        $keyword = trim((string) $request->query('q', ''));
         $kategoriId = $request->query('kategori');
+        $status = $request->query('status');
+        $lokasi = $request->query('lokasi', 'Perpustakaan Pusat');
+        $sort = $request->query('sort', 'popularitas');
 
-        // Query buku dengan relasi kategori
-        $query = Buku::with('kategori');
+        $query = Buku::query()
+            ->with(['kategori', 'barcode'])
+            ->withCount('detailPeminjaman');
 
-        // Filter kata kunci (judul, penulis, penerbit)
-        if (!empty($keyword)) {
-            $query->where(function ($q) use ($keyword) {
+        // 1. Pencarian bebas (judul, penulis, penerbit, kategori)
+        if ($keyword !== '') {
+            $query->where(function (Builder $q) use ($keyword) {
                 $q->where('judul', 'like', "%{$keyword}%")
-                  ->orWhere('penulis', 'like', "%{$keyword}%")
-                  ->orWhere('penerbit', 'like', "%{$keyword}%");
+                    ->orWhere('penulis', 'like', "%{$keyword}%")
+                    ->orWhere('penerbit', 'like', "%{$keyword}%")
+                    ->orWhereHas('kategori', fn (Builder $kat) => $kat->where('namaKategori', 'like', "%{$keyword}%"));
             });
         }
 
-        // Filter berdasarkan kategori
-        if (!empty($kategoriId)) {
+        // 2. Filter Kategori
+        if (! empty($kategoriId) && $kategoriId !== 'semua') {
             $query->where('idKategori', $kategoriId);
         }
 
-        $bukus = $query->latest('idBuku')->paginate(8)->withQueryString();
-        $kategoris = Kategori::orderBy('namaKategori')->get();
+        // 3. Filter Status Ketersediaan
+        if ($status === 'tersedia') {
+            $query->where('stok', '>', 0);
+        } elseif ($status === 'habis') {
+            $query->where('stok', '<=', 0);
+        }
 
-        return view('katalog.index', compact('bukus', 'kategoris', 'keyword', 'kategoriId'));
+        // 4. Pengurutan buku
+        match ($sort) {
+            'terbaru' => $query->latest('idBuku'),
+            'judul_asc' => $query->orderBy('judul', 'asc'),
+            'judul_desc' => $query->orderBy('judul', 'desc'),
+            default => $query->orderByDesc('detail_peminjaman_count')->latest('idBuku'), // Popularitas
+        };
+
+        $bukus = $query->paginate(self::PER_HALAMAN)->withQueryString();
+        $kategoris = Kategori::withCount('buku')->orderBy('namaKategori')->get();
+
+        return view('katalog.index', [
+            'bukus' => $bukus,
+            'kategoris' => $kategoris,
+            'keyword' => $keyword,
+            'kategoriId' => $kategoriId,
+            'status' => $status,
+            'lokasi' => $lokasi,
+            'sort' => $sort,
+        ]);
     }
 
-    // Tampilkan detail buku
-    public function show($id)
+    /**
+     * Menampilkan detail buku tertentu beserta rak dan eksemplar.
+     */
+    public function show(int|string $id): View
     {
-        $buku = Buku::with(['kategori', 'barcode'])->findOrFail($id);
+        $buku = Buku::with(['kategori', 'barcode', 'eksemplar'])->findOrFail($id);
 
-        return view('katalog.show', compact('buku'));
+        $bukuTerkait = Buku::where('idKategori', $buku->idKategori)
+            ->where('idBuku', '!=', $buku->idBuku)
+            ->take(4)
+            ->get();
+
+        return view('katalog.show', [
+            'buku' => $buku,
+            'bukuTerkait' => $bukuTerkait,
+        ]);
     }
 }

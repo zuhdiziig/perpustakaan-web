@@ -1,4 +1,4 @@
-@extends('layouts.member')
+@extends('layouts.anggota')
 
 @section('title', 'Riwayat Peminjaman - BOOKNEST')
 
@@ -330,14 +330,18 @@
     {{-- HEADER --}}
     <div class="history-header">
         <div>
-            <h1 class="history-heading">Riwayat Peminjaman</h1>
+            <h1 class="history-heading">
+                {{ $statusDipilih === 'Dipinjam' ? 'Peminjaman Aktif' : 'Riwayat Peminjaman' }}
+            </h1>
             <p class="history-subtitle">
-                Lihat seluruh riwayat peminjaman dan pengembalian buku Anda.
+                {{ $statusDipilih === 'Dipinjam'
+                    ? 'Buku yang sedang Anda pinjam dan belum dikembalikan.'
+                    : 'Lihat seluruh riwayat peminjaman dan pengembalian buku Anda.' }}
             </p>
         </div>
 
         <a href="{{ route('dashboard') }}" class="history-back">
-            ← Kembali ke Beranda
+            ← Kembali ke Dasbor
         </a>
     </div>
 

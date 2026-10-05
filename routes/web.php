@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\KategoriController;
@@ -28,6 +29,17 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+/*
+|--------------------------------------------------------------------------
+| KATALOG BUKU PUBLIK (Bisa diakses Tamu & Semua Role)
+|--------------------------------------------------------------------------
+*/
+
+Route::get('/katalog', [KatalogController::class, 'index'])
+    ->name('katalog.index');
+
+Route::get('/katalog/{id}', [KatalogController::class, 'show'])
+    ->name('katalog.show');
 
 /*
 |--------------------------------------------------------------------------
@@ -59,7 +71,6 @@ Route::middleware('guest')->group(function () {
         ->name('password.update');
 });
 
-
 /*
 |--------------------------------------------------------------------------
 | 3. AREA SISTEM (AUTH)
@@ -79,29 +90,20 @@ Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])
         ->name('logout');
 
-
     /*
     |--------------------------------------------------------------------------
-    | DASBOR UTAMA
+    | DASBOR (berbeda untuk setiap role: admin, petugas, member)
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
-
+    Route::get('/dashboard', DashboardController::class)
+        ->name('dashboard');
 
     /*
     |--------------------------------------------------------------------------
-    | KATALOG & LAYANAN MANDIRI MEMBER
+    | LAYANAN MANDIRI MEMBER
     |--------------------------------------------------------------------------
     */
-
-    Route::get('/katalog', [KatalogController::class, 'index'])
-        ->name('katalog.index');
-
-    Route::get('/katalog/{id}', [KatalogController::class, 'show'])
-        ->name('katalog.show');
 
     Route::get('/riwayat', [RiwayatController::class, 'index'])
         ->name('riwayat.index');
@@ -115,7 +117,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
         ->name('bayar.proses_qr');
 
-
     /*
     |--------------------------------------------------------------------------
     | PROFILE MEMBER
@@ -128,7 +129,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
 
-
     /*
     |--------------------------------------------------------------------------
     | KARTU / QR MEMBER
@@ -138,7 +138,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/kartu-saya', function () {
         return redirect()->route('member.cetak-qr', auth()->id());
     })->name('member.kartu-saya');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -160,7 +159,6 @@ Route::middleware('auth')->group(function () {
     Route::patch('/member/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
         ->name('member.toggle-status');
 
-
     /*
     |--------------------------------------------------------------------------
     | PEMINJAMAN
@@ -169,7 +167,6 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('peminjaman', PeminjamanController::class)
         ->only(['index', 'create', 'store', 'show']);
-
 
     /*
     |--------------------------------------------------------------------------
@@ -180,7 +177,6 @@ Route::middleware('auth')->group(function () {
     Route::resource('pengembalian', PengembalianController::class)
         ->only(['index', 'create', 'store', 'show']);
 
-
     /*
     |--------------------------------------------------------------------------
     | SCAN BARCODE
@@ -189,7 +185,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/scan-barcode', [BarcodeController::class, 'scan'])
         ->name('barcode.scan');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -205,7 +200,6 @@ Route::middleware('auth')->group(function () {
 
     Route::put('/kondisi-buku/{id}', [KondisiBukuController::class, 'update'])
         ->name('kondisi.update');
-
 
     /*
     |--------------------------------------------------------------------------
@@ -225,7 +219,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/denda/{id}', [DendaController::class, 'show'])
         ->name('denda.show');
 
-
     /*
     |--------------------------------------------------------------------------
     | PEMBAYARAN
@@ -238,7 +231,6 @@ Route::middleware('auth')->group(function () {
     Route::post('/pembayaran/{id}/verifikasi', [PembayaranController::class, 'verifikasi'])
         ->name('pembayaran.verifikasi');
 
-
     /*
     |--------------------------------------------------------------------------
     | LAPORAN
@@ -247,7 +239,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/laporan', [LaporanController::class, 'index'])
         ->name('laporan.index');
-
 
     /*
     |--------------------------------------------------------------------------

@@ -1,4 +1,4 @@
-@extends('layouts.member')
+@extends('layouts.anggota')
 
 @section('title', 'Edit Profil & Preferensi - BOOKNEST')
 

@@ -9,6 +9,11 @@ class Peminjaman extends Model
 {
     use HasFactory;
 
+    /**
+     * Jumlah maksimal buku yang boleh dipinjam bersamaan oleh satu member.
+     */
+    public const BATAS_MAKSIMAL_BUKU = 7;
+
     protected $table = 'peminjaman';
 
     protected $primaryKey = 'idPeminjaman';
