@@ -6,152 +6,148 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
-    // Tampilkan form registrasi member
-    public function showRegisterForm()
-    {
-        return view('auth.register');
-    }
-
-    // Proses pendaftaran member (Validasi -> Simpan -> Redirect)
-    public function register(Request $request)
-    {
-        // 1. Validasi data member
-        $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password' => ['required', 'string', 'min:6', 'confirmed'],
-            'noTelepon' => ['required', 'string', 'max:20'],
-            'alamat' => ['required', 'string', 'max:500'],
-        ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'email.required' => 'Alamat email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'email.unique' => 'Email sudah terdaftar, silakan gunakan email lain.',
-            'password.required' => 'Password wajib diisi.',
-            'password.min' => 'Password minimal harus 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'noTelepon.required' => 'Nomor telepon wajib diisi.',
-            'alamat.required' => 'Alamat domisili wajib diisi.',
-        ]);
-
-        // Generate token unik QR untuk member (contoh: MBR-UUID)
-        $qrToken = 'MBR-'.strtoupper(Str::random(12));
-
-        // 2. Simpan data member ke tabel users
-        User::create([
-            'name' => $validated['name'],
-            'email' => $validated['email'],
-            'password' => Hash::make($validated['password']),
-            'role' => 'member',
-            'status' => 'aktif',
-            'qr_token' => $qrToken,
-            'alamat' => $validated['alamat'],
-            'noTelepon' => $validated['noTelepon'],
-        ]);
-
-        // 3. Tampilkan pesan berhasil dan arahkan ke halaman login
-        return redirect()->route('login')->with('success', 'Registrasi berhasil! Silakan masuk dengan akun baru Anda.');
-    }
-
-    // Menampilkan halaman login
+    /**
+     * Menampilkan form login
+     */
     public function showLoginForm()
     {
         return view('auth.login');
     }
 
-    // Memproses data login (Validasi & Pembuatan Sesi)
+    /**
+     * Memproses autentikasi pengguna
+     */
     public function login(Request $request)
     {
-        // 1. Validasi input
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
-        ], [
-            'email.required' => 'Email wajib diisi.',
-            'email.email' => 'Format email tidak valid.',
-            'password.required' => 'Password wajib diisi.',
         ]);
 
-        $remember = $request->boolean('remember');
-
-        // 2. Cek apakah data valid
-        if (Auth::attempt($credentials, $remember)) {
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
 
-            /** @var User $user */
             $user = Auth::user();
 
-            // Auto-generate QR Token jika akun lama belum memiliki token
-            if (empty($user->qr_token)) {
-                $user->qr_token = 'MBR-'.strtoupper(Str::random(12));
-                $user->save();
+            // Cek status aktif jika akun adalah member
+            if ($user->role === 'member' && $user->status !== 'aktif') {
+                Auth::logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+
+                return back()->withErrors([
+                    'email' => 'Akun Anda sedang dinonaktifkan. Silakan hubungi petugas.',
+                ]);
             }
 
-            // Redirect sesuai role
-            if ($user->role === 'admin' || $user->role === 'petugas') {
-                return redirect()->intended('/dashboard');
-            }
-
-            return redirect()->intended('/katalog');
+            // Arahkan ke dashboard utama
+            return redirect()->intended(route('dashboard'));
         }
 
-        // 3. Jika login gagal
         return back()->withErrors([
-            'login_gagal' => 'Email atau password yang Anda masukkan salah.',
+            'email' => 'Email atau password yang Anda masukkan salah.',
         ])->onlyInput('email');
     }
 
-    // Tampilkan formulir lupa password
+    /**
+     * Menampilkan form register
+     */
+    public function showRegisterForm()
+    {
+        return view('auth.register');
+    }
+
+    /**
+     * Memproses pendaftaran member baru
+     */
+    public function register(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'noTelepon' => ['required', 'string', 'max:15'],
+            'alamat' => ['required', 'string'],
+            'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        // Generate nomor anggota berformat AG-2026-xxxxx
+        $nextNumber = User::count() + 1;
+        $nomorAnggota = 'AG-2026-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'noTelepon' => $validated['noTelepon'],
+            'alamat' => $validated['alamat'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'member',
+            'status' => 'aktif',
+            'qr_token' => $nomorAnggota,
+        ]);
+
+        // Simpan id user ke flash session untuk ditampilkan pada kartu register-success
+        return redirect()->route('register.success')->with('registered_user_id', $user->id);
+    }
+
+    /**
+     * Menampilkan kartu ucapan selamat & nomor anggota setelah registrasi berhasil
+     */
+    public function registerSuccess()
+    {
+        $userId = session('registered_user_id');
+
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
+        $user = User::find($userId);
+
+        if (!$user) {
+            return redirect()->route('login');
+        }
+
+        return view('auth.register-success', compact('user'));
+    }
+
+    /**
+     * Menampilkan form lupa password
+     */
     public function showForgotPasswordForm()
     {
         return view('auth.forgot-password');
     }
 
-    // Proses reset password
+    /**
+     * Memproses update password baru
+     */
     public function forgotPassword(Request $request)
     {
-        $validated = $request->validate([
+        $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
-            'noTelepon' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
-        ], [
-            'email.required' => 'Email wajib diisi.',
-            'email.exists' => 'Email tidak ditemukan dalam sistem.',
-            'noTelepon.required' => 'Nomor telepon wajib diisi untuk verifikasi akun.',
-            'password.required' => 'Password baru wajib diisi.',
-            'password.min' => 'Password minimal harus 6 karakter.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
         ]);
 
-        $user = User::where('email', $validated['email'])->first();
+        $user = User::where('email', $request->email)->first();
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
 
-        $cleanDbPhone = preg_replace('/[^0-9]/', '', (string) ($user->noTelepon ?? ''));
-        $cleanInputPhone = preg_replace('/[^0-9]/', '', (string) $validated['noTelepon']);
-
-        if (! empty($user->noTelepon) && $cleanDbPhone !== $cleanInputPhone) {
-            return back()->withErrors([
-                'noTelepon' => 'Nomor telepon tidak cocok dengan data terdaftar akun Anda.',
-            ])->withInput($request->except('password', 'password_confirmation'));
-        }
-
-        $user->password = Hash::make($validated['password']);
-        $user->setRememberToken(Str::random(60));
-        $user->save();
-
-        return redirect()->route('login')->with('success', 'Password Anda berhasil diperbarui! Silakan masuk dengan kata sandi baru.');
+        return redirect()->route('login')->with('success', 'Password berhasil diperbarui. Silakan masuk.');
     }
 
-    // Logout
+    /**
+     * Memproses logout sesi pengguna
+     */
     public function logout(Request $request)
     {
         Auth::logout();
+
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect('/login')->with('success', 'Berhasil keluar.');
+        return redirect()->route('login');
     }
 }

@@ -3,375 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daftar - BOOKNEST Perpustakaan</title>
+    <title>BOOKNEST - Daftar Member</title>
+    <!-- Google Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
     <style>
-        *, *::before, *::after {
+        * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
+            font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background-color: #f7f9fa;
+            background-color: #f8fafc;
             color: #1e293b;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
-            padding: 24px;
         }
 
-        .main-wrapper {
+        /* Header Bersih: Murni Hanya Logo */
+        .navbar-container {
             max-width: 1200px;
-            width: 100%;
-            margin: 0 auto;
+            margin: 24px auto 0;
+            width: calc(100% - 48px);
         }
 
-        /* Top Header Navbar */
-        .top-navbar {
+        .navbar {
             background: #ffffff;
-            border: 1px solid #e5e9ee;
-            border-radius: 16px;
-            padding: 12px 24px;
+            border-radius: 18px;
+            padding: 14px 28px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
-            margin-bottom: 40px;
+            box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04);
+            border: 1px solid #e2e8f0;
         }
 
-        .brand-logo {
+        .logo-area {
             display: flex;
             align-items: center;
             gap: 12px;
             text-decoration: none;
-            color: #1e293b;
         }
 
-        .brand-icon-box {
+        .logo-icon {
             width: 36px;
             height: 36px;
-            background-color: #345e59;
-            border-radius: 8px;
+            background: linear-gradient(135deg, #28635a, #1d4d46);
+            border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #ffffff;
-            flex-shrink: 0;
+            color: white;
+            box-shadow: 0 2px 6px rgba(35, 92, 84, 0.25);
         }
 
-        .brand-icon-box svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .brand-name {
-            font-size: 16px;
+        .logo-text {
+            font-size: 19px;
             font-weight: 800;
             letter-spacing: 0.5px;
-            color: #1e293b;
+            color: #0f172a;
         }
 
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-
-        .nav-pill-group {
-            border: 1px solid #e2e8f0;
-            border-radius: 9999px;
-            padding: 4px 6px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            background: #ffffff;
-        }
-
-        .nav-pill-item {
-            text-decoration: none;
-            font-size: 13.5px;
-            font-weight: 500;
-            color: #64748b;
-            padding: 6px 14px;
-            border-radius: 9999px;
-            transition: all 0.2s ease;
-        }
-
-        .nav-pill-item:hover {
-            color: #1e293b;
-        }
-
-        .nav-pill-item.active {
-            background-color: #d1fae5;
-            color: #047857;
-            font-weight: 600;
-        }
-
-        .btn-nav-masuk {
-            background-color: #4361ee;
-            color: #ffffff;
-            font-size: 13.5px;
-            font-weight: 600;
-            padding: 9px 24px;
-            border-radius: 9px;
-            text-decoration: none;
-            transition: background 0.2s ease, transform 0.1s ease;
-            display: inline-block;
-        }
-
-        .btn-nav-masuk:hover {
-            background-color: #3651d4;
-        }
-
-        .btn-nav-daftar {
-            background-color: #345e59;
-            color: #ffffff;
-            font-size: 13.5px;
-            font-weight: 600;
-            padding: 9px 24px;
-            border-radius: 9px;
-            text-decoration: none;
-            transition: background 0.2s ease, transform 0.1s ease;
-            display: inline-block;
-        }
-
-        .btn-nav-daftar:hover {
-            background-color: #2a4c48;
-        }
-
-        /* Content Layout */
-        .content-grid {
+        /* Layout Utama 2 Kolom */
+        .main-wrapper {
+            max-width: 1200px;
+            margin: 40px auto;
+            width: calc(100% - 48px);
             display: grid;
-            grid-template-columns: 1fr 1.08fr;
-            gap: 48px;
-            align-items: flex-start;
+            grid-template-columns: 1fr 1.15fr;
+            gap: 60px;
+            align-items: start;
+            flex: 1;
         }
 
-        /* Left Hero Section */
-        .hero-section {
+        /* Hero Kiri */
+        .hero-left {
             display: flex;
             flex-direction: column;
         }
 
-        .hero-image-wrapper {
+        .hero-img-box {
             width: 100%;
+            height: 380px;
             border-radius: 20px;
             overflow: hidden;
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.08);
+            margin-bottom: 24px;
             background-color: #e2e8f0;
+            border: 1px solid #e2e8f0;
         }
 
-        .hero-image {
+        .hero-img-box img {
             width: 100%;
-            height: auto;
-            aspect-ratio: 4 / 2.9;
+            height: 100%;
             object-fit: cover;
             display: block;
         }
 
-        .hero-heading {
-            font-size: 26px;
+        .hero-title {
+            font-size: 25px;
             font-weight: 800;
-            color: #1e293b;
-            margin-top: 26px;
-            margin-bottom: 10px;
-            letter-spacing: -0.02em;
+            color: #0f172a;
+            margin-bottom: 12px;
+            letter-spacing: -0.3px;
         }
 
-        .hero-description {
-            font-size: 14px;
+        .hero-desc {
+            font-size: 14.5px;
             color: #64748b;
             line-height: 1.6;
-            max-width: 480px;
         }
 
-        /* Right Form Card */
-        .auth-card {
+        /* Form Kanan */
+        .card-auth {
             background: #ffffff;
-            border: 1px solid #eef2f6;
-            border-radius: 24px;
-            padding: 40px 36px;
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+            border-radius: 22px;
+            padding: 40px 48px;
+            box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.03);
+            border: 1px solid #e2e8f0;
         }
 
-        .card-title {
-            font-size: 28px;
+        .form-title {
+            font-size: 30px;
             font-weight: 800;
-            color: #1e293b;
-            letter-spacing: -0.02em;
+            color: #0f172a;
             margin-bottom: 8px;
+            letter-spacing: -0.5px;
         }
 
-        .card-subtitle {
+        .form-subtitle {
             font-size: 14px;
             color: #64748b;
             line-height: 1.5;
             margin-bottom: 24px;
         }
 
-        .alert-box {
-            padding: 12px 16px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .alert-error {
-            background-color: #fef2f2;
-            color: #991b1b;
-            border: 1px solid #fecaca;
-        }
-
-        .form-row {
+        .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 16px;
+            margin-bottom: 16px;
         }
 
         .form-group {
-            margin-bottom: 18px;
+            margin-bottom: 16px;
         }
 
         .form-label {
             display: block;
             font-size: 13.5px;
-            font-weight: 500;
-            color: #64748b;
+            font-weight: 600;
+            color: #334155;
             margin-bottom: 6px;
         }
 
-        .form-control {
+        .form-input {
             width: 100%;
             padding: 12px 16px;
-            border: 1px solid #e2e8f0;
             border-radius: 12px;
+            border: 1px solid #cbd5e1;
             font-size: 14px;
-            font-family: inherit;
-            color: #1e293b;
-            background-color: #ffffff;
+            color: #0f172a;
             outline: none;
-            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            transition: all 0.2s;
+            background: #ffffff;
         }
 
-        .form-control:focus {
-            border-color: #345e59;
-            box-shadow: 0 0 0 3px rgba(52, 94, 89, 0.12);
-        }
-
-        .form-control::placeholder {
+        .form-input::placeholder {
             color: #94a3b8;
         }
 
-        textarea.form-control {
-            resize: vertical;
-            min-height: 70px;
+        .form-input:focus {
+            border-color: #235c54;
+            box-shadow: 0 0 0 4px rgba(35, 92, 84, 0.12);
         }
 
-        .field-error {
-            color: #dc2626;
-            font-size: 12px;
-            margin-top: 4px;
-        }
-
-        .btn-submit-masuk {
+        .btn-submit {
             width: 100%;
-            background-color: #345e59;
-            color: #ffffff;
+            padding: 14px;
+            background-color: #2e625a;
+            color: white;
             border: none;
-            padding: 13px;
             border-radius: 12px;
             font-size: 15px;
-            font-weight: 600;
-            font-family: inherit;
+            font-weight: 700;
             cursor: pointer;
-            transition: background-color 0.2s ease, transform 0.1s ease;
-            margin-top: 8px;
+            transition: all 0.2s;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 12px rgba(46, 98, 90, 0.25);
         }
 
-        .btn-submit-masuk:hover {
-            background-color: #2a4c48;
+        .btn-submit:hover {
+            background-color: #234c46;
+            box-shadow: 0 6px 16px rgba(46, 98, 90, 0.35);
+            transform: translateY(-1px);
         }
 
-        .btn-submit-masuk:active {
-            transform: scale(0.99);
-        }
-
-        .card-switch-link {
+        .switch-auth-text {
             text-align: center;
-            margin-top: 20px;
             font-size: 13.5px;
             color: #64748b;
         }
 
-        .card-switch-link a {
-            color: #334155;
-            font-weight: 600;
+        .switch-auth-text a {
+            color: #235c54;
+            font-weight: 700;
             text-decoration: none;
-            margin-left: 4px;
         }
 
-        .card-switch-link a:hover {
+        .switch-auth-text a:hover {
             text-decoration: underline;
         }
 
-        .card-bottom-notice {
-            margin-top: 24px;
-            font-size: 13px;
-            color: #64748b;
-            line-height: 1.5;
+        .alert-danger {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 13.5px;
+            background: #fef2f2;
+            color: #991b1b;
+            border: 1px solid #fee2e2;
         }
 
-        /* Footer */
-        .page-footer {
+        .footer {
             text-align: center;
-            padding-top: 48px;
-            padding-bottom: 12px;
+            padding: 24px 20px 32px;
             font-size: 13px;
             color: #64748b;
+            margin-top: auto;
         }
 
-        /* Responsive Breakpoint */
         @media (max-width: 900px) {
-            .content-grid {
+            .navbar {
+                justify-content: center;
+            }
+            .main-wrapper {
                 grid-template-columns: 1fr;
                 gap: 32px;
             }
-
-            .form-row {
+            .form-grid {
                 grid-template-columns: 1fr;
-                gap: 0;
             }
-
-            .top-navbar {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .nav-right {
-                flex-direction: column;
-                width: 100%;
-            }
-
-            .nav-pill-group {
-                width: 100%;
-                justify-content: center;
-            }
-
-            .btn-nav-masuk, .btn-nav-daftar {
-                text-align: center;
-                width: 100%;
-            }
-
-            .auth-card {
+            .card-auth {
                 padding: 30px 24px;
             }
         }
@@ -379,176 +257,93 @@
 </head>
 <body>
 
-<div class="main-wrapper">
-    <!-- Top Navbar Card -->
-    <header class="top-navbar">
-        <a href="{{ url('/') }}" class="brand-logo">
-            <div class="brand-icon-box">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                </svg>
+    <!-- Header Bersih: Murni Hanya Logo Identitas -->
+    <div class="navbar-container">
+        <header class="navbar">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <span class="logo-text">BOOKNEST</span>
             </div>
-            <span class="brand-name">BOOKNEST</span>
-        </a>
+        </header>
+    </div>
 
-        <div class="nav-right">
-            <nav class="nav-pill-group">
-                <a href="{{ url('/') }}" class="nav-pill-item">Beranda</a>
-                <a href="{{ route('katalog.index') }}" class="nav-pill-item">Katalog</a>
-                <a href="{{ route('dashboard') }}" class="nav-pill-item">Dasbor</a>
-                <a href="#tentang" class="nav-pill-item">Tentang</a>
-            </nav>
-
-            <a href="{{ route('login') }}" class="btn-nav-masuk">Masuk</a>
-            <a href="{{ route('register') }}" class="btn-nav-daftar">Daftar</a>
-        </div>
-    </header>
-
-    <!-- Main Grid: Left Hero & Right Form -->
-    <main class="content-grid">
-        <!-- Left Section: Image and Slogan -->
-        <section class="hero-section">
-            <div class="hero-image-wrapper">
-                <img src="{{ asset('images/library-table.jpg') }}" alt="Suasana Meja Membaca Perpustakaan" class="hero-image">
+    <!-- Main Konten Register -->
+    <main class="main-wrapper">
+        <section class="hero-left">
+            <div class="hero-img-box">
+                <img src="{{ asset('images/library-table.jpg') }}" 
+                     alt="Meja Perpustakaan"
+                     onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop';">
             </div>
-            <h2 class="hero-heading">Temukan. Baca. Berkembang.</h2>
-            <p class="hero-description">Buku berikutnya bisa menjadi awal dari sesuatu yang besar. Kami siap menemanimu menemukannya.</p>
+            <h2 class="hero-title">Bergabunglah Bersama Kami.</h2>
+            <p class="hero-desc">
+                Dapatkan kartu anggota digital dengan QR Code instan untuk meminjam ribuan buku fisik di perpustakaan.
+            </p>
         </section>
 
-        <!-- Right Section: Register Card -->
-        <section class="auth-card">
-            <h1 class="card-title">Daftar Akun Baru</h1>
-            <p class="card-subtitle">Buat akun anggotamu untuk mulai meminjam buku dan menikmati koleksi literasi kami.</p>
+        <!-- FORM REGISTRASI KEANGGOTAAN -->
+        <section class="card-auth">
+            <h1 class="form-title">Daftar Akun Anggota</h1>
+            <p class="form-subtitle">Lengkapi formulir di bawah ini untuk membuat akun baru.</p>
 
-            @if ($errors->any())
-                <div class="alert-box alert-error">
-                    <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
-                    </svg>
-                    <span>Silakan periksa kembali data pendaftaran Anda di bawah.</span>
+            @if($errors->any())
+                <div class="alert alert-danger">
+                    {{ $errors->first() }}
                 </div>
             @endif
 
             <form action="{{ route('register') }}" method="POST">
                 @csrf
 
-                <div class="form-row">
-                    <div class="form-group">
-                        <label class="form-label" for="name">Nama Lengkap</label>
-                        <input 
-                            type="text" 
-                            id="name" 
-                            name="name" 
-                            class="form-control" 
-                            placeholder="Masukkan nama lengkap" 
-                            value="{{ old('name') }}" 
-                            required 
-                            autofocus
-                        >
-                        @error('name')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="email">Email</label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            name="email" 
-                            class="form-control" 
-                            placeholder="contoh@email.com" 
-                            value="{{ old('email') }}" 
-                            required
-                        >
-                        @error('email')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="name">Nama Lengkap</label>
+                    <input type="text" id="name" name="name" value="{{ old('name') }}" class="form-input" placeholder="Masukkan nama lengkap" required autofocus>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="form-grid">
+                    <div>
+                        <label class="form-label" for="email">Alamat Email</label>
+                        <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="nama@email.com" required>
+                    </div>
+                    <div>
                         <label class="form-label" for="noTelepon">Nomor Telepon</label>
-                        <input 
-                            type="text" 
-                            id="noTelepon" 
-                            name="noTelepon" 
-                            class="form-control" 
-                            placeholder="08123456789" 
-                            value="{{ old('noTelepon') }}" 
-                            required
-                        >
-                        @error('noTelepon')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <label class="form-label" for="alamat">Alamat Domisili</label>
-                        <input 
-                            type="text" 
-                            id="alamat" 
-                            name="alamat" 
-                            class="form-control" 
-                            placeholder="Kota / Alamat lengkap" 
-                            value="{{ old('alamat') }}" 
-                            required
-                        >
-                        @error('alamat')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
+                        <input type="text" id="noTelepon" name="noTelepon" value="{{ old('noTelepon') }}" class="form-input" placeholder="08xxxxxxxxxx" required>
                     </div>
                 </div>
 
-                <div class="form-row">
-                    <div class="form-group">
+                <div class="form-group">
+                    <label class="form-label" for="alamat">Alamat Domisili</label>
+                    <input type="text" id="alamat" name="alamat" value="{{ old('alamat') }}" class="form-input" placeholder="Jl. Contoh No. 123" required>
+                </div>
+
+                <div class="form-grid">
+                    <div>
                         <label class="form-label" for="password">Password</label>
-                        <input 
-                            type="password" 
-                            id="password" 
-                            name="password" 
-                            class="form-control" 
-                            placeholder="Minimal 6 karakter" 
-                            required
-                        >
-                        @error('password')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
+                        <input type="password" id="password" name="password" class="form-input" placeholder="Minimal 6 karakter" required>
                     </div>
-
-                    <div class="form-group">
+                    <div>
                         <label class="form-label" for="password_confirmation">Konfirmasi Password</label>
-                        <input 
-                            type="password" 
-                            id="password_confirmation" 
-                            name="password_confirmation" 
-                            class="form-control" 
-                            placeholder="Ulangi password" 
-                            required
-                        >
+                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-input" placeholder="Ulangi password" required>
                     </div>
                 </div>
 
-                <button type="submit" class="btn-submit-masuk">Daftar Sekarang</button>
+                <button type="submit" class="btn-submit">Daftar Sekarang</button>
+
+                <div class="switch-auth-text">
+                    Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a>
+                </div>
             </form>
-
-            <div class="card-switch-link">
-                Sudah punya akun? <a href="{{ route('login') }}">Masuk</a>
-            </div>
-
-            <p class="card-bottom-notice">
-                Akun anggota, petugas, dan admin menggunakan sistem perpustakaan yang sama.
-            </p>
         </section>
     </main>
-</div>
 
-<!-- Page Footer -->
-<footer class="page-footer">
-    © 2026 BOOKNEST · Perpustakaan umum untuk semua
-</footer>
+    <footer class="footer">
+        © 2026 BOOKNEST · Perpustakaan umum untuk semua
+    </footer>
 
 </body>
 </html>
