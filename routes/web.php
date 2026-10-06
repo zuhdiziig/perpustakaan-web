@@ -112,6 +112,12 @@ Route::middleware('auth')->group(function () {
     Route::get('/riwayat', [RiwayatController::class, 'index'])
         ->name('riwayat.index');
 
+    Route::get('/peminjaman/konfirmasi/{id}', [PeminjamanController::class, 'konfirmasiMember'])
+        ->name('peminjaman.konfirmasi');
+
+    Route::post('/peminjaman/ajukan/{id}', [PeminjamanController::class, 'ajukanMember'])
+        ->name('peminjaman.ajukan');
+
     Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
         ->name('denda.saya');
 
@@ -276,4 +282,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
         ->name('api.scan.pengembalian.member');
+
+    Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
+        ->name('api.scan.identifikasi');
 });

@@ -14,7 +14,7 @@ class BarcodeController extends Controller
         $buku = null;
         $error = null;
 
-        if (!empty($kodeBarcode)) {
+        if (! empty($kodeBarcode)) {
             // Sistem mencari buku berdasarkan relasi kode barcode
             $barcodeModel = Barcode::with(['buku.kategori'])->where('kodeBarcode', $kodeBarcode)->first();
 

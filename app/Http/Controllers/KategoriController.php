@@ -11,6 +11,7 @@ class KategoriController extends Controller
     public function index()
     {
         $kategoris = Kategori::withCount('buku')->latest('idKategori')->paginate(10);
+
         return view('kategori.index', compact('kategoris'));
     }
 
@@ -19,10 +20,10 @@ class KategoriController extends Controller
     {
         $validated = $request->validate([
             'namaKategori' => ['required', 'string', 'max:255', 'unique:kategori,namaKategori'],
-            'deskripsi'    => ['nullable', 'string', 'max:500'],
+            'deskripsi' => ['nullable', 'string', 'max:500'],
         ], [
             'namaKategori.required' => 'Nama kategori wajib diisi.',
-            'namaKategori.unique'   => 'Nama kategori sudah ada.',
+            'namaKategori.unique' => 'Nama kategori sudah ada.',
         ]);
 
         Kategori::create($validated);
@@ -34,6 +35,7 @@ class KategoriController extends Controller
     public function edit($id)
     {
         $kategori = Kategori::findOrFail($id);
+
         return view('kategori.edit', compact('kategori'));
     }
 
@@ -43,11 +45,11 @@ class KategoriController extends Controller
         $kategori = Kategori::findOrFail($id);
 
         $validated = $request->validate([
-            'namaKategori' => ['required', 'string', 'max:255', 'unique:kategori,namaKategori,' . $id . ',idKategori'],
-            'deskripsi'    => ['nullable', 'string', 'max:500'],
+            'namaKategori' => ['required', 'string', 'max:255', 'unique:kategori,namaKategori,'.$id.',idKategori'],
+            'deskripsi' => ['nullable', 'string', 'max:500'],
         ], [
             'namaKategori.required' => 'Nama kategori wajib diisi.',
-            'namaKategori.unique'   => 'Nama kategori sudah ada.',
+            'namaKategori.unique' => 'Nama kategori sudah ada.',
         ]);
 
         $kategori->update($validated);

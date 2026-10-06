@@ -10,7 +10,9 @@ class Barcode extends Model
     use HasFactory;
 
     protected $table = 'barcode';
+
     protected $primaryKey = 'idBarcode';
+
     protected $guarded = [];
 
     public function buku()

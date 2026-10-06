@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-    Schema::create('pembayaran', function (Blueprint $table) {
-        $table->id('idPembayaran');
-        $table->foreignId('idDenda')->constrained('denda', 'idDenda')->onDelete('cascade');
-        $table->dateTime('tanggalBayar');
-        $table->string('metode'); // QRIS, Tunai, Transfer
-        $table->decimal('nominal', 12, 2);
-        $table->string('status')->default('Pending'); // Pending, Sukses, Gagal
-        $table->timestamps();
-    });
+        Schema::create('pembayaran', function (Blueprint $table) {
+            $table->id('idPembayaran');
+            $table->foreignId('idDenda')->constrained('denda', 'idDenda')->onDelete('cascade');
+            $table->dateTime('tanggalBayar');
+            $table->string('metode'); // QRIS, Tunai, Transfer
+            $table->decimal('nominal', 12, 2);
+            $table->string('status')->default('Pending'); // Pending, Sukses, Gagal
+            $table->timestamps();
+        });
     }
 
     /**

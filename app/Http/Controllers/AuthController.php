@@ -75,7 +75,7 @@ class AuthController extends Controller
 
         // Generate nomor anggota berformat AG-2026-xxxxx
         $nextNumber = User::count() + 1;
-        $nomorAnggota = 'AG-2026-' . str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
+        $nomorAnggota = 'AG-2026-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
 
         $user = User::create([
             'name' => $validated['name'],
@@ -99,13 +99,13 @@ class AuthController extends Controller
     {
         $userId = session('registered_user_id');
 
-        if (!$userId) {
+        if (! $userId) {
             return redirect()->route('login');
         }
 
         $user = User::find($userId);
 
-        if (!$user) {
+        if (! $user) {
             return redirect()->route('login');
         }
 

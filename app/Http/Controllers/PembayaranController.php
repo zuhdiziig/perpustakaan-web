@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Pembayaran;
 use App\Models\Denda;
+use App\Models\Pembayaran;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -11,7 +11,7 @@ class PembayaranController extends Controller
 {
     // Tambahkan di dalam class PembayaranController
 
-// 1. Member buka tagihan & pilih Bayar via QR -> Tampilkan halaman QRIS
+    // 1. Member buka tagihan & pilih Bayar via QR -> Tampilkan halaman QRIS
     public function bayarQr($idDenda)
     {
         $denda = Denda::with(['pengembalian.peminjaman.member'])->findOrFail($idDenda);
@@ -25,17 +25,17 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::firstOrCreate(
             [
                 'idDenda' => $denda->idDenda,
-                'status'  => 'Pending',
+                'status' => 'Pending',
             ],
             [
                 'nominal' => $denda->jumlah,
-                'metode'  => 'QRIS',
+                'metode' => 'QRIS',
             ]
         );
 
         // Mock QR string (menggunakan generator QR gratis Google Chart API / QR Server)
-        $qrData = "PERPUS-QRIS-" . $pembayaran->idPembayaran . "-NOMINAL-" . $pembayaran->nominal;
-        $qrImageUrl = "https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=" . urlencode($qrData);
+        $qrData = 'PERPUS-QRIS-'.$pembayaran->idPembayaran.'-NOMINAL-'.$pembayaran->nominal;
+        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=250x250&data='.urlencode($qrData);
 
         return view('pembayaran.bayar_qr', compact('denda', 'pembayaran', 'qrImageUrl'));
     }
@@ -52,13 +52,13 @@ class PembayaranController extends Controller
             DB::transaction(function () use ($pembayaran) {
                 // Perbarui status pembayaran
                 $pembayaran->update([
-                    'status' => 'Sukses'
+                    'status' => 'Sukses',
                 ]);
 
                 // Perbarui status denda menjadi Lunas
                 if ($pembayaran->denda) {
                     $pembayaran->denda->update([
-                        'status' => 'Lunas'
+                        'status' => 'Lunas',
                     ]);
                 }
             });
@@ -71,10 +71,7 @@ class PembayaranController extends Controller
         // Tampilkan pembayaran gagal
         return back()->with('error', 'Pembayaran gagal atau transaksi dibatalkan oleh Payment Gateway.');
     }
-    
-    
-    
-    
+
     // Aktor: Buka daftar pembayaran
     public function index()
     {
@@ -98,13 +95,13 @@ class PembayaranController extends Controller
             DB::transaction(function () use ($pembayaran) {
                 // Simpan status pembayaran
                 $pembayaran->update([
-                    'status' => 'Sukses'
+                    'status' => 'Sukses',
                 ]);
 
                 // Update status denda terkait menjadi Lunas
                 if ($pembayaran->denda) {
                     $pembayaran->denda->update([
-                        'status' => 'Lunas'
+                        'status' => 'Lunas',
                     ]);
                 }
             });

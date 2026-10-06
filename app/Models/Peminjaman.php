@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -24,6 +26,18 @@ class Peminjaman extends Model
     protected $primaryKey = 'idPeminjaman';
 
     protected $guarded = [];
+
+    /**
+     * Kode transaksi peminjaman, contoh: PJ-20261003-0417.
+     */
+    protected function kodeTransaksi(): Attribute
+    {
+        return Attribute::get(fn (): string => sprintf(
+            'PJ-%s-%04d',
+            Carbon::parse($this->tanggalPinjam ?? now())->format('Ymd'),
+            $this->idPeminjaman
+        ));
+    }
 
     public function member()
     {

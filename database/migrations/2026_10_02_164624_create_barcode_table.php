@@ -9,14 +9,14 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-  public function up(): void
+    public function up(): void
     {
-    Schema::create('barcode', function (Blueprint $table) {
-        $table->id('idBarcode');
-        $table->foreignId('idBuku')->unique()->constrained('buku', 'idBuku')->onDelete('cascade');
-        $table->string('kodeBarcode')->unique();
-        $table->timestamps();
-    });
+        Schema::create('barcode', function (Blueprint $table) {
+            $table->id('idBarcode');
+            $table->foreignId('idBuku')->unique()->constrained('buku', 'idBuku')->onDelete('cascade');
+            $table->string('kodeBarcode')->unique();
+            $table->timestamps();
+        });
     }
 
     /**

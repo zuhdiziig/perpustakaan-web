@@ -28,26 +28,26 @@ class PetugasController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password'  => ['required', 'string', 'min:6'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
             'noTelepon' => ['nullable', 'string', 'max:20'],
-            'alamat'    => ['nullable', 'string', 'max:500'],
+            'alamat' => ['nullable', 'string', 'max:500'],
         ], [
-            'name.required'     => 'Nama petugas wajib diisi.',
-            'email.required'    => 'Email petugas wajib diisi.',
-            'email.unique'      => 'Email sudah digunakan.',
+            'name.required' => 'Nama petugas wajib diisi.',
+            'email.required' => 'Email petugas wajib diisi.',
+            'email.unique' => 'Email sudah digunakan.',
             'password.required' => 'Password wajib diisi.',
-            'password.min'      => 'Password minimal 6 karakter.',
+            'password.min' => 'Password minimal 6 karakter.',
         ]);
 
         User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
-            'role'      => 'petugas',
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'petugas',
             'noTelepon' => $validated['noTelepon'] ?? null,
-            'alamat'    => $validated['alamat'] ?? null,
+            'alamat' => $validated['alamat'] ?? null,
         ]);
 
         return redirect()->route('petugas.index')->with('success', 'Akun petugas baru berhasil ditambahkan.');
@@ -57,6 +57,7 @@ class PetugasController extends Controller
     public function edit($id)
     {
         $petugas = User::where('role', 'petugas')->findOrFail($id);
+
         return view('petugas.edit', compact('petugas'));
     }
 
@@ -66,16 +67,16 @@ class PetugasController extends Controller
         $petugas = User::where('role', 'petugas')->findOrFail($id);
 
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $id],
-            'password'  => ['nullable', 'string', 'min:6'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$id],
+            'password' => ['nullable', 'string', 'min:6'],
             'noTelepon' => ['nullable', 'string', 'max:20'],
-            'alamat'    => ['nullable', 'string', 'max:500'],
+            'alamat' => ['nullable', 'string', 'max:500'],
         ], [
-            'name.required'  => 'Nama petugas wajib diisi.',
+            'name.required' => 'Nama petugas wajib diisi.',
             'email.required' => 'Email petugas wajib diisi.',
-            'email.unique'   => 'Email sudah digunakan.',
-            'password.min'   => 'Password minimal 6 karakter jika ingin diubah.',
+            'email.unique' => 'Email sudah digunakan.',
+            'password.min' => 'Password minimal 6 karakter jika ingin diubah.',
         ]);
 
         $petugas->name = $validated['name'];
@@ -84,7 +85,7 @@ class PetugasController extends Controller
         $petugas->alamat = $validated['alamat'] ?? null;
 
         // Perbarui password jika diisi
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $petugas->password = Hash::make($validated['password']);
         }
 
