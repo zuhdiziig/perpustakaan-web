@@ -12,7 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('detail_peminjaman', function (Blueprint $table) {
-            $table->id();
+            $table->id('idDetail');
+            $table->foreignId('idPeminjaman')->constrained('peminjaman', 'idPeminjaman')->onDelete('cascade');
+            $table->foreignId('idBuku')->constrained('buku', 'idBuku')->onDelete('cascade');
+            $table->integer('jumlah')->default(1);
+            $table->string('statusBuku')->default('Dipinjam');
             $table->timestamps();
         });
     }
