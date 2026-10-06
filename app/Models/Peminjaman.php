@@ -32,18 +32,6 @@ class Peminjaman extends Model
 
     protected $guarded = [];
 
-    /**
-     * Kode transaksi peminjaman, contoh: PJ-20261003-0417.
-     */
-    protected function kodeTransaksi(): Attribute
-    {
-        return Attribute::get(fn (): string => sprintf(
-            'PJ-%s-%04d',
-            Carbon::parse($this->tanggalPinjam ?? now())->format('Ymd'),
-            $this->idPeminjaman
-        ));
-    }
-
     public function member()
     {
         return $this->belongsTo(User::class, 'idUserMember', 'id');

@@ -12,10 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('detail_peminjaman', function (Blueprint $table) {
-            $table->foreignId('idPeminjaman')->after('id')->constrained('peminjaman', 'idPeminjaman')->onDelete('cascade');
-            $table->foreignId('idBuku')->after('idPeminjaman')->constrained('buku', 'idBuku')->onDelete('cascade');
-            $table->integer('jumlah')->default(1)->after('idBuku');
-            $table->string('statusBuku', 50)->default('Dipinjam')->after('jumlah');
+            if (! Schema::hasColumn('detail_peminjaman', 'idPeminjaman')) {
+                $table->foreignId('idPeminjaman')->constrained('peminjaman', 'idPeminjaman')->onDelete('cascade');
+            }
+            if (! Schema::hasColumn('detail_peminjaman', 'idBuku')) {
+                $table->foreignId('idBuku')->constrained('buku', 'idBuku')->onDelete('cascade');
+            }
+            if (! Schema::hasColumn('detail_peminjaman', 'jumlah')) {
+                $table->integer('jumlah')->default(1);
+            }
+            if (! Schema::hasColumn('detail_peminjaman', 'statusBuku')) {
+                $table->string('statusBuku', 50)->default('Dipinjam');
+            }
         });
     }
 
