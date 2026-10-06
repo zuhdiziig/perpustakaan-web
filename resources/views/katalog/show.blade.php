@@ -828,23 +828,13 @@
                 </div>
 
                 <div class="action-row">
-                    @if (auth()->check() && auth()->user()->role === 'member')
-                        @if ($isTersedia)
-                            <a href="{{ route('peminjaman.ajukan', $buku->idBuku) }}" id="btnPinjamBuku" class="btn-pinjam" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
-                                Pinjam Buku
-                            </a>
-                        @else
-                            <button type="button" class="btn-pinjam" disabled>
-                                Semua eksemplar sedang dipinjam
-                            </button>
-                        @endif
+                    @if ($isTersedia)
+                        <a href="{{ route('peminjaman.konfirmasi', $buku->idBuku) }}" id="btnPinjamBuku" class="btn-pinjam">
+                            Pinjam Buku
+                        </a>
                     @else
-                        <button type="button" id="btnPinjamBuku" class="btn-pinjam" @disabled(! $isTersedia)>
-                            @if ($isTersedia)
-                                Pinjam Buku
-                            @else
-                                Semua eksemplar sedang dipinjam
-                            @endif
+                        <button type="button" class="btn-pinjam" disabled>
+                            Semua eksemplar sedang dipinjam
                         </button>
                     @endif
                     <a href="{{ $urlKembali }}" id="btnKembali" class="btn-kembali">Kembali</a>
@@ -979,12 +969,8 @@
                     </ol>
                     <div class="dialog-actions">
                         <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
-                        <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-cancel" style="text-decoration:none; display:inline-flex; align-items:center;">Buka Kartu / QR Saya</a>
-                        @if ($isTersedia)
-                            <a href="{{ route('peminjaman.ajukan', $buku->idBuku) }}" class="btn-dialog-primary">Ajukan Peminjaman</a>
-                        @else
-                            <button type="button" class="btn-dialog-primary" disabled style="opacity: 0.6; cursor: not-allowed;">Stok Habis</button>
-                        @endif
+                        <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-cancel">Buka Kartu / QR Saya</a>
+                        <a href="{{ route('peminjaman.konfirmasi', $buku->idBuku) }}" class="btn-dialog-primary">Lanjutkan ke Peminjaman</a>
                     </div>
                 @else
                     <ol class="dialog-steps">
@@ -1037,7 +1023,9 @@
             const dialog = document.getElementById('borrowDialog');
             const tombolPinjam = document.getElementById('btnPinjamBuku');
 
-            tombolPinjam?.addEventListener('click', () => dialog.showModal());
+            if (tombolPinjam && tombolPinjam.tagName === 'BUTTON') {
+                tombolPinjam.addEventListener('click', () => dialog.showModal());
+            }
 
             dialog.querySelectorAll('[data-close-dialog]').forEach((tombol) => {
                 tombol.addEventListener('click', () => dialog.close());

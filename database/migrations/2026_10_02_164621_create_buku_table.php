@@ -23,7 +23,7 @@ return new class extends Migration
             $table->string('kondisi')->default('Baik'); // Baik, Rusak, Hilang
             $table->timestamps();
         });
-    }   
+    }
 
     /**
      * Reverse the migrations.

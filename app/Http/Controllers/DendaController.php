@@ -4,12 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Denda;
 use App\Models\Pengembalian;
-use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 
 class DendaController extends Controller
 {
-
     // Fitur 16: Melihat Denda oleh Member
     public function memberDenda()
     {
@@ -25,15 +24,15 @@ class DendaController extends Controller
 
         // Hitung akumulasi denda yang belum dibayar
         $totalTunggakan = Denda::whereHas('pengembalian.peminjaman', function ($query) use ($userId) {
-                $query->where('idUserMember', $userId);
-            })
+            $query->where('idUserMember', $userId);
+        })
             ->where('status', 'Belum Dibayar')
             ->sum('jumlah');
 
         return view('denda.member_index', compact('dendas', 'totalTunggakan'));
     }
 
-     // TAMBAHKAN METHOD INDEX DI SINI → Buka data denda & daftar transaksi yang perlu dihitung/dikelola
+    // TAMBAHKAN METHOD INDEX DI SINI → Buka data denda & daftar transaksi yang perlu dihitung/dikelola
     public function index()
     {
         // Daftar denda yang sudah tercatat
@@ -72,7 +71,9 @@ class DendaController extends Controller
 
         if ($tanggalKembali->greaterThan($batasKembali)) {
             $hariTerlambat = $batasKembali->diffInDays($tanggalKembali);
-            if ($hariTerlambat == 0) $hariTerlambat = 1;
+            if ($hariTerlambat == 0) {
+                $hariTerlambat = 1;
+            }
             $mingguTerlambat = (int) ceil($hariTerlambat / 7);
             $faktor = min($mingguTerlambat, 10);
             $persenKeterlambatan = $faktor * 10; // 10% s.d. 100%
@@ -104,15 +105,15 @@ class DendaController extends Controller
     {
         $validated = $request->validate([
             'idPengembalian' => ['required', 'exists:pengembalian,idPengembalian', 'unique:denda,idPengembalian'],
-            'jenisDenda'     => ['required', 'string'],
-            'jumlah'         => ['required', 'numeric', 'min:0'],
+            'jenisDenda' => ['required', 'string'],
+            'jumlah' => ['required', 'numeric', 'min:0'],
         ]);
 
         $denda = Denda::create([
             'idPengembalian' => $validated['idPengembalian'],
-            'jenisDenda'     => $validated['jenisDenda'],
-            'jumlah'         => $validated['jumlah'],
-            'status'         => 'Belum Dibayar',
+            'jenisDenda' => $validated['jenisDenda'],
+            'jumlah' => $validated['jumlah'],
+            'status' => 'Belum Dibayar',
         ]);
 
         return redirect()->route('denda.show', $denda->idDenda)
@@ -123,6 +124,7 @@ class DendaController extends Controller
     public function show($id)
     {
         $denda = Denda::with(['pengembalian.peminjaman.member', 'pembayaran'])->findOrFail($id);
+
         return view('denda.show', compact('denda'));
     }
 }
