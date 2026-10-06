@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Buku;
 use App\Models\Kategori;
+use App\Models\Peminjaman;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -14,6 +16,11 @@ class KatalogController extends Controller
      * Jumlah buku per halaman (grid 4 kolom x 2 baris).
      */
     private const PER_HALAMAN = 8;
+
+    /**
+     * Jumlah rekomendasi "Bacaan lain yang mungkin kamu suka" di halaman detail.
+     */
+    private const JUMLAH_BUKU_TERKAIT = 4;
 
     /**
      * Menampilkan katalog buku untuk umum dan anggota perpustakaan.
@@ -75,20 +82,74 @@ class KatalogController extends Controller
     }
 
     /**
-     * Menampilkan detail buku tertentu beserta rak dan eksemplar.
+     * Menampilkan detail buku tertentu beserta lokasi rak, ketersediaan eksemplar, dan rekomendasi bacaan.
      */
     public function show(int|string $id): View
     {
-        $buku = Buku::with(['kategori', 'barcode', 'eksemplar'])->findOrFail($id);
-
-        $bukuTerkait = Buku::where('idKategori', $buku->idKategori)
-            ->where('idBuku', '!=', $buku->idBuku)
-            ->take(4)
-            ->get();
+        $buku = Buku::query()
+            ->with(['kategori', 'barcode'])
+            ->withCount('eksemplar')
+            ->findOrFail($id);
 
         return view('katalog.show', [
             'buku' => $buku,
-            'bukuTerkait' => $bukuTerkait,
+            'totalEksemplar' => max($buku->eksemplar_count, (int) $buku->stok),
+            'kodeBuku' => $buku->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku->idBuku),
+            'bukuTerkait' => $this->bukuTerkait($buku),
+            'masaPinjamBulan' => Peminjaman::MASA_PINJAM_BULAN,
+            'batasMaksimalBuku' => Peminjaman::BATAS_MAKSIMAL_BUKU,
+            'urlKembali' => $this->urlKembaliKeKatalog(),
         ]);
+    }
+
+    /**
+     * Mengambil rekomendasi bacaan: prioritas kategori yang sama, lalu dilengkapi buku terpopuler lainnya.
+     *
+     * @return Collection<int, Buku>
+     */
+    private function bukuTerkait(Buku $buku): Collection
+    {
+        $kolomKartu = ['idBuku', 'idKategori', 'judul', 'penulis', 'stok', 'cover', 'jumlahHalaman', 'rak'];
+
+        $sekategori = Buku::query()
+            ->select($kolomKartu)
+            ->with('kategori:idKategori,namaKategori')
+            ->where('idKategori', $buku->idKategori)
+            ->whereKeyNot($buku->idBuku)
+            ->withCount('detailPeminjaman')
+            ->orderByDesc('detail_peminjaman_count')
+            ->take(self::JUMLAH_BUKU_TERKAIT)
+            ->get();
+
+        $kekurangan = self::JUMLAH_BUKU_TERKAIT - $sekategori->count();
+
+        if ($kekurangan <= 0) {
+            return $sekategori;
+        }
+
+        $pelengkap = Buku::query()
+            ->select($kolomKartu)
+            ->with('kategori:idKategori,namaKategori')
+            ->whereKeyNot([$buku->idBuku, ...$sekategori->modelKeys()])
+            ->withCount('detailPeminjaman')
+            ->orderByDesc('detail_peminjaman_count')
+            ->latest('idBuku')
+            ->take($kekurangan)
+            ->get();
+
+        return $sekategori->concat($pelengkap);
+    }
+
+    /**
+     * URL tombol "Kembali": kembali ke katalog beserta filter sebelumnya bila pengunjung datang dari katalog.
+     */
+    private function urlKembaliKeKatalog(): string
+    {
+        $urlSebelumnya = url()->previous();
+        $urlKatalog = route('katalog.index');
+
+        return str_starts_with($urlSebelumnya, $urlKatalog) && ! str_starts_with($urlSebelumnya, $urlKatalog.'/')
+            ? $urlSebelumnya
+            : $urlKatalog;
     }
 }

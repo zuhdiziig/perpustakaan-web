@@ -535,6 +535,14 @@
             text-overflow: ellipsis;
         }
 
+        .book-title a {
+            transition: color 0.15s;
+        }
+
+        .book-title a:hover {
+            color: #0f766e;
+        }
+
         .book-author-cat {
             font-size: 12.5px;
             color: var(--text-muted);
@@ -1168,7 +1176,7 @@
             @forelse ($bukus as $buku)
                 <div class="book-card">
                     <!-- Cover Container -->
-                    <div class="book-cover-container">
+                    <a href="{{ route('katalog.show', $buku->idBuku) }}" class="book-cover-container" aria-label="Lihat detail {{ $buku->judul }}">
                         @if (!empty($buku->cover))
                             <img src="{{ $buku->cover }}"
                                  alt="{{ $buku->judul }}"
@@ -1185,7 +1193,7 @@
                                 <p>{{ $buku->kategori?->namaKategori ?? 'Umum' }}</p>
                             </div>
                         @endif
-                    </div>
+                    </a>
 
                     <!-- Card Body -->
                     <div class="book-body">
@@ -1214,7 +1222,7 @@
 
                             <!-- Book Title -->
                             <h3 class="book-title" title="{{ $buku->judul }}">
-                                {{ $buku->judul }}
+                                <a href="{{ route('katalog.show', $buku->idBuku) }}">{{ $buku->judul }}</a>
                             </h3>
 
                             <!-- Author & Category -->

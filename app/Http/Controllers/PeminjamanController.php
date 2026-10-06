@@ -116,7 +116,7 @@ class PeminjamanController extends Controller
                 }
 
                 $tanggalPinjam = Carbon::now();
-                $batasKembali = Carbon::now()->addMonth(); // Jatuh tempo 1 bulan
+                $batasKembali = Carbon::now()->addMonths(Peminjaman::MASA_PINJAM_BULAN);
 
                 $peminjaman = Peminjaman::create([
                     'idUserMember' => $request->idUserMember,

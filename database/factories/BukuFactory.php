@@ -29,6 +29,8 @@ class BukuFactory extends Factory
             'kondisi' => 'Baik',
             'jumlahHalaman' => fake()->numberBetween(120, 600),
             'rak' => fake()->randomElement(['F', 'U', 'S']).'-'.str_pad((string) fake()->numberBetween(1, 20), 2, '0', STR_PAD_LEFT),
+            'isbn' => fake()->isbn13(),
+            'sinopsis' => fake()->paragraph(),
         ];
     }
 

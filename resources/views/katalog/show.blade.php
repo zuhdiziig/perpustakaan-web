@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="{{ Str::limit($buku->sinopsis ?? 'Detail buku '.$buku->judul.' karya '.$buku->penulis.' di katalog BOOKNEST.', 155) }}">
 
-    <title>{{ $buku->judul }} - Katalog BOOKNEST</title>
+    <title>{{ $buku->judul }} - Detail Buku BOOKNEST</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,20 +19,20 @@
             --brand-primary: #0f766e;
             --brand-primary-dark: #115e59;
             --brand-primary-light: #ccfbf1;
-            --brand-accent: #14b8a6;
+            --brand-mint: #f0fdfa;
+            --brand-blue: #2563eb;
+            --brand-blue-dark: #1d4ed8;
             --text-heading: #0f172a;
             --text-body: #334155;
             --text-muted: #64748b;
             --border-color: #e2e8f0;
             --bg-page: #f8fafc;
             --bg-card: #ffffff;
+            --radius-lg: 14px;
+            --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.04);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
@@ -39,26 +40,22 @@
             color: var(--text-body);
             line-height: 1.5;
             -webkit-font-smoothing: antialiased;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
-        a {
-            color: inherit;
-            text-decoration: none;
-        }
+        a { color: inherit; text-decoration: none; }
 
-        button {
-            font-family: inherit;
-            cursor: pointer;
-            border: none;
-            background: none;
-        }
+        button { font-family: inherit; cursor: pointer; border: none; background: none; }
 
         /* --- NAVBAR --- */
         .topbar {
             position: sticky;
             top: 0;
             z-index: 40;
-            background: #ffffff;
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -85,7 +82,7 @@
         .topbar-brand-icon {
             width: 36px;
             height: 36px;
-            background: #0f766e;
+            background: var(--brand-primary);
             color: #ffffff;
             border-radius: 8px;
             display: flex;
@@ -93,60 +90,44 @@
             justify-content: center;
         }
 
-        .topbar-nav {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .topbar-nav { display: flex; align-items: center; gap: 10px; }
 
         .topbar-nav-link {
             font-size: 13.5px;
             font-weight: 600;
-            color: #64748b;
+            color: var(--text-muted);
             padding: 6px 14px;
             border-radius: 8px;
             transition: all 0.15s;
         }
 
-        .topbar-nav-link:hover {
-            color: #0f766e;
-        }
+        .topbar-nav-link:hover { color: var(--brand-primary); }
 
         .topbar-nav-link.active {
-            background: #ccfbf1;
-            color: #0f766e;
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
             font-weight: 700;
         }
 
-        .topbar-actions {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .topbar-actions { display: flex; align-items: center; gap: 10px; }
 
-        .btn-auth-login {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 8px 18px;
-            background: #2563eb;
-            color: #ffffff;
-            border-radius: 8px;
-            font-size: 13.5px;
-            font-weight: 700;
-        }
-
+        .btn-auth-login,
         .btn-auth-register {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             padding: 8px 18px;
-            background: #0f766e;
             color: #ffffff;
             border-radius: 8px;
             font-size: 13.5px;
             font-weight: 700;
+            transition: background 0.15s, transform 0.15s;
         }
+
+        .btn-auth-login { background: var(--brand-blue); }
+        .btn-auth-login:hover { background: var(--brand-blue-dark); }
+        .btn-auth-register { background: var(--brand-primary); }
+        .btn-auth-register:hover { background: var(--brand-primary-dark); }
 
         .btn-user-badge {
             display: inline-flex;
@@ -154,18 +135,18 @@
             gap: 8px;
             padding: 6px 12px;
             background: #f1f5f9;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
             font-size: 13px;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text-heading);
         }
 
         .user-initials {
             width: 24px;
             height: 24px;
             border-radius: 6px;
-            background: #0f766e;
+            background: var(--brand-primary);
             color: #ffffff;
             display: flex;
             align-items: center;
@@ -174,220 +155,263 @@
             font-weight: 800;
         }
 
-        /* --- CONTAINER --- */
+        /* --- PAGE HEADER --- */
         .detail-container {
             max-width: 1240px;
+            width: 100%;
             margin: 0 auto;
-            padding: 32px 24px 70px;
+            padding: 28px 24px 72px;
+        }
+
+        .page-eyebrow {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--brand-primary);
+            margin-bottom: 6px;
+        }
+
+        .page-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: var(--text-heading);
+            letter-spacing: -0.6px;
+            line-height: 1.2;
         }
 
         .breadcrumb {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 6px;
+            margin: 8px 0 26px;
             font-size: 12.5px;
-            font-weight: 600;
-            color: #64748b;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-weight: 500;
+            color: var(--text-muted);
         }
 
-        .breadcrumb a {
-            color: #0f766e;
-            font-weight: 700;
+        .breadcrumb a:hover { color: var(--brand-primary); }
+
+        .breadcrumb li + li::before {
+            content: '/';
+            margin-right: 6px;
+            color: #94a3b8;
         }
 
-        .breadcrumb-separator {
-            color: #cbd5e1;
-        }
+        .breadcrumb [aria-current="page"] { color: var(--text-heading); font-weight: 600; }
 
-        /* --- DETAIL CARD --- */
-        .book-detail-card {
-            background: #ffffff;
-            border: 1px solid var(--border-color);
-            border-radius: 20px;
-            padding: 36px;
+        /* --- DETAIL GRID --- */
+        .detail-grid {
             display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 40px;
-            box-shadow: 0 4px 16px rgba(15, 23, 42, 0.03);
-            margin-bottom: 48px;
+            grid-template-columns: minmax(260px, 340px) 1fr;
+            gap: 28px;
+            align-items: start;
+            animation: fadeUp 0.45s ease both;
         }
 
-        .cover-box {
-            width: 100%;
-            height: 380px;
-            background: #f1f5f9;
-            border-radius: 14px;
+        .cover-card {
+            position: relative;
+            aspect-ratio: 4 / 3.3;
+            border-radius: var(--radius-lg);
             overflow: hidden;
-            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            background: linear-gradient(135deg, #e7e5e4 0%, #d6d3d1 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-soft);
         }
 
-        .cover-img {
+        .cover-card img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.6s cubic-bezier(.2, .7, .2, 1);
         }
 
-        .info-col {
+        .cover-card:hover img { transform: scale(1.04); }
+
+        .cover-fallback {
+            width: 100%;
+            height: 100%;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 24px;
+            text-align: center;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, #134e4a 100%);
         }
 
-        .badge-cat-row {
+        .cover-fallback h2 { font-size: 18px; font-weight: 800; }
+        .cover-fallback p { font-size: 13px; color: var(--brand-primary-light); }
+
+        .location-card {
+            margin-top: 14px;
+            background: var(--brand-mint);
+            border: 1px solid #99f6e4;
+            border-radius: var(--radius-lg);
+            padding: 18px 20px;
+        }
+
+        .location-card h3 {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 12px;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 10px;
         }
 
-        .badge-cat {
-            background: #ccfbf1;
-            color: #0f766e;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 700;
+        .location-card h3 svg { color: var(--brand-primary); }
+
+        .location-card p {
+            font-size: 12.5px;
+            color: var(--text-muted);
+            line-height: 1.7;
         }
 
+        /* Info column */
         .badge-status {
             display: inline-flex;
             align-items: center;
             gap: 6px;
             font-size: 12px;
-            font-weight: 700;
-            padding: 4px 12px;
-            border-radius: 20px;
+            font-weight: 600;
+            padding: 4px 11px;
+            border-radius: 999px;
         }
 
-        .badge-status.tersedia {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .badge-status.habis {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
+        .badge-status.tersedia { background: #dcfce7; color: #15803d; }
+        .badge-status.habis { background: #fee2e2; color: #b91c1c; }
 
         .badge-dot {
             width: 6px;
             height: 6px;
             border-radius: 50%;
+            background: currentColor;
         }
 
-        .badge-status.tersedia .badge-dot {
-            background: #16a34a;
-        }
-
-        .badge-status.habis .badge-dot {
-            background: #dc2626;
-        }
+        .badge-status.tersedia .badge-dot { animation: pulseDot 2s ease-in-out infinite; }
 
         .book-title-main {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             color: var(--text-heading);
             line-height: 1.25;
             letter-spacing: -0.5px;
-            margin-bottom: 6px;
+            margin: 16px 0 14px;
         }
 
         .book-author-main {
-            font-size: 15px;
-            color: var(--text-muted);
-            margin-bottom: 24px;
-        }
-
-        .book-author-main strong {
+            font-size: 14px;
+            font-weight: 700;
             color: var(--text-heading);
+            margin-bottom: 18px;
         }
 
-        /* Specification Grid */
-        .specs-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-            padding: 20px 0;
-            border-top: 1px solid #f1f5f9;
-            border-bottom: 1px solid #f1f5f9;
-            margin-bottom: 24px;
+        .spec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 10px 16px;
+            box-shadow: var(--shadow-soft);
         }
 
-        .spec-item {
+        .spec-list { display: grid; }
+
+        .spec-row {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-
-        .spec-label {
-            font-size: 11.5px;
-            font-weight: 700;
-            color: #94a3b8;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .spec-val {
-            font-size: 14px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        /* Borrow Guide Box */
-        .guide-box {
-            background: #ecfdf5;
-            border: 1px solid #a7f3d0;
-            border-radius: 14px;
-            padding: 18px 20px;
-            display: flex;
-            align-items: center;
             justify-content: space-between;
-            gap: 20px;
-            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 16px;
+            padding: 8.5px 0;
+            font-size: 13px;
         }
 
-        .guide-content h4 {
-            font-size: 14px;
-            font-weight: 800;
-            color: #065f46;
-            margin-bottom: 4px;
+        .spec-row + .spec-row { border-top: 1px dashed #f1f5f9; }
+        .spec-row dt { color: var(--text-muted); font-weight: 500; }
+        .spec-row dd { color: var(--text-heading); font-weight: 600; text-align: right; }
+        .spec-row dd.is-low { color: #b45309; }
+        .spec-row dd.is-empty { color: #b91c1c; }
+
+        .action-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
         }
 
-        .guide-content p {
-            font-size: 12.5px;
-            color: #047857;
-            line-height: 1.5;
-        }
-
-        .btn-action-primary {
+        .btn-pinjam,
+        .btn-kembali {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
-            background: #0f766e;
-            color: #ffffff;
-            border-radius: 10px;
+            padding: 11px 20px;
+            border-radius: 8px;
             font-size: 13.5px;
             font-weight: 700;
-            white-space: nowrap;
-            transition: background 0.15s;
+            color: #ffffff;
+            transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
         }
 
-        .btn-action-primary:hover {
-            background: #115e59;
+        .btn-pinjam {
+            flex: 1;
+            background: var(--brand-primary);
+            box-shadow: 0 6px 16px -6px rgba(15, 118, 110, 0.55);
         }
 
-        /* --- RELATED BOOKS SECTION --- */
-        .section-related {
-            margin-top: 40px;
+        .btn-pinjam:hover { background: var(--brand-primary-dark); transform: translateY(-1px); }
+        .btn-pinjam:active { transform: translateY(0); }
+
+        .btn-pinjam:disabled {
+            background: #cbd5e1;
+            color: #475569;
+            box-shadow: none;
+            cursor: not-allowed;
+            transform: none;
         }
+
+        .btn-kembali { min-width: 96px; background: var(--brand-blue); }
+        .btn-kembali:hover { background: var(--brand-blue-dark); transform: translateY(-1px); }
+
+        .loan-note {
+            margin-top: 12px;
+            font-size: 12.5px;
+            color: var(--text-muted);
+        }
+
+        /* --- ABOUT --- */
+        .about-card {
+            margin-top: 28px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px 26px;
+            box-shadow: var(--shadow-soft);
+            animation: fadeUp 0.45s 0.08s ease both;
+        }
+
+        .about-card h2 {
+            font-size: 19px;
+            font-weight: 800;
+            color: var(--text-heading);
+            margin-bottom: 14px;
+        }
+
+        .about-card p {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.75;
+        }
+
+        .about-card p + p { margin-top: 12px; }
+
+        /* --- RELATED --- */
+        .section-related { margin-top: 36px; animation: fadeUp 0.45s 0.16s ease both; }
 
         .section-title {
-            font-size: 20px;
+            font-size: 19px;
             font-weight: 800;
             color: var(--text-heading);
             margin-bottom: 18px;
@@ -395,26 +419,29 @@
 
         .related-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
         }
 
         .related-card {
-            background: #ffffff;
+            background: var(--bg-card);
             border: 1px solid var(--border-color);
-            border-radius: 14px;
+            border-radius: 12px;
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s;
+            box-shadow: var(--shadow-soft);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
         .related-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
+            box-shadow: 0 14px 30px -12px rgba(15, 23, 42, 0.18);
         }
 
         .related-cover {
-            height: 160px;
+            display: block;
+            aspect-ratio: 16 / 11;
             background: #f1f5f9;
             overflow: hidden;
         }
@@ -423,26 +450,192 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .related-card:hover .related-cover img { transform: scale(1.06); }
+
+        .related-cover-fallback {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            background: linear-gradient(135deg, var(--brand-primary) 0%, #134e4a 100%);
         }
 
         .related-body {
-            padding: 14px;
+            padding: 12px 12px 14px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
         }
+
+        .related-badges {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .badge-rating {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-heading);
+        }
+
+        .badge-rating svg { fill: none; stroke: #c2410c; stroke-width: 2; }
 
         .related-title {
             font-size: 14px;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text-heading);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            margin-bottom: 2px;
         }
+
+        .related-title a:hover { color: var(--brand-primary); }
 
         .related-author {
             font-size: 12px;
-            color: #64748b;
+            color: var(--text-muted);
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
+
+        .related-meta {
+            display: flex;
+            gap: 12px;
+            margin: 10px 0 12px;
+            font-size: 11.5px;
+            color: var(--text-muted);
+        }
+
+        .related-meta span { display: inline-flex; align-items: center; gap: 4px; }
+
+        .btn-related {
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            padding: 7px 12px;
+            background: var(--brand-primary);
+            color: #ffffff;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: background 0.15s;
+        }
+
+        .btn-related:hover { background: var(--brand-primary-dark); }
+
+        /* --- BORROW DIALOG --- */
+        .borrow-dialog {
+            margin: auto;
+            width: min(440px, calc(100% - 32px));
+            border: none;
+            border-radius: 18px;
+            padding: 0;
+            box-shadow: 0 30px 60px -20px rgba(15, 23, 42, 0.45);
+            color: var(--text-body);
+        }
+
+        .borrow-dialog::backdrop {
+            background: rgba(15, 23, 42, 0.45);
+            backdrop-filter: blur(4px);
+        }
+
+        .borrow-dialog[open] { animation: dialogIn 0.22s ease both; }
+
+        .dialog-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 18px 22px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .dialog-header h2 { font-size: 16px; font-weight: 800; color: var(--text-heading); }
+
+        .dialog-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-muted);
+        }
+
+        .dialog-close:hover { background: #f1f5f9; color: var(--text-heading); }
+
+        .dialog-body { padding: 20px 22px 22px; }
+
+        .dialog-location {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            padding: 14px;
+            background: var(--brand-mint);
+            border: 1px solid #99f6e4;
+            border-radius: 12px;
+            margin-bottom: 14px;
+        }
+
+        .dialog-location-icon {
+            flex-shrink: 0;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: var(--brand-primary);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .dialog-location strong { display: block; font-size: 14px; color: var(--text-heading); }
+        .dialog-location span { font-size: 12.5px; color: var(--text-muted); }
+
+        .dialog-steps {
+            padding-left: 18px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-body);
+        }
+
+        .dialog-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        .btn-dialog-cancel {
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-body);
+            background: #f1f5f9;
+        }
+
+        .btn-dialog-primary {
+            padding: 9px 16px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: #ffffff;
+            background: var(--brand-primary);
+        }
+
+        .btn-dialog-primary:hover { background: var(--brand-primary-dark); }
 
         /* --- FOOTER --- */
         .footer {
@@ -454,56 +647,19 @@
 
         .footer-container {
             max-width: 1240px;
-            margin: 0 auto;
+            margin: 0 auto 40px;
             display: grid;
             grid-template-columns: 1.3fr 1fr 1.2fr;
             gap: 40px;
-            margin-bottom: 40px;
         }
 
-        .footer-brand h3 {
-            font-size: 18px;
-            font-weight: 800;
-            color: var(--text-heading);
-            margin-bottom: 8px;
-        }
-
-        .footer-brand p {
-            font-size: 13.5px;
-            color: var(--text-muted);
-            line-height: 1.6;
-        }
-
-        .footer-heading {
-            font-size: 14px;
-            font-weight: 800;
-            color: var(--text-heading);
-            margin-bottom: 14px;
-        }
-
-        .footer-links {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .footer-links a {
-            font-size: 13px;
-            color: var(--text-muted);
-            transition: color 0.15s;
-        }
-
-        .footer-links a:hover {
-            color: #0f766e;
-        }
-
-        .footer-contact-item {
-            font-size: 13px;
-            color: var(--text-muted);
-            margin-bottom: 6px;
-            line-height: 1.5;
-        }
+        .footer-brand h3 { font-size: 18px; font-weight: 800; color: var(--text-heading); margin-bottom: 8px; }
+        .footer-brand p { font-size: 13.5px; color: var(--text-muted); line-height: 1.6; }
+        .footer-heading { font-size: 14px; font-weight: 800; color: var(--text-heading); margin-bottom: 14px; }
+        .footer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .footer-links a { font-size: 13px; color: var(--text-muted); transition: color 0.15s; }
+        .footer-links a:hover { color: var(--brand-primary); }
+        .footer-contact-item { font-size: 13px; color: var(--text-muted); margin-bottom: 6px; }
 
         .footer-copyright {
             max-width: 1240px;
@@ -512,26 +668,55 @@
             border-top: 1px solid #f1f5f9;
             font-size: 12.5px;
             color: #94a3b8;
-            text-align: left;
         }
 
-        @media (max-width: 860px) {
-            .book-detail-card {
-                grid-template-columns: 1fr;
-            }
-            .cover-box {
-                height: 300px;
-            }
-            .related-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            .footer-container {
-                grid-template-columns: 1fr;
-            }
+        /* --- ANIMATIONS --- */
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes dialogIn {
+            from { opacity: 0; transform: translateY(12px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes pulseDot {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.45); }
+            50% { box-shadow: 0 0 0 4px rgba(22, 163, 74, 0); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+
+        /* --- RESPONSIVE --- */
+        @media (max-width: 960px) {
+            .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        }
+
+        @media (max-width: 760px) {
+            .topbar-nav { display: none; }
+            .detail-grid { grid-template-columns: 1fr; }
+            .footer-container { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 480px) {
+            .action-row { flex-direction: column; }
+            .related-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+
+    @php
+        $namaKategori = $buku->kategori?->namaKategori ?? 'Umum';
+        $stokTersedia = (int) $buku->stok;
+        $isTersedia = $stokTersedia > 0;
+        $rakLengkap = $buku->rak ?? 'Rak A-01';
+        $kodeRak = Str::of($rakLengkap)->replaceStart('Rak ', '')->toString();
+        $fallbackCover = 'https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';
+    @endphp
 
     <!-- TOPBAR -->
     <header class="topbar">
@@ -546,7 +731,7 @@
                 <span>BOOKNEST</span>
             </a>
 
-            <nav class="topbar-nav">
+            <nav class="topbar-nav" aria-label="Navigasi utama">
                 <a href="{{ route('home') }}" class="topbar-nav-link">Beranda</a>
                 <a href="{{ route('katalog.index') }}" class="topbar-nav-link active">Katalog</a>
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link">Dasbor</a>
@@ -569,145 +754,234 @@
 
     <!-- MAIN DETAIL CONTENT -->
     <main class="detail-container">
-        <!-- Breadcrumb -->
-        <div class="breadcrumb">
-            <a href="{{ route('home') }}">BOOKNEST</a>
-            <span class="breadcrumb-separator">/</span>
-            <a href="{{ route('katalog.index') }}">Katalog Buku</a>
-            <span class="breadcrumb-separator">/</span>
-            <span>{{ $buku->judul }}</span>
-        </div>
+        <p class="page-eyebrow">BOOKNEST / Perpustakaan umum</p>
+        <h1 class="page-title">Detail Buku</h1>
 
-        <!-- Book Detail Card -->
-        <div class="book-detail-card">
-            <!-- Cover -->
-            <div class="cover-box">
-                @if (!empty($buku->cover))
-                    <img src="{{ $buku->cover }}" alt="{{ $buku->judul }}" class="cover-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';">
-                @else
-                    <div style="background: linear-gradient(135deg, #0f766e 0%, #134e4a 100%); width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; padding: 24px; text-align: center;">
-                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        <h3 style="font-size: 18px; font-weight: 800; margin-top: 14px;">{{ $buku->judul }}</h3>
-                        <p style="font-size: 13px; color: #ccfbf1; margin-top: 6px;">{{ $buku->penulis }}</p>
-                    </div>
-                @endif
-            </div>
+        <nav aria-label="Breadcrumb">
+            <ol class="breadcrumb">
+                <li><a href="{{ route('home') }}">Beranda</a></li>
+                <li><a href="{{ route('katalog.index') }}">Katalog</a></li>
+                <li aria-current="page">{{ $buku->judul }}</li>
+            </ol>
+        </nav>
 
-            <!-- Info -->
-            <div class="info-col">
-                <div>
-                    <!-- Badges -->
-                    <div class="badge-cat-row">
-                        <span class="badge-cat">{{ $buku->kategori?->namaKategori ?? 'Umum' }}</span>
-                        @if ($buku->stok > 0)
-                            <span class="badge-status tersedia">
-                                <span class="badge-dot"></span>
-                                Tersedia ({{ $buku->stok }} eksemplar)
-                            </span>
-                        @else
-                            <span class="badge-status habis">
-                                <span class="badge-dot"></span>
-                                Stok Habis / Sedang Dipinjam
-                            </span>
-                        @endif
-                    </div>
-
-                    <h1 class="book-title-main">{{ $buku->judul }}</h1>
-                    <p class="book-author-main">Karya <strong>{{ $buku->penulis }}</strong> · Diterbitkan oleh {{ $buku->penerbit }} ({{ $buku->tahunTerbit }})</p>
-
-                    <!-- Specifications Grid -->
-                    <div class="specs-grid">
-                        <div class="spec-item">
-                            <span class="spec-label">Lokasi Rak Fisik</span>
-                            <span class="spec-val" style="color: #0f766e;">{{ $buku->rak ?? 'Rak F-12' }} (Perpustakaan Pusat)</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Jumlah Halaman</span>
-                            <span class="spec-val">{{ $buku->jumlahHalaman ?? 320 }} Halaman</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Kode Barcode / Eksemplar</span>
-                            <span class="spec-val">{{ $buku->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku->idBuku) }}</span>
-                        </div>
-                        <div class="spec-item">
-                            <span class="spec-label">Kondisi Buku</span>
-                            <span class="spec-val">{{ $buku->kondisi ?? 'Baik' }}</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Borrowing Guide Box -->
-                <div class="guide-box">
-                    <div class="guide-content">
-                        <h4>Panduan Peminjaman Fisik</h4>
-                        @guest
-                            <p>Buku ini dapat dipinjam langsung di perpustakaan. Silakan masuk atau daftar anggota untuk mendapatkan kartu anggota digital.</p>
-                        @else
-                            @if (auth()->user()->role === 'member')
-                                <p>Buku tersedia di <strong>{{ $buku->rak ?? 'Rak F-12' }}</strong>. Tunjukkan kartu QR anggota Anda kepada petugas di meja sirkulasi.</p>
-                            @else
-                                <p>Anda login sebagai <strong>{{ ucfirst(auth()->user()->role) }}</strong>. Buka form sirkulasi untuk mencatat peminjaman.</p>
-                            @endif
-                        @endguest
-                    </div>
-
-                    @guest
-                        <a href="{{ route('login') }}" class="btn-action-primary">
-                            Masuk untuk Pinjam
-                        </a>
+        <section class="detail-grid" aria-labelledby="judulBuku">
+            <!-- Kolom kiri: cover & lokasi -->
+            <div>
+                <div class="cover-card">
+                    @if (! empty($buku->cover))
+                        <img src="{{ $buku->cover }}"
+                             alt="Sampul buku {{ $buku->judul }}"
+                             fetchpriority="high"
+                             onerror="this.onerror=null; this.src='{{ $fallbackCover }}';">
                     @else
-                        @if (auth()->user()->role === 'member')
-                            <a href="{{ route('member.kartu-saya') }}" class="btn-action-primary">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                </svg>
-                                Kartu / QR Saya
-                            </a>
-                        @else
-                            <a href="{{ route('peminjaman.create') }}" class="btn-action-primary">
-                                Form Sirkulasi
-                            </a>
-                        @endif
-                    @endguest
+                        <div class="cover-fallback">
+                            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                            <h2>{{ $buku->judul }}</h2>
+                            <p>{{ $buku->penulis }}</p>
+                        </div>
+                    @endif
                 </div>
-            </div>
-        </div>
 
-        <!-- Related Books -->
-        @if (isset($bukuTerkait) && $bukuTerkait->isNotEmpty())
-            <div class="section-related">
-                <h3 class="section-title">Buku Terkait dalam Kategori {{ $buku->kategori?->namaKategori }}</h3>
+                <aside class="location-card" aria-label="Lokasi buku">
+                    <h3>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                        Perpustakaan Pusat
+                    </h3>
+                    <p>{{ $rakLengkap }} · Area {{ $namaKategori }}</p>
+                    <p>Senin–Sabtu, 08.00–17.00 WIB</p>
+                </aside>
+            </div>
+
+            <!-- Kolom kanan: informasi -->
+            <div>
+                @if ($isTersedia)
+                    <span class="badge-status tersedia"><span class="badge-dot"></span>Tersedia</span>
+                @else
+                    <span class="badge-status habis"><span class="badge-dot"></span>Sedang dipinjam</span>
+                @endif
+
+                <h2 class="book-title-main" id="judulBuku">{{ $buku->judul }}</h2>
+                <p class="book-author-main">{{ $buku->penulis }}</p>
+
+                <div class="spec-card">
+                    <dl class="spec-list">
+                        <div class="spec-row"><dt>Kategori</dt><dd>{{ $namaKategori }}</dd></div>
+                        <div class="spec-row"><dt>ISBN</dt><dd>{{ $buku->isbn ?? '-' }}</dd></div>
+                        <div class="spec-row"><dt>Penerbit</dt><dd>{{ $buku->penerbit }}</dd></div>
+                        <div class="spec-row"><dt>Tahun terbit</dt><dd>{{ $buku->tahunTerbit }}</dd></div>
+                        <div class="spec-row"><dt>Jumlah halaman</dt><dd>{{ $buku->jumlahHalaman ? $buku->jumlahHalaman.' halaman' : '-' }}</dd></div>
+                        <div class="spec-row"><dt>Rak / kode buku</dt><dd>{{ $kodeRak }} / {{ $kodeBuku }}</dd></div>
+                        <div class="spec-row">
+                            <dt>Stok tersedia</dt>
+                            <dd id="stokTersedia" @class(['is-empty' => ! $isTersedia, 'is-low' => $isTersedia && $stokTersedia <= 1])>
+                                {{ $stokTersedia }} dari {{ $totalEksemplar }} eksemplar
+                            </dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <div class="action-row">
+                    <button type="button" id="btnPinjamBuku" class="btn-pinjam" @disabled(! $isTersedia)>
+                        @if ($isTersedia)
+                            Pinjam Buku
+                        @else
+                            Semua eksemplar sedang dipinjam
+                        @endif
+                    </button>
+                    <a href="{{ $urlKembali }}" id="btnKembali" class="btn-kembali">Kembali</a>
+                </div>
+
+                <p class="loan-note">
+                    Masa pinjam {{ $masaPinjamBulan }} bulan · Maksimal {{ $batasMaksimalBuku }} buku per anggota. Pengambilan dilakukan di meja layanan.
+                </p>
+            </div>
+        </section>
+
+        <!-- Tentang buku -->
+        <section class="about-card" aria-labelledby="tentangBuku">
+            <h2 id="tentangBuku">Tentang buku ini</h2>
+            @forelse (preg_split('/\R{2,}/', trim((string) $buku->sinopsis), -1, PREG_SPLIT_NO_EMPTY) as $paragraf)
+                <p>{{ $paragraf }}</p>
+            @empty
+                <p>{{ $buku->judul }} karya {{ $buku->penulis }} diterbitkan oleh {{ $buku->penerbit }} pada tahun {{ $buku->tahunTerbit }}. Sinopsis buku ini belum tersedia.</p>
+            @endforelse
+        </section>
+
+        <!-- Bacaan lain -->
+        @if ($bukuTerkait->isNotEmpty())
+            <section class="section-related" aria-labelledby="bacaanLain">
+                <h2 class="section-title" id="bacaanLain">Bacaan lain yang mungkin kamu suka</h2>
+
                 <div class="related-grid">
                     @foreach ($bukuTerkait as $terkait)
-                        <a href="{{ route('katalog.show', $terkait->idBuku) }}" class="related-card">
-                            <div class="related-cover">
-                                @if (!empty($terkait->cover))
-                                    <img src="{{ $terkait->cover }}" alt="{{ $terkait->judul }}" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';">
+                        <article class="related-card">
+                            <a href="{{ route('katalog.show', $terkait->idBuku) }}" class="related-cover" tabindex="-1" aria-hidden="true">
+                                @if (! empty($terkait->cover))
+                                    <img src="{{ $terkait->cover }}" alt="" loading="lazy" onerror="this.onerror=null; this.src='{{ $fallbackCover }}';">
                                 @else
-                                    <div style="background: #e2e8f0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #94a3b8;">
-                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <div class="related-cover-fallback">
+                                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                                         </svg>
                                     </div>
                                 @endif
-                            </div>
+                            </a>
+
                             <div class="related-body">
-                                <h4 class="related-title">{{ $terkait->judul }}</h4>
-                                <p class="related-author">{{ $terkait->penulis }}</p>
+                                <div class="related-badges">
+                                    @if ($terkait->stok > 0)
+                                        <span class="badge-status tersedia"><span class="badge-dot"></span>Tersedia</span>
+                                    @else
+                                        <span class="badge-status habis"><span class="badge-dot"></span>Habis</span>
+                                    @endif
+
+                                    <span class="badge-rating">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" aria-hidden="true">
+                                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                                        </svg>
+                                        4,8
+                                    </span>
+                                </div>
+
+                                <h3 class="related-title">
+                                    <a href="{{ route('katalog.show', $terkait->idBuku) }}">{{ $terkait->judul }}</a>
+                                </h3>
+                                <p class="related-author">{{ $terkait->penulis }} · {{ $terkait->kategori?->namaKategori ?? 'Umum' }}</p>
+
+                                <div class="related-meta">
+                                    <span>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+                                            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+                                        </svg>
+                                        {{ $terkait->jumlahHalaman ?? '-' }} halaman
+                                    </span>
+                                    <span>
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                            <circle cx="12" cy="10" r="3"></circle>
+                                        </svg>
+                                        {{ $terkait->rak ?? '-' }}
+                                    </span>
+                                </div>
+
+                                <a href="{{ route('katalog.show', $terkait->idBuku) }}" class="btn-related">Pinjam Buku</a>
                             </div>
-                        </a>
+                        </article>
                     @endforeach
                 </div>
-            </div>
+            </section>
         @endif
     </main>
+
+    <!-- DIALOG PANDUAN PEMINJAMAN -->
+    <dialog id="borrowDialog" class="borrow-dialog" aria-labelledby="borrowDialogTitle">
+        <div class="dialog-header">
+            <h2 id="borrowDialogTitle">Pinjam “{{ $buku->judul }}”</h2>
+            <button type="button" class="dialog-close" data-close-dialog aria-label="Tutup">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+
+        <div class="dialog-body">
+            <div class="dialog-location">
+                <div class="dialog-location-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                        <circle cx="12" cy="10" r="3"></circle>
+                    </svg>
+                </div>
+                <div>
+                    <strong>{{ $rakLengkap }} · Perpustakaan Pusat</strong>
+                    <span>{{ $stokTersedia }} dari {{ $totalEksemplar }} eksemplar tersedia</span>
+                </div>
+            </div>
+
+            @guest
+                <ol class="dialog-steps">
+                    <li>Masuk atau daftar sebagai anggota BOOKNEST.</li>
+                    <li>Ambil buku di {{ $rakLengkap }}.</li>
+                    <li>Tunjukkan kartu QR anggota ke petugas di meja layanan.</li>
+                </ol>
+                <div class="dialog-actions">
+                    <a href="{{ route('register') }}" class="btn-dialog-cancel">Daftar</a>
+                    <a href="{{ route('login') }}" class="btn-dialog-primary">Masuk untuk pinjam</a>
+                </div>
+            @else
+                @if (auth()->user()->role === 'member')
+                    <ol class="dialog-steps">
+                        <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat.</li>
+                        <li>Tunjukkan kartu QR anggota ke petugas di meja layanan.</li>
+                        <li>Buku jatuh tempo {{ $masaPinjamBulan }} bulan setelah dicatat petugas.</li>
+                    </ol>
+                    <div class="dialog-actions">
+                        <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
+                        <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-primary">Buka Kartu / QR Saya</a>
+                    </div>
+                @else
+                    <ol class="dialog-steps">
+                        <li>Anda masuk sebagai {{ ucfirst(auth()->user()->role) }}.</li>
+                        <li>Pindai QR anggota dan barcode <strong>{{ $kodeBuku }}</strong> di form sirkulasi.</li>
+                    </ol>
+                    <div class="dialog-actions">
+                        <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
+                        <a href="{{ route('peminjaman.create') }}" class="btn-dialog-primary">Buka Form Sirkulasi</a>
+                    </div>
+                @endif
+            @endguest
+        </div>
+    </dialog>
 
     <!-- FOOTER -->
     <footer class="footer">
@@ -741,5 +1015,24 @@
         </div>
     </footer>
 
+    <script>
+        (() => {
+            const dialog = document.getElementById('borrowDialog');
+            const tombolPinjam = document.getElementById('btnPinjamBuku');
+
+            tombolPinjam?.addEventListener('click', () => dialog.showModal());
+
+            dialog.querySelectorAll('[data-close-dialog]').forEach((tombol) => {
+                tombol.addEventListener('click', () => dialog.close());
+            });
+
+            // Tutup dialog saat area backdrop diklik
+            dialog.addEventListener('click', (event) => {
+                if (event.target === dialog) {
+                    dialog.close();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

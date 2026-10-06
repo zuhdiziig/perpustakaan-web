@@ -14,6 +14,11 @@ class Peminjaman extends Model
      */
     public const BATAS_MAKSIMAL_BUKU = 7;
 
+    /**
+     * Lama masa pinjam (dalam bulan) sebelum buku jatuh tempo.
+     */
+    public const MASA_PINJAM_BULAN = 1;
+
     protected $table = 'peminjaman';
 
     protected $primaryKey = 'idPeminjaman';
