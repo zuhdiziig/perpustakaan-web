@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KondisiBukuController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MemberPeminjamanController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengembalianController;

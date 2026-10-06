@@ -963,9 +963,9 @@
             @else
                 @if (auth()->user()->role === 'member')
                     <ol class="dialog-steps">
-                        <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat.</li>
-                        <li>Tunjukkan kartu QR anggota ke petugas di meja layanan.</li>
-                        <li>Buku jatuh tempo {{ $masaPinjamBulan }} bulan setelah dicatat petugas.</li>
+                        <li>Ajukan peminjaman buku secara online melalui sistem perpustakaan.</li>
+                        <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat dengan kartu anggota.</li>
+                        <li>Buku wajib dikembalikan sebelum batas waktu jatuh tempo (14 hari).</li>
                     </ol>
                     <div class="dialog-actions">
                         <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
