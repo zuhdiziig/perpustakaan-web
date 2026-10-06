@@ -518,7 +518,7 @@
                 <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
                     Katalog
                 </a>
-                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*', 'peminjaman.ajukan*', 'peminjaman.sukses*') ? 'active' : '' }}">
                     Dasbor
                 </a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
@@ -604,7 +604,7 @@
                     </li>
 
                     <li>
-                        <a href="{{ route('riwayat.index', ['status' => 'Dipinjam']) }}" class="sidebar-link {{ request()->routeIs('riwayat.*') && request('status') === 'Dipinjam' ? 'active' : '' }}">
+                        <a href="{{ route('peminjaman.ajukan') }}" class="sidebar-link {{ request()->routeIs('peminjaman.ajukan*', 'peminjaman.sukses*') || (request()->routeIs('riwayat.*') && request('status') === 'Dipinjam') ? 'active' : '' }}">
                             <div class="sidebar-link-content">
                                 <span class="sidebar-link-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

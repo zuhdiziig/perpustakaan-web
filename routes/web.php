@@ -10,6 +10,7 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KondisiBukuController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\MemberPeminjamanController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengembalianController;
@@ -111,6 +112,15 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/riwayat', [RiwayatController::class, 'index'])
         ->name('riwayat.index');
+
+    Route::get('/peminjaman/ajukan/{id?}', [MemberPeminjamanController::class, 'ajukan'])
+        ->name('peminjaman.ajukan');
+
+    Route::post('/peminjaman/ajukan/{id}', [MemberPeminjamanController::class, 'proses'])
+        ->name('peminjaman.ajukan.proses');
+
+    Route::get('/peminjaman/sukses/{id}', [MemberPeminjamanController::class, 'sukses'])
+        ->name('peminjaman.sukses');
 
     Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
         ->name('denda.saya');

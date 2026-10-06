@@ -828,13 +828,25 @@
                 </div>
 
                 <div class="action-row">
-                    <button type="button" id="btnPinjamBuku" class="btn-pinjam" @disabled(! $isTersedia)>
+                    @if (auth()->check() && auth()->user()->role === 'member')
                         @if ($isTersedia)
-                            Pinjam Buku
+                            <a href="{{ route('peminjaman.ajukan', $buku->idBuku) }}" id="btnPinjamBuku" class="btn-pinjam" style="text-decoration:none; display:inline-flex; align-items:center; justify-content:center;">
+                                Pinjam Buku
+                            </a>
                         @else
-                            Semua eksemplar sedang dipinjam
+                            <button type="button" class="btn-pinjam" disabled>
+                                Semua eksemplar sedang dipinjam
+                            </button>
                         @endif
-                    </button>
+                    @else
+                        <button type="button" id="btnPinjamBuku" class="btn-pinjam" @disabled(! $isTersedia)>
+                            @if ($isTersedia)
+                                Pinjam Buku
+                            @else
+                                Semua eksemplar sedang dipinjam
+                            @endif
+                        </button>
+                    @endif
                     <a href="{{ $urlKembali }}" id="btnKembali" class="btn-kembali">Kembali</a>
                 </div>
 
@@ -961,13 +973,18 @@
             @else
                 @if (auth()->user()->role === 'member')
                     <ol class="dialog-steps">
-                        <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat.</li>
-                        <li>Tunjukkan kartu QR anggota ke petugas di meja layanan.</li>
-                        <li>Buku jatuh tempo {{ $masaPinjamBulan }} bulan setelah dicatat petugas.</li>
+                        <li>Ajukan peminjaman buku secara online melalui sistem perpustakaan.</li>
+                        <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat dengan kartu anggota.</li>
+                        <li>Buku wajib dikembalikan sebelum batas waktu jatuh tempo (14 hari).</li>
                     </ol>
                     <div class="dialog-actions">
                         <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
-                        <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-primary">Buka Kartu / QR Saya</a>
+                        <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-cancel" style="text-decoration:none; display:inline-flex; align-items:center;">Buka Kartu / QR Saya</a>
+                        @if ($isTersedia)
+                            <a href="{{ route('peminjaman.ajukan', $buku->idBuku) }}" class="btn-dialog-primary">Ajukan Peminjaman</a>
+                        @else
+                            <button type="button" class="btn-dialog-primary" disabled style="opacity: 0.6; cursor: not-allowed;">Stok Habis</button>
+                        @endif
                     </div>
                 @else
                     <ol class="dialog-steps">
