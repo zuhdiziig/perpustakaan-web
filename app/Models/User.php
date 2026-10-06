@@ -13,13 +13,24 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name',
+        'nik',
         'email',
         'password',
         'role',
         'alamat',
+        'tanggal_lahir',
         'status',
         'noTelepon',
+        'foto',
         'qr_token',
+        'notif_jatuh_tempo',
+        'notif_koleksi_baru',
+    ];
+
+    protected $casts = [
+        'tanggal_lahir' => 'date',
+        'notif_jatuh_tempo' => 'boolean',
+        'notif_koleksi_baru' => 'boolean',
     ];
 
     protected static function booted()
@@ -71,5 +82,13 @@ class User extends Authenticatable
 
             return mb_strtoupper($inisial !== '' ? $inisial : 'U');
         });
+    }
+
+    /**
+     * URL foto profil jika ada, atau null bila belum diunggah.
+     */
+    protected function fotoUrl(): Attribute
+    {
+        return Attribute::get(fn (): ?string => $this->foto ? asset('storage/'.$this->foto) : null);
     }
 }

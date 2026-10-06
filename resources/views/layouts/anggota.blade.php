@@ -518,7 +518,7 @@
                 <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
                     Katalog
                 </a>
-                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*') ? 'active' : '' }}">
                     Dasbor
                 </a>
                 <a href="{{ route('home') }}#tentang" class="topbar-nav-link">
@@ -536,7 +536,11 @@
                 </a>
 
                 <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Anggota">
-                    {{ auth()->user()->inisial ?? 'RP' }}
+                    @if(auth()->user()->foto ?? false)
+                        <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    @else
+                        {{ auth()->user()->inisial ?? 'RP' }}
+                    @endif
                 </a>
             </div>
         </div>

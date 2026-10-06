@@ -129,6 +129,18 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [ProfileController::class, 'update'])
         ->name('profile.update');
 
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])
+        ->name('profile.password');
+
+    Route::post('/profile/foto', [ProfileController::class, 'updateFoto'])
+        ->name('profile.foto');
+
+    Route::delete('/profile/foto', [ProfileController::class, 'destroyFoto'])
+        ->name('profile.foto.destroy');
+
+    Route::put('/profile/notifikasi', [ProfileController::class, 'updateNotifikasi'])
+        ->name('profile.notifikasi');
+
     /*
     |--------------------------------------------------------------------------
     | KARTU / QR MEMBER
