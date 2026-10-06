@@ -10,7 +10,9 @@ class Pengembalian extends Model
     use HasFactory;
 
     protected $table = 'pengembalian';
+
     protected $primaryKey = 'idPengembalian';
+
     protected $guarded = [];
 
     public function peminjaman()

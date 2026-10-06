@@ -1,398 +1,1090 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Transaksi Peminjaman Buku (QR Code & Barcode)</title>
-    <script src="https://unpkg.com/html5-qrcode"></script>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; padding: 25px; margin: 0; color: #1e293b; }
-        .card { background: white; max-width: 800px; margin: auto; padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08); }
-        .steps { display: flex; gap: 10px; margin-bottom: 20px; }
-        .step { flex: 1; padding: 12px; border-radius: 8px; background: #f1f5f9; text-align: center; font-size: 13px; font-weight: 600; color: #64748b; }
-        .step.active { background: #2563eb; color: white; }
-        .step.completed { background: #dcfce7; color: #166534; }
-        
-        .scanner-container { background: #0f172a; border-radius: 10px; overflow: hidden; margin-bottom: 20px; padding: 10px; text-align: center; color: white; }
-        #reader { width: 100%; max-width: 450px; margin: auto; border-radius: 8px; overflow: hidden; }
-        
-        .member-card { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 15px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; }
-        .badge-success { background: #dcfce7; color: #166534; }
-        .badge-warning { background: #fef3c7; color: #92400e; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; margin-bottom: 20px; font-size: 13px; }
-        th, td { border-bottom: 1px solid #e2e8f0; padding: 10px; text-align: left; }
-        th { background: #f8fafc; color: #64748b; font-weight: 600; }
-        
-        .btn { padding: 9px 16px; border-radius: 6px; cursor: pointer; border: none; font-weight: 600; font-size: 13px; }
-        .btn-primary { background: #2563eb; color: white; }
-        .btn-success { background: #16a34a; color: white; width: 100%; padding: 12px; font-size: 15px; }
-        .btn-danger { background: #fee2e2; color: #dc2626; padding: 5px 10px; font-size: 12px; }
-        .btn-secondary { background: #e2e8f0; color: #334155; }
-        
-        .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        .input-group input { flex: 1; padding: 10px; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 14px; }
-        .alert-error { background: #fee2e2; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; }
-        .alert-success { background: #dcfce7; color: #166534; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; }
-    </style>
-</head>
-<body>
+@extends('layouts.petugas')
 
-<div class="card">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-        <h2 style="margin: 0;">Peminjaman Buku dengan QR Code</h2>
-        <a href="{{ route('peminjaman.index') }}" style="color: #64748b; font-size: 13px; text-decoration: none;">&larr; Riwayat Peminjaman</a>
+@section('title', 'Barcode Peminjaman - BOOKNEST')
+
+@section('styles')
+<style>
+    .peminjaman-header {
+        margin-bottom: 24px;
+    }
+
+    .peminjaman-breadcrumb {
+        font-size: 13px;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 6px;
+        letter-spacing: -0.2px;
+    }
+
+    .peminjaman-title {
+        font-size: 28px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.5px;
+        line-height: 1.2;
+        margin-bottom: 6px;
+    }
+
+    .peminjaman-desc {
+        font-size: 14px;
+        color: #64748b;
+    }
+
+    .peminjaman-grid {
+        display: grid;
+        grid-template-columns: 1fr 1.15fr;
+        gap: 24px;
+        align-items: start;
+    }
+
+    .card-panel {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        padding: 22px 24px;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    }
+
+    .card-title-lg {
+        font-size: 18px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 16px;
+    }
+
+    .card-title-md {
+        font-size: 15px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 12px;
+    }
+
+    .card-title-xl {
+        font-size: 20px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 22px;
+    }
+
+    /* Scanner Viewfinder Box */
+    .scanner-screen {
+        background: #0f172a;
+        border-radius: 12px;
+        height: 215px;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 14px;
+    }
+
+    #qrReader {
+        width: 100% !important;
+        height: 100% !important;
+        position: absolute;
+        inset: 0;
+        object-fit: cover;
+        border: none !important;
+    }
+
+    #qrReader video {
+        width: 100% !important;
+        height: 100% !important;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+
+    .scanner-overlay {
+        position: relative;
+        z-index: 2;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        pointer-events: none;
+    }
+
+    .scanner-prompt {
+        font-size: 13px;
+        color: #cbd5e1;
+        font-weight: 500;
+        text-align: center;
+    }
+
+    /* Action Buttons */
+    .btn-scan-action {
+        width: 100%;
+        padding: 12px 18px;
+        background: #3b7068;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .btn-scan-action:hover {
+        background: #2f5d56;
+    }
+
+    .btn-scan-action.active {
+        background: #dc2626;
+    }
+
+    .btn-scan-action.active:hover {
+        background: #b91c1c;
+    }
+
+    .btn-search-trx {
+        width: 100%;
+        padding: 11px 18px;
+        background: #3b66f5;
+        color: #ffffff;
+        border: none;
+        border-radius: 8px;
+        font-size: 13.5px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease;
+    }
+
+    .btn-search-trx:hover {
+        background: #2563eb;
+    }
+
+    .btn-confirm-loan {
+        width: 100%;
+        padding: 13px 20px;
+        background: #3b7068;
+        color: #ffffff;
+        border: none;
+        border-radius: 10px;
+        font-size: 14.5px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+    }
+
+    .btn-confirm-loan:hover {
+        background: #2f5d56;
+    }
+
+    .btn-confirm-loan:disabled {
+        background: #94a3b8;
+        cursor: not-allowed;
+        opacity: 0.8;
+    }
+
+    /* Manual Input */
+    .input-code-manual {
+        width: 100%;
+        padding: 11px 14px;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        font-size: 13.5px;
+        color: #1e293b;
+        outline: none;
+        margin-bottom: 14px;
+        box-sizing: border-box;
+        transition: border-color 0.15s ease;
+    }
+
+    .input-code-manual:focus {
+        border-color: #3b66f5;
+    }
+
+    /* Status Badge */
+    .badge-barcode-found {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: #dcfce7;
+        color: #166534;
+        font-size: 12px;
+        font-weight: 600;
+        border-radius: 20px;
+        margin-bottom: 12px;
+    }
+
+    .badge-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #22c55e;
+    }
+
+    /* Rincian List */
+    .rincian-list {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .rincian-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        font-size: 13px;
+    }
+
+    .rincian-label {
+        color: #64748b;
+        font-weight: 500;
+        flex-shrink: 0;
+    }
+
+    .rincian-val {
+        color: #0f172a;
+        font-weight: 600;
+        text-align: right;
+        word-break: break-word;
+    }
+
+    /* Validasi Petugas Card */
+    .validation-box {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 16px 20px;
+        margin-bottom: 16px;
+    }
+
+    .validation-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 6px;
+    }
+
+    .validation-text {
+        font-size: 12.5px;
+        line-height: 1.6;
+        color: #475569;
+        margin: 0;
+    }
+
+    /* Toast Notification */
+    .toast-feedback {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-size: 13.5px;
+        font-weight: 600;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+        z-index: 110;
+        display: none;
+        animation: fadeIn 0.2s ease;
+    }
+
+    .toast-success {
+        background: #166534;
+        color: #ffffff;
+    }
+
+    .toast-error {
+        background: #b91c1c;
+        color: #ffffff;
+    }
+
+    /* ============================================================
+       MODAL KONFIRMASI BARCODE (OVERLAY & DIALOG)
+       ============================================================ */
+    .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.45);
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        backdrop-filter: blur(2px);
+        -webkit-backdrop-filter: blur(2px);
+    }
+
+    .modal-dialog {
+        background: #ffffff;
+        border-radius: 16px;
+        width: 100%;
+        max-width: 480px;
+        padding: 24px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.12), 0 8px 10px -6px rgba(0, 0, 0, 0.08);
+        position: relative;
+        animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes modalPop {
+        from {
+            opacity: 0;
+            transform: scale(0.96) translateY(6px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
+    .modal-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        position: relative;
+    }
+
+    .modal-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        letter-spacing: -0.2px;
+    }
+
+    .modal-subtitle {
+        font-size: 12.5px;
+        color: #64748b;
+        line-height: 1.45;
+    }
+
+    .modal-close-btn {
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .modal-close-btn:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .modal-card-info {
+        background: #f8fafc;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin: 18px 0 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+    }
+
+    .modal-icon-box {
+        width: 38px;
+        height: 38px;
+        border-radius: 8px;
+        background: #dcfce7;
+        color: #0f766e;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+
+    .modal-info-book {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 2px;
+        line-height: 1.3;
+    }
+
+    .modal-info-member {
+        font-size: 12.5px;
+        color: #64748b;
+        margin-bottom: 3px;
+        line-height: 1.3;
+    }
+
+    .modal-info-date {
+        font-size: 12px;
+        font-weight: 600;
+        color: #16a34a;
+        line-height: 1.3;
+    }
+
+    .modal-actions {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-modal-cancel {
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #3b66f5;
+        color: #ffffff;
+        transition: background 0.15s ease;
+    }
+
+    .btn-modal-cancel:hover {
+        background: #2563eb;
+    }
+
+    .btn-modal-confirm {
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        background: #3b7068;
+        color: #ffffff;
+        transition: background 0.15s ease;
+    }
+
+    .btn-modal-confirm:hover {
+        background: #2f5d56;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 992px) {
+        .peminjaman-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+@endsection
+
+@section('content')
+
+    <!-- HEADER / BREADCRUMB -->
+    <div class="peminjaman-header">
+        <div class="peminjaman-breadcrumb">BOOKNEST / Petugas</div>
+        <h1 class="peminjaman-title">Barcode Peminjaman</h1>
+        <p class="peminjaman-desc">Scan barcode anggota atau buku untuk memproses peminjaman di meja layanan.</p>
     </div>
-
-    <!-- Indikator Langkah -->
-    <div class="steps">
-        <div id="stepIndicator1" class="step active">1. Scan QR Member</div>
-        <div id="stepIndicator2" class="step">2. Scan QR Buku (Maks 7)</div>
-        <div id="stepIndicator3" class="step">3. Konfirmasi</div>
-    </div>
-
-    <div id="alertBox" style="display: none;"></div>
 
     @if ($errors->any())
-        <div class="alert-error">
+        <div style="background: #fef2f2; border: 1px solid #fee2e2; border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; color: #991b1b; font-size: 13px;">
             @foreach ($errors->all() as $err)
                 <div>• {{ $err }}</div>
             @endforeach
         </div>
     @endif
 
-    <!-- Kotak Kamera Scanner -->
-    <div class="scanner-container">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; padding: 0 10px;">
-            <span id="scannerStatusText" style="font-size: 13px; font-weight: 600;">📷 Arahkan Kamera ke QR Code Member</span>
-            <div>
-                <button type="button" id="btnToggleCamera" class="btn btn-secondary" style="font-size: 11px; padding: 5px 10px;" onclick="toggleCamera()">Matikan Kamera</button>
-            </div>
+    @if (session('success'))
+        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 12px 18px; margin-bottom: 20px; color: #166534; font-size: 13px; font-weight: 600;">
+            ✓ {{ session('success') }}
         </div>
-        <div id="reader"></div>
-        <div style="margin-top: 10px; font-size: 12px; color: #94a3b8;">
-            Mode saat ini: <strong id="scanModeLabel" style="color: #38bdf8;">Scan Member</strong>
-        </div>
-    </div>
+    @endif
 
-    <!-- Input Manual / Scanner Fisik Alternatif -->
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; margin-bottom: 20px;">
-        <label id="manualInputLabel" style="display: block; font-weight: 600; font-size: 12px; color: #475569; margin-bottom: 6px;">
-            Input Manual / Scan Barcode Reader Fisik (Member):
-        </label>
-        <div class="input-group" style="margin-bottom: 0;">
-            <input type="text" id="manualInput" placeholder="Ketik token QR atau scan dengan barcode scanner..." autofocus>
-            <button type="button" class="btn btn-primary" onclick="submitManualInput()">Proses</button>
-        </div>
-    </div>
+    <!-- MAIN GRID DUA KOLOM -->
+    <div class="peminjaman-grid">
 
-    <!-- Data Member Teridentifikasi -->
-    <div id="memberSection" style="display: none;" class="member-card">
+        <!-- ==================== KOLOM KIRI ==================== -->
         <div>
-            <div style="font-size: 11px; text-transform: uppercase; color: #2563eb; font-weight: bold; margin-bottom: 2px;">Member Teridentifikasi</div>
-            <h3 id="memberName" style="margin: 0 0 4px 0; color: #0f172a;">-</h3>
-            <div style="font-size: 12px; color: #475569;">
-                <span id="memberEmail">-</span> • <span id="memberPhone">-</span>
+            <!-- CARD 1: SCAN BARCODE -->
+            <div class="card-panel" style="margin-bottom: 20px;">
+                <h2 class="card-title-lg">Scan barcode</h2>
+
+                <!-- Area Viewfinder / Kamera -->
+                <div class="scanner-screen" id="cameraScreen">
+                    <!-- Div Target HTML5-QRCode -->
+                    <div id="qrReader" style="display: none;"></div>
+
+                    <!-- Placeholder Target Frame & Teks -->
+                    <div class="scanner-overlay" id="cameraPlaceholder">
+                        <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#cbd5e1" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="margin-bottom: 12px;">
+                            <path d="M4 8V5a1 1 0 0 1 1-1h3"></path>
+                            <path d="M16 4h3a1 1 0 0 1 1 1v3"></path>
+                            <path d="M20 16v3a1 1 0 0 1-1 1h-3"></path>
+                            <path d="M8 20H5a1 1 0 0 1-1-1v-3"></path>
+                            <line x1="9" y1="9" x2="9" y2="15"></line>
+                            <line x1="12" y1="8" x2="12" y2="16"></line>
+                            <line x1="15" y1="9" x2="15" y2="15"></line>
+                        </svg>
+                        <span class="scanner-prompt" id="cameraPromptText">Arahkan barcode ke kamera</span>
+                    </div>
+                </div>
+
+                <!-- Tombol Mulai Scan -->
+                <button type="button" class="btn-scan-action" id="btnToggleScan">
+                    Mulai Scan
+                </button>
+            </div>
+
+            <!-- CARD 2: ATAU MASUKKAN KODE MANUAL -->
+            <div class="card-panel">
+                <h3 class="card-title-md">Atau masukkan kode manual</h3>
+
+                <label for="inputManual" style="display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px;">
+                    Kode transaksi / buku
+                </label>
+
+                <input type="text"
+                       id="inputManual"
+                       class="input-code-manual"
+                       placeholder="PJ-20261003-0417"
+                       value="{{ request('kode', 'PJ-20261003-0417') }}"
+                       autocomplete="off">
+
+                <!-- Tombol Cari Transaksi -->
+                <button type="button" class="btn-search-trx" id="btnCariTransaksi">
+                    Cari Transaksi
+                </button>
             </div>
         </div>
-        <div style="text-align: right;">
-            <div style="margin-bottom: 6px;">
-                <span id="memberStatusBadge" class="badge badge-success">AKTIF</span>
+
+        <!-- ==================== KOLOM KANAN ==================== -->
+        <div>
+            <!-- Status Pill: Barcode Ditemukan -->
+            <div id="badgeContainer" style="display: block;">
+                <span class="badge-barcode-found" id="badgeBarcodeDitemukan">
+                    <span class="badge-dot"></span>
+                    <span id="badgeText">Barcode ditemukan</span>
+                </span>
             </div>
-            <div style="font-size: 12px; color: #1e40af; font-weight: 600;">
-                Sisa Kuota: <span id="memberQuota">7</span> Buku
+
+            <!-- CARD 1: RINCIAN PEMINJAMAN -->
+            <div class="card-panel" style="margin-bottom: 20px;">
+                <h2 class="card-title-xl">Rincian peminjaman</h2>
+
+                <div class="rincian-list">
+                    <!-- Row 1: Transaksi -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Transaksi</span>
+                        <span class="rincian-val" id="dispTransaksi">PJ-20261003-0417</span>
+                    </div>
+
+                    <!-- Row 2: Anggota -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Anggota</span>
+                        <span class="rincian-val" id="dispAnggota">
+                            {{ $defaultMember->name ?? 'Rizky Pratama' }}
+                        </span>
+                    </div>
+
+                    <!-- Row 3: Nomor anggota -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Nomor anggota</span>
+                        <span class="rincian-val" id="dispNomorAnggota">
+                            {{ $defaultMember->kode_anggota ?? 'AG-2026-00128' }}
+                        </span>
+                    </div>
+
+                    <!-- Row 4: Buku -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Buku</span>
+                        <span class="rincian-val" id="dispBuku">
+                            @php
+                                $kodeBukuDisplay = $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode->kodeBarcode ?? 'BK-00417';
+                                $judulBukuDisplay = $defaultBuku->judul ?? 'Laut Bercerita';
+                            @endphp
+                            {{ $judulBukuDisplay }} · {{ $kodeBukuDisplay }}
+                        </span>
+                    </div>
+
+                    <!-- Row 5: Tanggal pinjam -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Tanggal pinjam</span>
+                        <span class="rincian-val" id="dispTanggalPinjam">03 Okt 2026</span>
+                    </div>
+
+                    <!-- Row 6: Batas pengembalian -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Batas pengembalian</span>
+                        <span class="rincian-val" id="dispBatasPengembalian">17 Okt 2026</span>
+                    </div>
+
+                    <!-- Row 7: Durasi / jumlah -->
+                    <div class="rincian-item">
+                        <span class="rincian-label">Durasi / jumlah</span>
+                        <span class="rincian-val" id="dispDurasiJumlah">14 hari / 1 buku</span>
+                    </div>
+                </div>
             </div>
-            <button type="button" onclick="resetMember()" style="background: none; border: none; color: #dc2626; font-size: 11px; cursor: pointer; text-decoration: underline; margin-top: 4px;">Ganti Member</button>
+
+            <!-- CARD 2: VALIDASI PETUGAS -->
+            <div class="validation-box" id="boxValidasiPetugas">
+                <h4 class="validation-title">Validasi petugas</h4>
+                <p class="validation-text" id="dispValidasiPetugas">
+                    Anggota aktif. Kode buku {{ $kodeBukuDisplay }} sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.
+                </p>
+            </div>
+
+            <!-- FORM & TOMBOL: KONFIRMASI PEMINJAMAN -->
+            <form id="formPeminjaman" action="{{ route('peminjaman.store') }}" method="POST">
+                @csrf
+                <input type="hidden" name="idUserMember" id="formIdUserMember" value="{{ $defaultMember->id ?? '' }}">
+                <input type="hidden" name="barcodes[]" id="formBarcodeBuku" value="{{ $defaultEksemplar->qr_token ?? ($defaultEksemplar->kode_barcode ?? ($defaultBuku->barcode->kodeBarcode ?? 'BK-00417')) }}">
+
+                <button type="submit" class="btn-confirm-loan" id="btnKonfirmasiPeminjaman">
+                    Konfirmasi Peminjaman
+                </button>
+            </form>
         </div>
     </div>
 
-    <!-- Form Transaksi Utama -->
-    <form id="peminjamanForm" action="{{ route('peminjaman.store') }}" method="POST">
-        @csrf
-        <input type="hidden" name="idUserMember" id="formUserId" required>
-
-        <!-- Tabel Daftar Buku yang Dipinjam -->
-        <div id="booksSection" style="display: none;">
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <h4 style="margin: 0; color: #0f172a;">Daftar Buku Dipinjam (<span id="bookCount">0</span>/7)</h4>
-                <span style="font-size: 12px; color: #64748b;">Maksimal 7 buku per transaksi</span>
+    <!-- ============================================================
+         OVERLAY & MODAL KONFIRMASI BARCODE
+         ============================================================ -->
+    <div id="modalOverlay" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <!-- Header Modal -->
+            <div class="modal-header">
+                <div style="padding-right: 32px;">
+                    <h3 class="modal-title">Konfirmasi Barcode</h3>
+                    <p class="modal-subtitle">Periksa data anggota dan buku. Peminjaman berlangsung 14 hari, tanpa biaya.</p>
+                </div>
+                <button type="button" class="modal-close-btn" id="btnModalClose" aria-label="Tutup modal">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
             </div>
 
-            <table>
-                <thead>
-                    <tr>
-                        <th>No</th>
-                        <th>Kode QR / Barcode</th>
-                        <th>Judul Buku</th>
-                        <th>Kategori</th>
-                        <th>Stok Tersedia</th>
-                        <th style="width: 60px;">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="bookListTable">
-                    <!-- Baris buku dinamis masuk ke sini -->
-                </tbody>
-            </table>
-
-            <div id="emptyBookMsg" style="text-align: center; color: #94a3b8; padding: 20px 0; font-size: 13px;">
-                Belum ada buku yang di-scan. Silakan arahkan kamera atau masukkan kode QR buku.
+            <!-- Card Informasi Barcode -->
+            <div class="modal-card-info">
+                <div class="modal-icon-box">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                    <div class="modal-info-book" id="modalBuku">Laut Bercerita · BK-00417</div>
+                    <div class="modal-info-member" id="modalMember">Rizky Pratama · AG-2026-00128</div>
+                    <div class="modal-info-date" id="modalTanggal">03 Okt 2026 → 17 Okt 2026</div>
+                </div>
             </div>
 
-            <button type="submit" id="btnSubmitForm" class="btn btn-success" disabled>
-                Konfirmasi & Simpan Transaksi Peminjaman
-            </button>
+            <!-- Tombol Aksi Modal (Batal & Konfirmasi) -->
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" id="btnModalBatal">
+                    Batal
+                </button>
+                <button type="button" class="btn-modal-confirm" id="btnModalKonfirmasi">
+                    Konfirmasi
+                </button>
+            </div>
         </div>
-    </form>
-</div>
+    </div>
 
-<!-- Audio Beep Feedback -->
-<audio id="beepSound" preload="auto">
-    <source src="data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU9vT18AAAAAAAEBAgMEBQYHCAkKCwwNDg8QERITFBUWFxgZGhscHR4fICEiIyQlJicoKSorLC0uLzAxMjM0NTY3ODk6Ozw9Pj9AQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYGFiY2RlZmdoaWprbG1ub3BxcnN0dXZ3eHl6e3x9fn8=" type="audio/wav">
-</audio>
+    <!-- TOAST NOTIFIKASI -->
+    <div id="toastFeedback" class="toast-feedback toast-success"></div>
+
+@endsection
+
+@section('scripts')
+<!-- Library Scanner HTML5-QRCode -->
+<script src="https://unpkg.com/html5-qrcode"></script>
 
 <script>
-    const csrfToken = '{{ csrf_token() }}';
-    let currentMode = 'member'; // 'member' atau 'book'
-    let currentMember = null;
-    let selectedBooks = []; // array of book objects
-    let html5QrCode = null;
-    let isCameraRunning = false;
+    document.addEventListener('DOMContentLoaded', function () {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
-    function playBeep() {
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain);
-            gain.connect(ctx.destination);
-            osc.frequency.value = 880;
-            gain.gain.value = 0.1;
-            osc.start();
-            setTimeout(() => { osc.stop(); ctx.close(); }, 120);
-        } catch(e) {}
-    }
+        // State Transaksi & Sirkulasi
+        const state = {
+            member: {!! json_encode($defaultMember ? [
+                'id' => $defaultMember->id,
+                'name' => $defaultMember->name,
+                'kodeAnggota' => $defaultMember->kode_anggota,
+                'status' => $defaultMember->status,
+                'sisaKuota' => 7,
+            ] : null) !!},
+            buku: {!! json_encode($defaultBuku && $defaultEksemplar ? [
+                'idBuku' => $defaultBuku->idBuku,
+                'idEksemplar' => $defaultEksemplar->idEksemplar,
+                'judul' => $defaultBuku->judul,
+                'kodeBuku' => $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode?->kodeBarcode ?? 'BK-00417',
+                'qr_token' => $defaultEksemplar->qr_token,
+                'kondisi' => $defaultEksemplar->kondisi ?? 'Baik',
+                'status' => $defaultEksemplar->status ?? 'Tersedia',
+            ] : null) !!},
+            transaksiCode: 'PJ-20261003-0417',
+            tanggalPinjam: '03 Okt 2026',
+            batasKembali: '17 Okt 2026',
+            durasiJumlah: '14 hari / 1 buku',
+            isCameraRunning: false
+        };
 
-    function showAlert(msg, isError = true) {
-        const box = document.getElementById('alertBox');
-        box.className = isError ? 'alert-error' : 'alert-success';
-        box.innerHTML = msg;
-        box.style.display = 'block';
-        setTimeout(() => { box.style.display = 'none'; }, 4500);
-    }
+        // DOM Elements
+        const btnToggleScan = document.getElementById('btnToggleScan');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const cameraPromptText = document.getElementById('cameraPromptText');
+        const qrReaderDiv = document.getElementById('qrReader');
+        const inputManual = document.getElementById('inputManual');
+        const btnCariTransaksi = document.getElementById('btnCariTransaksi');
 
-    // Inisialisasi Scanner Kamera
-    function initScanner() {
-        html5QrCode = new Html5Qrcode("reader");
-        const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+        const badgeContainer = document.getElementById('badgeContainer');
+        const badgeText = document.getElementById('badgeText');
+        const dispTransaksi = document.getElementById('dispTransaksi');
+        const dispAnggota = document.getElementById('dispAnggota');
+        const dispNomorAnggota = document.getElementById('dispNomorAnggota');
+        const dispBuku = document.getElementById('dispBuku');
+        const dispTanggalPinjam = document.getElementById('dispTanggalPinjam');
+        const dispBatasPengembalian = document.getElementById('dispBatasPengembalian');
+        const dispDurasiJumlah = document.getElementById('dispDurasiJumlah');
+        const dispValidasiPetugas = document.getElementById('dispValidasiPetugas');
 
-        html5QrCode.start({ facingMode: "environment" }, config, onScanSuccess)
-            .then(() => { isCameraRunning = true; })
+        const formIdUserMember = document.getElementById('formIdUserMember');
+        const formBarcodeBuku = document.getElementById('formBarcodeBuku');
+        const btnKonfirmasi = document.getElementById('btnKonfirmasiPeminjaman');
+        const formPeminjaman = document.getElementById('formPeminjaman');
+        const toast = document.getElementById('toastFeedback');
+
+        // Modal Elements
+        const modalOverlay = document.getElementById('modalOverlay');
+        const modalBuku = document.getElementById('modalBuku');
+        const modalMember = document.getElementById('modalMember');
+        const modalTanggal = document.getElementById('modalTanggal');
+        const btnModalClose = document.getElementById('btnModalClose');
+        const btnModalBatal = document.getElementById('btnModalBatal');
+        const btnModalKonfirmasi = document.getElementById('btnModalKonfirmasi');
+
+        let html5Scanner = null;
+        let isSubmitting = false;
+
+        // Feedback Audio Beep
+        function playScanBeep() {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 920;
+                gain.gain.value = 0.15;
+                osc.start();
+                setTimeout(() => { osc.stop(); audioCtx.close(); }, 140);
+            } catch (e) {}
+        }
+
+        // Tampilkan Toast
+        function showToast(message, isError = false) {
+            toast.textContent = message;
+            toast.className = 'toast-feedback ' + (isError ? 'toast-error' : 'toast-success');
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3800);
+        }
+
+        // Format Tanggal Indonesia
+        function formatTanggalIndo(date) {
+            const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const d = String(date.getDate()).padStart(2, '0');
+            const m = bulan[date.getMonth()];
+            const y = date.getFullYear();
+            return `${d} ${m} ${y}`;
+        }
+
+        // Buka Modal Konfirmasi Barcode
+        function openConfirmModal() {
+            if (!state.member || !state.buku) {
+                showToast('Lengkapi identifikasi anggota dan buku terlebih dahulu!', true);
+                return;
+            }
+
+            modalBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
+            modalMember.textContent = `${state.member.name} · ${state.member.kodeAnggota}`;
+            modalTanggal.textContent = `${state.tanggalPinjam} → ${state.batasKembali}`;
+
+            modalOverlay.style.display = 'flex';
+        }
+
+        // Tutup Modal Konfirmasi Barcode
+        function closeConfirmModal() {
+            modalOverlay.style.display = 'none';
+        }
+
+        // Render Seluruh Rincian & Form Hidden Sesuai State
+        function updateUI() {
+            if (state.transaksiCode) {
+                dispTransaksi.textContent = state.transaksiCode;
+            }
+
+            if (state.member) {
+                dispAnggota.textContent = state.member.name;
+                dispNomorAnggota.textContent = state.member.kodeAnggota;
+                formIdUserMember.value = state.member.id;
+            } else {
+                dispAnggota.textContent = 'Menunggu scan anggota...';
+                dispNomorAnggota.textContent = '-';
+                formIdUserMember.value = '';
+            }
+
+            if (state.buku) {
+                dispBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
+                formBarcodeBuku.value = state.buku.qr_token || state.buku.kodeBuku;
+            } else {
+                dispBuku.textContent = 'Menunggu scan buku...';
+                formBarcodeBuku.value = '';
+            }
+
+            dispTanggalPinjam.textContent = state.tanggalPinjam;
+            dispBatasPengembalian.textContent = state.batasKembali;
+            dispDurasiJumlah.textContent = state.durasiJumlah;
+
+            // Perbarui Pesan Validasi Petugas
+            if (state.member && state.buku) {
+                dispValidasiPetugas.textContent = `Anggota aktif. Kode buku ${state.buku.kodeBuku} sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.`;
+                badgeContainer.style.display = 'block';
+                badgeText.textContent = 'Barcode ditemukan';
+                btnKonfirmasi.disabled = false;
+            } else if (state.member && !state.buku) {
+                dispValidasiPetugas.textContent = `Anggota aktif (${state.member.name}). Sisa kuota peminjaman ${state.member.sisaKuota ?? 7} buku. Silakan scan barcode buku fisik untuk melanjutkan.`;
+                badgeContainer.style.display = 'block';
+                badgeText.textContent = 'Anggota teridentifikasi';
+                btnKonfirmasi.disabled = true;
+            } else if (!state.member && state.buku) {
+                dispValidasiPetugas.textContent = `Buku fisik '${state.buku.judul}' (${state.buku.kodeBuku}) tersedia. Silakan scan barcode kartu anggota untuk mengonfirmasi peminjam.`;
+                badgeContainer.style.display = 'block';
+                badgeText.textContent = 'Buku teridentifikasi';
+                btnKonfirmasi.disabled = true;
+            } else {
+                dispValidasiPetugas.textContent = 'Arahkan barcode anggota atau buku ke kamera, atau masukkan kode manual untuk memulai proses peminjaman.';
+                badgeContainer.style.display = 'none';
+                btnKonfirmasi.disabled = true;
+            }
+        }
+
+        // Proses Identifikasi Kode melalui API
+        function prosesIdentifikasi(rawCode) {
+            const code = rawCode.trim();
+            if (!code) return;
+
+            btnCariTransaksi.disabled = true;
+            btnCariTransaksi.textContent = 'Memeriksa...';
+
+            fetch('{{ route("api.scan.identifikasi") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ code: code })
+            })
+            .then(res => res.json())
+            .then(res => {
+                btnCariTransaksi.disabled = false;
+                btnCariTransaksi.textContent = 'Cari Transaksi';
+
+                if (!res.success) {
+                    showToast(res.message || 'Kode tidak ditemukan.', true);
+                    return;
+                }
+
+                playScanBeep();
+
+                // 1. Jika teridentifikasi sebagai transaksi utuh
+                if (res.type === 'transaksi') {
+                    const trx = res.data;
+                    state.transaksiCode = trx.kodeTransaksi;
+                    state.member = trx.member;
+                    state.buku = trx.buku;
+                    state.tanggalPinjam = trx.tanggalPinjam;
+                    state.batasKembali = trx.batasKembali;
+                    state.durasiJumlah = trx.durasiJumlah;
+                    inputManual.value = trx.kodeTransaksi;
+
+                    updateUI();
+                    dispValidasiPetugas.textContent = trx.validasiPesan;
+                    showToast(`Barcode transaksi ${trx.kodeTransaksi} ditemukan.`);
+
+                    // Tampilkan modal konfirmasi barcode
+                    openConfirmModal();
+                    return;
+                }
+
+                // 2. Jika teridentifikasi sebagai data Member
+                if (res.type === 'member') {
+                    state.member = res.data;
+                    inputManual.value = res.data.kodeAnggota;
+                    cameraPromptText.textContent = 'Arahkan barcode buku ke kamera';
+
+                    // Update tanggal dinamis
+                    const today = new Date();
+                    const due = new Date();
+                    due.setDate(today.getDate() + 14);
+                    state.tanggalPinjam = formatTanggalIndo(today);
+                    state.batasKembali = formatTanggalIndo(due);
+                    state.transaksiCode = `PJ-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${String(state.buku ? state.buku.idEksemplar : 417).padStart(4,'0')}`;
+
+                    updateUI();
+
+                    if (state.buku) {
+                        showToast(`Barcode anggota '${state.member.name}' ditemukan.`);
+                        openConfirmModal();
+                    } else {
+                        showToast(`Anggota '${state.member.name}' teridentifikasi. Silakan scan buku.`);
+                    }
+                    return;
+                }
+
+                // 3. Jika teridentifikasi sebagai Eksemplar Buku
+                if (res.type === 'buku') {
+                    state.buku = res.data;
+                    inputManual.value = res.data.kodeBuku;
+
+                    const today = new Date();
+                    const due = new Date();
+                    due.setDate(today.getDate() + 14);
+                    state.tanggalPinjam = formatTanggalIndo(today);
+                    state.batasKembali = formatTanggalIndo(due);
+                    state.transaksiCode = `PJ-${today.getFullYear()}${String(today.getMonth()+1).padStart(2,'0')}${String(today.getDate()).padStart(2,'0')}-${String(state.buku.idEksemplar).padStart(4,'0')}`;
+
+                    updateUI();
+
+                    if (state.member) {
+                        showToast(`Barcode buku '${state.buku.judul}' ditemukan.`);
+                        openConfirmModal();
+                    } else {
+                        showToast(`Buku '${state.buku.judul}' teridentifikasi. Silakan scan anggota.`);
+                    }
+                }
+            })
             .catch(err => {
-                console.log("Scanner camera not available:", err);
-                document.getElementById('scannerStatusText').innerText = "Kamera tidak aktif / tidak diizinkan. Gunakan input manual.";
-                document.getElementById('btnToggleCamera').style.display = 'none';
+                btnCariTransaksi.disabled = false;
+                btnCariTransaksi.textContent = 'Cari Transaksi';
+                showToast('Gagal terhubung ke server scanner.', true);
             });
-    }
+        }
 
-    function toggleCamera() {
-        if (!html5QrCode) return;
-        const btn = document.getElementById('btnToggleCamera');
-        if (isCameraRunning) {
-            html5QrCode.stop().then(() => {
-                isCameraRunning = false;
-                btn.innerText = "Aktifkan Kamera";
+        // Toggle Scanner Kamera (html5-qrcode)
+        function toggleScanner() {
+            if (state.isCameraRunning) {
+                stopScanner();
+            } else {
+                startScanner();
+            }
+        }
+
+        function startScanner() {
+            if (!html5Scanner) {
+                html5Scanner = new Html5Qrcode('qrReader');
+            }
+
+            qrReaderDiv.style.display = 'block';
+            cameraPlaceholder.style.display = 'none';
+            btnToggleScan.textContent = 'Hentikan Scan';
+            btnToggleScan.classList.add('active');
+
+            const scanConfig = { fps: 10, qrbox: { width: 220, height: 180 } };
+
+            html5Scanner.start(
+                { facingMode: 'environment' },
+                scanConfig,
+                (decodedText) => {
+                    prosesIdentifikasi(decodedText);
+                },
+                (error) => {
+                    // scanning loop frame error, ignore
+                }
+            ).then(() => {
+                state.isCameraRunning = true;
+            }).catch(err => {
+                console.warn('Camera error:', err);
+                qrReaderDiv.style.display = 'none';
+                cameraPlaceholder.style.display = 'flex';
+                cameraPromptText.textContent = 'Kamera tidak tersedia / izin ditolak';
+                btnToggleScan.textContent = 'Mulai Scan';
+                btnToggleScan.classList.remove('active');
+                state.isCameraRunning = false;
+                showToast('Kamera tidak dapat diakses. Gunakan input manual.', true);
             });
-        } else {
-            html5QrCode.start({ facingMode: "environment" }, { fps: 10, qrbox: { width: 250, height: 250 } }, onScanSuccess)
-                .then(() => {
-                    isCameraRunning = true;
-                    btn.innerText = "Matikan Kamera";
+        }
+
+        function stopScanner() {
+            if (html5Scanner && state.isCameraRunning) {
+                html5Scanner.stop().then(() => {
+                    qrReaderDiv.style.display = 'none';
+                    cameraPlaceholder.style.display = 'flex';
+                    btnToggleScan.textContent = 'Mulai Scan';
+                    btnToggleScan.classList.remove('active');
+                    state.isCameraRunning = false;
+                }).catch(err => {
+                    console.error('Stop scanner error:', err);
                 });
+            }
         }
-    }
 
-    function onScanSuccess(decodedText) {
-        playBeep();
-        handleScannedCode(decodedText.trim());
-    }
+        // Event Listeners Scanner & Input
+        btnToggleScan.addEventListener('click', toggleScanner);
 
-    function submitManualInput() {
-        const val = document.getElementById('manualInput').value.trim();
-        if (!val) return;
-        handleScannedCode(val);
-        document.getElementById('manualInput').value = '';
-    }
+        btnCariTransaksi.addEventListener('click', function () {
+            prosesIdentifikasi(inputManual.value);
+        });
 
-    document.getElementById('manualInput').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
+        inputManual.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                prosesIdentifikasi(inputManual.value);
+            }
+        });
+
+        // Tombol Konfirmasi Peminjaman pada Halaman Utama membuka Modal Konfirmasi Barcode
+        btnKonfirmasi.addEventListener('click', function (e) {
             e.preventDefault();
-            submitManualInput();
-        }
-    });
+            if (!formIdUserMember.value || !formBarcodeBuku.value) {
+                showToast('Lengkapi identifikasi anggota dan buku sebelum konfirmasi!', true);
+                return;
+            }
+            openConfirmModal();
+        });
 
-    function handleScannedCode(code) {
-        if (currentMode === 'member') {
-            lookupMember(code);
-        } else if (currentMode === 'book') {
-            lookupBook(code);
-        }
-    }
+        // Tombol Close (X) dan Batal pada Modal
+        btnModalClose.addEventListener('click', closeConfirmModal);
+        btnModalBatal.addEventListener('click', closeConfirmModal);
 
-    // 1. Lookup Member via API
-    function lookupMember(token) {
-        fetch('{{ route("api.scan.member") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ token: token })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                showAlert(data.message, true);
+        // Klik background overlay menutup modal
+        modalOverlay.addEventListener('click', function (e) {
+            if (e.target === modalOverlay) {
+                closeConfirmModal();
+            }
+        });
+
+        // Tombol Konfirmasi pada Modal menjalankan peminjaman backend yang sebenarnya
+        btnModalKonfirmasi.addEventListener('click', function () {
+            if (!formIdUserMember.value || !formBarcodeBuku.value) {
+                showToast('Data peminjaman belum lengkap!', true);
+                closeConfirmModal();
                 return;
             }
 
-            if (data.member.sisaKuota <= 0) {
-                showAlert(`Gagal: Member ${data.member.name} sudah mencapai batas maksimal 7 buku pinjaman aktif.`, true);
-                return;
-            }
+            if (isSubmitting) return;
+            isSubmitting = true;
 
-            // Set current member
-            currentMember = data.member;
-            document.getElementById('formUserId').value = currentMember.id;
-            document.getElementById('memberName').innerText = currentMember.name;
-            document.getElementById('memberEmail').innerText = currentMember.email;
-            document.getElementById('memberPhone').innerText = currentMember.noTelepon;
-            document.getElementById('memberQuota').innerText = currentMember.sisaKuota;
-            
-            document.getElementById('memberSection').style.display = 'flex';
-            document.getElementById('booksSection').style.display = 'block';
+            btnModalKonfirmasi.disabled = true;
+            btnModalKonfirmasi.textContent = 'Memproses...';
+            btnModalBatal.disabled = true;
+            btnModalClose.disabled = true;
 
-            // Switch to Book Scanning Mode
-            currentMode = 'book';
-            document.getElementById('stepIndicator1').className = 'step completed';
-            document.getElementById('stepIndicator2').className = 'step active';
-            document.getElementById('scanModeLabel').innerText = 'Scan QR / Barcode Buku';
-            document.getElementById('scannerStatusText').innerText = '📷 Arahkan Kamera ke QR Code / Barcode Buku';
-            document.getElementById('manualInputLabel').innerText = 'Input Manual / Scan Barcode Reader Fisik (Buku):';
-            document.getElementById('manualInput').placeholder = 'Ketik token QR atau barcode buku...';
-
-            showAlert(`Member ${currentMember.name} berhasil teridentifikasi! Silakan scan buku.`, false);
-        })
-        .catch(err => {
-            showAlert('Gagal menghubungi server.', true);
+            formPeminjaman.submit();
         });
-    }
 
-    // 2. Lookup Book via API
-    function lookupBook(token) {
-        if (!currentMember) {
-            showAlert('Silakan scan member terlebih dahulu!', true);
-            return;
-        }
-
-        // Cek kuota member
-        if (selectedBooks.length >= currentMember.sisaKuota) {
-            showAlert(`Batas maksimal tercapai! Member ini hanya memiliki sisa kuota ${currentMember.sisaKuota} buku.`, true);
-            return;
-        }
-
-        // Cek duplikasi di keranjang
-        if (selectedBooks.some(b => b.qr_token === token || b.kodeBarcode === token)) {
-            showAlert('Buku ini sudah dimasukkan ke dalam daftar peminjaman.', true);
-            return;
-        }
-
-        fetch('{{ route("api.scan.buku") }}', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-            body: JSON.stringify({ token: token })
-        })
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                showAlert(data.message, true);
-                return;
-            }
-
-            // Masukkan ke array
-            selectedBooks.push(data.buku);
-            renderBookTable();
-            showAlert(`Buku '${data.buku.judul}' berhasil ditambahkan.`, false);
-        })
-        .catch(err => {
-            showAlert('Gagal mencari data buku.', true);
-        });
-    }
-
-    function removeBook(index) {
-        selectedBooks.splice(index, 1);
-        renderBookTable();
-    }
-
-    function renderBookTable() {
-        const tbody = document.getElementById('bookListTable');
-        const emptyMsg = document.getElementById('emptyBookMsg');
-        const submitBtn = document.getElementById('btnSubmitForm');
-        const countSpan = document.getElementById('bookCount');
-
-        tbody.innerHTML = '';
-        countSpan.innerText = selectedBooks.length;
-
-        if (selectedBooks.length === 0) {
-            emptyMsg.style.display = 'block';
-            submitBtn.disabled = true;
-            document.getElementById('stepIndicator3').className = 'step';
-            return;
-        }
-
-        emptyMsg.style.display = 'none';
-        submitBtn.disabled = false;
-        document.getElementById('stepIndicator3').className = 'step active';
-
-        selectedBooks.forEach((buku, idx) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${idx + 1}</td>
-                <td>
-                    <code>${buku.qr_token || buku.kodeBarcode}</code>
-                    <input type="hidden" name="barcodes[]" value="${buku.qr_token || buku.kodeBarcode}">
-                </td>
-                <td><strong>${buku.judul}</strong><br><small style="color:#64748b;">${buku.penulis}</small></td>
-                <td>${buku.kategori}</td>
-                <td><span class="badge badge-success">${buku.stok} eks</span></td>
-                <td>
-                    <button type="button" class="btn btn-danger" onclick="removeBook(${idx})">Hapus</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    function resetMember() {
-        currentMember = null;
-        selectedBooks = [];
-        currentMode = 'member';
-        renderBookTable();
-        document.getElementById('formUserId').value = '';
-        document.getElementById('memberSection').style.display = 'none';
-        document.getElementById('booksSection').style.display = 'none';
-
-        document.getElementById('stepIndicator1').className = 'step active';
-        document.getElementById('stepIndicator2').className = 'step';
-        document.getElementById('stepIndicator3').className = 'step';
-
-        document.getElementById('scanModeLabel').innerText = 'Scan Member';
-        document.getElementById('scannerStatusText').innerText = '📷 Arahkan Kamera ke QR Code Member';
-        document.getElementById('manualInputLabel').innerText = 'Input Manual / Scan Barcode Reader Fisik (Member):';
-        document.getElementById('manualInput').placeholder = 'Ketik token QR member...';
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        initScanner();
+        // Inisialisasi tampilan awal
+        updateUI();
     });
 </script>
-
-</body>
-</html>
+@endsection

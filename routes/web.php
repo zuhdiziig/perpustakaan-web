@@ -113,14 +113,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/riwayat', [RiwayatController::class, 'index'])
         ->name('riwayat.index');
 
-    Route::get('/peminjaman/ajukan/{id?}', [MemberPeminjamanController::class, 'ajukan'])
+    Route::get('/peminjaman/konfirmasi/{id}', [PeminjamanController::class, 'konfirmasiMember'])
+        ->name('peminjaman.konfirmasi');
+
+    Route::post('/peminjaman/ajukan/{id}', [PeminjamanController::class, 'ajukanMember'])
         ->name('peminjaman.ajukan');
-
-    Route::post('/peminjaman/ajukan/{id}', [MemberPeminjamanController::class, 'proses'])
-        ->name('peminjaman.ajukan.proses');
-
-    Route::get('/peminjaman/sukses/{id}', [MemberPeminjamanController::class, 'sukses'])
-        ->name('peminjaman.sukses');
 
     Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
         ->name('denda.saya');
@@ -286,4 +283,7 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
         ->name('api.scan.pengembalian.member');
+
+    Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
+        ->name('api.scan.identifikasi');
 });

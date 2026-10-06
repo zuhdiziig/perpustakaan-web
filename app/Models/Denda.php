@@ -10,7 +10,9 @@ class Denda extends Model
     use HasFactory;
 
     protected $table = 'denda';
+
     protected $primaryKey = 'idDenda';
+
     protected $guarded = [];
 
     public function pengembalian()

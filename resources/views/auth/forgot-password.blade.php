@@ -381,7 +381,7 @@
                 <a href="{{ url('/') }}" class="nav-pill-item">Beranda</a>
                 <a href="{{ route('katalog.index') }}" class="nav-pill-item">Katalog</a>
                 <a href="{{ route('dashboard') }}" class="nav-pill-item">Dasbor</a>
-                <a href="#tentang" class="nav-pill-item">Tentang</a>
+                <a href="{{ route('tentang') }}" class="nav-pill-item">Tentang</a>
             </nav>
 
             <a href="{{ route('login') }}" class="btn-nav-masuk">Masuk</a>

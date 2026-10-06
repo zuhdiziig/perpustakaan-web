@@ -28,28 +28,28 @@ class MemberController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
-            'password'  => ['required', 'string', 'min:6'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
+            'password' => ['required', 'string', 'min:6'],
             'noTelepon' => ['required', 'string', 'max:20'],
-            'alamat'    => ['required', 'string', 'max:500'],
+            'alamat' => ['required', 'string', 'max:500'],
         ], [
-            'name.required'      => 'Nama member wajib diisi.',
-            'email.required'     => 'Email wajib diisi.',
-            'email.unique'       => 'Email sudah terdaftar.',
-            'password.required'  => 'Password wajib diisi.',
+            'name.required' => 'Nama member wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email sudah terdaftar.',
+            'password.required' => 'Password wajib diisi.',
             'noTelepon.required' => 'Nomor telepon wajib diisi.',
-            'alamat.required'    => 'Alamat wajib diisi.',
+            'alamat.required' => 'Alamat wajib diisi.',
         ]);
 
         User::create([
-            'name'      => $validated['name'],
-            'email'     => $validated['email'],
-            'password'  => Hash::make($validated['password']),
-            'role'      => 'member',
-            'status'    => 'aktif',
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'role' => 'member',
+            'status' => 'aktif',
             'noTelepon' => $validated['noTelepon'],
-            'alamat'    => $validated['alamat'],
+            'alamat' => $validated['alamat'],
         ]);
 
         return redirect()->route('member.index')->with('success', 'Data member baru berhasil ditambahkan.');
@@ -59,6 +59,7 @@ class MemberController extends Controller
     public function edit($id)
     {
         $member = User::where('role', 'member')->findOrFail($id);
+
         return view('member.edit', compact('member'));
     }
 
@@ -68,18 +69,18 @@ class MemberController extends Controller
         $member = User::where('role', 'member')->findOrFail($id);
 
         $validated = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users,email,' . $id],
-            'password'  => ['nullable', 'string', 'min:6'],
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email,'.$id],
+            'password' => ['nullable', 'string', 'min:6'],
             'noTelepon' => ['required', 'string', 'max:20'],
-            'alamat'    => ['required', 'string', 'max:500'],
-            'status'    => ['required', 'in:aktif,nonaktif'],
+            'alamat' => ['required', 'string', 'max:500'],
+            'status' => ['required', 'in:aktif,nonaktif'],
         ], [
-            'name.required'      => 'Nama member wajib diisi.',
-            'email.required'     => 'Email wajib diisi.',
-            'email.unique'       => 'Email sudah terdaftar.',
+            'name.required' => 'Nama member wajib diisi.',
+            'email.required' => 'Email wajib diisi.',
+            'email.unique' => 'Email sudah terdaftar.',
             'noTelepon.required' => 'Nomor telepon wajib diisi.',
-            'alamat.required'    => 'Alamat wajib diisi.',
+            'alamat.required' => 'Alamat wajib diisi.',
         ]);
 
         $member->name = $validated['name'];
@@ -88,7 +89,7 @@ class MemberController extends Controller
         $member->alamat = $validated['alamat'];
         $member->status = $validated['status'];
 
-        if (!empty($validated['password'])) {
+        if (! empty($validated['password'])) {
             $member->password = Hash::make($validated['password']);
         }
 
@@ -105,6 +106,7 @@ class MemberController extends Controller
         $member->save();
 
         $pesan = $member->status === 'aktif' ? 'Member berhasil diaktifkan kembali.' : 'Member berhasil dinonaktifkan.';
+
         return redirect()->route('member.index')->with('success', $pesan);
     }
 }

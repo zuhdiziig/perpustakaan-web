@@ -10,7 +10,9 @@ class Kategori extends Model
     use HasFactory;
 
     protected $table = 'kategori';
+
     protected $primaryKey = 'idKategori';
+
     protected $guarded = [];
 
     public function buku()

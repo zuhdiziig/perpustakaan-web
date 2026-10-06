@@ -13,7 +13,7 @@ class KondisiBukuController extends Controller
         $statusFilter = $request->query('kondisi');
         $query = Buku::with(['kategori', 'barcode']);
 
-        if (!empty($statusFilter)) {
+        if (! empty($statusFilter)) {
             $query->where('kondisi', $statusFilter);
         }
 
@@ -26,6 +26,7 @@ class KondisiBukuController extends Controller
     public function edit($id)
     {
         $buku = Buku::with(['kategori', 'barcode'])->findOrFail($id);
+
         return view('kondisi.edit', compact('buku'));
     }
 
@@ -55,9 +56,9 @@ class KondisiBukuController extends Controller
         }
 
         return redirect()->route('kondisi.index')->with([
-            'success'        => 'Kondisi buku berhasil diperbarui.',
-            'judulBuku'      => $buku->judul,
-            'kondisi'        => $kondisiBaru,
+            'success' => 'Kondisi buku berhasil diperbarui.',
+            'judulBuku' => $buku->judul,
+            'kondisi' => $kondisiBaru,
             'biayaKerusakan' => $biayaKerusakan,
         ]);
     }
