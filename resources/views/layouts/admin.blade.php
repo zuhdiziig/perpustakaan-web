@@ -521,7 +521,7 @@
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
                 </a>
-                <a href="{{ route('home') }}#tentang" class="topbar-nav-link">
+                <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                     Tentang
                 </a>
             </nav>

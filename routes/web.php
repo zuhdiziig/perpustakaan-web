@@ -29,6 +29,10 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+Route::get('/tentang', function () {
+    return view('tentang');
+})->name('tentang');
+
 /*
 |--------------------------------------------------------------------------
 | KATALOG BUKU PUBLIK (Bisa diakses Tamu & Semua Role)

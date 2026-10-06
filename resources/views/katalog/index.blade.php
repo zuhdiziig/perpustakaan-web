@@ -1038,7 +1038,7 @@
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link">
                     Dasbor
                 </a>
-                <a href="{{ route('home') }}#tentang" class="topbar-nav-link">
+                <a href="{{ route('tentang') }}" class="topbar-nav-link">
                     Tentang
                 </a>
             </nav>
@@ -1463,7 +1463,7 @@
                 <ul class="footer-links">
                     <li><a href="{{ route('katalog.index') }}">Katalog buku</a></li>
                     <li><a href="{{ route('register') }}">Keanggotaan</a></li>
-                    <li><a href="{{ route('home') }}#tentang">Tentang kami</a></li>
+                    <li><a href="{{ route('tentang') }}">Tentang kami</a></li>
                     <li><a href="{{ route('katalog.index') }}">Panduan peminjaman</a></li>
                     <li><a href="{{ route('home') }}">Kebijakan privasi · Syarat layanan</a></li>
                 </ul>
