@@ -26,6 +26,22 @@ class RiwayatController extends Controller
             ->paginate(10)
             ->withQueryString();
 
-        return view('riwayat.index', compact('riwayats', 'statusDipilih'));
+        // Hitung statistik transaksi member
+        $totalPinjam = Peminjaman::where('idUserMember', $userId)->count();
+        $totalAktif = Peminjaman::where('idUserMember', $userId)->where('status', 'Dipinjam')->count();
+        $totalSelesai = Peminjaman::where('idUserMember', $userId)->where('status', 'Selesai')->count();
+        $totalTerlambat = Peminjaman::where('idUserMember', $userId)
+            ->where('status', 'Dipinjam')
+            ->where('batasKembali', '<', now()->toDateString())
+            ->count();
+
+        return view('riwayat.index', compact(
+            'riwayats',
+            'statusDipilih',
+            'totalPinjam',
+            'totalAktif',
+            'totalSelesai',
+            'totalTerlambat'
+        ));
     }
 }
