@@ -518,7 +518,7 @@
                 <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
                     Katalog
                 </a>
-                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*', 'peminjaman.ajukan*', 'peminjaman.sukses*') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*', 'peminjaman.ajukan*', 'peminjaman.sukses*', 'denda.*', 'bayar.*', 'pembayaran.nota') ? 'active' : '' }}">
                     Dasbor
                 </a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
@@ -641,7 +641,7 @@
                 <div class="sidebar-section-title">Lainnya</div>
                 <ul class="sidebar-menu">
                     <li>
-                        <a href="{{ route('denda.saya') }}" class="sidebar-link {{ request()->routeIs('denda.saya') ? 'active' : '' }}">
+                        <a href="{{ route('denda.saya') }}" class="sidebar-link {{ request()->routeIs('denda.*', 'bayar.*', 'pembayaran.nota') ? 'active' : '' }}">
                             <div class="sidebar-link-content">
                                 <span class="sidebar-link-icon">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
