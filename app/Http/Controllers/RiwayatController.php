@@ -12,7 +12,7 @@ class RiwayatController extends Controller
     public function index(Request $request): View
     {
         $userId = auth()->id();
-        $statusDipilih = in_array($request->query('status'), ['Dipinjam', 'Selesai'], true)
+        $statusDipilih = in_array($request->query('status'), ['Booking', 'Siap Diambil', 'Dipinjam', 'Selesai', 'Dibatalkan'], true)
             ? $request->query('status')
             : null;
 
@@ -28,6 +28,7 @@ class RiwayatController extends Controller
 
         // Hitung statistik transaksi member
         $totalPinjam = Peminjaman::where('idUserMember', $userId)->count();
+        $totalBooking = Peminjaman::where('idUserMember', $userId)->whereIn('status', ['Booking', 'Siap Diambil'])->count();
         $totalAktif = Peminjaman::where('idUserMember', $userId)->where('status', 'Dipinjam')->count();
         $totalSelesai = Peminjaman::where('idUserMember', $userId)->where('status', 'Selesai')->count();
         $totalTerlambat = Peminjaman::where('idUserMember', $userId)
@@ -39,6 +40,7 @@ class RiwayatController extends Controller
             'riwayats',
             'statusDipilih',
             'totalPinjam',
+            'totalBooking',
             'totalAktif',
             'totalSelesai',
             'totalTerlambat'

@@ -745,7 +745,7 @@
             </div>
 
             <p class="hero-note">
-                Peminjaman hingga 14 hari · Pengembalian langsung ke meja sirkulasi
+                Peminjaman hingga 30 hari · Pengembalian langsung ke meja sirkulasi
             </p>
         </div>
 

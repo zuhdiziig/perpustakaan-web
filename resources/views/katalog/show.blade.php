@@ -706,6 +706,8 @@
             .related-grid { grid-template-columns: 1fr; }
         }
     </style>
+
+    @include('layouts.partials.sidebar_styles')
 </head>
 <body>
 
@@ -721,15 +723,27 @@
     <!-- TOPBAR -->
     <header class="topbar">
         <div class="topbar-container">
-            <a href="{{ route('home') }}" class="topbar-brand">
-                <div class="topbar-brand-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <span>BOOKNEST</span>
-            </a>
+            <div style="display: flex; align-items: center; gap: 14px;">
+                @auth
+                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                @endauth
+
+                <a href="{{ route('home') }}" class="topbar-brand">
+                    <div class="topbar-brand-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <span>BOOKNEST</span>
+                </a>
+            </div>
 
             <nav class="topbar-nav" aria-label="Navigasi utama">
                 <a href="{{ route('home') }}" class="topbar-nav-link">Beranda</a>
@@ -753,7 +767,25 @@
     </header>
 
     <!-- MAIN DETAIL CONTENT -->
-    <main class="detail-container">
+    @auth
+        <!-- MOBILE BACKDROP -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+        <!-- PAGE WRAPPER -->
+        <div class="page-wrapper">
+            @if(auth()->user()->role === 'admin')
+                @include('layouts.partials.sidebar_admin')
+            @elseif(auth()->user()->role === 'petugas')
+                @include('layouts.partials.sidebar_petugas')
+            @else
+                @include('layouts.partials.sidebar_anggota')
+            @endif
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="content-area">
+    @endauth
+
+    <div class="detail-container" @auth style="max-width: 100%; margin: 0; padding: 0 0 40px 0;" @endauth>
         <p class="page-eyebrow">BOOKNEST / Perpustakaan umum</p>
         <h1 class="page-title">Detail Buku</h1>
 
@@ -922,7 +954,12 @@
                 </div>
             </section>
         @endif
-    </main>
+    </div>
+
+    @auth
+            </main>
+        </div>
+    @endauth
 
     <!-- DIALOG PANDUAN PEMINJAMAN -->
     <dialog id="borrowDialog" class="borrow-dialog" aria-labelledby="borrowDialogTitle">
@@ -965,7 +1002,7 @@
                     <ol class="dialog-steps">
                         <li>Ajukan peminjaman buku secara online melalui sistem perpustakaan.</li>
                         <li>Ambil buku di {{ $rakLengkap }}, Perpustakaan Pusat dengan kartu anggota.</li>
-                        <li>Buku wajib dikembalikan sebelum batas waktu jatuh tempo (14 hari).</li>
+                        <li>Buku wajib dikembalikan sebelum batas waktu jatuh tempo ({{ \App\Models\Peminjaman::MASA_PINJAM_HARI }} hari).</li>
                     </ol>
                     <div class="dialog-actions">
                         <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
@@ -1039,5 +1076,7 @@
             });
         })();
     </script>
+
+    @include('layouts.partials.sidebar_scripts')
 </body>
 </html>

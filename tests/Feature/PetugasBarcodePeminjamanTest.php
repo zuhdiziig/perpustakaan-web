@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Buku;
 use App\Models\BukuEksemplar;
+use App\Models\DetailPeminjaman;
 use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\User;
@@ -77,7 +78,7 @@ class PetugasBarcodePeminjamanTest extends TestCase
             ->assertSee('Validasi petugas')
             ->assertSee('Konfirmasi Peminjaman')
             ->assertSee('Konfirmasi Barcode')
-            ->assertSee('Periksa data anggota dan buku. Peminjaman berlangsung 14 hari, tanpa biaya.')
+            ->assertSee('Periksa data anggota dan buku. Peminjaman berlangsung '.Peminjaman::MASA_PINJAM_HARI.' hari, tanpa biaya.')
             ->assertSee('id="modalOverlay"', false)
             ->assertSee('id="btnModalBatal"', false)
             ->assertSee('id="btnModalKonfirmasi"', false);
@@ -268,5 +269,139 @@ class PetugasBarcodePeminjamanTest extends TestCase
         $response = $this->get(route('peminjaman.show', $peminjaman->idPeminjaman));
 
         $response->assertRedirect(route('login'));
+    }
+
+    public function test_api_identifikasi_mengenali_tiket_booking_peminjaman(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'kode_booking' => 'BK-20261007-7777',
+            'qr_token' => 'book_test_token_7777',
+            'opsi_pengambilan' => 'siapkan_petugas',
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $this->eksemplar->update(['status' => 'Dibooking']);
+
+        // 1. Scan via kode booking BK-20261007-7777
+        $responseCode = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => 'BK-20261007-7777',
+        ]);
+
+        $responseCode->assertOk()
+            ->assertJson([
+                'success' => true,
+                'type' => 'booking',
+                'data' => [
+                    'idPeminjaman' => $booking->idPeminjaman,
+                    'kodeBooking' => 'BK-20261007-7777',
+                    'status' => 'Booking',
+                    'opsiPengambilan' => 'siapkan_petugas',
+                ],
+            ]);
+
+        // 2. Scan via QR token
+        $responseToken = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => 'book_test_token_7777',
+        ]);
+
+        $responseToken->assertOk()
+            ->assertJson([
+                'success' => true,
+                'type' => 'booking',
+                'data' => [
+                    'idPeminjaman' => $booking->idPeminjaman,
+                    'kodeBooking' => 'BK-20261007-7777',
+                ],
+            ]);
+    }
+
+    public function test_halaman_scan_barcode_mendeteksi_tiket_booking_dan_opsi_serah_terima(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'kode_booking' => 'BK-20261007-8888',
+            'qr_token' => 'book_test_token_8888',
+            'opsi_pengambilan' => 'ambil_mandiri',
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->get(route('barcode.scan', ['kodeBarcode' => 'BK-20261007-8888']));
+
+        $response->assertOk()
+            ->assertSee('Tiket Booking Online')
+            ->assertSee('BK-20261007-8888')
+            ->assertSee('Laut Bercerita')
+            ->assertSee('Rizky Pratama')
+            ->assertSee('Ambil Mandiri dari Rak')
+            ->assertSee('Serah Terima Buku')
+            ->assertSee('Tandai Siap Diambil');
+    }
+
+    public function test_serah_terima_booking_mengubah_status_menjadi_dipinjam(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'kode_booking' => 'BK-20261007-9999',
+            'qr_token' => 'book_test_token_9999',
+            'opsi_pengambilan' => 'siapkan_petugas',
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $this->eksemplar->update(['status' => 'Dibooking']);
+
+        $response = $this->post(route('petugas.booking.serah-terima', $booking->idPeminjaman));
+
+        $response->assertRedirect(route('peminjaman.show', $booking->idPeminjaman));
+
+        $booking->refresh();
+        $detail->refresh();
+        $this->eksemplar->refresh();
+
+        $this->assertSame('Dipinjam', $booking->status);
+        $this->assertSame($this->petugas->id, $booking->idUserPetugas);
+        $this->assertSame('Dipinjam', $detail->statusBuku);
+        $this->assertSame('Dipinjam', $this->eksemplar->status);
     }
 }

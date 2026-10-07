@@ -45,8 +45,69 @@
         </div>
     @endif
 
+    {{-- Tampilan Rincian Data Booking Jika Ditemukan --}}
+    @if ($booking)
+        <div class="result-box" style="border: 2px solid #0f766e; background: #f0fdf4; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px;">
+                <div>
+                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #ccfbf1; color: #0f766e; padding: 3px 8px; border-radius: 6px;">
+                        🎫 Tiket Booking Online
+                    </span>
+                    <h3 style="margin: 6px 0 0 0; color: #0f172a; font-size: 18px;">{{ $booking->kode_booking }}</h3>
+                </div>
+                <span class="badge" style="background: {{ $booking->status === 'Siap Diambil' ? '#dcfce7' : '#fef3c7' }}; color: {{ $booking->status === 'Siap Diambil' ? '#166534' : '#b45309' }}; font-size: 13px; padding: 4px 10px;">
+                    {{ $booking->status }}
+                </span>
+            </div>
+
+            <div class="row">
+                <span class="label">Anggota Pemesan</span>
+                <span><strong>{{ $booking->member?->name }}</strong> ({{ $booking->member?->kode_anggota }})</span>
+            </div>
+            <div class="row">
+                <span class="label">Judul Buku</span>
+                <strong>{{ $buku?->judul ?? 'Buku Perpustakaan' }}</strong>
+            </div>
+            <div class="row">
+                <span class="label">Lokasi Rak Fisik</span>
+                <span style="color: #0f766e; font-weight: 700;">📍 {{ $buku?->rak ?? 'Rak Utama' }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Metode Pengambilan</span>
+                <span>{{ $booking->opsi_pengambilan === 'siapkan_petugas' ? '📦 Disiapkan Petugas di Meja' : '🚶 Ambil Mandiri dari Rak' }}</span>
+            </div>
+            <div class="row">
+                <span class="label">Batas Waktu Pengambilan</span>
+                <span>{{ $booking->batasAmbil ? \Carbon\Carbon::parse($booking->batasAmbil)->translatedFormat('d M Y, H:i') : '-' }}</span>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; flex-direction: column; gap: 8px;">
+                <form method="POST" action="{{ route('petugas.booking.serah-terima', $booking->idPeminjaman) }}" style="margin: 0;" onsubmit="return confirm('Konfirmasi serah terima buku kepada {{ $booking->member?->name }}? Transaksi akan beralih menjadi Dipinjam (30 hari).');">
+                    @csrf
+                    <button type="submit" style="width: 100%; padding: 11px; background: #0f766e; color: white; border: none; border-radius: 6px; font-weight: 700; font-size: 14px; cursor: pointer;">
+                        🤝 Serah Terima Buku (Konfirmasi Selesai)
+                    </button>
+                </form>
+
+                <div style="display: flex; gap: 8px;">
+                    @if($booking->status === 'Booking')
+                        <form method="POST" action="{{ route('petugas.booking.siapkan', $booking->idPeminjaman) }}" style="flex: 1; margin: 0;">
+                            @csrf
+                            <button type="submit" style="width: 100%; padding: 9px; background: #fef3c7; color: #92400e; border: 1px solid #fde68a; border-radius: 6px; font-weight: 700; font-size: 13px; cursor: pointer;">
+                                📦 Tandai Siap Diambil
+                            </button>
+                        </form>
+                    @endif
+                    <a href="{{ route('peminjaman.booking.tiket', $booking->idPeminjaman) }}" target="_blank" style="flex: 1; text-align: center; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 9px; border-radius: 6px; text-decoration: none; font-size: 13px; font-weight: 700;">
+                        🔍 Buka Tiket QR
+                    </a>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- Tampilan Rincian Data Buku Jika Ditemukan --}}
-    @if ($buku)
+    @if ($buku && ! $booking)
         <div class="result-box">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <h3 style="margin: 0; color: #0f172a;">{{ $buku->judul }}</h3>

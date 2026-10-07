@@ -427,6 +427,76 @@
         border-color: #cbd5e1;
     }
 
+    /* --- OPSI PENGAMBILAN CARDS --- */
+    .option-section-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-heading);
+        margin: 16px 0 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .option-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 18px;
+    }
+
+    .option-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 13px 14px;
+        border: 2px solid var(--border-color);
+        border-radius: 12px;
+        background: #ffffff;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .option-card:hover {
+        border-color: var(--brand-primary);
+        background: #f8faf9;
+    }
+
+    .option-card:has(input[type="radio"]:checked) {
+        border-color: var(--brand-primary);
+        background: #f0fdf9;
+        box-shadow: 0 2px 8px rgba(35, 92, 84, 0.08);
+    }
+
+    .option-radio {
+        margin-top: 3px;
+        accent-color: var(--brand-primary);
+        width: 17px;
+        height: 17px;
+        cursor: pointer;
+    }
+
+    .option-content {
+        flex: 1;
+    }
+
+    .option-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: var(--text-heading);
+        margin-bottom: 3px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .option-desc {
+        font-size: 12px;
+        color: var(--text-muted);
+        line-height: 1.45;
+        margin: 0;
+    }
+
     /* --- RESPONSIVE BREAKPOINTS --- */
     @media (max-width: 992px) {
         .loan-grid {
@@ -719,8 +789,18 @@
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-key">Durasi / Jumlah</span>
-                    <span class="detail-val">{{ $durasiHari }} hari / 1 buku</span>
+                    <span class="detail-key">Lokasi Rak</span>
+                    <span class="detail-val highlight">{{ $buku->rak ?? 'Perpustakaan Pusat' }}</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-key">Batas Ambil Booking</span>
+                    <span class="detail-val">{{ $estimasiBatasAmbil->translatedFormat('d M Y, H:i') }} WIB ({{ $batasAmbilJam }} Jam)</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-key">Durasi Masa Pinjam</span>
+                    <span class="detail-val">{{ $durasiHari }} hari (dihitung sejak serah terima)</span>
                 </div>
 
                 <div class="detail-row">
@@ -740,51 +820,101 @@
                 </div>
             </div>
 
-            {{-- CARD INFORMASI / NOTICE --}}
-            <div class="notice-card">
-                <div class="notice-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            {{-- FORM BOOKING & PILIHAN PENGAMBILAN --}}
+            @php
+                $bisaMeminjam = $isTersedia && ! $kuotaHabis && ! $sedangPinjamBukuIni && $user->status === 'aktif';
+            @endphp
+
+            <form method="POST" action="{{ route('peminjaman.ajukan', $buku->idBuku) }}">
+                @csrf
+
+                <div class="option-section-title">
+                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10"></circle>
-                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        <polyline points="12 6 12 12 16 14"></polyline>
                     </svg>
+                    Pilih Metode Pengambilan Buku
                 </div>
-                <div>
-                    <div class="notice-title">Informasi Peminjaman</div>
-                    <p class="notice-desc">
-                        Pastikan data peminjaman sudah sesuai sebelum melanjutkan. Setelah peminjaman diajukan, silakan ambil buku fisik di meja layanan sirkulasi perpustakaan dengan menunjukkan kartu anggota Anda.
-                    </p>
+
+                <div class="option-cards">
+                    {{-- Opsi 1: Disiapkan Petugas --}}
+                    <label class="option-card">
+                        <input type="radio" name="opsi_pengambilan" value="siapkan_petugas" class="option-radio" checked>
+                        <div class="option-content">
+                            <div class="option-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                                </svg>
+                                Disiapkan oleh Petugas (Rekomendasi)
+                            </div>
+                            <p class="option-desc">
+                                Petugas akan menyiapkan buku di meja sirkulasi. Anda cukup datang, tunjukkan QR booking, dan langsung terima buku.
+                            </p>
+                        </div>
+                    </label>
+
+                    {{-- Opsi 2: Ambil Mandiri di Rak --}}
+                    <label class="option-card">
+                        <input type="radio" name="opsi_pengambilan" value="ambil_mandiri" class="option-radio">
+                        <div class="option-content">
+                            <div class="option-title">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                                Ambil Mandiri di Rak
+                            </div>
+                            <p class="option-desc">
+                                Anda mencari sendiri buku di {{ $buku->rak ?? 'rak koleksi' }} saat di perpustakaan, lalu membawanya ke meja layanan untuk scan serah terima.
+                            </p>
+                        </div>
+                    </label>
                 </div>
-            </div>
 
-            {{-- TOMBOL AKSI --}}
-            <div class="action-group">
-                @php
-                    $bisaMeminjam = $isTersedia && ! $kuotaHabis && ! $sedangPinjamBukuIni && $user->status === 'aktif';
-                @endphp
+                {{-- CARD INFORMASI / NOTICE --}}
+                <div class="notice-card">
+                    <div class="notice-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="16" x2="12" y2="12"></line>
+                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="notice-title">Petunjuk Tiket QR Code</div>
+                        <p class="notice-desc">
+                            Setelah klik booking, sistem akan membuatkan <strong>QR Code Tiket Booking</strong> unik. Tunjukkan tiket tersebut ke petugas saat Anda tiba di perpustakaan.
+                        </p>
+                    </div>
+                </div>
 
-                <form method="POST" action="{{ route('peminjaman.ajukan', $buku->idBuku) }}">
-                    @csrf
+                {{-- TOMBOL AKSI --}}
+                <div class="action-group">
                     <button
                         type="submit"
                         class="btn-submit-loan"
                         @disabled(! $bisaMeminjam)
                     >
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="20 6 9 17 4 12"></polyline>
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
-                        Konfirmasi Peminjaman
+                        Booking Buku & Dapatkan QR Code
                     </button>
-                </form>
 
-                <a href="{{ route('katalog.show', $buku->idBuku) }}" class="btn-back-detail">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="19" y1="12" x2="5" y2="12"></line>
-                        <polyline points="12 19 5 12 12 5"></polyline>
-                    </svg>
-                    Kembali ke Detail Buku
-                </a>
-            </div>
+                    <a href="{{ route('katalog.show', $buku->idBuku) }}" class="btn-back-detail">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        Kembali ke Detail Buku
+                    </a>
+                </div>
+            </form>
         </div>
 
     </div>

@@ -358,6 +358,129 @@ class QrController extends Controller
             ], 422);
         }
 
+        // 0. Cek KODE BOOKING / QR TIKET BOOKING
+        $bookingPeminjaman = null;
+        if (str_starts_with($raw, 'book_') || str_starts_with(strtoupper($raw), 'BK-')) {
+            $bookingPeminjaman = Peminjaman::with(['member', 'petugas', 'details.buku.barcode', 'details.eksemplar'])
+                ->where('qr_token', $raw)
+                ->orWhere('kode_booking', $raw)
+                ->orWhere('kode_booking', strtoupper($raw))
+                ->first();
+        }
+
+        if ($bookingPeminjaman) {
+            $firstDetail = $bookingPeminjaman->details->first();
+            $buku = $firstDetail?->buku;
+            $eksemplar = $firstDetail?->eksemplar;
+            $kodeBuku = $eksemplar?->kode_barcode ?? $buku?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku?->idBuku ?? 0);
+
+            return response()->json([
+                'success' => true,
+                'type' => 'booking',
+                'data' => [
+                    'idPeminjaman' => $bookingPeminjaman->idPeminjaman,
+                    'kodeBooking' => $bookingPeminjaman->kode_booking,
+                    'opsiPengambilan' => $bookingPeminjaman->opsi_pengambilan,
+                    'status' => $bookingPeminjaman->status,
+                    'member' => [
+                        'id' => $bookingPeminjaman->member?->id,
+                        'name' => $bookingPeminjaman->member?->name ?? 'Anggota',
+                        'kodeAnggota' => $bookingPeminjaman->member?->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), $bookingPeminjaman->idUserMember),
+                        'email' => $bookingPeminjaman->member?->email,
+                        'status' => $bookingPeminjaman->member?->status ?? 'aktif',
+                    ],
+                    'buku' => [
+                        'idBuku' => $buku?->idBuku,
+                        'idEksemplar' => $eksemplar?->idEksemplar,
+                        'judul' => $buku?->judul ?? 'Buku',
+                        'rak' => $buku?->rak ?? '-',
+                        'kodeBuku' => $kodeBuku,
+                        'kondisi' => $eksemplar?->kondisi ?? 'Baik',
+                        'statusEksemplar' => $eksemplar?->status ?? 'Dibooking',
+                        'nomor_eksemplar' => $eksemplar?->nomor_eksemplar,
+                    ],
+                    'batasAmbil' => $bookingPeminjaman->batasAmbil ? Carbon::parse($bookingPeminjaman->batasAmbil)->translatedFormat('d M Y, H:i') : '-',
+                    'validasiPesan' => "Tiket Booking {$bookingPeminjaman->kode_booking} teridentifikasi. Status: {$bookingPeminjaman->status}. Anggota: {$bookingPeminjaman->member?->name}.",
+                ],
+                'message' => "Tiket Booking '{$bookingPeminjaman->kode_booking}' berhasil diidentifikasi.",
+            ]);
+        }
+
+        // 0.5. Cek KODE TIKET PENGEMBALIAN / QR PENGEMBALIAN (ret_... atau KB-...)
+        $detailPengembalian = null;
+        if (str_starts_with($raw, 'ret_') || str_starts_with(strtoupper($raw), 'KB-')) {
+            $detailPengembalian = DetailPeminjaman::with([
+                'peminjaman.member',
+                'buku.kategori',
+                'buku.barcode',
+                'eksemplar',
+            ])
+                ->where('qr_kembali', $raw)
+                ->orWhere('kode_kembali', $raw)
+                ->orWhere('kode_kembali', strtoupper($raw))
+                ->first();
+        }
+
+        if ($detailPengembalian) {
+            $peminjaman = $detailPengembalian->peminjaman;
+            $member = $peminjaman?->member;
+            $buku = $detailPengembalian->buku;
+            $eksemplar = $detailPengembalian->eksemplar;
+            $kodeBuku = $eksemplar?->kode_barcode ?? $buku?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku?->idBuku ?? 0);
+
+            // Hitung keterlambatan & estimasi denda
+            $today = Carbon::now();
+            $batasKembali = Carbon::parse($peminjaman->batasKembali);
+            $isOverdue = $today->greaterThan($batasKembali);
+            $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+            $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+            $faktorMinggu = min($mingguTerlambat, 10);
+            $persenDenda = $faktorMinggu * 0.10;
+            $hargaBuku = (float) ($buku?->harga ?? 0);
+            $estDenda = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+
+            return response()->json([
+                'success' => true,
+                'type' => 'pengembalian',
+                'data' => [
+                    'idDetail' => $detailPengembalian->id,
+                    'idPeminjaman' => $peminjaman?->idPeminjaman,
+                    'kodeKembali' => $detailPengembalian->kode_kembali,
+                    'statusBuku' => $detailPengembalian->statusBuku,
+                    'kondisiLaporan' => $detailPengembalian->kondisi_laporan ?? 'Baik',
+                    'waktuPengajuan' => $detailPengembalian->waktu_pengajuan_kembali ? Carbon::parse($detailPengembalian->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-',
+                    'member' => [
+                        'id' => $member?->id,
+                        'name' => $member?->name ?? 'Anggota',
+                        'kodeAnggota' => $member?->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), $peminjaman?->idUserMember ?? 0),
+                        'email' => $member?->email,
+                        'noTelepon' => $member?->noTelepon ?? '-',
+                        'status' => $member?->status ?? 'aktif',
+                    ],
+                    'buku' => [
+                        'idBuku' => $buku?->idBuku,
+                        'idEksemplar' => $eksemplar?->idEksemplar,
+                        'nomor_eksemplar' => $eksemplar?->nomor_eksemplar,
+                        'judul' => $buku?->judul ?? 'Buku',
+                        'kategori' => $buku?->kategori?->namaKategori ?? '-',
+                        'kodeBuku' => $kodeBuku,
+                        'rak' => $buku?->rak ?? '-',
+                        'kondisi' => $eksemplar?->kondisi ?? 'Baik',
+                        'harga' => $hargaBuku,
+                    ],
+                    'keterlambatan' => [
+                        'isOverdue' => $isOverdue,
+                        'hariTerlambat' => $hariTerlambat,
+                        'mingguTerlambat' => $mingguTerlambat,
+                        'estDenda' => $estDenda,
+                        'batasKembali' => $batasKembali->translatedFormat('d M Y'),
+                    ],
+                    'validasiPesan' => "Tiket Pengembalian {$detailPengembalian->kode_kembali} teridentifikasi. Anggota: {$member?->name}. Buku: {$buku?->judul}.",
+                ],
+                'message' => "Tiket Pengembalian '{$detailPengembalian->kode_kembali}' berhasil diidentifikasi.",
+            ]);
+        }
+
         // 1. Cek KODE TRANSAKSI PEMINJAMAN (PJ-Ymd-ID, #TRX-ID, TRX-ID, atau numeric ID)
         $trxId = null;
         if (preg_match('/^PJ-\d{8}-(\d+)$/i', $raw, $m)) {
@@ -403,8 +526,8 @@ class QrController extends Controller
                                 'qr_token' => $eksemplarSample->qr_token,
                             ],
                             'tanggalPinjam' => '03 Okt 2026',
-                            'batasKembali' => '17 Okt 2026',
-                            'durasiJumlah' => '14 hari / 1 buku',
+                            'batasKembali' => '02 Nov 2026',
+                            'durasiJumlah' => '30 hari / 1 buku',
                             'status' => 'Dipinjam',
                             'validasiPesan' => 'Anggota aktif. Kode buku BK-00417 sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.',
                         ],
@@ -547,6 +670,75 @@ class QrController extends Controller
         if ($eksemplar) {
             $buku = $eksemplar->buku;
             $kodeBuku = $eksemplar->kode_barcode ?? $buku->barcode->kodeBarcode ?? sprintf('BK-%05d', $buku->idBuku);
+
+            // Jika dalam konteks pengembalian, periksa apakah eksemplar ini sedang dalam peminjaman aktif
+            if ($request->input('context') === 'pengembalian') {
+                $activeDetail = DetailPeminjaman::with([
+                    'peminjaman.member',
+                    'buku.kategori',
+                    'buku.barcode',
+                    'eksemplar',
+                ])
+                    ->where('idEksemplar', $eksemplar->idEksemplar)
+                    ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                    ->first();
+
+                if ($activeDetail) {
+                    $peminjaman = $activeDetail->peminjaman;
+                    $member = $peminjaman?->member;
+
+                    $today = Carbon::now();
+                    $batasKembali = Carbon::parse($peminjaman->batasKembali);
+                    $isOverdue = $today->greaterThan($batasKembali);
+                    $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+                    $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                    $faktorMinggu = min($mingguTerlambat, 10);
+                    $persenDenda = $faktorMinggu * 0.10;
+                    $hargaBuku = (float) ($buku?->harga ?? 0);
+                    $estDenda = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+
+                    return response()->json([
+                        'success' => true,
+                        'type' => 'pengembalian',
+                        'data' => [
+                            'idDetail' => $activeDetail->id,
+                            'idPeminjaman' => $peminjaman?->idPeminjaman,
+                            'kodeKembali' => $activeDetail->kode_kembali ?? ('KB-'.Carbon::now()->format('Ymd').'-'.str_pad($activeDetail->id, 4, '0', STR_PAD_LEFT)),
+                            'statusBuku' => $activeDetail->statusBuku,
+                            'kondisiLaporan' => $activeDetail->kondisi_laporan ?? 'Baik',
+                            'waktuPengajuan' => $activeDetail->waktu_pengajuan_kembali ? Carbon::parse($activeDetail->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-',
+                            'member' => [
+                                'id' => $member?->id,
+                                'name' => $member?->name ?? 'Anggota',
+                                'kodeAnggota' => $member?->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), $peminjaman?->idUserMember ?? 0),
+                                'email' => $member?->email,
+                                'noTelepon' => $member?->noTelepon ?? '-',
+                                'status' => $member?->status ?? 'aktif',
+                            ],
+                            'buku' => [
+                                'idBuku' => $buku?->idBuku,
+                                'idEksemplar' => $eksemplar?->idEksemplar,
+                                'nomor_eksemplar' => $eksemplar?->nomor_eksemplar,
+                                'judul' => $buku?->judul ?? 'Buku',
+                                'kategori' => $buku?->kategori?->namaKategori ?? '-',
+                                'kodeBuku' => $kodeBuku,
+                                'rak' => $buku?->rak ?? '-',
+                                'kondisi' => $eksemplar?->kondisi ?? 'Baik',
+                                'harga' => $hargaBuku,
+                            ],
+                            'keterlambatan' => [
+                                'isOverdue' => $isOverdue,
+                                'hariTerlambat' => $hariTerlambat,
+                                'mingguTerlambat' => $mingguTerlambat,
+                                'estDenda' => $estDenda,
+                                'batasKembali' => $batasKembali->translatedFormat('d M Y'),
+                            ],
+                            'validasiPesan' => "Buku '{$buku->judul}' teridentifikasi dalam peminjaman aktif anggota {$member?->name}.",
+                        ],
+                        'message' => "Buku '{$buku->judul}' teridentifikasi untuk pengembalian.",
+                    ]);
+                }
+            }
 
             return response()->json([
                 'success' => true,

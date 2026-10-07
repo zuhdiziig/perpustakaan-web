@@ -188,8 +188,27 @@ class DashboardController extends Controller
     {
         $kataKunci = trim((string) $request->query('q', ''));
 
+        // 0. Antrean Booking Aktif (Booking & Siap Diambil)
+        $antreanBooking = Peminjaman::query()
+            ->whereIn('status', ['Booking', 'Siap Diambil'])
+            ->with([
+                'member:id,name,noTelepon,email,created_at',
+                'details.buku:idBuku,judul,penulis,rak,cover',
+                'details.eksemplar:idEksemplar,nomor_eksemplar,kode_barcode,status',
+            ])
+            ->latest('idPeminjaman')
+            ->get();
+
+        $totalBookingMenunggu = Peminjaman::where('status', 'Booking')->count();
+        $totalBookingSiap = Peminjaman::where('status', 'Siap Diambil')->count();
+        $totalBookingPerluDisiapkan = Peminjaman::where('status', 'Booking')
+            ->where('opsi_pengambilan', 'siapkan_petugas')
+            ->count();
+
         // 1. Statistik sirkulasi
-        $peminjamanHariIni = Peminjaman::whereDate('tanggalPinjam', today())->count();
+        $peminjamanHariIni = Peminjaman::whereDate('tanggalPinjam', today())
+            ->where('status', 'Dipinjam')
+            ->count();
         $pengembalianHariIni = Pengembalian::whereDate('tanggalKembali', today())->count();
 
         // Pengembalian tepat waktu (tanpa denda keterlambatan)
@@ -252,10 +271,16 @@ class DashboardController extends Controller
                 'peminjamanAktif' => $totalPeminjamanAktif,
                 'jatuhTempoHariIni' => $jatuhTempoHariIni,
                 'terlambat' => $totalTerlambat,
+                'bookingMenunggu' => $totalBookingMenunggu,
+                'bookingSiap' => $totalBookingSiap,
+                'bookingPerluDisiapkan' => $totalBookingPerluDisiapkan,
+                'totalBookingAktif' => $totalBookingMenunggu + $totalBookingSiap,
             ],
             'kataKunci' => $kataKunci,
             'totalTransaksiAktif' => $totalTransaksiDitemukan,
             'transaksi' => $transaksiList,
+            'antreanBooking' => $antreanBooking,
+            'totalBookingPerluDisiapkan' => $totalBookingPerluDisiapkan,
             'aktivitasTerbaru' => $aktivitasTerbaru,
         ]);
     }

@@ -105,37 +105,7 @@ Route::middleware('auth')->group(function () {
 
     /*
     |--------------------------------------------------------------------------
-    | LAYANAN MANDIRI MEMBER
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/riwayat', [RiwayatController::class, 'index'])
-        ->name('riwayat.index');
-
-    Route::get('/peminjaman/konfirmasi/{id}', [PeminjamanController::class, 'konfirmasiMember'])
-        ->name('peminjaman.konfirmasi');
-
-    Route::post('/peminjaman/ajukan/{id}', [PeminjamanController::class, 'ajukanMember'])
-        ->name('peminjaman.ajukan');
-
-    Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
-        ->name('denda.saya');
-
-    Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
-        ->name('bayar.qr');
-
-    Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
-        ->name('bayar.proses_qr');
-
-    Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
-        ->name('bayar.sukses');
-
-    Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
-        ->name('pembayaran.nota');
-
-    /*
-    |--------------------------------------------------------------------------
-    | PROFILE MEMBER
+    | PROFIL PENGGUNA (Semua Role Terautentikasi)
     |--------------------------------------------------------------------------
     */
 
@@ -163,132 +133,169 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::get('/kartu-saya', function () {
-        return redirect()->route('member.cetak-qr', auth()->id());
-    })->name('member.kartu-saya');
-
-    /*
-    |--------------------------------------------------------------------------
-    | MODUL OPERASIONAL PETUGAS & ADMIN
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource('buku', BukuController::class);
-
-    Route::resource('kategori', KategoriController::class)
-        ->except(['create', 'show']);
-
-    Route::resource('petugas', PetugasController::class)
-        ->except(['show']);
-
-    Route::resource('member', MemberController::class)
-        ->except(['show', 'destroy']);
-
-    Route::patch('/member/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
-        ->name('member.toggle-status');
-
-    /*
-    |--------------------------------------------------------------------------
-    | PEMINJAMAN
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource('peminjaman', PeminjamanController::class)
-        ->only(['index', 'create', 'store', 'show']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | PENGEMBALIAN
-    |--------------------------------------------------------------------------
-    */
-
-    Route::resource('pengembalian', PengembalianController::class)
-        ->only(['index', 'create', 'store', 'show']);
-
-    /*
-    |--------------------------------------------------------------------------
-    | SCAN BARCODE
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/scan-barcode', [BarcodeController::class, 'scan'])
-        ->name('barcode.scan');
-
-    /*
-    |--------------------------------------------------------------------------
-    | KONDISI BUKU
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
-        ->name('kondisi.index');
-
-    Route::get('/kondisi-buku/{id}/edit', [KondisiBukuController::class, 'edit'])
-        ->name('kondisi.edit');
-
-    Route::put('/kondisi-buku/{id}', [KondisiBukuController::class, 'update'])
-        ->name('kondisi.update');
-
-    /*
-    |--------------------------------------------------------------------------
-    | DENDA
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/denda', [DendaController::class, 'index'])
-        ->name('denda.index');
-
-    Route::get('/denda/hitung/{idPengembalian}', [DendaController::class, 'hitung'])
-        ->name('denda.hitung');
-
-    Route::post('/denda', [DendaController::class, 'store'])
-        ->name('denda.store');
-
-    Route::get('/denda/{id}', [DendaController::class, 'show'])
-        ->name('denda.show');
-
-    /*
-    |--------------------------------------------------------------------------
-    | PEMBAYARAN
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/pembayaran', [PembayaranController::class, 'index'])
-        ->name('pembayaran.index');
-
-    Route::post('/pembayaran/{id}/verifikasi', [PembayaranController::class, 'verifikasi'])
-        ->name('pembayaran.verifikasi');
-
-    /*
-    |--------------------------------------------------------------------------
-    | LAPORAN
-    |--------------------------------------------------------------------------
-    */
-
-    Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('laporan.index');
-
-    /*
-    |--------------------------------------------------------------------------
-    | QR CODE
-    |--------------------------------------------------------------------------
-    */
-
     Route::get('/member/{id}/cetak-qr', [QrController::class, 'cetakMember'])
         ->name('member.cetak-qr');
 
-    Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])
-        ->name('buku.cetak-qr');
+    /*
+    |--------------------------------------------------------------------------
+    | LAYANAN MANDIRI MEMBER (Role: Member)
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('role:member')->group(function () {
+        Route::get('/riwayat', [RiwayatController::class, 'index'])
+            ->name('riwayat.index');
 
-    Route::post('/api/scan/member', [QrController::class, 'apiScanMember'])
-        ->name('api.scan.member');
+        Route::get('/peminjaman/konfirmasi/{id}', [PeminjamanController::class, 'konfirmasiMember'])
+            ->name('peminjaman.konfirmasi');
 
-    Route::post('/api/scan/buku', [QrController::class, 'apiScanBuku'])
-        ->name('api.scan.buku');
+        Route::post('/peminjaman/ajukan/{id}', [PeminjamanController::class, 'ajukanMember'])
+            ->name('peminjaman.ajukan');
 
-    Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
-        ->name('api.scan.pengembalian.member');
+        Route::get('/booking/{id}/tiket', [PeminjamanController::class, 'tiketBooking'])
+            ->name('peminjaman.booking.tiket');
 
-    Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
-        ->name('api.scan.identifikasi');
+        Route::post('/booking/{id}/batal', [PeminjamanController::class, 'batalBooking'])
+            ->name('peminjaman.booking.batal');
+
+        Route::get('/pengembalian-saya', [PengembalianController::class, 'memberIndex'])
+            ->name('pengembalian.member');
+
+        Route::post('/pengembalian-saya/{idDetail}/proses', [PengembalianController::class, 'memberStore'])
+            ->name('pengembalian.member.store');
+
+        Route::get('/pengembalian-saya/{idDetail}/tiket', [PengembalianController::class, 'memberTiket'])
+            ->name('pengembalian.member.tiket');
+
+        Route::post('/pengembalian-saya/{idDetail}/batal', [PengembalianController::class, 'memberBatal'])
+            ->name('pengembalian.member.batal');
+
+        Route::get('/pengembalian-saya/{idPengembalian}/bukti', [PengembalianController::class, 'memberBukti'])
+            ->name('pengembalian.member.bukti');
+
+        Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
+            ->name('denda.saya');
+
+        Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
+            ->name('bayar.qr');
+
+        Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
+            ->name('bayar.proses_qr');
+
+        Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
+            ->name('bayar.sukses');
+
+        Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
+            ->name('pembayaran.nota');
+
+        Route::get('/kartu-saya', function () {
+            return redirect()->route('member.cetak-qr', auth()->id());
+        })->name('member.kartu-saya');
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODUL KHUSUS ADMIN (Role: Admin)
+    |--------------------------------------------------------------------------
+    | Pengawasan sistem, kebijakan, master data kategori & buku, serta laporan eksekutif.
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('petugas', PetugasController::class)
+            ->except(['show']);
+
+        Route::resource('kategori', KategoriController::class)
+            ->except(['create', 'show']);
+
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('laporan.index');
+
+        // Mutasi Master Data Buku (Tambah, Edit, Hapus)
+        Route::resource('buku', BukuController::class)
+            ->except(['index', 'show']);
+    });
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODUL OPERASIONAL STAF SIRKULASI (Role: Petugas & Admin)
+    |--------------------------------------------------------------------------
+    | Pelayanan peminjaman/pengembalian meja sirkulasi, scan, denda, dan data member.
+    |--------------------------------------------------------------------------
+    */
+    Route::middleware('role:admin,petugas')->group(function () {
+        // Akses daftar & detail buku untuk staf
+        Route::get('/buku', [BukuController::class, 'index'])
+            ->name('buku.index');
+
+        Route::get('/buku/{buku}', [BukuController::class, 'show'])
+            ->name('buku.show');
+
+        Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])
+            ->name('buku.cetak-qr');
+
+        // Kelola Data Member
+        Route::resource('member', MemberController::class)
+            ->except(['show', 'destroy']);
+
+        Route::patch('/member/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
+            ->name('member.toggle-status');
+
+        // Sirkulasi Peminjaman & Pengembalian
+        Route::resource('peminjaman', PeminjamanController::class)
+            ->only(['index', 'create', 'store', 'show']);
+
+        // Aksi Pengelolaan Booking Sirkulasi
+        Route::post('/peminjaman/booking/{id}/siapkan', [PeminjamanController::class, 'siapkanBooking'])
+            ->name('petugas.booking.siapkan');
+
+        Route::post('/peminjaman/booking/{id}/serah-terima', [PeminjamanController::class, 'serahTerimaBooking'])
+            ->name('petugas.booking.serah-terima');
+
+        Route::resource('pengembalian', PengembalianController::class)
+            ->only(['index', 'create', 'store', 'show']);
+
+        // Barcode & Kondisi Buku
+        Route::get('/scan-barcode', [BarcodeController::class, 'scan'])
+            ->name('barcode.scan');
+
+        Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
+            ->name('kondisi.index');
+
+        Route::get('/kondisi-buku/{id}/edit', [KondisiBukuController::class, 'edit'])
+            ->name('kondisi.edit');
+
+        Route::put('/kondisi-buku/{id}', [KondisiBukuController::class, 'update'])
+            ->name('kondisi.update');
+
+        // Kelola Denda & Pembayaran
+        Route::get('/denda', [DendaController::class, 'index'])
+            ->name('denda.index');
+
+        Route::get('/denda/hitung/{idPengembalian}', [DendaController::class, 'hitung'])
+            ->name('denda.hitung');
+
+        Route::post('/denda', [DendaController::class, 'store'])
+            ->name('denda.store');
+
+        Route::get('/denda/{id}', [DendaController::class, 'show'])
+            ->name('denda.show');
+
+        Route::get('/pembayaran', [PembayaranController::class, 'index'])
+            ->name('pembayaran.index');
+
+        Route::post('/pembayaran/{id}/verifikasi', [PembayaranController::class, 'verifikasi'])
+            ->name('pembayaran.verifikasi');
+
+        // API Scan Sirkulasi
+        Route::post('/api/scan/member', [QrController::class, 'apiScanMember'])
+            ->name('api.scan.member');
+
+        Route::post('/api/scan/buku', [QrController::class, 'apiScanBuku'])
+            ->name('api.scan.buku');
+
+        Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
+            ->name('api.scan.pengembalian.member');
+
+        Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
+            ->name('api.scan.identifikasi');
+    });
 });

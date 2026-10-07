@@ -369,7 +369,7 @@
 
                     <div class="rincian-row">
                         <span class="rincian-label">Durasi / jumlah</span>
-                        <span class="rincian-value">14 hari / 1 buku</span>
+                        <span class="rincian-value">{{ \App\Models\Peminjaman::MASA_PINJAM_HARI }} hari / {{ $peminjaman->totalBuku ?? 1 }} buku</span>
                     </div>
                 </div>
             </div>

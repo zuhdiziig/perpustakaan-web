@@ -432,6 +432,29 @@
         color: #ffffff;
     }
 
+    .btn-kembalikan-shortcut {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 12px;
+        border-radius: 8px;
+        background: #0f766e;
+        color: #ffffff;
+        font-size: 11.5px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        box-shadow: 0 1px 2px rgba(15, 118, 110, 0.2);
+        margin-top: 4px;
+    }
+
+    .btn-kembalikan-shortcut:hover {
+        background: #115e59;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 6px rgba(15, 118, 110, 0.25);
+    }
+
     .pagination-footer {
         padding: 16px 24px;
         border-top: 1px solid #f1f5f9;
@@ -546,6 +569,11 @@
         <a href="{{ route('riwayat.index') }}" class="filter-tab-btn {{ is_null($statusDipilih) ? 'active' : '' }}">
             <span>Semua Peminjaman</span>
             <span class="filter-badge-count">{{ $totalPinjam ?? 0 }}</span>
+        </a>
+
+        <a href="{{ route('riwayat.index', ['status' => 'Booking']) }}" class="filter-tab-btn {{ $statusDipilih === 'Booking' ? 'active' : '' }}">
+            <span>Booking Menunggu Ambil</span>
+            <span class="filter-badge-count">{{ $totalBooking ?? 0 }}</span>
         </a>
 
         <a href="{{ route('riwayat.index', ['status' => 'Dipinjam']) }}" class="filter-tab-btn {{ $statusDipilih === 'Dipinjam' ? 'active' : '' }}">
@@ -672,7 +700,17 @@
 
                                 {{-- STATUS --}}
                                 <td>
-                                    @if ($item->status === 'Dipinjam')
+                                    @if ($item->status === 'Booking')
+                                        <span class="badge-status" style="background: #fef3c7; color: #92400e; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #d97706;"></span>
+                                            Menunggu Ambil
+                                        </span>
+                                    @elseif ($item->status === 'Siap Diambil')
+                                        <span class="badge-status" style="background: #dbeafe; color: #1e40af; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px; display: inline-flex; align-items: center; gap: 6px;">
+                                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #2563eb;"></span>
+                                            Siap di Meja Layanan
+                                        </span>
+                                    @elseif ($item->status === 'Dipinjam')
                                         @if ($isOverdue)
                                             <span class="badge-status overdue">
                                                 <span style="width: 6px; height: 6px; border-radius: 50%; background: #be123c;"></span>
@@ -689,6 +727,10 @@
                                             <span style="width: 6px; height: 6px; border-radius: 50%; background: #15803d;"></span>
                                             Selesai
                                         </span>
+                                    @elseif ($item->status === 'Dibatalkan')
+                                        <span class="badge-status" style="background: #f1f5f9; color: #64748b; padding: 4px 10px; border-radius: 9999px; font-weight: 700; font-size: 11.5px;">
+                                            Dibatalkan
+                                        </span>
                                     @else
                                         <span class="badge-status" style="background: #f1f5f9; color: #475569;">
                                             {{ $item->status }}
@@ -698,7 +740,22 @@
 
                                 {{-- RETURN & FINE DETAILS --}}
                                 <td>
-                                    @if ($item->pengembalians->isNotEmpty())
+                                    @if (in_array($item->status, ['Booking', 'Siap Diambil']))
+                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                            <a href="{{ route('peminjaman.booking.tiket', $item->idPeminjaman) }}" class="action-pay-qr" style="background: #0f766e; text-decoration: none;">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                                </svg>
+                                                <span>Buka Tiket QR</span>
+                                            </a>
+                                            <span style="font-size: 11px; color: #64748b;">
+                                                {{ $item->opsi_pengambilan === 'siapkan_petugas' ? 'Disiapkan Petugas' : 'Ambil di Rak' }}
+                                            </span>
+                                        </div>
+                                    @elseif ($item->pengembalians->isNotEmpty())
                                         <div style="display: flex; flex-direction: column; gap: 4px;">
                                             @foreach ($item->pengembalians as $ret)
                                                 <span style="font-weight: 700; font-size: 12.5px; color: var(--text-heading);">
@@ -728,12 +785,33 @@
                                                         Kondisi: {{ $ret->kondisiBuku ?? 'Baik' }}
                                                     </span>
                                                 @endif
+
+                                                <a href="{{ route('pengembalian.member.bukti', $ret->idPengembalian) }}" style="font-size: 11.5px; color: #0f766e; font-weight: 700; text-decoration: underline; margin-top: 2px;">
+                                                    Lihat Resi &rarr;
+                                                </a>
                                             @endforeach
                                         </div>
-                                    @else
-                                        <span style="color: #94a3b8; font-size: 12.5px; font-style: italic;">
-                                            Belum Dikembalikan
+                                    @elseif ($item->status === 'Dibatalkan')
+                                        <span style="font-size: 12px; color: #94a3b8; font-style: italic;">
+                                            Booking Dibatalkan
                                         </span>
+                                    @else
+                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                            <span style="display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #b45309; background: #fef3c7; padding: 2px 8px; border-radius: 6px;">
+                                                ● Belum Dikembalikan
+                                            </span>
+                                            @if($item->status === 'Dipinjam')
+                                                <a href="{{ route('pengembalian.member', ['highlight' => $item->idPeminjaman]) }}" class="btn-kembalikan-shortcut" title="Menuju ke halaman pengembalian">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                        <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+                                                        <path d="M21 3v5h-5"></path>
+                                                        <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+                                                        <path d="M3 21v-5h5"></path>
+                                                    </svg>
+                                                    <span>Kembalikan</span>
+                                                </a>
+                                            @endif
+                                        </div>
                                     @endif
                                 </td>
                             </tr>

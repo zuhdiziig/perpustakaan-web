@@ -19,18 +19,29 @@ class Peminjaman extends Model
     /**
      * Lama masa pinjam reguler (dalam hari) sebelum buku jatuh tempo.
      */
-    public const MASA_PINJAM_HARI = 14;
+    public const MASA_PINJAM_HARI = 30;
 
     /**
      * Lama masa pinjam (dalam bulan) sebelum buku jatuh tempo.
      */
     public const MASA_PINJAM_BULAN = 1;
 
+    /**
+     * Batas toleransi waktu pengambilan buku yang dibooking (dalam jam).
+     */
+    public const BATAS_AMBIL_BOOKING_JAM = 48;
+
     protected $table = 'peminjaman';
 
     protected $primaryKey = 'idPeminjaman';
 
     protected $guarded = [];
+
+    protected $casts = [
+        'tanggalPinjam' => 'date',
+        'batasKembali' => 'date',
+        'batasAmbil' => 'datetime',
+    ];
 
     public function member()
     {
@@ -52,6 +63,30 @@ class Peminjaman extends Model
         return $this->hasMany(Pengembalian::class, 'idPeminjaman', 'idPeminjaman');
     }
 
+    public function isBooking(): bool
+    {
+        return $this->status === 'Booking';
+    }
+
+    public function isSiapDiambil(): bool
+    {
+        return $this->status === 'Siap Diambil';
+    }
+
+    public function isDipinjam(): bool
+    {
+        return $this->status === 'Dipinjam';
+    }
+
+    public function isKadaluarsa(): bool
+    {
+        if (! in_array($this->status, ['Booking', 'Siap Diambil'])) {
+            return false;
+        }
+
+        return $this->batasAmbil && Carbon::now()->greaterThan($this->batasAmbil);
+    }
+
     /**
      * Kode transaksi peminjaman, contoh: PJ-20261006-00042.
      */
@@ -60,6 +95,18 @@ class Peminjaman extends Model
         return Attribute::get(fn (): string => sprintf(
             'PJ-%s-%05d',
             ($this->tanggalPinjam ? Carbon::parse($this->tanggalPinjam) : ($this->created_at ?? now()))->format('Ymd'),
+            $this->idPeminjaman
+        ));
+    }
+
+    /**
+     * Kode booking peminjaman, contoh: BK-20261007-00042.
+     */
+    protected function kodeBookingDisplay(): Attribute
+    {
+        return Attribute::get(fn (): string => $this->kode_booking ?: sprintf(
+            'BK-%s-%05d',
+            ($this->created_at ?? now())->format('Ymd'),
             $this->idPeminjaman
         ));
     }

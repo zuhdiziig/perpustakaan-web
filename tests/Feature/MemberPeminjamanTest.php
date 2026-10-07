@@ -50,11 +50,12 @@ class MemberPeminjamanTest extends TestCase
         $response->assertSee('Leila S. Chudori');
         $response->assertSee('Rizky Pratama');
         $response->assertSee($member->kodeAnggota);
-        $response->assertSee('Rincian Peminjaman');
-        $response->assertSee('Konfirmasi Peminjaman');
+        $response->assertSee('Pilih Metode Pengambilan Buku');
+        $response->assertSee('Booking Buku');
+        $response->assertSee('Dapatkan QR Code');
     }
 
-    public function test_member_can_submit_borrow_request_successfully(): void
+    public function test_member_can_submit_booking_request_successfully(): void
     {
         $member = User::factory()->create([
             'role' => 'member',
@@ -68,23 +69,89 @@ class MemberPeminjamanTest extends TestCase
 
         $this->assertEquals(3, $buku->stok);
 
-        $response = $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku));
+        $response = $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku), [
+            'opsi_pengambilan' => 'siapkan_petugas',
+        ]);
+
+        $peminjaman = Peminjaman::where('idUserMember', $member->id)->first();
+        $this->assertNotNull($peminjaman);
+
+        $response->assertRedirect(route('peminjaman.booking.tiket', $peminjaman->idPeminjaman));
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('Booking', $peminjaman->status);
+        $this->assertEquals('siapkan_petugas', $peminjaman->opsi_pengambilan);
+        $this->assertNotNull($peminjaman->kode_booking);
+        $this->assertNotNull($peminjaman->qr_token);
+        $this->assertNotNull($peminjaman->batasAmbil);
+
+        $this->assertDatabaseHas('detail_peminjaman', [
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'statusBuku' => 'Booking',
+            'jumlah' => 1,
+        ]);
+
+        $this->assertEquals(2, $buku->fresh()->stok);
+    }
+
+    public function test_member_can_view_booking_ticket_with_qr_code(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $buku = Buku::factory()->create([
+            'judul' => 'Cantik Itu Luka',
+            'stok' => 2,
+        ]);
+
+        $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku), [
+            'opsi_pengambilan' => 'ambil_mandiri',
+        ]);
+
+        $peminjaman = Peminjaman::where('idUserMember', $member->id)->first();
+
+        $response = $this->actingAs($member)->get(route('peminjaman.booking.tiket', $peminjaman->idPeminjaman));
+
+        $response->assertOk();
+        $response->assertViewIs('peminjaman.booking_tiket');
+        $response->assertSee('Tiket Booking Peminjaman');
+        $response->assertSee('Cantik Itu Luka');
+        $response->assertSee($peminjaman->kode_booking);
+        $response->assertSee('Ambil Mandiri');
+    }
+
+    public function test_other_member_cannot_view_someone_elses_booking_ticket(): void
+    {
+        $member1 = User::factory()->create(['role' => 'member']);
+        $member2 = User::factory()->create(['role' => 'member']);
+
+        $buku = Buku::factory()->create(['stok' => 2]);
+
+        $this->actingAs($member1)->post(route('peminjaman.ajukan', $buku->idBuku));
+        $peminjaman = Peminjaman::where('idUserMember', $member1->id)->first();
+
+        $response = $this->actingAs($member2)->get(route('peminjaman.booking.tiket', $peminjaman->idPeminjaman));
+        $response->assertForbidden();
+    }
+
+    public function test_member_can_cancel_active_booking(): void
+    {
+        $member = User::factory()->create(['role' => 'member', 'status' => 'aktif']);
+        $buku = Buku::factory()->create(['stok' => 2]);
+
+        $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku));
+        $peminjaman = Peminjaman::where('idUserMember', $member->id)->first();
+        $this->assertEquals(1, $buku->fresh()->stok);
+
+        $response = $this->actingAs($member)->post(route('peminjaman.booking.batal', $peminjaman->idPeminjaman));
 
         $response->assertRedirect(route('riwayat.index'));
         $response->assertSessionHas('success');
 
-        $this->assertDatabaseHas('peminjaman', [
-            'idUserMember' => $member->id,
-            'status' => 'Dipinjam',
-            'totalBuku' => 1,
-        ]);
-
-        $this->assertDatabaseHas('detail_peminjaman', [
-            'idBuku' => $buku->idBuku,
-            'statusBuku' => 'Dipinjam',
-            'jumlah' => 1,
-        ]);
-
+        $this->assertEquals('Dibatalkan', $peminjaman->fresh()->status);
         $this->assertEquals(2, $buku->fresh()->stok);
     }
 

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Buku;
 use App\Models\BukuEksemplar;
+use App\Models\DetailPeminjaman;
 use App\Models\Kategori;
 use App\Models\Peminjaman;
 use App\Models\User;
@@ -464,5 +465,64 @@ class QrCodeSystemTest extends TestCase
 
         // Pastikan jumlah eksemplar tetap 0, tidak ada copy dummy yang terbuat
         $this->assertEquals(0, $buku->eksemplar()->count());
+    }
+
+    /**
+     * Endpoint api.identifikasi mampu mengenali QR Code Tiket Pengembalian (ret_... atau KB-...).
+     */
+    public function test_l_api_identifikasi_mengenali_tiket_pengembalian(): void
+    {
+        $buku = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Buku Sirkulasi Test',
+            'penulis' => 'Penulis Sirk',
+            'penerbit' => 'Penerbit Sirk',
+            'tahunTerbit' => 2026,
+            'harga' => 75000,
+            'stok' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        $eksemplar = $buku->eksemplar()->first();
+        $eksemplar->update(['status' => 'Dipinjam']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member1->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => now()->subDays(3)->toDateString(),
+            'batasKembali' => now()->addDays(11)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KB-20261007-0099',
+            'qr_kembali' => 'ret_12345abcdef67890',
+            'kondisi_laporan' => 'Baik',
+            'waktu_pengajuan_kembali' => now(),
+        ]);
+
+        $this->actingAs($this->petugas);
+
+        // 1. Scan via qr_kembali
+        $response1 = $this->postJson(route('api.scan.identifikasi'), ['code' => 'ret_12345abcdef67890']);
+        $response1->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('type', 'pengembalian')
+            ->assertJsonPath('data.kodeKembali', 'KB-20261007-0099')
+            ->assertJsonPath('data.member.name', $this->member1->name)
+            ->assertJsonPath('data.buku.judul', 'Buku Sirkulasi Test');
+
+        // 2. Scan via kode_kembali
+        $response2 = $this->postJson(route('api.scan.identifikasi'), ['code' => 'KB-20261007-0099']);
+        $response2->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('type', 'pengembalian')
+            ->assertJsonPath('data.kodeKembali', 'KB-20261007-0099');
     }
 }

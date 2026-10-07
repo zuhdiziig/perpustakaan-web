@@ -998,7 +998,7 @@
                 </h2>
 
                 <ul class="about-service-list">
-                    <li>Peminjaman hingga 3 buku selama 14 hari</li>
+                    <li>Peminjaman hingga {{ \App\Models\Peminjaman::BATAS_MAKSIMAL_BUKU }} buku selama {{ \App\Models\Peminjaman::MASA_PINJAM_HARI }} hari</li>
                     <li>Ruang baca dan area belajar bersama</li>
                     <li>Koleksi anak dan bacaan keluarga</li>
                     <li>Bantuan pencarian referensi oleh petugas</li>

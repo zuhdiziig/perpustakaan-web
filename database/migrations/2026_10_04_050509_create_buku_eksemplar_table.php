@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('qr_token', 64)->unique();
             $table->string('kode_barcode', 50)->nullable()->unique();
             $table->string('kondisi', 50)->default('Baik');
-            $table->enum('status', ['Tersedia', 'Dipinjam', 'Hilang'])->default('Tersedia');
+            $table->enum('status', ['Tersedia', 'Dibooking', 'Dipinjam', 'Hilang'])->default('Tersedia');
             $table->timestamps();
         });
     }

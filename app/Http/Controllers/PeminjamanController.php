@@ -34,19 +34,41 @@ class PeminjamanController extends Controller
     {
         $members = User::where('role', 'member')->where('status', 'aktif')->get();
 
-        // Data default / preview sesuai layout Figma (Rizky Pratama & Laut Bercerita)
-        $defaultMember = User::where('role', 'member')->where('name', 'like', '%Rizky Pratama%')->first()
-            ?? User::where('role', 'member')->where('status', 'aktif')->first();
+        $bookingCode = trim((string) $request->query('booking', $request->query('code', '')));
+        $selectedBooking = null;
 
-        $defaultBuku = Buku::with(['barcode', 'eksemplarTersedia'])
-            ->where('judul', 'like', '%Laut Bercerita%')
-            ->first()
-            ?? Buku::with(['barcode', 'eksemplarTersedia'])->has('eksemplarTersedia')->first();
+        if (! empty($bookingCode)) {
+            $selectedBooking = Peminjaman::with([
+                'member',
+                'details.buku.barcode',
+                'details.eksemplar',
+            ])
+                ->where('kode_booking', $bookingCode)
+                ->orWhere('kode_booking', strtoupper($bookingCode))
+                ->orWhere('qr_token', $bookingCode)
+                ->first();
+        }
 
-        $defaultEksemplar = $defaultBuku?->eksemplarTersedia?->first()
-            ?? $defaultBuku?->eksemplar()->first();
+        if ($selectedBooking) {
+            $defaultMember = $selectedBooking->member;
+            $firstDetail = $selectedBooking->details->first();
+            $defaultBuku = $firstDetail?->buku;
+            $defaultEksemplar = $firstDetail?->eksemplar;
+        } else {
+            // Data default / preview sesuai layout Figma (Rizky Pratama & Laut Bercerita)
+            $defaultMember = User::where('role', 'member')->where('name', 'like', '%Rizky Pratama%')->first()
+                ?? User::where('role', 'member')->where('status', 'aktif')->first();
 
-        return view('peminjaman.create', compact('members', 'defaultMember', 'defaultBuku', 'defaultEksemplar'));
+            $defaultBuku = Buku::with(['barcode', 'eksemplarTersedia'])
+                ->where('judul', 'like', '%Laut Bercerita%')
+                ->first()
+                ?? Buku::with(['barcode', 'eksemplarTersedia'])->has('eksemplarTersedia')->first();
+
+            $defaultEksemplar = $defaultBuku?->eksemplarTersedia?->first()
+                ?? $defaultBuku?->eksemplar()->first();
+        }
+
+        return view('peminjaman.create', compact('members', 'defaultMember', 'defaultBuku', 'defaultEksemplar', 'selectedBooking'));
     }
 
     // Konfirmasi & Simpan Transaksi Peminjaman
@@ -133,7 +155,7 @@ class PeminjamanController extends Controller
                 }
 
                 $tanggalPinjam = Carbon::now();
-                $batasKembali = Carbon::now()->addMonths(Peminjaman::MASA_PINJAM_BULAN);
+                $batasKembali = Carbon::now()->addDays(Peminjaman::MASA_PINJAM_HARI);
 
                 $peminjaman = Peminjaman::create([
                     'idUserMember' => $request->idUserMember,
@@ -206,6 +228,21 @@ class PeminjamanController extends Controller
     }
 
     /**
+     * Helper universal untuk generate string SVG QR Code
+     */
+    private function generateSvgQr($text, $size = 200)
+    {
+        $url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&format=svg&data=".urlencode($text);
+        $svg = @file_get_contents($url);
+
+        if ($svg) {
+            return $svg;
+        }
+
+        return '<img src="'.$url.'" width="'.$size.'" height="'.$size.'" alt="QR Code">';
+    }
+
+    /**
      * Halaman konfirmasi peminjaman buku khusus member.
      */
     public function konfirmasiMember($id)
@@ -219,22 +256,24 @@ class PeminjamanController extends Controller
         $isTersedia = $stokTersedia > 0 && $buku->eksemplarTersedia->isNotEmpty();
 
         $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
+            $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+        })->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->count();
 
         $batasMaksimalBuku = Peminjaman::BATAS_MAKSIMAL_BUKU;
+        $durasiHari = Peminjaman::MASA_PINJAM_HARI;
         $masaPinjamBulan = Peminjaman::MASA_PINJAM_BULAN;
-        $durasiHari = $masaPinjamBulan * 30;
+        $batasAmbilJam = Peminjaman::BATAS_AMBIL_BOOKING_JAM;
 
         $sisaKuota = max(0, $batasMaksimalBuku - $bukuSedangDipinjam);
         $kuotaHabis = $sisaKuota <= 0;
 
         $sedangPinjamBukuIni = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('idBuku', $buku->idBuku)->where('statusBuku', 'Dipinjam')->exists();
+            $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+        })->where('idBuku', $buku->idBuku)->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->exists();
 
         $tanggalPinjam = Carbon::now();
-        $batasKembali = Carbon::now()->addMonths($masaPinjamBulan);
+        $batasKembali = Carbon::now()->addDays($durasiHari);
+        $estimasiBatasAmbil = Carbon::now()->addHours($batasAmbilJam);
 
         return view('peminjaman.member_konfirmasi', compact(
             'buku',
@@ -246,16 +285,18 @@ class PeminjamanController extends Controller
             'batasMaksimalBuku',
             'masaPinjamBulan',
             'durasiHari',
+            'batasAmbilJam',
             'sisaKuota',
             'kuotaHabis',
             'sedangPinjamBukuIni',
             'tanggalPinjam',
-            'batasKembali'
+            'batasKembali',
+            'estimasiBatasAmbil'
         ));
     }
 
     /**
-     * Proses pengajuan peminjaman mandiri oleh member.
+     * Proses pengajuan booking peminjaman mandiri oleh member.
      */
     public function ajukanMember(Request $request, $id)
     {
@@ -265,24 +306,30 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Status keanggotaan Anda saat ini tidak aktif. Silakan hubungi petugas perpustakaan.');
         }
 
-        $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
+        $request->validate([
+            'opsi_pengambilan' => ['nullable', 'in:siapkan_petugas,ambil_mandiri'],
+        ]);
 
-        if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal mengajukan peminjaman: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku pinjaman aktif.');
+        $opsiPengambilan = $request->input('opsi_pengambilan', 'siapkan_petugas');
+
+        $bukuAktif = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
+            $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+        })->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->count();
+
+        if ($bukuAktif >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku aktif (booking/pinjaman).');
         }
 
         $sedangPinjamBukuIni = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('idBuku', $id)->where('statusBuku', 'Dipinjam')->exists();
+            $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+        })->where('idBuku', $id)->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->exists();
 
         if ($sedangPinjamBukuIni) {
-            return back()->with('error', 'Anda saat ini sedang meminjam buku ini. Harap selesaikan pengembalian terlebih dahulu.');
+            return back()->with('error', 'Anda sudah memiliki booking atau pinjaman aktif untuk judul buku ini.');
         }
 
         try {
-            $peminjaman = DB::transaction(function () use ($id, $user) {
+            $peminjaman = DB::transaction(function () use ($id, $user, $opsiPengambilan) {
                 $buku = Buku::lockForUpdate()->findOrFail($id);
 
                 $eksemplar = BukuEksemplar::where('idBuku', $buku->idBuku)
@@ -291,19 +338,31 @@ class PeminjamanController extends Controller
                     ->first();
 
                 if (! $eksemplar || $buku->stok <= 0) {
-                    throw new \DomainException('Maaf, eksemplar buku "'.$buku->judul.'" baru saja habis dipinjam pengguna lain.');
+                    throw new \DomainException('Maaf, eksemplar buku "'.$buku->judul.'" baru saja dibooking atau dipinjam anggota lain.');
                 }
 
                 $tanggalPinjam = Carbon::now();
-                $batasKembali = Carbon::now()->addMonths(Peminjaman::MASA_PINJAM_BULAN);
+                $batasKembali = Carbon::now()->addDays(Peminjaman::MASA_PINJAM_HARI);
+                $batasAmbil = Carbon::now()->addHours(Peminjaman::BATAS_AMBIL_BOOKING_JAM);
+
+                // Generate kode booking unik, contoh: BK-20261007-8A2F1B
+                do {
+                    $kodeBooking = sprintf('BK-%s-%s', Carbon::now()->format('Ymd'), strtoupper(bin2hex(random_bytes(3))));
+                } while (Peminjaman::where('kode_booking', $kodeBooking)->exists());
+
+                $qrToken = 'book_'.bin2hex(random_bytes(16));
 
                 $peminjaman = Peminjaman::create([
                     'idUserMember' => $user->id,
                     'idUserPetugas' => null,
                     'tanggalPinjam' => $tanggalPinjam->toDateString(),
                     'batasKembali' => $batasKembali->toDateString(),
-                    'status' => 'Dipinjam',
+                    'status' => 'Booking',
                     'totalBuku' => 1,
+                    'kode_booking' => $kodeBooking,
+                    'qr_token' => $qrToken,
+                    'batasAmbil' => $batasAmbil,
+                    'opsi_pengambilan' => $opsiPengambilan,
                 ]);
 
                 DetailPeminjaman::create([
@@ -311,22 +370,154 @@ class PeminjamanController extends Controller
                     'idBuku' => $buku->idBuku,
                     'idEksemplar' => $eksemplar->idEksemplar,
                     'jumlah' => 1,
-                    'statusBuku' => 'Dipinjam',
+                    'statusBuku' => 'Booking',
                 ]);
 
-                $eksemplar->update(['status' => 'Dipinjam']);
+                // Update eksemplar fisik menjadi Dibooking agar tidak terambil orang lain
+                $eksemplar->update(['status' => 'Dibooking']);
 
+                // Sinkronkan stok tersedia pada master buku
                 $buku->syncStok();
 
                 return $peminjaman;
             });
 
-            return redirect()->route('riwayat.index')
-                ->with('success', 'Peminjaman buku berhasil diajukan! Silakan ambil buku fisik di meja layanan perpustakaan.');
+            return redirect()->route('peminjaman.booking.tiket', $peminjaman->idPeminjaman)
+                ->with('success', 'Booking buku berhasil! Simpan tiket QR ini dan tunjukkan kepada petugas di perpustakaan.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
-            return back()->with('error', 'Terjadi kesalahan sistem saat memproses peminjaman: '.$e->getMessage());
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses booking: '.$e->getMessage());
         }
+    }
+
+    /**
+     * Halaman Tiket QR Code Booking Peminjaman untuk Member.
+     */
+    public function tiketBooking($id)
+    {
+        $user = auth()->user();
+
+        $peminjaman = Peminjaman::with([
+            'member',
+            'petugas',
+            'details.buku.kategori',
+            'details.buku.barcode',
+            'details.eksemplar',
+        ])->findOrFail($id);
+
+        if ($user && $user->role === 'member' && (int) $peminjaman->idUserMember !== (int) $user->id) {
+            abort(403, 'Anda tidak memiliki hak akses melihat tiket booking ini.');
+        }
+
+        // Teks QR yang di-encode: qr_token transaksi booking
+        $qrPayload = $peminjaman->qr_token ?: $peminjaman->kode_booking;
+        $qrCodeSvg = $this->generateSvgQr($qrPayload, 220);
+
+        return view('peminjaman.booking_tiket', compact('peminjaman', 'qrCodeSvg'));
+    }
+
+    /**
+     * Batalkan booking peminjaman oleh member.
+     */
+    public function batalBooking(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        $peminjaman = Peminjaman::with(['details.eksemplar', 'details.buku'])->findOrFail($id);
+
+        if ($user && $user->role === 'member' && (int) $peminjaman->idUserMember !== (int) $user->id) {
+            abort(403, 'Akses ditolak.');
+        }
+
+        if (! in_array($peminjaman->status, ['Booking', 'Siap Diambil'])) {
+            return back()->with('error', 'Booking tidak dapat dibatalkan karena status transaksi saat ini: '.$peminjaman->status);
+        }
+
+        DB::transaction(function () use ($peminjaman) {
+            foreach ($peminjaman->details as $detail) {
+                if ($detail->eksemplar && $detail->eksemplar->status === 'Dibooking') {
+                    $detail->eksemplar->update(['status' => 'Tersedia']);
+                }
+                if ($detail->buku) {
+                    $detail->buku->syncStok();
+                }
+                $detail->update(['statusBuku' => 'Dibatalkan']);
+            }
+
+            $peminjaman->update([
+                'status' => 'Dibatalkan',
+            ]);
+        });
+
+        return redirect()->route('riwayat.index')
+            ->with('success', 'Booking peminjaman buku "'.$peminjaman->kode_booking.'" berhasil dibatalkan. Eksemplar buku telah dikembalikan ke stok tersedia.');
+    }
+
+    /**
+     * Tandai buku booking telah disiapkan oleh petugas di meja layanan.
+     */
+    public function siapkanBooking(Request $request, $id)
+    {
+        $role = auth()->user()->role ?? '';
+        if ($role !== 'petugas' && $role !== 'admin') {
+            abort(403, 'Akses terbatas untuk Petugas dan Administrator.');
+        }
+
+        $peminjaman = Peminjaman::with('details.buku')->findOrFail($id);
+
+        if ($peminjaman->status !== 'Booking') {
+            return back()->with('error', 'Status peminjaman bukan Booking (status saat ini: '.$peminjaman->status.').');
+        }
+
+        $peminjaman->update([
+            'status' => 'Siap Diambil',
+            'catatan_petugas' => $request->input('catatan_petugas', 'Buku telah disiapkan di meja reservasi sirkulasi.'),
+        ]);
+
+        $judulBuku = $peminjaman->details->first()?->buku?->judul ?? 'Buku';
+
+        return back()->with('success', 'Buku "'.$judulBuku.'" berhasil ditandai SIAP DIAMBIL. Member dapat mengambil buku di meja layanan.');
+    }
+
+    /**
+     * Konfirmasi serah terima buku fisik booking oleh petugas (beralih ke status Dipinjam).
+     */
+    public function serahTerimaBooking(Request $request, $id)
+    {
+        $role = auth()->user()->role ?? '';
+        if ($role !== 'petugas' && $role !== 'admin') {
+            abort(403, 'Akses terbatas untuk Petugas dan Administrator.');
+        }
+
+        $peminjaman = Peminjaman::with(['details.eksemplar', 'details.buku', 'member'])->findOrFail($id);
+
+        if (! in_array($peminjaman->status, ['Booking', 'Siap Diambil'])) {
+            return back()->with('error', 'Transaksi ini tidak dalam status Booking atau Siap Diambil (status: '.$peminjaman->status.').');
+        }
+
+        DB::transaction(function () use ($peminjaman) {
+            $tanggalPinjam = Carbon::now();
+            $batasKembali = Carbon::now()->addDays(Peminjaman::MASA_PINJAM_HARI);
+
+            $peminjaman->update([
+                'idUserPetugas' => auth()->id(),
+                'tanggalPinjam' => $tanggalPinjam->toDateString(),
+                'batasKembali' => $batasKembali->toDateString(),
+                'status' => 'Dipinjam',
+            ]);
+
+            foreach ($peminjaman->details as $detail) {
+                $detail->update(['statusBuku' => 'Dipinjam']);
+                if ($detail->eksemplar) {
+                    $detail->eksemplar->update(['status' => 'Dipinjam']);
+                }
+            }
+        });
+
+        $namaMember = $peminjaman->member?->name ?? 'Member';
+
+        return redirect()->route('peminjaman.show', $peminjaman->idPeminjaman)
+            ->with('success', 'Serah terima buku kepada '.$namaMember.' berhasil! Masa pinjam 30 hari resmi aktif.');
     }
 }

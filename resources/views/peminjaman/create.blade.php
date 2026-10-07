@@ -542,8 +542,8 @@
                 <input type="text"
                        id="inputManual"
                        class="input-code-manual"
-                       placeholder="PJ-20261003-0417"
-                       value="{{ request('kode', 'PJ-20261003-0417') }}"
+                       placeholder="Contoh: BK-20261007-0001 atau PJ-..."
+                       value="{{ request('booking', request('code', request('kode', 'PJ-20261003-0417'))) }}"
                        autocomplete="off">
 
                 <!-- Tombol Cari Transaksi -->
@@ -617,7 +617,7 @@
                     <!-- Row 7: Durasi / jumlah -->
                     <div class="rincian-item">
                         <span class="rincian-label">Durasi / jumlah</span>
-                        <span class="rincian-val" id="dispDurasiJumlah">14 hari / 1 buku</span>
+                        <span class="rincian-val" id="dispDurasiJumlah">30 hari / 1 buku</span>
                     </div>
                 </div>
             </div>
@@ -652,7 +652,7 @@
             <div class="modal-header">
                 <div style="padding-right: 32px;">
                     <h3 class="modal-title">Konfirmasi Barcode</h3>
-                    <p class="modal-subtitle">Periksa data anggota dan buku. Peminjaman berlangsung 14 hari, tanpa biaya.</p>
+                    <p class="modal-subtitle">Periksa data anggota dan buku. Peminjaman berlangsung 30 hari, tanpa biaya.</p>
                 </div>
                 <button type="button" class="modal-close-btn" id="btnModalClose" aria-label="Tutup modal">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
@@ -704,6 +704,30 @@
 
         // State Transaksi & Sirkulasi
         const state = {
+            booking: {!! isset($selectedBooking) && $selectedBooking ? json_encode([
+                'idPeminjaman' => $selectedBooking->idPeminjaman,
+                'kodeBooking' => $selectedBooking->kode_booking,
+                'opsiPengambilan' => $selectedBooking->opsi_pengambilan,
+                'status' => $selectedBooking->status,
+                'member' => [
+                    'id' => $selectedBooking->member?->id,
+                    'name' => $selectedBooking->member?->name ?? 'Anggota',
+                    'kodeAnggota' => $selectedBooking->member?->kode_anggota,
+                    'email' => $selectedBooking->member?->email,
+                    'status' => $selectedBooking->member?->status ?? 'aktif',
+                ],
+                'buku' => [
+                    'idBuku' => $selectedBooking->details->first()?->buku?->idBuku,
+                    'idEksemplar' => $selectedBooking->details->first()?->eksemplar?->idEksemplar,
+                    'judul' => $selectedBooking->details->first()?->buku?->judul ?? 'Buku',
+                    'rak' => $selectedBooking->details->first()?->buku?->rak ?? '-',
+                    'kodeBuku' => $selectedBooking->details->first()?->eksemplar?->kode_barcode ?? ($selectedBooking->details->first()?->buku?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $selectedBooking->details->first()?->buku?->idBuku ?? 0)),
+                    'kondisi' => $selectedBooking->details->first()?->eksemplar?->kondisi ?? 'Baik',
+                    'statusEksemplar' => $selectedBooking->details->first()?->eksemplar?->status ?? 'Dibooking',
+                    'nomor_eksemplar' => $selectedBooking->details->first()?->eksemplar?->nomor_eksemplar,
+                ],
+                'batasAmbil' => $selectedBooking->batasAmbil ? \Carbon\Carbon::parse($selectedBooking->batasAmbil)->translatedFormat('d M Y, H:i') : '-',
+            ]) : 'null' !!},
             member: {!! json_encode($defaultMember ? [
                 'id' => $defaultMember->id,
                 'name' => $defaultMember->name,
@@ -720,10 +744,10 @@
                 'kondisi' => $defaultEksemplar->kondisi ?? 'Baik',
                 'status' => $defaultEksemplar->status ?? 'Tersedia',
             ] : null) !!},
-            transaksiCode: 'PJ-20261003-0417',
-            tanggalPinjam: '03 Okt 2026',
-            batasKembali: '17 Okt 2026',
-            durasiJumlah: '14 hari / 1 buku',
+            transaksiCode: {!! isset($selectedBooking) && $selectedBooking ? json_encode($selectedBooking->kode_booking) : "'PJ-20261003-0417'" !!},
+            tanggalPinjam: '{{ now()->translatedFormat("d M Y") }}',
+            batasKembali: '{{ now()->addDays(30)->translatedFormat("d M Y") }}',
+            durasiJumlah: '30 hari / 1 buku',
             isCameraRunning: false
         };
 
@@ -846,22 +870,50 @@
             dispDurasiJumlah.textContent = state.durasiJumlah;
 
             // Perbarui Pesan Validasi Petugas
-            if (state.member && state.buku) {
+            if (state.booking) {
+                dispValidasiPetugas.innerHTML = `
+                    <strong>Tiket Booking Online Teridentifikasi!</strong><br>
+                    Kode: <b>${state.booking.kodeBooking}</b> &middot; Anggota: <b>${state.booking.member.name}</b> (${state.booking.member.kodeAnggota})<br>
+                    Buku: <b>${state.booking.buku.judul}</b> (📍 Rak: <b>${state.booking.buku.rak}</b>)<br>
+                    Metode Ambil: <b>${state.booking.opsiPengambilan === 'siapkan_petugas' ? '📦 Disiapkan Petugas di Meja' : '🚶 Ambil Mandiri dari Rak'}</b> &middot; Status: <b><span style="color: ${state.booking.status === 'Siap Diambil' ? '#166534' : '#b45309'}">${state.booking.status}</span></b><br>
+                    <span style="display:inline-block; margin-top: 5px; font-size: 12px; color: #0f766e; font-weight: 600;">
+                        Tekan tombol konfirmasi di bawah untuk menyelesaikan serah terima buku secara instan (30 hari aktif).
+                    </span>
+                `;
+                badgeContainer.style.display = 'block';
+                badgeText.textContent = `Tiket Booking: ${state.booking.status}`;
+                btnKonfirmasi.disabled = false;
+                btnKonfirmasi.textContent = '🤝 Konfirmasi Serah Terima Buku';
+                btnKonfirmasi.style.background = '#0f766e';
+                formPeminjaman.action = `/peminjaman/booking/${state.booking.idPeminjaman}/serah-terima`;
+            } else if (state.member && state.buku) {
+                formPeminjaman.action = '{{ route("peminjaman.store") }}';
+                btnKonfirmasi.textContent = 'Konfirmasi Peminjaman';
+                btnKonfirmasi.style.background = '';
                 dispValidasiPetugas.textContent = `Anggota aktif. Kode buku ${state.buku.kodeBuku} sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.`;
                 badgeContainer.style.display = 'block';
                 badgeText.textContent = 'Barcode ditemukan';
                 btnKonfirmasi.disabled = false;
             } else if (state.member && !state.buku) {
+                formPeminjaman.action = '{{ route("peminjaman.store") }}';
+                btnKonfirmasi.textContent = 'Konfirmasi Peminjaman';
+                btnKonfirmasi.style.background = '';
                 dispValidasiPetugas.textContent = `Anggota aktif (${state.member.name}). Sisa kuota peminjaman ${state.member.sisaKuota ?? 7} buku. Silakan scan barcode buku fisik untuk melanjutkan.`;
                 badgeContainer.style.display = 'block';
                 badgeText.textContent = 'Anggota teridentifikasi';
                 btnKonfirmasi.disabled = true;
             } else if (!state.member && state.buku) {
+                formPeminjaman.action = '{{ route("peminjaman.store") }}';
+                btnKonfirmasi.textContent = 'Konfirmasi Peminjaman';
+                btnKonfirmasi.style.background = '';
                 dispValidasiPetugas.textContent = `Buku fisik '${state.buku.judul}' (${state.buku.kodeBuku}) tersedia. Silakan scan barcode kartu anggota untuk mengonfirmasi peminjam.`;
                 badgeContainer.style.display = 'block';
                 badgeText.textContent = 'Buku teridentifikasi';
                 btnKonfirmasi.disabled = true;
             } else {
+                formPeminjaman.action = '{{ route("peminjaman.store") }}';
+                btnKonfirmasi.textContent = 'Konfirmasi Peminjaman';
+                btnKonfirmasi.style.background = '';
                 dispValidasiPetugas.textContent = 'Arahkan barcode anggota atau buku ke kamera, atau masukkan kode manual untuk memulai proses peminjaman.';
                 badgeContainer.style.display = 'none';
                 btnKonfirmasi.disabled = true;
@@ -897,8 +949,37 @@
 
                 playScanBeep();
 
+                // 0. Jika teridentifikasi sebagai Tiket Booking Online
+                if (res.type === 'booking') {
+                    const booking = res.data;
+                    state.booking = booking;
+                    state.transaksiCode = booking.kodeBooking;
+                    state.member = booking.member;
+                    state.buku = booking.buku;
+
+                    const today = new Date();
+                    const due = new Date();
+                    due.setDate(today.getDate() + 30);
+                    state.tanggalPinjam = formatTanggalIndo(today);
+                    state.batasKembali = formatTanggalIndo(due);
+                    state.durasiJumlah = '30 hari / 1 buku';
+                    inputManual.value = booking.kodeBooking;
+
+                    updateUI();
+
+                    modalBuku.textContent = `${booking.buku.judul} · ${booking.buku.kodeBuku} (📍 ${booking.buku.rak})`;
+                    modalMember.textContent = `${booking.member.name} · ${booking.member.kodeAnggota}`;
+                    modalTanggal.textContent = `Serah Terima Booking (${booking.opsiPengambilan === 'siapkan_petugas' ? 'Disiapkan Petugas' : 'Ambil Mandiri'})`;
+                    btnModalKonfirmasi.textContent = 'Konfirmasi Serah Terima';
+
+                    showToast(`Tiket Booking '${booking.kodeBooking}' teridentifikasi.`);
+                    openConfirmModal();
+                    return;
+                }
+
                 // 1. Jika teridentifikasi sebagai transaksi utuh
                 if (res.type === 'transaksi') {
+                    state.booking = null;
                     const trx = res.data;
                     state.transaksiCode = trx.kodeTransaksi;
                     state.member = trx.member;
@@ -919,6 +1000,7 @@
 
                 // 2. Jika teridentifikasi sebagai data Member
                 if (res.type === 'member') {
+                    state.booking = null;
                     state.member = res.data;
                     inputManual.value = res.data.kodeAnggota;
                     cameraPromptText.textContent = 'Arahkan barcode buku ke kamera';
@@ -944,6 +1026,7 @@
 
                 // 3. Jika teridentifikasi sebagai Eksemplar Buku
                 if (res.type === 'buku') {
+                    state.booking = null;
                     state.buku = res.data;
                     inputManual.value = res.data.kodeBuku;
 

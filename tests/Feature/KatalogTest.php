@@ -130,4 +130,75 @@ class KatalogTest extends TestCase
 
         $this->assertEquals('Buku Sangat Populer', $bukus->first()->judul);
     }
+
+    public function test_authenticated_admin_sees_admin_sidebar_on_katalog(): void
+    {
+        $admin = User::factory()->create(['role' => 'admin']);
+        $buku = Buku::factory()->create();
+
+        $response = $this->actingAs($admin)->get('/katalog');
+
+        $response->assertStatus(200);
+        $response->assertSee('Panel Admin');
+        $response->assertSee('Data Petugas');
+        $response->assertSee('Koleksi Buku');
+        $response->assertSee('Kategori Buku');
+        $response->assertSee('Laporan');
+    }
+
+    public function test_authenticated_petugas_sees_petugas_sidebar_on_katalog(): void
+    {
+        $petugas = User::factory()->create(['role' => 'petugas']);
+        $buku = Buku::factory()->create();
+
+        $response = $this->actingAs($petugas)->get('/katalog');
+
+        $response->assertStatus(200);
+        $response->assertSee('Panel Petugas');
+        $response->assertSee('Scan Barcode');
+        $response->assertSee('Peminjaman');
+        $response->assertSee('Pengembalian');
+        $response->assertSee('Kelola Denda');
+    }
+
+    public function test_authenticated_member_sees_anggota_sidebar_on_katalog(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $buku = Buku::factory()->create();
+
+        $response = $this->actingAs($member)->get('/katalog');
+
+        $response->assertStatus(200);
+        $response->assertSee('Panel Anggota');
+        $response->assertSee('Katalog Buku');
+        $response->assertSee('Riwayat');
+        $response->assertSee('Denda');
+    }
+
+    public function test_authenticated_actors_see_sidebar_on_katalog_detail(): void
+    {
+        $buku = Buku::factory()->create();
+
+        $this->get('/katalog/'.$buku->idBuku)
+            ->assertStatus(200)
+            ->assertDontSee('Panel Admin')
+            ->assertDontSee('Panel Petugas')
+            ->assertDontSee('Panel Anggota');
+
+        $admin = User::factory()->create(['role' => 'admin']);
+        $petugas = User::factory()->create(['role' => 'petugas']);
+        $member = User::factory()->create(['role' => 'member']);
+
+        $this->actingAs($admin)->get('/katalog/'.$buku->idBuku)
+            ->assertStatus(200)
+            ->assertSee('Panel Admin');
+
+        $this->actingAs($petugas)->get('/katalog/'.$buku->idBuku)
+            ->assertStatus(200)
+            ->assertSee('Panel Petugas');
+
+        $this->actingAs($member)->get('/katalog/'.$buku->idBuku)
+            ->assertStatus(200)
+            ->assertSee('Panel Anggota');
+    }
 }

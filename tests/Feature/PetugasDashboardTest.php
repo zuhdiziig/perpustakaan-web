@@ -30,7 +30,7 @@ class PetugasDashboardTest extends TestCase
         $response->assertSee('Selamat bertugas, Dina Amelia.');
         $response->assertSee('Panel Petugas');
         $response->assertSee('Scan Barcode');
-        $response->assertSee('Catat Pengembalian');
+        $response->assertSee('Pengembalian');
         $response->assertSee('Pengingat petugas');
     }
 
@@ -172,5 +172,176 @@ class PetugasDashboardTest extends TestCase
         $response2->assertViewHas('transaksi', fn ($transaksi) => $transaksi->contains('judul', 'Pulang') &&
             ! $transaksi->contains('judul', 'Bumi Manusia')
         );
+    }
+
+    public function test_petugas_dashboard_displays_booking_notification_banner_and_queue(): void
+    {
+        $petugas = User::factory()->create([
+            'role' => 'petugas',
+            'status' => 'aktif',
+        ]);
+
+        $member = User::factory()->create([
+            'name' => 'Budi Santoso',
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $buku = Buku::factory()->create(['judul' => 'Atomic Habits', 'rak' => 'Rak A-12', 'stok' => 1]);
+        $eksemplar = $buku->eksemplar()->first();
+        $eksemplar->update(['status' => 'Dibooking']);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'kode_booking' => 'BK-20261007-9999',
+            'qr_token' => 'book_test_token_123',
+            'opsi_pengambilan' => 'siapkan_petugas',
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->actingAs($petugas)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('Pemberitahuan Sirkulasi:');
+        $response->assertSee('Booking Buku Menunggu Pengambilan');
+        $response->assertSee('Disiapkan oleh Petugas');
+        $response->assertSee('BK-20261007-9999');
+        $response->assertSee('Budi Santoso');
+        $response->assertSee('Atomic Habits');
+        $response->assertSee('Tandai Siap');
+        $response->assertSee('Proses');
+        $response->assertSee(route('peminjaman.create', ['booking' => 'BK-20261007-9999']));
+    }
+
+    public function test_petugas_can_mark_booking_as_ready_for_pickup(): void
+    {
+        $petugas = User::factory()->create([
+            'role' => 'petugas',
+            'status' => 'aktif',
+        ]);
+
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $buku = Buku::factory()->create(['judul' => 'Laskar Pelangi', 'stok' => 1]);
+        $eksemplar = $buku->eksemplar()->first();
+        $eksemplar->update(['status' => 'Dibooking']);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'kode_booking' => 'BK-20261007-1234',
+            'opsi_pengambilan' => 'siapkan_petugas',
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->actingAs($petugas)->post(route('petugas.booking.siapkan', $booking->idPeminjaman));
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $booking->refresh();
+        $this->assertSame('Siap Diambil', $booking->status);
+    }
+
+    public function test_petugas_can_handover_booking_to_member(): void
+    {
+        $petugas = User::factory()->create([
+            'role' => 'petugas',
+            'status' => 'aktif',
+        ]);
+
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $buku = Buku::factory()->create(['judul' => 'Sapiens', 'stok' => 1]);
+        $eksemplar = $buku->eksemplar()->first();
+        $eksemplar->update(['status' => 'Dibooking']);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'kode_booking' => 'BK-20261007-5678',
+            'opsi_pengambilan' => 'ambil_mandiri',
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->actingAs($petugas)->post(route('petugas.booking.serah-terima', $booking->idPeminjaman));
+
+        $response->assertRedirect(route('peminjaman.show', $booking->idPeminjaman));
+        $response->assertSessionHas('success');
+
+        $booking->refresh();
+        $detail->refresh();
+        $eksemplar->refresh();
+
+        $this->assertSame('Dipinjam', $booking->status);
+        $this->assertSame($petugas->id, $booking->idUserPetugas);
+        $this->assertNotNull($booking->tanggalPinjam);
+        $this->assertNotNull($booking->batasKembali);
+        $this->assertSame('Dipinjam', $detail->statusBuku);
+        $this->assertSame('Dipinjam', $eksemplar->status);
+    }
+
+    public function test_member_cannot_access_petugas_booking_actions(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'kode_booking' => 'BK-20261007-0099',
+            'opsi_pengambilan' => 'siapkan_petugas',
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+        ]);
+
+        $responseSiapkan = $this->actingAs($member)->post(route('petugas.booking.siapkan', $booking->idPeminjaman));
+        $responseSiapkan->assertForbidden();
+
+        $responseSerahTerima = $this->actingAs($member)->post(route('petugas.booking.serah-terima', $booking->idPeminjaman));
+        $responseSerahTerima->assertForbidden();
     }
 }
