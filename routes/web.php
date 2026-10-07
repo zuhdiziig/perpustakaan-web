@@ -10,7 +10,6 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KondisiBukuController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
-use App\Http\Controllers\MemberPeminjamanController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\PeminjamanController;
 use App\Http\Controllers\PengembalianController;
@@ -127,6 +126,12 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
         ->name('bayar.proses_qr');
+
+    Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
+        ->name('bayar.sukses');
+
+    Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
+        ->name('pembayaran.nota');
 
     /*
     |--------------------------------------------------------------------------

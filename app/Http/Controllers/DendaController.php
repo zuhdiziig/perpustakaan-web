@@ -9,12 +9,12 @@ use Illuminate\Http\Request;
 
 class DendaController extends Controller
 {
-    // Fitur 16: Melihat Denda oleh Member
-    public function memberDenda()
+    // Fitur 17: Halaman Web Denda untuk Anggota (Sesuai Figma Frame 17)
+    public function memberDenda(Request $request)
     {
         $userId = auth()->id();
 
-        // Ambil data denda milik member yang sedang login
+        // Ambil data semua denda milik member yang sedang login
         $dendas = Denda::with(['pengembalian.peminjaman.details.buku', 'pembayaran'])
             ->whereHas('pengembalian.peminjaman', function ($query) use ($userId) {
                 $query->where('idUserMember', $userId);
@@ -22,14 +22,75 @@ class DendaController extends Controller
             ->latest('idDenda')
             ->paginate(10);
 
-        // Hitung akumulasi denda yang belum dibayar
-        $totalTunggakan = Denda::whereHas('pengembalian.peminjaman', function ($query) use ($userId) {
-            $query->where('idUserMember', $userId);
-        })
+        // Ambil list denda yang belum dibayar
+        $dendaBelumDibayar = Denda::with(['pengembalian.peminjaman.details.buku', 'pembayaran'])
+            ->whereHas('pengembalian.peminjaman', function ($query) use ($userId) {
+                $query->where('idUserMember', $userId);
+            })
             ->where('status', 'Belum Dibayar')
-            ->sum('jumlah');
+            ->latest('idDenda')
+            ->get();
 
-        return view('denda.member_index', compact('dendas', 'totalTunggakan'));
+        // Total tunggakan belum dibayar
+        $totalTunggakan = $dendaBelumDibayar->sum('jumlah');
+
+        // Pilih denda aktif (bisa dipilih lewat query param ?selected=idDenda, default ke denda belum dibayar pertama atau denda pertama)
+        $selectedId = $request->query('selected');
+        $activeDenda = null;
+        if ($selectedId) {
+            $activeDenda = $dendaBelumDibayar->firstWhere('idDenda', $selectedId)
+                ?? $dendas->firstWhere('idDenda', $selectedId);
+        }
+
+        if (! $activeDenda) {
+            $activeDenda = $dendaBelumDibayar->first() ?? $dendas->first();
+        }
+
+        // Hitung rincian untuk denda aktif
+        $hariTerlambat = 0;
+        $rentangTanggal = '-';
+        $perhitunganText = '-';
+        $peminjaman = null;
+        $pengembalian = null;
+        $buku = null;
+
+        if ($activeDenda && $activeDenda->pengembalian) {
+            $pengembalian = $activeDenda->pengembalian;
+            $peminjaman = $pengembalian->peminjaman;
+            $buku = $peminjaman?->details?->first()?->buku;
+
+            if ($peminjaman && $pengembalian->tanggalKembali && $peminjaman->batasKembali) {
+                $tglKembali = Carbon::parse($pengembalian->tanggalKembali);
+                $batas = Carbon::parse($peminjaman->batasKembali);
+
+                if ($tglKembali->greaterThan($batas)) {
+                    $hariTerlambat = (int) $batas->diffInDays($tglKembali);
+                    if ($hariTerlambat === 0) {
+                        $hariTerlambat = 1;
+                    }
+                    $rentangTanggal = $batas->locale('id')->translatedFormat('d M').' — '.$tglKembali->locale('id')->translatedFormat('d M Y');
+                }
+            }
+
+            if ($hariTerlambat > 0) {
+                $perhitunganText = "{$hariTerlambat} hari × Rp1.000";
+            } else {
+                $perhitunganText = 'Rp '.number_format($activeDenda->jumlah, 0, ',', '.');
+            }
+        }
+
+        return view('denda.member_index', compact(
+            'dendas',
+            'dendaBelumDibayar',
+            'totalTunggakan',
+            'activeDenda',
+            'hariTerlambat',
+            'rentangTanggal',
+            'perhitunganText',
+            'peminjaman',
+            'pengembalian',
+            'buku'
+        ));
     }
 
     // TAMBAHKAN METHOD INDEX DI SINI → Buka data denda & daftar transaksi yang perlu dihitung/dikelola

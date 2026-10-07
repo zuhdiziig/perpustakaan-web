@@ -79,5 +79,10 @@ class DatabaseSeeder extends Seeder
             ['kodeBarcode' => 'BK-IT-001'],
             ['idBuku' => $buku1->idBuku]
         );
+
+        $this->call([
+            KatalogBukuSeeder::class,
+            DendaSampleSeeder::class,
+        ]);
     }
 }
