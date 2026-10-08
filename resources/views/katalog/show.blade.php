@@ -956,7 +956,15 @@
                 </div>
 
                 <div class="action-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                    @if ($isTersedia)
+                    @if (auth()->check() && auth()->user()->role === 'admin')
+                        <a href="{{ route('buku.edit', $buku->idBuku) }}" id="btnKelolaBuku" class="btn-pinjam" style="display: inline-flex; align-items: center; gap: 8px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                            Kelola Data Buku
+                        </a>
+                    @elseif ($isTersedia)
                         <a href="{{ route('peminjaman.konfirmasi', $buku->idBuku) }}" id="btnPinjamBuku" class="btn-pinjam">
                             Pinjam Buku
                         </a>
@@ -986,7 +994,11 @@
                             Semua eksemplar sedang dipinjam
                         </button>
                     @endif
-                    <a href="{{ $urlKembali }}" id="btnKembali" class="btn-kembali">Kembali</a>
+                    @if (auth()->check() && auth()->user()->role === 'admin')
+                        <a href="{{ route('buku.index') }}" id="btnKembali" class="btn-kembali">Kembali ke Kelola Buku</a>
+                    @else
+                        <a href="{{ $urlKembali }}" id="btnKembali" class="btn-kembali">Kembali</a>
+                    @endif
                 </div>
 
                 <p class="loan-note">
@@ -1126,14 +1138,24 @@
                         <a href="{{ route('member.kartu-saya') }}" class="btn-dialog-cancel">Buka Kartu / QR Saya</a>
                         <a href="{{ route('peminjaman.konfirmasi', $buku->idBuku) }}" class="btn-dialog-primary">Lanjutkan ke Peminjaman</a>
                     </div>
-                @else
+                @elseif (auth()->user()->role === 'petugas')
                     <ol class="dialog-steps">
-                        <li>Anda masuk sebagai {{ ucfirst(auth()->user()->role) }}.</li>
+                        <li>Anda masuk sebagai <strong>Petugas Perpustakaan</strong>.</li>
                         <li>Pindai QR anggota dan barcode <strong>{{ $kodeBuku }}</strong> di form sirkulasi.</li>
                     </ol>
                     <div class="dialog-actions">
                         <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
                         <a href="{{ route('peminjaman.create') }}" class="btn-dialog-primary">Buka Form Sirkulasi</a>
+                    </div>
+                @else
+                    {{-- Admin --}}
+                    <ol class="dialog-steps">
+                        <li>Anda masuk sebagai <strong>Admin Perpustakaan</strong>.</li>
+                        <li>Admin berwenang dalam pembaruan data dan manajemen eksemplar buku ini.</li>
+                    </ol>
+                    <div class="dialog-actions">
+                        <button type="button" class="btn-dialog-cancel" data-close-dialog>Tutup</button>
+                        <a href="{{ route('buku.edit', $buku->idBuku) }}" class="btn-dialog-primary">Kelola Data Buku</a>
                     </div>
                 @endif
             @endguest

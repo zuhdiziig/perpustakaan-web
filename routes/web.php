@@ -176,11 +176,20 @@ Route::middleware('auth')->group(function () {
         Route::post('/pengembalian-saya/{idDetail}/proses', [PengembalianController::class, 'memberStore'])
             ->name('pengembalian.member.store');
 
+        Route::post('/pengembalian-saya/batch-proses', [PengembalianController::class, 'memberBatchStore'])
+            ->name('pengembalian.member.batch-store');
+
         Route::get('/pengembalian-saya/{idDetail}/tiket', [PengembalianController::class, 'memberTiket'])
             ->name('pengembalian.member.tiket');
 
+        Route::get('/pengembalian-saya/tiket-batch/{kodeBatch}', [PengembalianController::class, 'memberBatchTiket'])
+            ->name('pengembalian.member.batch-tiket');
+
         Route::post('/pengembalian-saya/{idDetail}/batal', [PengembalianController::class, 'memberBatal'])
             ->name('pengembalian.member.batal');
+
+        Route::post('/pengembalian-saya/tiket-batch/{kodeBatch}/batal', [PengembalianController::class, 'memberBatchBatal'])
+            ->name('pengembalian.member.batch-batal');
 
         Route::get('/pengembalian-saya/{idPengembalian}/bukti', [PengembalianController::class, 'memberBukti'])
             ->name('pengembalian.member.bukti');

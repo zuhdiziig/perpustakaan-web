@@ -515,11 +515,14 @@
                 <a href="{{ route('home') }}" class="topbar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                     Beranda
                 </a>
-                <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                    Katalog
-                </a>
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
+                </a>
+                <a href="{{ route('buku.index') }}" class="topbar-nav-link {{ request()->routeIs('buku.*') ? 'active' : '' }}">
+                    Kelola Buku
+                </a>
+                <a href="{{ route('laporan.index') }}" class="topbar-nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
+                    Laporan
                 </a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                     Tentang
@@ -528,10 +531,11 @@
 
             <!-- Top Right -->
             <div class="topbar-right">
-                <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
+                <a href="{{ route('buku.index') }}" class="topbar-icon-btn" title="Kelola Master Buku">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        <line x1="18" y1="20" x2="18" y2="10"></line>
+                        <line x1="12" y1="20" x2="12" y2="4"></line>
+                        <line x1="6" y1="20" x2="6" y2="14"></line>
                     </svg>
                 </a>
 

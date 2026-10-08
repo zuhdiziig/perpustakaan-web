@@ -323,4 +323,249 @@ class PengembalianMemberTest extends TestCase
 
         $response->assertForbidden();
     }
+
+    public function test_member_can_submit_batch_return_with_individual_book_conditions(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+        $petugas = User::factory()->create(['role' => 'petugas']);
+        $kategori = Kategori::factory()->create();
+
+        $buku1 = Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Buku Clean Code', 'harga' => 80000]);
+        $buku2 = Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Buku Refactoring', 'harga' => 95000]);
+        $buku3 = Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Buku Design Patterns', 'harga' => 120000]);
+
+        $eksemplar1 = $buku1->eksemplar()->first();
+        $eksemplar2 = $buku2->eksemplar()->first();
+        $eksemplar3 = $buku3->eksemplar()->first();
+
+        $eksemplar1->update(['status' => 'Dipinjam']);
+        $eksemplar2->update(['status' => 'Dipinjam']);
+        $eksemplar3->update(['status' => 'Dipinjam']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'idUserPetugas' => $petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(4)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(10)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 3,
+        ]);
+
+        $detail1 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku1->idBuku,
+            'idEksemplar' => $eksemplar1->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $detail2 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $eksemplar2->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $detail3 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku3->idBuku,
+            'idEksemplar' => $eksemplar3->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->actingAs($member)->post(route('pengembalian.member.batch-store'), [
+            'detail_ids' => [$detail1->id, $detail2->id, $detail3->id],
+            'kondisi' => [
+                $detail1->id => 'Baik',
+                $detail2->id => 'Rusak',
+                $detail3->id => 'Hilang',
+            ],
+            'konfirmasi' => 1,
+        ]);
+
+        $detail1->refresh();
+        $detail2->refresh();
+        $detail3->refresh();
+
+        $this->assertNotNull($detail1->kode_batch_kembali);
+        $batchCode = $detail1->kode_batch_kembali;
+
+        $response->assertRedirect(route('pengembalian.member.batch-tiket', $batchCode));
+
+        // Verifikasi semua buku berstatus diajukan kembali
+        $this->assertEquals('Diajukan Kembali', $detail1->statusBuku);
+        $this->assertEquals('Diajukan Kembali', $detail2->statusBuku);
+        $this->assertEquals('Diajukan Kembali', $detail3->statusBuku);
+
+        // Verifikasi kondisi masing-masing buku tersimpan akurat
+        $this->assertEquals('Baik', $detail1->kondisi_laporan);
+        $this->assertEquals('Rusak', $detail2->kondisi_laporan);
+        $this->assertEquals('Hilang', $detail3->kondisi_laporan);
+
+        // Verifikasi kode batch sama untuk ketiganya
+        $this->assertEquals($batchCode, $detail2->kode_batch_kembali);
+        $this->assertEquals($batchCode, $detail3->kode_batch_kembali);
+
+        // Verifikasi setiap buku tetap memiliki token kode_kembali yang unik
+        $this->assertNotEquals($detail1->kode_kembali, $detail2->kode_kembali);
+        $this->assertNotEquals($detail2->kode_kembali, $detail3->kode_kembali);
+    }
+
+    public function test_member_can_view_batch_return_ticket(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+        $kategori = Kategori::factory()->create();
+
+        $buku1 = Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Sistem Informasi']);
+        $buku2 = Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Basis Data Lanjut']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'tanggalPinjam' => Carbon::now()->subDays(2)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(12)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 2,
+        ]);
+
+        $batchCode = 'KB-BATCH-TEST-12345';
+
+        $detail1 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku1->idBuku,
+            'idEksemplar' => $buku1->eksemplar()->first()->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KMB-TEST-001',
+            'qr_kembali' => 'QR-RET-TEST-001',
+            'kode_batch_kembali' => $batchCode,
+            'kondisi_laporan' => 'Baik',
+        ]);
+
+        $detail2 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $buku2->eksemplar()->first()->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KMB-TEST-002',
+            'qr_kembali' => 'QR-RET-TEST-002',
+            'kode_batch_kembali' => $batchCode,
+            'kondisi_laporan' => 'Rusak',
+        ]);
+
+        $response = $this->actingAs($member)->get(route('pengembalian.member.batch-tiket', $batchCode));
+
+        $response->assertOk();
+        $response->assertViewIs('pengembalian.member_batch_tiket');
+        $response->assertSee($batchCode);
+        $response->assertSee('Sistem Informasi');
+        $response->assertSee('Basis Data Lanjut');
+        $response->assertSee('Tiket Pengembalian Buku Sekaligus');
+    }
+
+    public function test_member_cannot_view_other_members_batch_ticket(): void
+    {
+        $memberA = User::factory()->create(['role' => 'member', 'status' => 'aktif']);
+        $memberB = User::factory()->create(['role' => 'member', 'status' => 'aktif']);
+        $kategori = Kategori::factory()->create();
+
+        $buku = Buku::factory()->create(['idKategori' => $kategori->idKategori]);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $memberA->id,
+            'tanggalPinjam' => Carbon::now()->subDays(2)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(12)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $batchCode = 'KB-BATCH-MEMBER-A';
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $buku->eksemplar()->first()->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KMB-TEST-003',
+            'qr_kembali' => 'QR-RET-TEST-003',
+            'kode_batch_kembali' => $batchCode,
+            'kondisi_laporan' => 'Baik',
+        ]);
+
+        $response = $this->actingAs($memberB)->get(route('pengembalian.member.batch-tiket', $batchCode));
+
+        $response->assertForbidden();
+    }
+
+    public function test_member_can_cancel_batch_return(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+        $kategori = Kategori::factory()->create();
+
+        $buku1 = Buku::factory()->create(['idKategori' => $kategori->idKategori]);
+        $buku2 = Buku::factory()->create(['idKategori' => $kategori->idKategori]);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'tanggalPinjam' => Carbon::now()->subDays(2)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(12)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 2,
+        ]);
+
+        $batchCode = 'KB-BATCH-CANCEL-TEST';
+
+        $detail1 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku1->idBuku,
+            'idEksemplar' => $buku1->eksemplar()->first()->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KMB-CAN-001',
+            'qr_kembali' => 'QR-RET-CAN-001',
+            'kode_batch_kembali' => $batchCode,
+            'kondisi_laporan' => 'Baik',
+        ]);
+
+        $detail2 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $buku2->eksemplar()->first()->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KMB-CAN-002',
+            'qr_kembali' => 'QR-RET-CAN-002',
+            'kode_batch_kembali' => $batchCode,
+            'kondisi_laporan' => 'Rusak',
+        ]);
+
+        $response = $this->actingAs($member)->post(route('pengembalian.member.batch-batal', $batchCode));
+
+        $response->assertRedirect(route('pengembalian.member'));
+        $response->assertSessionHas('success');
+
+        $detail1->refresh();
+        $detail2->refresh();
+
+        $this->assertEquals('Dipinjam', $detail1->statusBuku);
+        $this->assertEquals('Dipinjam', $detail2->statusBuku);
+        $this->assertNull($detail1->kode_batch_kembali);
+        $this->assertNull($detail2->kode_batch_kembali);
+        $this->assertNull($detail1->kode_kembali);
+        $this->assertNull($detail2->kode_kembali);
+        $this->assertEquals('Baik', $detail1->kondisi_laporan);
+        $this->assertEquals('Baik', $detail2->kondisi_laporan);
+    }
 }

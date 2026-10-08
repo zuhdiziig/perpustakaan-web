@@ -1,16 +1,16 @@
 @extends('layouts.anggota')
 
-@section('title', 'Tiket Pengembalian Buku - BOOKNEST')
+@section('title', 'Tiket Pengembalian Sekaligus - BOOKNEST')
 
 @section('styles')
 <style>
     /* =========================================================
-       HALAMAN TIKET PENGEMBALIAN BUKU (MEMBER RETURN PASS)
+       HALAMAN TIKET PENGEMBALIAN BUKU SEKALIGUS (BATCH RETURN)
        ========================================================= */
 
     .ticket-page {
         width: 100%;
-        max-width: 1080px;
+        max-width: 1140px;
         margin: 0 auto;
         padding: 4px 0 40px;
         box-sizing: border-box;
@@ -98,64 +98,96 @@
         font-size: 11.5px;
         font-weight: 700;
         letter-spacing: 0.3px;
-        margin-bottom: 18px;
         background: #fef3c7;
         color: #92400e;
         border: 1px solid #fde68a;
+        margin-bottom: 16px;
     }
 
     .qr-frame {
-        width: 220px;
-        height: 220px;
-        margin: 0 auto 16px;
-        padding: 12px;
         background: #f8fafc;
-        border: 2px dashed #cbd5e1;
-        border-radius: 16px;
+        border: 1.5px dashed #cbd5e1;
+        border-radius: 14px;
+        padding: 14px;
         display: flex;
         align-items: center;
         justify-content: center;
+        margin: 0 auto 16px;
+        max-width: 250px;
     }
 
-    .qr-frame svg,
-    .qr-frame img {
-        max-width: 100%;
-        max-height: 100%;
+    .qr-frame svg, .qr-frame img {
+        width: 100%;
+        height: auto;
         display: block;
     }
 
     .ticket-code-label {
-        font-size: 11px;
+        font-size: 11.5px;
         font-weight: 700;
-        color: var(--text-muted);
         text-transform: uppercase;
-        letter-spacing: 0.8px;
+        letter-spacing: 0.6px;
+        color: var(--text-muted);
         margin-bottom: 4px;
     }
 
     .ticket-code-val {
-        font-size: 20px;
-        font-weight: 900;
+        font-family: monospace;
+        font-size: 16px;
+        font-weight: 800;
         color: var(--brand-primary);
-        letter-spacing: 1px;
+        letter-spacing: 0.8px;
         margin-bottom: 14px;
+        word-break: break-all;
+    }
+
+    .batch-summary-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+        margin-bottom: 16px;
+    }
+
+    .chip-item {
+        padding: 4px 10px;
+        border-radius: 8px;
+        font-size: 11.5px;
+        font-weight: 700;
+    }
+
+    .chip-item.total {
+        background: #f1f5f9;
+        color: #334155;
+    }
+
+    .chip-item.baik {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .chip-item.rusak {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .chip-item.hilang {
+        background: #fee2e2;
+        color: #b91c1c;
     }
 
     .qr-instruction-text {
         font-size: 12px;
         color: var(--text-muted);
-        line-height: 1.5;
-        padding: 12px 14px;
-        background: #f8fafc;
-        border-radius: 10px;
-        border: 1px solid #e2e8f0;
-        margin-bottom: 18px;
+        line-height: 1.55;
+        margin-bottom: 20px;
+        padding: 0 4px;
     }
 
     .qr-actions-box {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 9px;
     }
 
     .btn-qr-action {
@@ -163,47 +195,43 @@
         align-items: center;
         justify-content: center;
         gap: 8px;
+        width: 100%;
         padding: 10px 16px;
         border-radius: 10px;
         font-size: 13px;
         font-weight: 700;
-        text-decoration: none;
         cursor: pointer;
         transition: all 0.15s ease;
         border: none;
-        width: 100%;
-        box-sizing: border-box;
+        text-decoration: none;
     }
 
     .btn-qr-print {
-        background: var(--brand-primary);
+        background: #0f766e;
         color: #ffffff;
-        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.25);
     }
 
     .btn-qr-print:hover {
-        background: #0d655e;
-        color: #ffffff;
+        background: #115e59;
         transform: translateY(-1px);
     }
 
     .btn-qr-cancel {
-        background: #fff1f2;
-        color: #e11d48;
-        border: 1px solid #fecdd3;
+        background: #ffffff;
+        color: #dc2626;
+        border: 1px solid #fecaca;
     }
 
     .btn-qr-cancel:hover {
-        background: #ffe4e6;
-        color: #be123c;
+        background: #fef2f2;
     }
 
-    /* --- TICKET DETAIL CARD (KOLOM KANAN) --- */
+    /* --- DETAIL CARD (KOLOM KANAN) --- */
     .ticket-detail-card {
         background: #ffffff;
         border: 1px solid var(--border-color);
         border-radius: 18px;
-        padding: 26px 28px;
+        padding: 24px;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.04);
     }
 
@@ -211,142 +239,169 @@
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        padding-bottom: 16px;
+        gap: 16px;
+        padding-bottom: 18px;
         border-bottom: 1px solid var(--border-color);
         margin-bottom: 20px;
-        gap: 16px;
     }
 
     .detail-head-title {
-        font-size: 17px;
+        font-size: 18px;
         font-weight: 800;
         color: var(--text-heading);
         margin: 0 0 4px;
     }
 
     .detail-head-subtitle {
-        font-size: 12.5px;
+        font-size: 13px;
         color: var(--text-muted);
         margin: 0;
     }
 
-    /* Showcase Buku Singkat */
-    .book-item-box {
+    /* List of books in batch */
+    .batch-books-list {
         display: flex;
-        align-items: center;
-        gap: 16px;
-        padding: 16px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
-        border-radius: 14px;
+        flex-direction: column;
+        gap: 12px;
         margin-bottom: 22px;
     }
 
-    .book-icon-wrapper {
-        width: 48px;
-        height: 48px;
+    .batch-book-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+        padding: 14px 16px;
         border-radius: 12px;
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        transition: all 0.15s ease;
+    }
+
+    .batch-book-row:hover {
+        border-color: #cbd5e1;
+        background: #ffffff;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    }
+
+    .batch-book-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .batch-book-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 10px;
+        background: #ccfbf1;
+        color: #0f766e;
         display: flex;
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
     }
 
-    .book-item-info {
-        flex: 1;
+    .batch-book-info {
         min-width: 0;
     }
 
-    .book-item-title {
-        font-size: 15px;
-        font-weight: 800;
+    .batch-book-title {
+        font-size: 14px;
+        font-weight: 700;
         color: var(--text-heading);
-        margin: 0 0 4px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+        display: block;
     }
 
-    .book-item-author {
-        font-size: 13px;
+    .batch-book-meta {
+        font-size: 12px;
         color: var(--text-muted);
-        margin: 0 0 8px;
+        margin-top: 2px;
+        display: block;
     }
 
-    .book-item-meta-badges {
+    .batch-book-right {
         display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+        flex-shrink: 0;
     }
 
-    .badge-shelf {
+    .condition-pill {
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        padding: 3px 10px;
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-        border-radius: 6px;
+        padding: 4px 10px;
+        border-radius: 20px;
         font-size: 11.5px;
         font-weight: 700;
     }
 
-    .badge-copy-num {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        padding: 3px 10px;
-        background: #f1f5f9;
-        color: #475569;
-        border: 1px solid #cbd5e1;
-        border-radius: 6px;
-        font-size: 11.5px;
+    .condition-pill.baik {
+        background: #dcfce7;
+        color: #15803d;
+    }
+
+    .condition-pill.rusak {
+        background: #fef3c7;
+        color: #b45309;
+        border: 1px solid #fde68a;
+    }
+
+    .condition-pill.hilang {
+        background: #fee2e2;
+        color: #b91c1c;
+        border: 1px solid #fecaca;
+    }
+
+    .condition-note {
+        font-size: 11px;
+        color: #e11d48;
         font-weight: 700;
     }
 
-    /* Rincian List */
+    /* SPEC LIST */
     .ticket-spec-list {
         display: flex;
         flex-direction: column;
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 10px;
+        margin-bottom: 22px;
+        padding: 14px 18px;
+        background: #f8fafc;
+        border-radius: 12px;
+        border: 1px solid #e2e8f0;
     }
 
     .ticket-spec-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-bottom: 10px;
-        border-bottom: 1px dashed #e2e8f0;
-        font-size: 13.5px;
+        font-size: 13px;
+        gap: 12px;
     }
 
-    .ticket-spec-row:last-child {
-        border-bottom: none;
-        padding-bottom: 0;
-    }
-
-    .spec-key {
+    .ticket-spec-row .spec-key {
         color: var(--text-muted);
-        font-weight: 500;
+        font-weight: 600;
     }
 
-    .spec-val {
+    .ticket-spec-row .spec-val {
         color: var(--text-heading);
         font-weight: 700;
         text-align: right;
     }
 
-    /* Info Panduan Step */
+    /* GUIDE BOX */
     .return-steps {
-        background: #f0fdf9;
+        background: #f0fdfa;
         border: 1px solid #ccfbf1;
-        border-radius: 14px;
+        border-radius: 12px;
         padding: 16px 18px;
         margin-bottom: 24px;
     }
@@ -391,7 +446,7 @@
         }
 
         .ticket-qr-card {
-            max-width: 420px;
+            max-width: 440px;
             margin: 0 auto;
             width: 100%;
         }
@@ -413,7 +468,7 @@
         }
 
         .ticket-grid {
-            grid-template-columns: 320px 1fr !important;
+            grid-template-columns: 300px 1fr !important;
         }
 
         .ticket-qr-card, .ticket-detail-card {
@@ -432,13 +487,13 @@
         <span>›</span>
         <a href="{{ route('pengembalian.member') }}">Pengembalian Saya</a>
         <span>›</span>
-        <span>Tiket QR Pengembalian</span>
+        <span>Tiket Pengembalian Sekaligus</span>
     </div>
 
     {{-- HEADER TITLE --}}
-    <h1 class="ticket-page-title">Tiket Pengembalian Buku Fisik</h1>
+    <h1 class="ticket-page-title">Tiket Pengembalian Buku Sekaligus</h1>
     <p class="ticket-page-subtitle">
-        Tunjukkan QR Code tiket ini kepada petugas perpustakaan di meja layanan sirkulasi saat mengembalikan buku fisik.
+        Tunjukkan QR Code tiket pengembalian sekaligus ini kepada petugas di meja layanan sirkulasi perpustakaan BOOKNEST.
     </p>
 
     {{-- ALERT BANNER SUCCESS --}}
@@ -449,23 +504,9 @@
                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
             </svg>
             <div>
-                <strong>Pengajuan Pengembalian Berhasil Dibuat!</strong><br>
+                <strong>Pengajuan Pengembalian Sekaligus Berhasil Dibuat!</strong><br>
                 {{ session('success') }}
             </div>
-        </div>
-    @endif
-
-    @if($detail->kode_batch_kembali)
-        <div style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
-            <div style="display: flex; align-items: center; gap: 10px;">
-                <span style="font-size: 18px;">📚</span>
-                <div style="font-size: 13px; color: #0f766e; font-weight: 600;">
-                    Buku ini diajukan bersama dalam <strong>Tiket Pengembalian Sekaligus ({{ $detail->kode_batch_kembali }})</strong>.
-                </div>
-            </div>
-            <a href="{{ route('pengembalian.member.batch-tiket', $detail->kode_batch_kembali) }}" style="padding: 7px 14px; background: #0f766e; color: #fff; font-size: 12.5px; font-weight: 700; border-radius: 8px; text-decoration: none;">
-                Buka Tiket Sekaligus &rarr;
-            </a>
         </div>
     @endif
 
@@ -485,11 +526,23 @@
                 {!! $qrCodeSvg !!}
             </div>
 
-            <div class="ticket-code-label">Kode Tiket Pengembalian</div>
-            <div class="ticket-code-val">{{ $detail->kode_kembali ?? '-' }}</div>
+            <div class="ticket-code-label">Kode Tiket Pengembalian Kolektif</div>
+            <div class="ticket-code-val">{{ $kodeBatch }}</div>
+
+            {{-- Summary Chips --}}
+            <div class="batch-summary-chips">
+                <span class="chip-item total">{{ $totalBuku }} Buku</span>
+                <span class="chip-item baik">{{ $countBaik }} Baik</span>
+                @if($countRusak > 0)
+                    <span class="chip-item rusak">{{ $countRusak }} Rusak</span>
+                @endif
+                @if($countHilang > 0)
+                    <span class="chip-item hilang">{{ $countHilang }} Hilang</span>
+                @endif
+            </div>
 
             <div class="qr-instruction-text">
-                Scan kode QR di atas pada barcode reader meja sirkulasi untuk serah terima buku dan verifikasi kondisi buku secara langsung.
+                Scan satu kode QR di atas pada scanner meja sirkulasi untuk memverifikasi dan mengembalikan seluruh buku dalam daftar ini sekaligus.
             </div>
 
             <div class="qr-actions-box">
@@ -502,100 +555,107 @@
                     Cetak Tiket QR
                 </button>
 
-                <form action="{{ route('pengembalian.member.batal', $detail->id) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pengajuan pengembalian buku ini? Status buku akan dikembalikan menjadi Dipinjam.')">
+                <form action="{{ route('pengembalian.member.batch-batal', $kodeBatch) }}" method="POST" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan pengajuan pengembalian {{ $totalBuku }} buku ini sekaligus? Status seluruh buku akan dikembalikan menjadi Dipinjam.')">
                     @csrf
                     <button type="submit" class="btn-qr-action btn-qr-cancel">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
                             <line x1="6" y1="6" x2="18" y2="18"></line>
                         </svg>
-                        Batalkan Pengajuan
+                        Batalkan Pengajuan Sekaligus
                     </button>
                 </form>
             </div>
         </div>
 
-        {{-- KOLOM KANAN: RINCIAN PENGEMBALIAN --}}
+        {{-- KOLOM KANAN: RINCIAN BUKU DALAM BATCH --}}
         <div class="ticket-detail-card">
             <div class="detail-card-head">
                 <div>
-                    <h2 class="detail-head-title">Rincian Pengajuan Pengembalian</h2>
-                    <p class="detail-head-subtitle">Informasi lengkap transaksi peminjaman & buku yang akan dikembalikan</p>
+                    <h2 class="detail-head-title">Rincian Buku yang Dikembalikan</h2>
+                    <p class="detail-head-subtitle">Daftar {{ $totalBuku }} buku beserta kondisi fisik yang dilaporkan</p>
                 </div>
-                <span style="font-size: 12px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 4px 10px; border-radius: 8px;">
-                    #TRX-{{ str_pad($detail->idPeminjaman, 5, '0', STR_PAD_LEFT) }}
+                <span style="font-size: 12px; font-weight: 700; color: #0f766e; background: #ccfbf1; padding: 5px 12px; border-radius: 8px;">
+                    {{ $totalBuku }} Buku Sekaligus
                 </span>
             </div>
 
-            {{-- BUKU ITEM ROW --}}
-            <div class="book-item-box">
-                <div class="book-icon-wrapper">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <div class="book-item-info">
-                    <div class="book-item-title">{{ $detail->buku->judul ?? 'Judul Buku' }}</div>
-                    <div class="book-item-author">{{ $detail->buku->penulis ?? 'Anonim' }} • {{ $detail->buku->kategori->namaKategori ?? 'Umum' }}</div>
-                    <div class="book-item-meta-badges">
-                        <span class="badge-copy-num">Eksemplar #{{ $detail->eksemplar->nomor_eksemplar ?? '1' }}</span>
-                        <span class="badge-shelf">Rak: {{ $detail->buku->rak ?? 'Utama' }}</span>
-                        @if($detail->eksemplar?->kode_barcode)
-                            <span class="badge-copy-num">{{ $detail->eksemplar->kode_barcode }}</span>
-                        @endif
+            {{-- LIST OF BOOKS IN THIS BATCH --}}
+            <div class="batch-books-list">
+                @foreach($details as $item)
+                    <div class="batch-book-row">
+                        <div class="batch-book-left">
+                            <div class="batch-book-icon">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                            </div>
+                            <div class="batch-book-info">
+                                <span class="batch-book-title">{{ $item->buku->judul ?? 'Judul Buku' }}</span>
+                                <span class="batch-book-meta">
+                                    {{ $item->buku->penulis ?? 'Anonim' }} • 
+                                    Eksemplar: #{{ $item->eksemplar->nomor_eksemplar ?? '1' }} • 
+                                    Rak: {{ $item->buku->rak ?? 'Utama' }} •
+                                    Ref: #TRX-{{ str_pad($item->idPeminjaman, 5, '0', STR_PAD_LEFT) }}
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="batch-book-right">
+                            @if($item->kondisi_laporan === 'Baik')
+                                <span class="condition-pill baik">✓ Kondisi Baik</span>
+                            @elseif($item->kondisi_laporan === 'Rusak')
+                                <span class="condition-pill rusak">⚠️ Kondisi Rusak</span>
+                                <span class="condition-note">Denda: Rp {{ number_format($item->dendaKondisi, 0, ',', '.') }}</span>
+                            @else
+                                <span class="condition-pill hilang">✕ Buku Hilang</span>
+                                <span class="condition-note">Ganti Rugi: Rp {{ number_format($item->dendaKondisi, 0, ',', '.') }}</span>
+                            @endif
+
+                            @if($item->isOverdue)
+                                <span style="font-size: 11px; color: #dc2626; font-weight: 700;">
+                                    Telat {{ $item->hariTerlambat }} hari (+Rp {{ number_format($item->dendaTelat, 0, ',', '.') }})
+                                </span>
+                            @endif
+                        </div>
                     </div>
-                </div>
+                @endforeach
             </div>
 
-            {{-- SPEC LIST TABLE --}}
+            {{-- SUMMARY SPEC LIST --}}
             <div class="ticket-spec-list">
                 <div class="ticket-spec-row">
-                    <span class="spec-key">Nama Peminjam (Member)</span>
-                    <span class="spec-val">{{ $detail->peminjaman->member->name ?? auth()->user()->name }}</span>
+                    <span class="spec-key">Nama Anggota (Member)</span>
+                    <span class="spec-val">{{ auth()->user()->name }}</span>
                 </div>
                 <div class="ticket-spec-row">
                     <span class="spec-key">Nomor Anggota</span>
-                    <span class="spec-val">{{ $detail->peminjaman->member->kode_anggota ?? '-' }}</span>
+                    <span class="spec-val">{{ auth()->user()->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), auth()->id()) }}</span>
                 </div>
                 <div class="ticket-spec-row">
-                    <span class="spec-key">Tanggal Mulai Pinjam</span>
-                    <span class="spec-val">{{ \Carbon\Carbon::parse($detail->peminjaman->tanggalPinjam)->translatedFormat('l, d F Y') }}</span>
+                    <span class="spec-key">Total Buku yang Dikembalikan</span>
+                    <span class="spec-val">{{ $totalBuku }} Buku</span>
                 </div>
                 <div class="ticket-spec-row">
-                    <span class="spec-key">Batas Jatuh Tempo</span>
-                    <span class="spec-val" style="color: {{ $isOverdue ? '#dc2626' : 'inherit' }};">
-                        {{ $batasKembali->translatedFormat('l, d F Y') }}
-                    </span>
-                </div>
-                <div class="ticket-spec-row">
-                    <span class="spec-key">Status Keterlambatan</span>
+                    <span class="spec-key">Ringkasan Kondisi</span>
                     <span class="spec-val">
-                        @if($isOverdue)
-                            <span style="color: #dc2626; font-weight: 800;">● Terlambat {{ $hariTerlambat }} Hari</span>
-                            <span style="font-size: 12px; color: #dc2626; display: block;">(Est. Denda: Rp {{ number_format($estDenda, 0, ',', '.') }})</span>
-                        @else
-                            <span style="color: #166534; font-weight: 800;">✓ Tepat Waktu (Bebas Denda Keterlambatan)</span>
-                        @endif
+                        {{ $countBaik }} Baik 
+                        @if($countRusak > 0), {{ $countRusak }} Rusak @endif 
+                        @if($countHilang > 0), {{ $countHilang }} Hilang @endif
                     </span>
                 </div>
                 <div class="ticket-spec-row">
-                    <span class="spec-key">Kondisi Laporan Member</span>
-                    <span class="spec-val">
-                        @if($detail->kondisi_laporan === 'Baik')
-                            <span style="color: #166534; font-weight: 700;">Baik (Buku utuh dan bersih)</span>
-                        @elseif($detail->kondisi_laporan === 'Rusak')
-                            <span style="color: #d97706; font-weight: 700;">Rusak (Ada kerusakan fisik)</span>
-                        @else
-                            <span style="color: #dc2626; font-weight: 700;">Hilang (Buku tidak ditemukan)</span>
-                        @endif
-                        <span style="font-size: 11px; color: var(--text-muted); display: block; font-weight: 400;">*Kondisi akhir akan diverifikasi langsung oleh petugas</span>
+                    <span class="spec-key">Estimasi Total Denda</span>
+                    <span class="spec-val" style="color: {{ $totalEstDenda > 0 ? '#dc2626' : '#166534' }}; font-size: 15px; font-weight: 800;">
+                        {{ $totalEstDenda > 0 ? 'Rp ' . number_format($totalEstDenda, 0, ',', '.') : 'Rp 0 (Bebas Denda)' }}
                     </span>
                 </div>
-                <div class="ticket-spec-row">
-                    <span class="spec-key">Waktu Pengajuan Tiket</span>
-                    <span class="spec-val">{{ $detail->waktu_pengajuan_kembali ? \Carbon\Carbon::parse($detail->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-' }} WIB</span>
-                </div>
+                @if($totalEstDenda > 0)
+                    <div style="font-size: 11.5px; color: #94a3b8; text-align: right; margin-top: -4px;">
+                        *Rincian: Denda Keterlambatan Rp {{ number_format($totalEstDendaTelat, 0, ',', '.') }} + Denda Kerusakan/Kehilangan Rp {{ number_format($totalEstDendaKondisi, 0, ',', '.') }}
+                    </div>
+                @endif
             </div>
 
             {{-- RETURN STEPS --}}
@@ -606,13 +666,13 @@
                         <polyline points="12 16 16 12 12 8"></polyline>
                         <line x1="8" y1="12" x2="16" y2="12"></line>
                     </svg>
-                    Panduan Pengembalian Buku di Perpustakaan
+                    Panduan Serah Terima di Meja Layanan Perpustakaan
                 </div>
                 <ol class="return-steps-list">
-                    <li>Bawa buku fisik eksemplar di atas ke meja sirkulasi perpustakaan BOOKNEST.</li>
-                    <li>Tunjukkan QR Code pada tiket ini dari ponsel Anda kepada petugas perpustakaan.</li>
-                    <li>Petugas akan melakukan scan QR, memverifikasi fisik buku, dan menyelesaikan pengembalian.</li>
-                    <li>Setelah transaksi selesai, Anda akan menerima bukti tanda terima pengembalian resmi (#RET).</li>
+                    <li>Bawa buku fisik yang berstatus <strong>Baik</strong> atau <strong>Rusak</strong> ke Meja Sirkulasi BOOKNEST.</li>
+                    <li>Tunjukkan QR Code tiket pengembalian kolektif ini kepada petugas perpustakaan.</li>
+                    <li>Petugas akan memverifikasi fisik seluruh buku secara bersamaan dan menyelesaikan transaksi.</li>
+                    <li>Jika ada denda (keterlambatan/kerusakan/kehilangan), Anda dapat membayarnya langsung via QRIS/Denda Saya.</li>
                 </ol>
             </div>
 

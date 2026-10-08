@@ -689,6 +689,181 @@
         to { transform: scale(1); opacity: 1; }
     }
 
+    /* --- BATCH RETURN STYLES --- */
+    .bulk-action-bar {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 50;
+        background: #0f172a;
+        color: #ffffff;
+        padding: 10px 18px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        animation: scaleUp 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        max-width: 92%;
+    }
+
+    .bulk-bar-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        width: 100%;
+    }
+
+    .bulk-bar-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .bulk-badge-count {
+        background: #0f766e;
+        color: #ffffff;
+        font-weight: 800;
+        font-size: 13px;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .bulk-bar-text {
+        font-size: 13.5px;
+        color: #cbd5e1;
+    }
+
+    .bulk-bar-text strong {
+        color: #ffffff;
+    }
+
+    .bulk-bar-right {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-bulk-cancel {
+        background: none;
+        border: none;
+        color: #94a3b8;
+        font-size: 12.5px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 10px;
+        transition: color 0.15s;
+    }
+
+    .btn-bulk-cancel:hover {
+        color: #ffffff;
+    }
+
+    .btn-bulk-submit {
+        background: #0f766e;
+        color: #ffffff;
+        border: none;
+        border-radius: 9px;
+        padding: 8px 16px;
+        font-size: 13px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s;
+    }
+
+    .btn-bulk-submit:hover {
+        background: #115e59;
+        transform: translateY(-1px);
+    }
+
+    .modal-batch-card {
+        max-width: 680px !important;
+        width: 100%;
+    }
+
+    .batch-modal-item-card {
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        transition: all 0.15s;
+    }
+
+    .batch-modal-item-card:hover {
+        border-color: #cbd5e1;
+    }
+
+    .condition-selector-group {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+
+    .condition-option {
+        cursor: pointer;
+        position: relative;
+    }
+
+    .condition-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .condition-label-box {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 10px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 8px;
+        background: #f8fafc;
+        font-size: 12px;
+        font-weight: 700;
+        color: #475569;
+        transition: all 0.15s ease;
+        justify-content: center;
+        text-align: center;
+        height: 100%;
+        box-sizing: border-box;
+    }
+
+    .condition-option input[type="radio"]:checked + .condition-label-box {
+        font-weight: 800;
+        transform: translateY(-1px);
+    }
+
+    .condition-option.opt-baik input[type="radio"]:checked + .condition-label-box {
+        background: #ecfdf5;
+        border-color: #10b981;
+        color: #065f46;
+        box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+    }
+
+    .condition-option.opt-rusak input[type="radio"]:checked + .condition-label-box {
+        background: #fffbeb;
+        border-color: #f59e0b;
+        color: #92400e;
+        box-shadow: 0 2px 6px rgba(245, 158, 11, 0.15);
+    }
+
+    .condition-option.opt-hilang input[type="radio"]:checked + .condition-label-box {
+        background: #fef2f2;
+        border-color: #ef4444;
+        color: #991b1b;
+        box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
+    }
+
     @media (max-width: 900px) {
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -837,7 +1012,7 @@
     {{-- TAB 1: BUKU SIAP DIKEMBALIKAN (AKTIF) --}}
     @if($tab === 'aktif')
         <div class="main-card">
-            <div class="main-card-header">
+            <div class="main-card-header" style="flex-wrap: wrap; gap: 12px;">
                 <h3 class="main-card-title">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
@@ -845,9 +1020,23 @@
                     </svg>
                     Daftar Buku Sedang Dipinjam yang Perlu Dikembalikan
                 </h3>
-                <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">
-                    Total: {{ $pinjamanAktif->count() }} buku aktif
-                </span>
+                <div style="display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+                    @php
+                        $bukuBisaKembali = $pinjamanAktif->where('statusBuku', 'Dipinjam')->count();
+                    @endphp
+                    @if($bukuBisaKembali > 1)
+                        <button type="button" class="btn-return-action" onclick="openBatchReturnModalAll()" style="padding: 7px 14px; font-size: 12.5px; background: #0f766e;">
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                                <polyline points="9 11 12 14 22 4"></polyline>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                            <span>Kembalikan Sekaligus ({{ $bukuBisaKembali }})</span>
+                        </button>
+                    @endif
+                    <span style="font-size: 12.5px; color: var(--text-muted); font-weight: 600;">
+                        Total: {{ $pinjamanAktif->count() }} buku aktif
+                    </span>
+                </div>
             </div>
 
             @if($pinjamanAktif->isNotEmpty())
@@ -855,17 +1044,40 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th style="width: 120px;">Kode TRX</th>
+                                <th style="width: 44px; text-align: center;">
+                                    <input type="checkbox" id="checkAllBooks" onchange="toggleSelectAllBooks(this)" title="Pilih Semua Buku" style="cursor: pointer; width: 17px; height: 17px; accent-color: #0f766e;">
+                                </th>
+                                <th style="width: 110px;">Kode TRX</th>
                                 <th>Detail Buku</th>
-                                <th style="width: 130px;">Tgl Pinjam</th>
-                                <th style="width: 150px;">Jatuh Tempo</th>
+                                <th style="width: 120px;">Tgl Pinjam</th>
+                                <th style="width: 140px;">Jatuh Tempo</th>
                                 <th style="width: 160px;">Status Keterlambatan</th>
-                                <th style="width: 220px; text-align: right;">Aksi Pengembalian</th>
+                                <th style="width: 200px; text-align: right;">Aksi Pengembalian</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($pinjamanAktif as $item)
                                 <tr class="{{ (int)$highlightId === (int)$item->idPeminjaman ? 'highlighted' : '' }}">
+                                    {{-- CHECKBOX PILIHAN --}}
+                                    <td style="text-align: center;">
+                                        @if($item->statusBuku === 'Dipinjam')
+                                            <input type="checkbox" class="book-row-check" 
+                                                   value="{{ $item->id }}" 
+                                                   data-id="{{ $item->id }}"
+                                                   data-judul="{{ $item->buku->judul ?? 'Buku' }}"
+                                                   data-penulis="{{ $item->buku->penulis ?? 'Anonim' }}"
+                                                   data-eksemplar="{{ $item->eksemplar->nomor_eksemplar ?? '1' }}"
+                                                   data-rak="{{ $item->buku->rak ?? 'Utama' }}"
+                                                   data-harga="{{ (float)($item->buku->harga ?? 0) }}"
+                                                   data-overdue="{{ $item->isOverdue ? 1 : 0 }}"
+                                                   data-denda="{{ $item->isOverdue ? $item->estDenda : 0 }}"
+                                                   data-haritelat="{{ $item->isOverdue ? $item->hariTerlambat : 0 }}"
+                                                   onchange="handleRowCheckChange()" 
+                                                   style="cursor: pointer; width: 17px; height: 17px; accent-color: #0f766e;">
+                                        @else
+                                            <span title="Buku sedang menunggu scan petugas di meja layanan" style="color: #cbd5e1; font-size: 16px;">—</span>
+                                        @endif
+                                    </td>
                                     {{-- KODE TRX --}}
                                     <td>
                                         <span class="trx-badge">
@@ -1235,7 +1447,378 @@
     </div>
 </div>
 
+{{-- FLOATING BULK ACTION BAR --}}
+<div id="bulkActionBar" class="bulk-action-bar" style="display: none;">
+    <div class="bulk-bar-content">
+        <div class="bulk-bar-left">
+            <span class="bulk-badge-count" id="selectedCountBadge">0</span>
+            <div class="bulk-bar-text">
+                <strong id="selectedCountText">0 Buku</strong> dipilih untuk dikembalikan
+            </div>
+        </div>
+        <div class="bulk-bar-right">
+            <button type="button" class="btn-bulk-cancel" onclick="clearAllSelections()">
+                Batal Pilihan
+            </button>
+            <button type="button" class="btn-bulk-submit" onclick="openBatchReturnModalFromSelection()">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Proses Sekaligus</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+{{-- MODAL 3: PENGEMBALIAN BUKU SEKALIGUS (BATCH) --}}
+<div class="modal-overlay" id="modalBatchReturn">
+    <div class="modal-card modal-batch-card">
+        <div class="modal-header">
+            <div>
+                <h3 class="modal-title">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                        <polyline points="9 11 12 14 22 4"></polyline>
+                        <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                    </svg>
+                    Pengembalian Sekaligus
+                </h3>
+                <span style="font-size: 12px; color: var(--text-muted); margin-top: 2px; display: block;">
+                    Mengembalikan <strong id="batchModalItemCount">0</strong> buku secara bersamaan dalam satu tiket QR
+                </span>
+            </div>
+            <button type="button" class="btn-close-modal" onclick="closeBatchReturnModal()">✕</button>
+        </div>
+
+        <form id="formBatchReturn" method="POST" action="{{ route('pengembalian.member.batch-store') }}">
+            @csrf
+            <div class="modal-body" style="max-height: 62vh; overflow-y: auto; padding: 20px;">
+                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; color: #0f766e; display: flex; align-items: flex-start; gap: 10px;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <div>
+                        <strong>Penting:</strong> Tentukan kondisi fisik untuk setiap buku di bawah ini. Jika ada buku berstatus <strong>Rusak</strong> atau <strong>Hilang</strong>, sistem akan secara otomatis menghitung tagihan ganti rugi (100% harga buku).
+                    </div>
+                </div>
+
+                {{-- DAFTAR KARTU BUKU DENGAN PILIHAN KONDISI --}}
+                <div id="batchItemsList" style="display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px;">
+                    {{-- Di-render via JavaScript --}}
+                </div>
+
+                {{-- RINGKASAN BATCH --}}
+                <div style="background: #f8fafc; border: 1.5px solid #e2e8f0; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
+                    <div style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+                        Ringkasan Pengembalian
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 12px;">
+                        <div style="background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                            <span style="font-size: 11px; font-weight: 700; color: #065f46; display: block;">Kondisi Baik</span>
+                            <strong id="summaryCountBaik" style="font-size: 16px; color: #047857;">0</strong>
+                        </div>
+                        <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                            <span style="font-size: 11px; font-weight: 700; color: #92400e; display: block;">Kondisi Rusak</span>
+                            <strong id="summaryCountRusak" style="font-size: 16px; color: #b45309;">0</strong>
+                        </div>
+                        <div style="background: #fef2f2; border: 1px solid #fecaca; border-radius: 8px; padding: 8px 10px; text-align: center;">
+                            <span style="font-size: 11px; font-weight: 700; color: #991b1b; display: block;">Buku Hilang</span>
+                            <strong id="summaryCountHilang" style="font-size: 16px; color: #dc2626;">0</strong>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding-top: 10px; border-top: 1px dashed #cbd5e1; font-size: 13px;">
+                        <span style="font-weight: 600; color: var(--text-heading);">Total Estimasi Tagihan/Denda:</span>
+                        <strong id="summaryTotalDenda" style="font-size: 15px; color: #dc2626;">Rp 0</strong>
+                    </div>
+                </div>
+
+                <div class="checkbox-wrap">
+                    <input type="checkbox" name="konfirmasi" id="checkBatchConfirm" required>
+                    <label for="checkBatchConfirm">
+                        Saya memastikan telah menyiapkan seluruh buku yang dipilih dan bersedia menunjukkan tiket QR pengembalian bersama ke petugas sirkulasi.
+                    </label>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn-qr-desk" onclick="closeBatchReturnModal()">Batal</button>
+                <button type="submit" class="btn-return-action" id="btnSubmitBatch">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="3" width="7" height="7"></rect>
+                        <rect x="14" y="14" width="7" height="7"></rect>
+                        <rect x="3" y="14" width="7" height="7"></rect>
+                    </svg>
+                    <span>Terbitkan Tiket Pengembalian Sekaligus</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+    let selectedBatchBooks = [];
+
+    function formatRupiah(number) {
+        return new Intl.NumberFormat('id-ID').format(Math.round(number));
+    }
+
+    function toggleSelectAllBooks(masterCheckbox) {
+        const checkboxes = document.querySelectorAll('.book-row-check');
+        checkboxes.forEach(cb => {
+            cb.checked = masterCheckbox.checked;
+        });
+        handleRowCheckChange();
+    }
+
+    function handleRowCheckChange() {
+        const checkboxes = Array.from(document.querySelectorAll('.book-row-check'));
+        const checked = checkboxes.filter(cb => cb.checked);
+        const master = document.getElementById('checkAllBooks');
+
+        if (master) {
+            if (checked.length === 0) {
+                master.checked = false;
+                master.indeterminate = false;
+            } else if (checked.length === checkboxes.length) {
+                master.checked = true;
+                master.indeterminate = false;
+            } else {
+                master.checked = false;
+                master.indeterminate = true;
+            }
+        }
+
+        const bulkBar = document.getElementById('bulkActionBar');
+        const badge = document.getElementById('selectedCountBadge');
+        const text = document.getElementById('selectedCountText');
+
+        if (checked.length > 0) {
+            if (badge) badge.innerText = checked.length;
+            if (text) text.innerText = checked.length + ' Buku';
+            if (bulkBar) bulkBar.style.display = 'flex';
+        } else {
+            if (bulkBar) bulkBar.style.display = 'none';
+        }
+    }
+
+    function clearAllSelections() {
+        const checkboxes = document.querySelectorAll('.book-row-check');
+        checkboxes.forEach(cb => {
+            cb.checked = false;
+        });
+        const master = document.getElementById('checkAllBooks');
+        if (master) {
+            master.checked = false;
+            master.indeterminate = false;
+        }
+        const bulkBar = document.getElementById('bulkActionBar');
+        if (bulkBar) bulkBar.style.display = 'none';
+    }
+
+    function openBatchReturnModalAll() {
+        const checkboxes = Array.from(document.querySelectorAll('.book-row-check'));
+        if (checkboxes.length === 0) return;
+
+        checkboxes.forEach(cb => {
+            cb.checked = true;
+        });
+        handleRowCheckChange();
+        openBatchReturnModalFromSelection();
+    }
+
+    function openBatchReturnModalFromSelection() {
+        const checked = Array.from(document.querySelectorAll('.book-row-check:checked'));
+        if (checked.length === 0) {
+            alert('Silakan pilih minimal 1 buku untuk dikembalikan.');
+            return;
+        }
+
+        selectedBatchBooks = checked.map(cb => ({
+            id: cb.dataset.id,
+            judul: cb.dataset.judul,
+            penulis: cb.dataset.penulis,
+            eksemplar: cb.dataset.eksemplar,
+            rak: cb.dataset.rak,
+            harga: parseFloat(cb.dataset.harga) || 0,
+            overdue: parseInt(cb.dataset.overdue) === 1,
+            denda: parseFloat(cb.dataset.denda) || 0,
+            hariTelat: parseInt(cb.dataset.haritelat) || 0,
+            kondisi: 'Baik'
+        }));
+
+        renderBatchModalCards();
+        document.getElementById('modalBatchReturn').classList.add('show');
+    }
+
+    function renderBatchModalCards() {
+        const container = document.getElementById('batchItemsList');
+        const countHeader = document.getElementById('batchModalItemCount');
+        if (countHeader) countHeader.innerText = selectedBatchBooks.length;
+
+        if (!container) return;
+        container.innerHTML = '';
+
+        selectedBatchBooks.forEach((item, index) => {
+            const card = document.createElement('div');
+            card.className = 'batch-modal-item-card';
+            card.id = `batch-card-${item.id}`;
+
+            const overdueBadge = item.overdue
+                ? `<div style="font-size: 11px; color: #dc2626; font-weight: 700; margin-top: 2px;">Terlambat ${item.hariTelat} hr (Est. Denda: Rp ${formatRupiah(item.denda)})</div>`
+                : `<div style="font-size: 11px; color: #16a34a; font-weight: 600; margin-top: 2px;">Tepat Waktu (Bebas Denda)</div>`;
+
+            card.innerHTML = `
+                <input type="hidden" name="detail_ids[]" value="${item.id}">
+                <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 12px; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px;">
+                    <div>
+                        <div style="display: flex; align-items: center; gap: 6px;">
+                            <span style="font-size: 11px; font-weight: 800; background: #f1f5f9; color: #475569; padding: 2px 6px; border-radius: 4px;">#${index + 1}</span>
+                            <strong style="color: var(--text-heading); font-size: 13.5px; line-height: 1.35;">${item.judul}</strong>
+                        </div>
+                        <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 3px;">
+                            ${item.penulis} • Eksemplar #${item.eksemplar} • Rak ${item.rak}
+                        </div>
+                    </div>
+                    <div style="text-align: right; flex-shrink: 0;">
+                        <span style="font-size: 11.5px; color: #475569; font-weight: 700;">Nilai Buku: Rp ${formatRupiah(item.harga)}</span>
+                        ${overdueBadge}
+                    </div>
+                </div>
+
+                <div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                        <label style="font-size: 11.5px; font-weight: 700; color: #475569;">
+                            Kondisi Fisik Buku Ini:
+                        </label>
+                        <span id="badge-kondisi-label-${item.id}" style="font-size: 11px; font-weight: 700; color: #059669;">
+                            Baik (Normal)
+                        </span>
+                    </div>
+
+                    <div class="condition-selector-group">
+                        <label class="condition-option opt-baik">
+                            <input type="radio" name="kondisi[${item.id}]" value="Baik" checked onchange="handleItemConditionChange('${item.id}', 'Baik')">
+                            <div class="condition-label-box">
+                                <span>✓ Baik</span>
+                            </div>
+                        </label>
+                        <label class="condition-option opt-rusak">
+                            <input type="radio" name="kondisi[${item.id}]" value="Rusak" onchange="handleItemConditionChange('${item.id}', 'Rusak')">
+                            <div class="condition-label-box">
+                                <span>⚠️ Rusak</span>
+                            </div>
+                        </label>
+                        <label class="condition-option opt-hilang">
+                            <input type="radio" name="kondisi[${item.id}]" value="Hilang" onchange="handleItemConditionChange('${item.id}', 'Hilang')">
+                            <div class="condition-label-box">
+                                <span>✕ Hilang</span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <div id="item-penalty-box-${item.id}" style="display: none; margin-top: 8px; border-radius: 8px; padding: 7px 10px; font-size: 11.5px; line-height: 1.4;">
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+
+        updateBatchSummary();
+    }
+
+    function handleItemConditionChange(detailId, condition) {
+        const item = selectedBatchBooks.find(b => String(b.id) === String(detailId));
+        if (item) {
+            item.kondisi = condition;
+        }
+
+        const penaltyBox = document.getElementById(`item-penalty-box-${detailId}`);
+        const labelBadge = document.getElementById(`badge-kondisi-label-${detailId}`);
+
+        if (penaltyBox && item) {
+            if (condition === 'Baik') {
+                penaltyBox.style.display = 'none';
+                if (labelBadge) {
+                    labelBadge.innerText = 'Baik (Normal)';
+                    labelBadge.style.color = '#059669';
+                }
+            } else if (condition === 'Rusak') {
+                penaltyBox.style.display = 'block';
+                penaltyBox.style.background = '#fffbeb';
+                penaltyBox.style.color = '#92400e';
+                penaltyBox.style.border = '1px solid #fde68a';
+                penaltyBox.innerHTML = `⚠️ <strong>Denda Rusak (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} akan ditagihkan ke akun Anda saat diverifikasi petugas.`;
+                if (labelBadge) {
+                    labelBadge.innerText = 'Rusak (+ Denda Ganti Rugi)';
+                    labelBadge.style.color = '#d97706';
+                }
+            } else if (condition === 'Hilang') {
+                penaltyBox.style.display = 'block';
+                penaltyBox.style.background = '#fef2f2';
+                penaltyBox.style.color = '#991b1b';
+                penaltyBox.style.border = '1px solid #fecaca';
+                penaltyBox.innerHTML = `✕ <strong>Denda Hilang (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} akan ditagihkan ke akun Anda saat diverifikasi petugas.`;
+                if (labelBadge) {
+                    labelBadge.innerText = 'Hilang (+ Denda Penggantian)';
+                    labelBadge.style.color = '#dc2626';
+                }
+            }
+        }
+
+        updateBatchSummary();
+    }
+
+    function updateBatchSummary() {
+        let countBaik = 0;
+        let countRusak = 0;
+        let countHilang = 0;
+        let totalDenda = 0;
+
+        selectedBatchBooks.forEach(item => {
+            const cond = item.kondisi || 'Baik';
+            if (cond === 'Baik') {
+                countBaik++;
+            } else if (cond === 'Rusak') {
+                countRusak++;
+                totalDenda += item.harga;
+            } else if (cond === 'Hilang') {
+                countHilang++;
+                totalDenda += item.harga;
+            }
+
+            // Keterlambatan
+            if (item.overdue) {
+                totalDenda += item.denda;
+            }
+        });
+
+        const elBaik = document.getElementById('summaryCountBaik');
+        const elRusak = document.getElementById('summaryCountRusak');
+        const elHilang = document.getElementById('summaryCountHilang');
+        const elTotal = document.getElementById('summaryTotalDenda');
+
+        if (elBaik) elBaik.innerText = countBaik;
+        if (elRusak) elRusak.innerText = countRusak;
+        if (elHilang) elHilang.innerText = countHilang;
+        if (elTotal) {
+            if (totalDenda > 0) {
+                elTotal.innerText = 'Rp ' + formatRupiah(totalDenda);
+                elTotal.style.color = '#dc2626';
+            } else {
+                elTotal.innerText = 'Bebas Denda (Rp 0)';
+                elTotal.style.color = '#059669';
+            }
+        }
+    }
+
+    function closeBatchReturnModal() {
+        document.getElementById('modalBatchReturn').classList.remove('show');
+    }
+
     function openReturnModal(detailId, judul, eksemplar, dendaFormatted) {
         const form = document.getElementById('formReturn');
         form.action = `/pengembalian-saya/${detailId}/proses`;
@@ -1273,8 +1856,10 @@
     window.addEventListener('click', function(e) {
         const modalReturn = document.getElementById('modalReturn');
         const modalQr = document.getElementById('modalQr');
+        const modalBatchReturn = document.getElementById('modalBatchReturn');
         if (e.target === modalReturn) closeReturnModal();
         if (e.target === modalQr) closeQrModal();
+        if (e.target === modalBatchReturn) closeBatchReturnModal();
     });
 </script>
 @endsection

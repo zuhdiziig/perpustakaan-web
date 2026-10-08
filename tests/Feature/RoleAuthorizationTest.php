@@ -105,4 +105,13 @@ class RoleAuthorizationTest extends TestCase
         $this->get(route('buku.create'))->assertOk();
         $this->get(route('member.index'))->assertOk();
     }
+
+    public function test_admin_cannot_access_operational_desk_routes(): void
+    {
+        $this->actingAs($this->admin);
+
+        $this->get(route('peminjaman.create'))->assertRedirect(route('dashboard'));
+        $this->get(route('pengembalian.create'))->assertRedirect(route('dashboard'));
+        $this->get(route('barcode.scan'))->assertRedirect(route('dashboard'));
+    }
 }

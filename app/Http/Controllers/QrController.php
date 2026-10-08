@@ -444,6 +444,8 @@ class QrController extends Controller
                 ->where('qr_kembali', $raw)
                 ->orWhere('kode_kembali', $raw)
                 ->orWhere('kode_kembali', strtoupper($raw))
+                ->orWhere('kode_batch_kembali', $raw)
+                ->orWhere('kode_batch_kembali', strtoupper($raw))
                 ->first();
         }
 

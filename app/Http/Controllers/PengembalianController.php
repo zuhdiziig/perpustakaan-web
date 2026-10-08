@@ -28,6 +28,10 @@ class PengembalianController extends Controller
     // Tampilkan form proses pengembalian (scan barcode & cek kondisi)
     public function create(Request $request)
     {
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Layanan meja sirkulasi pengembalian hanya diperuntukkan bagi Petugas Perpustakaan.');
+        }
+
         $code = trim((string) $request->query('code', $request->query('barcode', $request->query('tiket', $request->query('kode', '')))));
         $selectedDetail = null;
 
@@ -42,6 +46,8 @@ class PengembalianController extends Controller
                 ->where('qr_kembali', $code)
                 ->orWhere('kode_kembali', $code)
                 ->orWhere('kode_kembali', strtoupper($code))
+                ->orWhere('kode_batch_kembali', $code)
+                ->orWhere('kode_batch_kembali', strtoupper($code))
                 ->first();
 
             // 2. Cek token / barcode eksemplar fisik buku
@@ -522,6 +528,199 @@ class PengembalianController extends Controller
     }
 
     /**
+     * Pengajuan pengembalian buku sekaligus (batch) mandiri oleh member.
+     */
+    public function memberBatchStore(Request $request)
+    {
+        $user = auth()->user();
+
+        $request->validate([
+            'detail_ids' => ['required', 'array', 'min:1'],
+            'detail_ids.*' => ['required', 'integer'],
+            'kondisi' => ['required', 'array'],
+            'kondisi.*' => ['required', 'in:Baik,Rusak,Hilang'],
+            'konfirmasi' => ['accepted'],
+        ], [
+            'detail_ids.required' => 'Pilih minimal satu buku yang ingin dikembalikan.',
+            'detail_ids.min' => 'Pilih minimal satu buku yang ingin dikembalikan.',
+            'kondisi.*.in' => 'Pilihan kondisi buku harus berupa Baik, Rusak, atau Hilang.',
+            'konfirmasi.accepted' => 'Harap centang konfirmasi penyerahan buku fisik.',
+        ]);
+
+        try {
+            $kodeBatch = DB::transaction(function () use ($request, $user) {
+                $detailIds = $request->input('detail_ids', []);
+                $kondisiMap = $request->input('kondisi', []);
+
+                $details = DetailPeminjaman::with(['peminjaman', 'buku'])
+                    ->whereIn('id', $detailIds)
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($details->isEmpty()) {
+                    throw new \DomainException('Tidak ada data buku yang valid untuk diproses.');
+                }
+
+                $batchCode = 'KB-BATCH-'.Carbon::now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(3)));
+
+                foreach ($details as $detail) {
+                    if ((int) $detail->peminjaman->idUserMember !== (int) $user->id) {
+                        throw new \DomainException('Buku "'.($detail->buku?->judul ?? 'Buku').'" tidak tercatat dalam transaksi akun Anda.');
+                    }
+
+                    if ($detail->statusBuku === 'Kembali') {
+                        throw new \DomainException('Buku "'.($detail->buku?->judul ?? 'Buku').'" sudah berstatus dikembalikan sebelumnya.');
+                    }
+
+                    $kondisiDipilih = $kondisiMap[$detail->id] ?? 'Baik';
+                    if (! in_array($kondisiDipilih, ['Baik', 'Rusak', 'Hilang'])) {
+                        $kondisiDipilih = 'Baik';
+                    }
+
+                    $kodeKembali = $detail->kode_kembali ?: ('KB-'.Carbon::now()->format('Ymd').'-'.str_pad($detail->id, 4, '0', STR_PAD_LEFT));
+                    $qrKembali = $detail->qr_kembali ?: ('ret_'.bin2hex(random_bytes(16)));
+
+                    $detail->update([
+                        'statusBuku' => 'Diajukan Kembali',
+                        'kode_kembali' => $kodeKembali,
+                        'qr_kembali' => $qrKembali,
+                        'kode_batch_kembali' => $batchCode,
+                        'kondisi_laporan' => $kondisiDipilih,
+                        'waktu_pengajuan_kembali' => Carbon::now(),
+                    ]);
+                }
+
+                return $batchCode;
+            });
+
+            return redirect()->route('pengembalian.member.batch-tiket', $kodeBatch)
+                ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Tunjukkan QR Code tiket ini ke petugas meja sirkulasi.');
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengembalian sekaligus: '.$e->getMessage());
+        }
+    }
+
+    /**
+     * Halaman Tiket QR Code Pengembalian Sekaligus (Batch) untuk Member.
+     */
+    public function memberBatchTiket($kodeBatch)
+    {
+        $user = auth()->user();
+
+        $details = DetailPeminjaman::with([
+            'peminjaman.member',
+            'buku.kategori',
+            'buku.barcode',
+            'eksemplar',
+        ])
+            ->where('kode_batch_kembali', $kodeBatch)
+            ->get();
+
+        if ($details->isEmpty()) {
+            abort(404, 'Tiket pengembalian sekaligus tidak ditemukan.');
+        }
+
+        $firstDetail = $details->first();
+        if ($user && $user->role === 'member' && (int) $firstDetail->peminjaman->idUserMember !== (int) $user->id) {
+            abort(403, 'Anda tidak memiliki hak akses melihat tiket pengembalian ini.');
+        }
+
+        $today = Carbon::now();
+        $totalEstDendaTelat = 0;
+        $totalEstDendaKondisi = 0;
+        $totalBuku = $details->count();
+        $countBaik = 0;
+        $countRusak = 0;
+        $countHilang = 0;
+
+        foreach ($details as $item) {
+            $batasKembali = Carbon::parse($item->peminjaman->batasKembali);
+            $isOverdue = $today->greaterThan($batasKembali);
+            $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+            $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+            $faktorMinggu = min($mingguTerlambat, 10);
+            $persenDenda = $faktorMinggu * 0.10;
+            $hargaBuku = (float) ($item->buku->harga ?? 0);
+            $dendaTelat = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+
+            $dendaKondisi = 0;
+            if ($item->kondisi_laporan === 'Rusak') {
+                $dendaKondisi = $hargaBuku;
+                $countRusak++;
+            } elseif ($item->kondisi_laporan === 'Hilang') {
+                $dendaKondisi = $hargaBuku;
+                $countHilang++;
+            } else {
+                $countBaik++;
+            }
+
+            $item->batasKembaliCarbon = $batasKembali;
+            $item->isOverdue = $isOverdue;
+            $item->hariTerlambat = $hariTerlambat;
+            $item->dendaTelat = $dendaTelat;
+            $item->dendaKondisi = $dendaKondisi;
+            $item->totalDendaItem = $dendaTelat + $dendaKondisi;
+
+            $totalEstDendaTelat += $dendaTelat;
+            $totalEstDendaKondisi += $dendaKondisi;
+        }
+
+        $totalEstDenda = $totalEstDendaTelat + $totalEstDendaKondisi;
+        $qrCodeSvg = $this->generateSvgQr($kodeBatch, 220);
+
+        return view('pengembalian.member_batch_tiket', compact(
+            'details',
+            'kodeBatch',
+            'qrCodeSvg',
+            'totalBuku',
+            'countBaik',
+            'countRusak',
+            'countHilang',
+            'totalEstDendaTelat',
+            'totalEstDendaKondisi',
+            'totalEstDenda'
+        ));
+    }
+
+    /**
+     * Batalkan seluruh pengajuan pengembalian dalam satu batch.
+     */
+    public function memberBatchBatal($kodeBatch)
+    {
+        $user = auth()->user();
+
+        $details = DetailPeminjaman::with('peminjaman')
+            ->where('kode_batch_kembali', $kodeBatch)
+            ->get();
+
+        if ($details->isEmpty()) {
+            return redirect()->route('pengembalian.member')->with('error', 'Tiket batch pengembalian tidak ditemukan.');
+        }
+
+        foreach ($details as $detail) {
+            if ($user && $user->role === 'member' && (int) $detail->peminjaman->idUserMember !== (int) $user->id) {
+                abort(403, 'Akses ditolak.');
+            }
+
+            if ($detail->statusBuku === 'Diajukan Kembali') {
+                $detail->update([
+                    'statusBuku' => 'Dipinjam',
+                    'kode_kembali' => null,
+                    'qr_kembali' => null,
+                    'kode_batch_kembali' => null,
+                    'kondisi_laporan' => 'Baik',
+                    'waktu_pengajuan_kembali' => null,
+                ]);
+            }
+        }
+
+        return redirect()->route('pengembalian.member')
+            ->with('success', 'Pengajuan pengembalian sekaligus ('.$details->count().' buku) berhasil dibatalkan. Status buku kembali menjadi "Dipinjam".');
+    }
+
+    /**
      * Batalkan pengajuan pengembalian buku oleh member.
      */
     public function memberBatal(Request $request, $idDetail)
@@ -542,6 +741,8 @@ class PengembalianController extends Controller
             'statusBuku' => 'Dipinjam',
             'kode_kembali' => null,
             'qr_kembali' => null,
+            'kode_batch_kembali' => null,
+            'kondisi_laporan' => 'Baik',
             'waktu_pengajuan_kembali' => null,
         ]);
 

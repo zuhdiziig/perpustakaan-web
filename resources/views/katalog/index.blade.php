@@ -1449,20 +1449,32 @@
 
                         <!-- Action Button: Pinjam Buku & Keranjang -->
                         <div style="display: flex; gap: 8px; align-items: center;">
-                            <button type="button"
-                                    class="btn-pinjam-buku"
-                                    style="flex: 1;"
-                                    data-id="{{ $buku->idBuku }}"
-                                    data-judul="{{ $buku->judul }}"
-                                    data-penulis="{{ $buku->penulis }}"
-                                    data-kategori="{{ $buku->kategori?->namaKategori ?? 'Umum' }}"
-                                    data-rak="{{ $buku->rak ?? 'Rak F-12' }}"
-                                    data-stok="{{ $buku->stok }}"
-                                    data-halaman="{{ $buku->jumlahHalaman ?? 320 }}"
-                                    data-cover="{{ $buku->cover ?? '' }}"
-                                    onclick="openBorrowModal(this)">
-                                Pinjam Buku
-                            </button>
+                            @if (auth()->check() && auth()->user()->role === 'admin')
+                                <a href="{{ route('buku.edit', $buku->idBuku) }}"
+                                   class="btn-pinjam-buku"
+                                   style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                    </svg>
+                                    Kelola Buku
+                                </a>
+                            @else
+                                <button type="button"
+                                        class="btn-pinjam-buku"
+                                        style="flex: 1;"
+                                        data-id="{{ $buku->idBuku }}"
+                                        data-judul="{{ $buku->judul }}"
+                                        data-penulis="{{ $buku->penulis }}"
+                                        data-kategori="{{ $buku->kategori?->namaKategori ?? 'Umum' }}"
+                                        data-rak="{{ $buku->rak ?? 'Rak F-12' }}"
+                                        data-stok="{{ $buku->stok }}"
+                                        data-halaman="{{ $buku->jumlahHalaman ?? 320 }}"
+                                        data-cover="{{ $buku->cover ?? '' }}"
+                                        onclick="openBorrowModal(this)">
+                                    Pinjam Buku
+                                </button>
+                            @endif
 
                             @if (auth()->check() && auth()->user()->role === 'member' && $buku->stok > 0)
                                 <form action="{{ route('keranjang.tambah', $buku->idBuku) }}" method="POST" style="margin: 0;" class="form-ajax-cart">
@@ -1662,10 +1674,9 @@
                                 Booking Sekarang
                             </a>
                         </div>
-                    @else
-                        {{-- Petugas / Admin --}}
+                    @elseif (auth()->user()->role === 'petugas')
                         <p class="modal-instructions">
-                            Anda login sebagai <strong>{{ ucfirst(auth()->user()->role) }}</strong>. Anda dapat mencatat transaksi peminjaman buku ini langsung di Meja Sirkulasi.
+                            Anda login sebagai <strong>Petugas Perpustakaan</strong>. Anda dapat mencatat transaksi peminjaman buku ini langsung di Meja Sirkulasi.
                         </p>
                         <div class="modal-actions">
                             <button type="button" class="btn-modal-cancel" onclick="hideBorrowModal()">
@@ -1673,6 +1684,19 @@
                             </button>
                             <a href="{{ route('peminjaman.create') }}" class="btn-modal-primary">
                                 Buka Form Sirkulasi
+                            </a>
+                        </div>
+                    @else
+                        {{-- Admin --}}
+                        <p class="modal-instructions">
+                            Anda login sebagai <strong>Admin Perpustakaan</strong>. Admin bertugas dalam tata kelola master data buku, bukan transaksi sirkulasi peminjaman.
+                        </p>
+                        <div class="modal-actions">
+                            <button type="button" class="btn-modal-cancel" onclick="hideBorrowModal()">
+                                Tutup
+                            </button>
+                            <a id="modalAdminKelolaBtn" href="{{ route('buku.index') }}" class="btn-modal-primary">
+                                Kelola Master Buku
                             </a>
                         </div>
                     @endif
@@ -1756,6 +1780,10 @@
             const btnDirect = document.getElementById('modalBtnBookingDirect');
             if (btnDirect && idBuku) {
                 btnDirect.href = `{{ url('/peminjaman/konfirmasi') }}/${idBuku}`;
+            }
+            const btnAdminManage = document.getElementById('modalAdminKelolaBtn');
+            if (btnAdminManage && idBuku) {
+                btnAdminManage.href = `{{ url('/buku') }}/${idBuku}/edit`;
             }
 
             modal.classList.add('show');

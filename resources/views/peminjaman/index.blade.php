@@ -20,7 +20,9 @@
     <div class="header">
         <h2>Daftar Transaksi Peminjaman</h2>
         <div>
-            <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">+ Pinjam Buku Baru</a>
+            @if (auth()->check() && auth()->user()->role === 'petugas')
+                <a href="{{ route('peminjaman.create') }}" class="btn btn-primary">+ Pinjam Buku Baru</a>
+            @endif
             <a href="{{ route('dashboard') }}" style="margin-left: 10px; font-size: 13px; color: #64748b; text-decoration: none;">&larr; Dashboard</a>
         </div>
     </div>

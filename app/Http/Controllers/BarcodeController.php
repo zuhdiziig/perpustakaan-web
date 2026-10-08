@@ -12,6 +12,10 @@ class BarcodeController extends Controller
     // Halaman antarmuka scanner barcode
     public function scan(Request $request)
     {
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Layanan scanner meja sirkulasi hanya diperuntukkan bagi Petugas Perpustakaan.');
+        }
+
         $kodeBarcode = trim($request->query('kodeBarcode', ''));
         $buku = null;
         $booking = null;

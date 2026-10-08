@@ -32,6 +32,10 @@ class PeminjamanController extends Controller
     // Tampilkan form peminjaman (Scan barcode & input member)
     public function create(Request $request)
     {
+        if (auth()->check() && auth()->user()->role === 'admin') {
+            return redirect()->route('dashboard')->with('error', 'Layanan meja sirkulasi peminjaman hanya diperuntukkan bagi Petugas Perpustakaan.');
+        }
+
         $members = User::where('role', 'member')->where('status', 'aktif')->get();
 
         $bookingCode = trim((string) $request->query('booking', $request->query('code', '')));
