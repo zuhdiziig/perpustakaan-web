@@ -684,7 +684,7 @@
                 <h2 class="section-header-title">Ketentuan peminjaman</h2>
 
                 <p class="ketentuan-text">
-                    Ambil buku di meja layanan dengan kartu anggota dan barcode. Kembalikan paling lambat {{ $batasKembali->translatedFormat('d M Y') }}. Keterlambatan dikenakan denda 10% per minggu dari harga buku (maksimal 100%), serta denda 100% seharga buku jika buku rusak atau hilang.
+                    Ambil buku secara mandiri di rak koleksi ({{ $buku->rak ?? 'Rak Utama' }}) dan bawa ke meja layanan dengan menunjukkan kartu anggota atau tiket booking. Kembalikan paling lambat {{ $batasKembali->translatedFormat('d M Y') }}. Keterlambatan dikenakan denda 10% per minggu dari harga buku (maksimal 100%), serta denda 100% seharga buku jika buku rusak atau hilang.
                 </p>
 
                 <label class="terms-checkbox-label">

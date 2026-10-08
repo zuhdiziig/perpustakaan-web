@@ -229,7 +229,7 @@
     .rincian-item {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 16px;
         font-size: 13px;
     }
@@ -238,6 +238,7 @@
         color: #64748b;
         font-weight: 500;
         flex-shrink: 0;
+        padding-top: 1px;
     }
 
     .rincian-val {
@@ -542,8 +543,8 @@
                 <input type="text"
                        id="inputManual"
                        class="input-code-manual"
-                       placeholder="Contoh: BK-20261007-0001 atau PJ-..."
-                       value="{{ request('booking', request('code', request('kode', 'PJ-20261003-0417'))) }}"
+                       placeholder="Contoh: BK-20261007-0001, AG-..., atau PJ-..."
+                       value="{{ request('booking', request('code', request('kode', ''))) }}"
                        autocomplete="off">
 
                 <!-- Tombol Cari Transaksi -->
@@ -555,11 +556,11 @@
 
         <!-- ==================== KOLOM KANAN ==================== -->
         <div>
-            <!-- Status Pill: Barcode Ditemukan -->
-            <div id="badgeContainer" style="display: block;">
+            <!-- Status Pill: Barcode Ditemukan (Awalnya tersembunyi hingga discan) -->
+            <div id="badgeContainer" style="{{ $selectedBooking ? 'display: block;' : 'display: none;' }}">
                 <span class="badge-barcode-found" id="badgeBarcodeDitemukan">
                     <span class="badge-dot"></span>
-                    <span id="badgeText">Barcode ditemukan</span>
+                    <span id="badgeText">{{ $selectedBooking ? 'Tiket Booking: ' . $selectedBooking->status : 'Barcode ditemukan' }}</span>
                 </span>
             </div>
 
@@ -571,14 +572,14 @@
                     <!-- Row 1: Transaksi -->
                     <div class="rincian-item">
                         <span class="rincian-label">Transaksi</span>
-                        <span class="rincian-val" id="dispTransaksi">PJ-20261003-0417</span>
+                        <span class="rincian-val" id="dispTransaksi">{{ $selectedBooking->kode_booking ?? '-' }}</span>
                     </div>
 
                     <!-- Row 2: Anggota -->
                     <div class="rincian-item">
                         <span class="rincian-label">Anggota</span>
                         <span class="rincian-val" id="dispAnggota">
-                            {{ $defaultMember->name ?? 'Rizky Pratama' }}
+                            {{ $defaultMember->name ?? '-' }}
                         </span>
                     </div>
 
@@ -586,59 +587,50 @@
                     <div class="rincian-item">
                         <span class="rincian-label">Nomor anggota</span>
                         <span class="rincian-val" id="dispNomorAnggota">
-                            {{ $defaultMember->kode_anggota ?? 'AG-2026-00128' }}
+                            {{ $defaultMember->kode_anggota ?? '-' }}
                         </span>
                     </div>
 
                     <!-- Row 3.5: Status kuota pinjam -->
                     <div class="rincian-item">
                         <span class="rincian-label">Status kuota</span>
-                        <span class="rincian-val" id="dispKuotaAnggota">
-                            @if($defaultMember)
-                                @php
-                                    $sedangDipinjamDef = $defaultMember->jumlahBukuSedangDipinjam();
-                                    $kuotaPenuhDef = $defaultMember->sudahMencapaiBatasMaksimalPinjam();
-                                    $sisaDef = $defaultMember->sisaKuotaPinjam();
-                                @endphp
-                                @if($kuotaPenuhDef)
-                                    <span style="color: #b91c1c; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 9999px;">7/7 Buku (Penuh)</span>
-                                @else
-                                    <span style="color: #166534; font-weight: 600;">{{ $sedangDipinjamDef }}/7 Buku (Sisa: {{ $sisaDef }})</span>
-                                @endif
-                            @else
-                                -
-                            @endif
-                        </span>
+                        <span class="rincian-val" id="dispKuotaAnggota">-</span>
                     </div>
 
                     <!-- Row 4: Buku -->
                     <div class="rincian-item">
                         <span class="rincian-label">Buku</span>
                         <span class="rincian-val" id="dispBuku">
-                            @php
-                                $kodeBukuDisplay = $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode->kodeBarcode ?? 'BK-00417';
-                                $judulBukuDisplay = $defaultBuku->judul ?? 'Laut Bercerita';
-                            @endphp
-                            {{ $judulBukuDisplay }} · {{ $kodeBukuDisplay }}
+                            @if(isset($selectedBooking) && $selectedBooking && $selectedBooking->details->count() > 1)
+                                <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+                                    @foreach($selectedBooking->details as $detail)
+                                        <div style="line-height: 1.45;">- {{ $detail->buku?->judul ?? 'Buku' }}</div>
+                                    @endforeach
+                                </div>
+                            @elseif($defaultBuku)
+                                {{ $defaultBuku->judul }} · {{ $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode->kodeBarcode ?? ('BK-' . $defaultBuku->idBuku) }}
+                            @else
+                                -
+                            @endif
                         </span>
                     </div>
 
                     <!-- Row 5: Tanggal pinjam -->
                     <div class="rincian-item">
                         <span class="rincian-label">Tanggal pinjam</span>
-                        <span class="rincian-val" id="dispTanggalPinjam">03 Okt 2026</span>
+                        <span class="rincian-val" id="dispTanggalPinjam">-</span>
                     </div>
 
                     <!-- Row 6: Batas pengembalian -->
                     <div class="rincian-item">
                         <span class="rincian-label">Batas pengembalian</span>
-                        <span class="rincian-val" id="dispBatasPengembalian">17 Okt 2026</span>
+                        <span class="rincian-val" id="dispBatasPengembalian">-</span>
                     </div>
 
                     <!-- Row 7: Durasi / jumlah -->
                     <div class="rincian-item">
                         <span class="rincian-label">Durasi / jumlah</span>
-                        <span class="rincian-val" id="dispDurasiJumlah">30 hari / 1 buku</span>
+                        <span class="rincian-val" id="dispDurasiJumlah">-</span>
                     </div>
                 </div>
             </div>
@@ -647,7 +639,11 @@
             <div class="validation-box" id="boxValidasiPetugas">
                 <h4 class="validation-title">Validasi petugas</h4>
                 <p class="validation-text" id="dispValidasiPetugas">
-                    Anggota aktif. Kode buku {{ $kodeBukuDisplay }} sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.
+                    @if($selectedBooking)
+                        Tiket Booking Online Teridentifikasi. Tekan tombol konfirmasi di bawah untuk serah terima buku.
+                    @else
+                        Arahkan barcode anggota atau buku ke kamera scanner, atau masukkan kode manual di sebelah kiri untuk memproses peminjaman.
+                    @endif
                 </p>
             </div>
 
@@ -655,9 +651,9 @@
             <form id="formPeminjaman" action="{{ route('peminjaman.store') }}" method="POST">
                 @csrf
                 <input type="hidden" name="idUserMember" id="formIdUserMember" value="{{ $defaultMember->id ?? '' }}">
-                <input type="hidden" name="barcodes[]" id="formBarcodeBuku" value="{{ $defaultEksemplar->qr_token ?? ($defaultEksemplar->kode_barcode ?? ($defaultBuku->barcode->kodeBarcode ?? 'BK-00417')) }}">
+                <input type="hidden" name="barcodes[]" id="formBarcodeBuku" value="{{ $defaultEksemplar->qr_token ?? ($defaultEksemplar->kode_barcode ?? ($defaultBuku->barcode->kodeBarcode ?? '')) }}">
 
-                <button type="submit" class="btn-confirm-loan" id="btnKonfirmasiPeminjaman">
+                <button type="submit" class="btn-confirm-loan" id="btnKonfirmasiPeminjaman" {{ ($defaultMember && $defaultBuku) || $selectedBooking ? '' : 'disabled' }}>
                     Konfirmasi Peminjaman
                 </button>
             </form>
@@ -730,6 +726,19 @@
                 'kodeBooking' => $selectedBooking->kode_booking,
                 'opsiPengambilan' => $selectedBooking->opsi_pengambilan,
                 'status' => $selectedBooking->status,
+                'totalBuku' => $selectedBooking->totalBuku ?: $selectedBooking->details->count(),
+                'daftarBuku' => $selectedBooking->details->map(function ($d) {
+                    $b = $d->buku;
+                    $e = $d->eksemplar;
+                    return [
+                        'idBuku' => $b?->idBuku,
+                        'idEksemplar' => $e?->idEksemplar,
+                        'judul' => $b?->judul ?? 'Buku',
+                        'rak' => $b?->rak ?? '-',
+                        'kodeBuku' => $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0),
+                        'nomor_eksemplar' => $e?->nomor_eksemplar,
+                    ];
+                })->values()->all(),
                 'member' => [
                     'id' => $selectedBooking->member?->id,
                     'name' => $selectedBooking->member?->name ?? 'Anggota',
@@ -765,12 +774,12 @@
                 'idBuku' => $defaultBuku->idBuku,
                 'idEksemplar' => $defaultEksemplar->idEksemplar,
                 'judul' => $defaultBuku->judul,
-                'kodeBuku' => $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode?->kodeBarcode ?? 'BK-00417',
+                'kodeBuku' => $defaultEksemplar->kode_barcode ?? $defaultBuku->barcode?->kodeBarcode ?? ('BK-' . $defaultBuku->idBuku),
                 'qr_token' => $defaultEksemplar->qr_token,
                 'kondisi' => $defaultEksemplar->kondisi ?? 'Baik',
                 'status' => $defaultEksemplar->status ?? 'Tersedia',
             ] : null) !!},
-            transaksiCode: {!! isset($selectedBooking) && $selectedBooking ? json_encode($selectedBooking->kode_booking) : "'PJ-20261003-0417'" !!},
+            transaksiCode: {!! isset($selectedBooking) && $selectedBooking ? json_encode($selectedBooking->kode_booking) : 'null' !!},
             tanggalPinjam: '{{ now()->translatedFormat("d M Y") }}',
             batasKembali: '{{ now()->addDays(30)->translatedFormat("d M Y") }}',
             durasiJumlah: '30 hari / 1 buku',
@@ -861,7 +870,20 @@
                 return;
             }
 
-            modalBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
+            const daftarBukuModal = (state.booking && Array.isArray(state.booking.daftarBuku) && state.booking.daftarBuku.length > 0)
+                ? state.booking.daftarBuku
+                : (Array.isArray(state.daftarBuku) && state.daftarBuku.length > 0 ? state.daftarBuku : null);
+
+            if (daftarBukuModal && daftarBukuModal.length > 1) {
+                modalBuku.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 3px;">
+                        <span style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">${daftarBukuModal.length} Buku:</span>
+                        ${daftarBukuModal.map(b => `<div style="line-height: 1.4;">- ${b.judul}</div>`).join('')}
+                    </div>
+                `;
+            } else {
+                modalBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
+            }
             modalMember.textContent = `${state.member.name} · ${state.member.kodeAnggota}`;
             modalTanggal.textContent = `${state.tanggalPinjam} → ${state.batasKembali}`;
 
@@ -877,6 +899,8 @@
         function updateUI() {
             if (state.transaksiCode) {
                 dispTransaksi.textContent = state.transaksiCode;
+            } else {
+                dispTransaksi.textContent = '-';
             }
 
             if (state.member) {
@@ -895,7 +919,7 @@
                     }
                 }
             } else {
-                dispAnggota.textContent = 'Menunggu scan anggota...';
+                dispAnggota.textContent = '-';
                 dispNomorAnggota.textContent = '-';
                 if (dispKuotaAnggota) {
                     dispKuotaAnggota.textContent = '-';
@@ -903,17 +927,33 @@
                 formIdUserMember.value = '';
             }
 
-            if (state.buku) {
+            const daftarBuku = (state.booking && Array.isArray(state.booking.daftarBuku) && state.booking.daftarBuku.length > 0)
+                ? state.booking.daftarBuku
+                : (Array.isArray(state.daftarBuku) && state.daftarBuku.length > 0 ? state.daftarBuku : null);
+
+            if (daftarBuku && daftarBuku.length > 1) {
+                dispBuku.innerHTML = `
+                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+                        ${daftarBuku.map(b => `<div style="line-height: 1.45;">- ${b.judul}</div>`).join('')}
+                    </div>
+                `;
+                formBarcodeBuku.value = state.buku ? (state.buku.qr_token || state.buku.kodeBuku) : '';
+            } else if (daftarBuku && daftarBuku.length === 1) {
+                const single = daftarBuku[0];
+                dispBuku.textContent = `${single.judul} · ${single.kodeBuku}`;
+                formBarcodeBuku.value = single.qr_token || single.kodeBuku;
+            } else if (state.buku) {
                 dispBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
                 formBarcodeBuku.value = state.buku.qr_token || state.buku.kodeBuku;
             } else {
-                dispBuku.textContent = 'Menunggu scan buku...';
+                dispBuku.textContent = '-';
                 formBarcodeBuku.value = '';
             }
 
-            dispTanggalPinjam.textContent = state.tanggalPinjam;
-            dispBatasPengembalian.textContent = state.batasKembali;
-            dispDurasiJumlah.textContent = state.durasiJumlah;
+            const hasActiveData = Boolean(state.member || state.buku || state.booking || state.transaksiCode);
+            dispTanggalPinjam.textContent = hasActiveData ? state.tanggalPinjam : '-';
+            dispBatasPengembalian.textContent = hasActiveData ? state.batasKembali : '-';
+            dispDurasiJumlah.textContent = hasActiveData ? state.durasiJumlah : '-';
 
             const isMemberPenuh = state.member && (state.member.kuotaPenuh || (state.member.sedangDipinjam >= 7));
 
@@ -1048,7 +1088,7 @@
                     'X-CSRF-TOKEN': csrfToken,
                     'Accept': 'application/json'
                 },
-                body: JSON.stringify({ code: code })
+                body: JSON.stringify({ code: code, context: 'peminjaman' })
             })
             .then(res => res.json())
             .then(res => {
@@ -1066,6 +1106,7 @@
                 if (res.type === 'booking') {
                     const booking = res.data;
                     state.booking = booking;
+                    state.daftarBuku = booking.daftarBuku || [];
                     state.transaksiCode = booking.kodeBooking;
                     state.member = booking.member;
                     state.buku = booking.buku;
@@ -1075,7 +1116,7 @@
                     due.setDate(today.getDate() + 30);
                     state.tanggalPinjam = formatTanggalIndo(today);
                     state.batasKembali = formatTanggalIndo(due);
-                    const totalBooking = booking.totalBuku ?? 1;
+                    const totalBooking = booking.totalBuku ?? (booking.daftarBuku ? booking.daftarBuku.length : 1);
                     state.durasiJumlah = `30 hari / ${totalBooking} buku`;
                     inputManual.value = booking.kodeBooking;
 
@@ -1086,21 +1127,28 @@
                         return;
                     }
 
-                    modalBuku.textContent = totalBooking > 1
-                        ? `${totalBooking} Buku: ${booking.buku.judul}`
-                        : `${booking.buku.judul} · ${booking.buku.kodeBuku} (📍 ${booking.buku.rak})`;
+                    if (booking.daftarBuku && booking.daftarBuku.length > 1) {
+                        modalBuku.innerHTML = `
+                            <div style="display: flex; flex-direction: column; gap: 3px;">
+                                <span style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">${booking.daftarBuku.length} Buku:</span>
+                                ${booking.daftarBuku.map(b => `<div>- ${b.judul}</div>`).join('')}
+                            </div>
+                        `;
+                    } else {
+                        modalBuku.textContent = `${booking.buku.judul} · ${booking.buku.kodeBuku} (📍 ${booking.buku.rak})`;
+                    }
                     modalMember.textContent = `${booking.member.name} · ${booking.member.kodeAnggota}`;
                     modalTanggal.textContent = `Serah Terima Booking ${totalBooking} Buku (${booking.opsiPengambilan === 'siapkan_petugas' ? 'Disiapkan Petugas' : 'Ambil Mandiri'})`;
                     btnModalKonfirmasi.textContent = `Konfirmasi Serah Terima (${totalBooking} Buku)`;
 
-                    showToast(`Tiket Booking '${booking.kodeBooking}' (${totalBooking} buku) teridentifikasi.`);
-                    openConfirmModal();
+                    showToast(`Tiket Booking '${booking.kodeBooking}' (${totalBooking} buku) berhasil diidentifikasi. Silakan periksa rincian di sebelah kanan.`);
                     return;
                 }
 
                 // 1. Jika teridentifikasi sebagai transaksi utuh
                 if (res.type === 'transaksi') {
                     state.booking = null;
+                    state.daftarBuku = null;
                     const trx = res.data;
                     state.transaksiCode = trx.kodeTransaksi;
                     state.member = trx.member;
@@ -1112,16 +1160,14 @@
 
                     updateUI();
                     dispValidasiPetugas.textContent = trx.validasiPesan;
-                    showToast(`Barcode transaksi ${trx.kodeTransaksi} ditemukan.`);
-
-                    // Tampilkan modal konfirmasi barcode
-                    openConfirmModal();
+                    showToast(`Barcode transaksi ${trx.kodeTransaksi} ditemukan. Rincian telah dimuat di sebelah kanan.`);
                     return;
                 }
 
                 // 2. Jika teridentifikasi sebagai data Member
                 if (res.type === 'member') {
                     state.booking = null;
+                    state.daftarBuku = null;
                     state.member = res.data;
                     inputManual.value = res.data.kodeAnggota;
                     cameraPromptText.textContent = 'Arahkan barcode buku ke kamera';
@@ -1139,8 +1185,7 @@
                     if (state.member.kuotaPenuh || (state.member.sedangDipinjam >= 7)) {
                         showToast(`⚠️ Kuota anggota '${state.member.name}' penuh (7/7 buku). Wajib pengembalian terlebih dahulu.`, true);
                     } else if (state.buku) {
-                        showToast(`Barcode anggota '${state.member.name}' ditemukan.`);
-                        openConfirmModal();
+                        showToast(`Barcode anggota '${state.member.name}' ditemukan. Rincian lengkap siap dikonfirmasi.`);
                     } else {
                         showToast(`Anggota '${state.member.name}' teridentifikasi. Sisa kuota: ${state.member.sisaKuota} buku.`);
                     }
@@ -1150,6 +1195,7 @@
                 // 3. Jika teridentifikasi sebagai Eksemplar Buku
                 if (res.type === 'buku') {
                     state.booking = null;
+                    state.daftarBuku = null;
                     state.buku = res.data;
                     inputManual.value = res.data.kodeBuku;
 
@@ -1163,8 +1209,7 @@
                     updateUI();
 
                     if (state.member) {
-                        showToast(`Barcode buku '${state.buku.judul}' ditemukan.`);
-                        openConfirmModal();
+                        showToast(`Barcode buku '${state.buku.judul}' ditemukan. Rincian lengkap siap dikonfirmasi.`);
                     } else {
                         showToast(`Buku '${state.buku.judul}' teridentifikasi. Silakan scan anggota.`);
                     }

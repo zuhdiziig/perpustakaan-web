@@ -155,10 +155,11 @@
         gap: 12px;
     }
 
-    .btn-lihat-nota {
+    .btn-tiket-kembali {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 8px;
         width: 100%;
         padding: 13.5px;
         background: #0f766e;
@@ -168,31 +169,55 @@
         text-decoration: none;
         border-radius: 10px;
         transition: background 0.15s ease;
-        box-shadow: 0 2px 4px rgba(15, 118, 110, 0.15);
+        box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2);
+    }
+
+    .btn-tiket-kembali:hover {
+        background: #115e59;
+    }
+
+    .btn-lihat-nota {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 13.5px;
+        background: #f1f5f9;
+        color: #334155;
+        font-size: 14px;
+        font-weight: 700;
+        text-decoration: none;
+        border-radius: 10px;
+        border: 1px solid #cbd5e1;
+        transition: background 0.15s ease;
     }
 
     .btn-lihat-nota:hover {
-        background: #115e59;
+        background: #e2e8f0;
+        color: #0f172a;
     }
 
     .btn-kembali-dasbor {
         display: flex;
         align-items: center;
         justify-content: center;
+        gap: 8px;
         width: 100%;
         padding: 13.5px;
-        background: #2563eb;
-        color: #ffffff;
+        background: #ffffff;
+        color: #64748b;
         font-size: 14px;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
         border-radius: 10px;
-        transition: background 0.15s ease;
-        box-shadow: 0 2px 4px rgba(37, 99, 235, 0.15);
+        border: 1px solid #e2e8f0;
+        transition: all 0.15s ease;
     }
 
     .btn-kembali-dasbor:hover {
-        background: #1d4ed8;
+        background: #f8fafc;
+        color: #0f172a;
     }
 
     /* --- RIGHT COLUMN: DETAILS & AUTO NOTE --- */
@@ -342,11 +367,62 @@
             </div>
 
             <div class="btn-action-stack">
+                @php
+                    $detailKembali = $denda?->details?->first() 
+                        ?? \App\Models\DetailPeminjaman::where('id_denda', $denda?->idDenda)->first()
+                        ?? ($pengembalian?->idPeminjaman ? \App\Models\DetailPeminjaman::where('idPeminjaman', $pengembalian->idPeminjaman)->whereIn('statusBuku', ['Diajukan Kembali', 'Dipinjam'])->first() : null);
+                    $kodeBatch = $detailKembali?->kode_batch_kembali;
+                @endphp
+
+                @if($kodeBatch)
+                    <a href="{{ route('pengembalian.member.batch-tiket', $kodeBatch) }}" class="btn-tiket-kembali">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Buka Tiket Pengembalian Fisik</span>
+                    </a>
+                @elseif($detailKembali)
+                    <a href="{{ route('pengembalian.member.tiket', $detailKembali->id) }}" class="btn-tiket-kembali">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="3" width="7" height="7"></rect>
+                            <rect x="14" y="14" width="7" height="7"></rect>
+                            <rect x="3" y="14" width="7" height="7"></rect>
+                        </svg>
+                        <span>Buka Tiket Pengembalian Fisik</span>
+                    </a>
+                @endif
+
                 <a href="{{ route('pembayaran.nota', $pembayaran->idPembayaran) }}" class="btn-lihat-nota">
-                    Lihat Nota
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                        <line x1="16" y1="13" x2="8" y2="13"></line>
+                        <line x1="16" y1="17" x2="8" y2="17"></line>
+                        <polyline points="10 9 9 9 8 9"></polyline>
+                    </svg>
+                    <span>Lihat Nota</span>
                 </a>
+
+                @if($detailKembali)
+                    <a href="{{ route('pengembalian.member') }}" class="btn-kembali-dasbor" style="background: #f8fafc;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="19" y1="12" x2="5" y2="12"></line>
+                            <polyline points="12 19 5 12 12 5"></polyline>
+                        </svg>
+                        <span>Ke Halaman Pengembalian</span>
+                    </a>
+                @endif
+
                 <a href="{{ route('dashboard') }}" class="btn-kembali-dasbor">
-                    Kembali ke Dasbor
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                    <span>Kembali ke Dasbor</span>
                 </a>
             </div>
         </div>

@@ -794,11 +794,6 @@
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-key">Lokasi Rak</span>
-                    <span class="detail-val highlight">{{ $buku->rak ?? 'Perpustakaan Pusat' }}</span>
-                </div>
-
-                <div class="detail-row">
                     <span class="detail-key">Batas Ambil Booking</span>
                     <span class="detail-val">{{ $estimasiBatasAmbil->translatedFormat('d M Y, H:i') }} WIB ({{ $batasAmbilJam }} Jam)</span>
                 </div>
@@ -835,47 +830,30 @@
 
                 <div class="option-section-title">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 16 14"></polyline>
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                     </svg>
-                    Pilih Metode Pengambilan Buku
+                    Metode Pengambilan Buku
                 </div>
 
-                <div class="option-cards">
-                    {{-- Opsi 1: Disiapkan Petugas --}}
-                    <label class="option-card">
-                        <input type="radio" name="opsi_pengambilan" value="siapkan_petugas" class="option-radio" checked>
-                        <div class="option-content">
-                            <div class="option-title">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--brand-primary)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-                                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-                                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
-                                </svg>
-                                Disiapkan oleh Petugas (Rekomendasi)
-                            </div>
-                            <p class="option-desc">
-                                Petugas akan menyiapkan buku di meja sirkulasi. Anda cukup datang, tunjukkan QR booking, dan langsung terima buku.
-                            </p>
-                        </div>
-                    </label>
+                {{-- Hidden input: Ambil Mandiri di rak sesuai tata tertib perpustakaan --}}
+                <input type="hidden" name="opsi_pengambilan" value="ambil_mandiri">
 
-                    {{-- Opsi 2: Ambil Mandiri di Rak --}}
-                    <label class="option-card">
-                        <input type="radio" name="opsi_pengambilan" value="ambil_mandiri" class="option-radio">
-                        <div class="option-content">
-                            <div class="option-title">
-                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                </svg>
-                                Ambil Mandiri di Rak
-                            </div>
-                            <p class="option-desc">
-                                Anda mencari sendiri buku di {{ $buku->rak ?? 'rak koleksi' }} saat di perpustakaan, lalu membawanya ke meja layanan untuk scan serah terima.
-                            </p>
+                <div class="pickup-info-card" style="display: flex; align-items: flex-start; gap: 12px; padding: 14px 16px; border: 1.5px solid #ccfbf1; border-radius: 12px; background: #f0fdfa; margin-bottom: 18px;">
+                    <div style="width: 36px; height: 36px; border-radius: 10px; background: #0f766e; color: #ffffff; display: flex; align-items: center; justify-content: center; flex-shrink: 0; box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2);">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <div style="flex: 1;">
+                        <div style="font-size: 13.5px; font-weight: 800; color: #0f766e; margin-bottom: 3px; display: flex; align-items: center; gap: 6px;">
+                            <span>Ambil Mandiri Langsung di Rak Buku</span>
                         </div>
-                    </label>
+                        <p style="font-size: 12px; color: #115e59; line-height: 1.5; margin: 0;">
+                            Sesuai tata tertib, anggota mengambil buku fisik langsung di <strong>{{ $buku->rak ?? 'Rak Koleksi' }}</strong> secara mandiri, kemudian membawa buku ke meja layanan untuk verifikasi dan serah terima peminjaman.
+                        </p>
+                    </div>
                 </div>
 
                 {{-- CARD INFORMASI / NOTICE --}}

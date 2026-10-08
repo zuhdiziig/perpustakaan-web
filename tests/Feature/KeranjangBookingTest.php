@@ -225,19 +225,19 @@ class KeranjangBookingTest extends TestCase
 
         // Lakukan Checkout Booking Sekaligus
         $resCheckout = $this->post(route('keranjang.checkout'), [
-            'opsi_pengambilan' => 'siapkan_petugas',
+            'opsi_pengambilan' => 'ambil_mandiri',
         ]);
 
         // Verifikasi Redirect ke tiket booking
         $peminjaman = Peminjaman::where('idUserMember', $this->member->id)->first();
         $this->assertNotNull($peminjaman);
 
-        $resCheckout->assertRedirect(route('peminjaman.booking.tiket', $peminjaman->idPeminjaman));
+        $resCheckout->assertRedirect(route('dashboard'));
 
         // Verifikasi data transaksi induk Peminjaman
         $this->assertEquals(3, $peminjaman->totalBuku);
         $this->assertEquals('Booking', $peminjaman->status);
-        $this->assertEquals('siapkan_petugas', $peminjaman->opsi_pengambilan);
+        $this->assertEquals('ambil_mandiri', $peminjaman->opsi_pengambilan);
         $this->assertNotEmpty($peminjaman->kode_booking);
         $this->assertNotEmpty($peminjaman->qr_token);
 
@@ -257,7 +257,8 @@ class KeranjangBookingTest extends TestCase
             ->assertSee('Robotika Cerdas')
             ->assertSee('Kecerdasan Buatan')
             ->assertSee('Jaringan Komputer')
-            ->assertSee('Total 3 Buku');
+            ->assertSee('Total 3 Buku')
+            ->assertSee('Ambil Mandiri');
     }
 
     public function test_petugas_dapat_serah_terima_booking_multi_buku_secara_bersamaan(): void
@@ -270,7 +271,7 @@ class KeranjangBookingTest extends TestCase
         $this->post(route('keranjang.tambah', $buku2->idBuku));
 
         $this->post(route('keranjang.checkout'), [
-            'opsi_pengambilan' => 'siapkan_petugas',
+            'opsi_pengambilan' => 'ambil_mandiri',
         ]);
 
         $peminjaman = Peminjaman::where('idUserMember', $this->member->id)->first();

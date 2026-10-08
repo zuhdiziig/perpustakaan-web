@@ -1122,12 +1122,28 @@
                                     {{-- STATUS KETERLAMBATAN & PENGAJUAN --}}
                                     <td>
                                         @if($item->statusBuku === 'Diajukan Kembali')
-                                            <span class="badge-status-waiting">
-                                                ⏳ Menunggu Scan Petugas
-                                            </span>
-                                            <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-top: 3px;">
-                                                Tiket: {{ $item->kode_kembali ?? '-' }}
-                                            </div>
+                                            @if($item->denda && $item->denda->status === 'Belum Dibayar')
+                                                <span class="badge-status-waiting" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
+                                                    💳 Menunggu Bayar Denda
+                                                </span>
+                                                <div style="font-size: 11px; color: #dc2626; font-weight: 700; margin-top: 3px;">
+                                                    Denda: Rp {{ number_format($item->denda->jumlah, 0, ',', '.') }}
+                                                </div>
+                                            @elseif($item->denda && $item->denda->status === 'Lunas')
+                                                <span class="badge-status-waiting">
+                                                    ⏳ Menunggu Scan Petugas
+                                                </span>
+                                                <div style="font-size: 11px; color: #059669; font-weight: 700; margin-top: 3px;">
+                                                    ✓ Denda Lunas (Tiket: {{ $item->kode_batch_kembali ?? $item->kode_kembali ?? '-' }})
+                                                </div>
+                                            @else
+                                                <span class="badge-status-waiting">
+                                                    ⏳ Menunggu Scan Petugas
+                                                </span>
+                                                <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-top: 3px;">
+                                                    Tiket: {{ $item->kode_batch_kembali ?? $item->kode_kembali ?? '-' }}
+                                                </div>
+                                            @endif
                                         @elseif($item->isOverdue)
                                             <span class="badge-status overdue">
                                                 ● Terlambat {{ $item->hariTerlambat }} Hari
@@ -1148,24 +1164,40 @@
                                     {{-- AKSI PENGEMBALIAN --}}
                                     <td style="text-align: right;">
                                         @if($item->statusBuku === 'Diajukan Kembali')
-                                            <div style="display: inline-flex; align-items: center; gap: 8px;">
-                                                <a href="{{ route('pengembalian.member.tiket', $item->id) }}" 
-                                                   class="btn-ticket-action" 
-                                                   title="Buka Tiket QR Pengembalian">
-                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                                        <rect x="3" y="3" width="7" height="7"></rect>
-                                                        <rect x="14" y="3" width="7" height="7"></rect>
-                                                        <rect x="14" y="14" width="7" height="7"></rect>
-                                                        <rect x="3" y="14" width="7" height="7"></rect>
-                                                    </svg>
-                                                    <span>Buka Tiket QR</span>
-                                                </a>
-                                            </div>
+                                            @if($item->denda && $item->denda->status === 'Belum Dibayar')
+                                                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                                    <a href="{{ route('bayar.qr', $item->denda->idDenda) }}" 
+                                                       class="btn-ticket-action" 
+                                                       style="background: #dc2626; border-color: #dc2626; color: #ffffff;"
+                                                       title="Bayar Denda Terlebih Dahulu">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
+                                                            <line x1="1" y1="10" x2="23" y2="10"></line>
+                                                        </svg>
+                                                        <span>Bayar Denda (Rp {{ number_format($item->denda->jumlah, 0, ',', '.') }})</span>
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                                    <a href="{{ route('member.kartu-saya') }}" 
+                                                       class="btn-ticket-action" 
+                                                       target="_blank"
+                                                       title="Tunjukkan Kartu / QR Anggota Anda ke Petugas Meja Sirkulasi">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                                        </svg>
+                                                        <span>Tunjukkan QR Anggota</span>
+                                                    </a>
+                                                </div>
+                                            @endif
                                         @else
                                             <div style="display: inline-flex; align-items: center; gap: 8px;">
                                                 <button type="button" 
                                                         class="btn-return-action"
-                                                        onclick="openReturnModal({{ $item->id }}, '{{ addslashes($item->buku->judul ?? 'Buku') }}', '{{ $item->eksemplar->nomor_eksemplar ?? '1' }}', '{{ $item->isOverdue ? number_format($item->estDenda, 0, ',', '.') : '0' }}')">
+                                                        onclick="openReturnModal({{ $item->id }}, '{{ addslashes($item->buku->judul ?? 'Buku') }}', '{{ $item->eksemplar->nomor_eksemplar ?? '1' }}', '{{ $item->isOverdue ? number_format($item->estDenda, 0, ',', '.') : '0' }}', {{ (float)($item->buku->harga ?? 0) }}, {{ (float)($item->estDenda ?? 0) }})">
                                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                         <polyline points="20 6 9 17 4 12"></polyline>
                                                     </svg>
@@ -1380,11 +1412,19 @@
 
                 <div class="form-group">
                     <label class="form-label">Kondisi Fisik Buku yang Dikembalikan</label>
-                    <select name="kondisiBuku" class="form-select" required>
+                    <select name="kondisiBuku" id="modalKondisiBuku" class="form-select" required onchange="handleSingleConditionChange()">
                         <option value="Baik" selected>Baik (Buku utuh, bersih, dan tidak rusak)</option>
                         <option value="Rusak">Rusak (Halaman robek, basah, atau coretan parah)</option>
                         <option value="Hilang">Hilang (Buku fisik hilang / tidak dapat ditemukan)</option>
                     </select>
+                </div>
+
+                <div id="modalConditionNotice" style="display: none; background: #fffbeb; border: 1px solid #fde68a; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; line-height: 1.5;">
+                    <span id="modalConditionNoticeText">-</span>
+                </div>
+
+                <div id="modalPayFirstWarning" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 10px; padding: 11px 14px; margin-bottom: 16px; font-size: 12px; color: #1e40af; line-height: 1.45;">
+                    ℹ️ <strong>Ketentuan Denda:</strong> Karena terdapat denda pengembalian, Anda akan diarahkan untuk <strong>membayar denda via QRIS terlebih dahulu</strong> sebelum Tiket Pengembalian Buku Fisik diterbitkan.
                 </div>
 
                 <div class="checkbox-wrap">
@@ -1397,14 +1437,14 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn-qr-desk" onclick="closeReturnModal()">Batal</button>
-                <button type="submit" class="btn-return-action">
+                <button type="submit" class="btn-return-action" id="modalSubmitBtn">
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <rect x="3" y="3" width="7" height="7"></rect>
                         <rect x="14" y="3" width="7" height="7"></rect>
                         <rect x="14" y="14" width="7" height="7"></rect>
                         <rect x="3" y="14" width="7" height="7"></rect>
                     </svg>
-                    <span>Selesaikan & Terbitkan QR Code</span>
+                    <span id="modalSubmitText">Selesaikan & Terbitkan QR Code</span>
                 </button>
             </div>
         </form>
@@ -1751,7 +1791,7 @@
                 penaltyBox.style.background = '#fffbeb';
                 penaltyBox.style.color = '#92400e';
                 penaltyBox.style.border = '1px solid #fde68a';
-                penaltyBox.innerHTML = `⚠️ <strong>Denda Rusak (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} akan ditagihkan ke akun Anda saat diverifikasi petugas.`;
+                penaltyBox.innerHTML = `⚠️ <strong>Denda Rusak (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} wajib dibayar via QRIS terlebih dahulu sebelum tiket diterbitkan.`;
                 if (labelBadge) {
                     labelBadge.innerText = 'Rusak (+ Denda Ganti Rugi)';
                     labelBadge.style.color = '#d97706';
@@ -1761,7 +1801,7 @@
                 penaltyBox.style.background = '#fef2f2';
                 penaltyBox.style.color = '#991b1b';
                 penaltyBox.style.border = '1px solid #fecaca';
-                penaltyBox.innerHTML = `✕ <strong>Denda Hilang (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} akan ditagihkan ke akun Anda saat diverifikasi petugas.`;
+                penaltyBox.innerHTML = `✕ <strong>Denda Hilang (100% Harga Buku):</strong> Rp ${formatRupiah(item.harga)} wajib dibayar via QRIS terlebih dahulu sebelum tiket diterbitkan.`;
                 if (labelBadge) {
                     labelBadge.innerText = 'Hilang (+ Denda Penggantian)';
                     labelBadge.style.color = '#dc2626';
@@ -1813,28 +1853,102 @@
                 elTotal.style.color = '#059669';
             }
         }
+
+        const btnSubmitBatch = document.getElementById('btnSubmitBatch');
+        if (btnSubmitBatch) {
+            const spanText = btnSubmitBatch.querySelector('span');
+            if (spanText) {
+                if (totalDenda > 0) {
+                    spanText.innerText = `Bayar Denda (Rp ${formatRupiah(totalDenda)}) & Buat Tiket`;
+                } else {
+                    spanText.innerText = 'Terbitkan Tiket Pengembalian Sekaligus';
+                }
+            }
+        }
     }
 
     function closeBatchReturnModal() {
         document.getElementById('modalBatchReturn').classList.remove('show');
     }
 
-    function openReturnModal(detailId, judul, eksemplar, dendaFormatted) {
+    let currentModalBookPrice = 0;
+    let currentModalOverdueFine = 0;
+
+    function openReturnModal(detailId, judul, eksemplar, dendaFormatted, bookPrice = 0, overdueFine = 0) {
         const form = document.getElementById('formReturn');
         form.action = `/pengembalian-saya/${detailId}/proses`;
 
         document.getElementById('modalBookTitle').innerText = judul;
         document.getElementById('modalBookEksemplar').innerText = 'Eksemplar #' + eksemplar;
 
-        const dendaBox = document.getElementById('modalDendaNotice');
-        if (dendaFormatted !== '0') {
-            document.getElementById('modalDendaAmount').innerText = 'Rp ' + dendaFormatted;
-            dendaBox.style.display = 'block';
-        } else {
-            dendaBox.style.display = 'none';
+        currentModalBookPrice = Number(bookPrice) || 0;
+        currentModalOverdueFine = Number(overdueFine) || 0;
+
+        const select = document.getElementById('modalKondisiBuku');
+        if (select) {
+            select.value = 'Baik';
         }
 
+        handleSingleConditionChange();
+
         document.getElementById('modalReturn').classList.add('show');
+    }
+
+    function handleSingleConditionChange() {
+        const select = document.getElementById('modalKondisiBuku');
+        const condition = select ? select.value : 'Baik';
+
+        const dendaBox = document.getElementById('modalDendaNotice');
+        const conditionBox = document.getElementById('modalConditionNotice');
+        const conditionText = document.getElementById('modalConditionNoticeText');
+        const payFirstBox = document.getElementById('modalPayFirstWarning');
+        const submitText = document.getElementById('modalSubmitText');
+
+        let conditionFine = 0;
+        if (condition === 'Rusak') {
+            conditionFine = currentModalBookPrice;
+            if (conditionBox && conditionText) {
+                conditionBox.style.display = 'block';
+                conditionBox.style.background = '#fffbeb';
+                conditionBox.style.borderColor = '#fde68a';
+                conditionBox.style.color = '#92400e';
+                conditionText.innerHTML = `⚠️ <strong>Denda Kerusakan (100% Harga Buku):</strong> Rp ${formatRupiah(conditionFine)} wajib dibayar via QRIS terlebih dahulu sebelum tiket pengembalian diterbitkan.`;
+            }
+        } else if (condition === 'Hilang') {
+            conditionFine = currentModalBookPrice;
+            if (conditionBox && conditionText) {
+                conditionBox.style.display = 'block';
+                conditionBox.style.background = '#fef2f2';
+                conditionBox.style.borderColor = '#fecaca';
+                conditionBox.style.color = '#991b1b';
+                conditionText.innerHTML = `✕ <strong>Denda Kehilangan (100% Harga Buku):</strong> Rp ${formatRupiah(conditionFine)} wajib dibayar via QRIS terlebih dahulu sebelum tiket pengembalian diterbitkan.`;
+            }
+        } else {
+            if (conditionBox) conditionBox.style.display = 'none';
+        }
+
+        if (currentModalOverdueFine > 0) {
+            if (dendaBox) {
+                document.getElementById('modalDendaAmount').innerText = 'Rp ' + formatRupiah(currentModalOverdueFine);
+                dendaBox.style.display = 'block';
+            }
+        } else {
+            if (dendaBox) dendaBox.style.display = 'none';
+        }
+
+        const totalFine = currentModalOverdueFine + conditionFine;
+
+        if (totalFine > 0) {
+            if (payFirstBox) payFirstBox.style.display = 'block';
+            if (submitText) {
+                submitText.innerText = `Bayar Denda (Rp ${formatRupiah(totalFine)}) & Terbitkan QR Code`;
+            }
+        } else {
+            if (payFirstBox) payFirstBox.style.display = 'none';
+            if (submitText) {
+                submitText.innerText = 'Selesaikan & Terbitkan QR Code';
+            }
+        }
     }
 
     function closeReturnModal() {

@@ -702,24 +702,20 @@
                         </div>
                     </div>
 
-                    <!-- Pilihan Pengambilan Buku -->
+                    <!-- Metode Pengambilan Buku -->
                     <div class="pickup-option-title">Metode Pengambilan Buku:</div>
 
-                    <label class="pickup-radio-card">
-                        <input type="radio" name="opsi_pengambilan" value="siapkan_petugas" checked>
-                        <div>
-                            <div class="pickup-radio-label">📦 Disiapkan oleh Petugas di Meja</div>
-                            <div class="pickup-radio-desc">Petugas sirkulasi akan menyiapkan seluruh buku ini di meja layanan. Anda tinggal datang dan scan QR.</div>
-                        </div>
-                    </label>
+                    <input type="hidden" name="opsi_pengambilan" value="ambil_mandiri">
 
-                    <label class="pickup-radio-card">
-                        <input type="radio" name="opsi_pengambilan" value="ambil_mandiri">
+                    <div style="background: #f0fdfa; border: 1.5px solid #ccfbf1; border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; display: flex; align-items: flex-start; gap: 10px;">
+                        <span style="font-size: 18px; line-height: 1;">🚶</span>
                         <div>
-                            <div class="pickup-radio-label">🚶 Ambil Mandiri dari Rak</div>
-                            <div class="pickup-radio-desc">Anda mencari sendiri buku di rak koleksi perpustakaan, lalu membawanya ke meja sirkulasi untuk scan serah terima.</div>
+                            <strong style="font-size: 13px; color: #0f766e; display: block; margin-bottom: 3px;">Ambil Mandiri Langsung dari Rak</strong>
+                            <p style="font-size: 11.5px; color: #115e59; line-height: 1.5; margin: 0;">
+                                Sesuai tata tertib, anggota mengambil seluruh buku fisik di rak koleksi secara mandiri, kemudian membawanya ke meja sirkulasi untuk verifikasi serah terima.
+                            </p>
                         </div>
-                    </label>
+                    </div>
 
                     <!-- Tombol Konfirmasi Booking -->
                     <button

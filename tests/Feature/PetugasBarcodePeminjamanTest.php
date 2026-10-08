@@ -404,4 +404,106 @@ class PetugasBarcodePeminjamanTest extends TestCase
         $this->assertSame('Dipinjam', $detail->statusBuku);
         $this->assertSame('Dipinjam', $this->eksemplar->status);
     }
+
+    public function test_petugas_scan_tiket_booking_multi_buku_menampilkan_rincian_daftar_buku_dengan_strip(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $buku2 = Buku::factory()->create(['judul' => 'Kisah Para Nabi', 'stok' => 1]);
+        $eksemplar2 = $buku2->eksemplar()->first();
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'kode_booking' => 'BK-20261008-0099',
+            'qr_token' => 'book_multi_test_token',
+            'opsi_pengambilan' => 'ambil_mandiri',
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Booking',
+            'totalBuku' => 2,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $eksemplar2->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        // 1. Identifikasi via API scanner
+        $apiResponse = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => $booking->kode_booking,
+        ]);
+
+        $apiResponse->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('type', 'booking')
+            ->assertJsonCount(2, 'data.daftarBuku')
+            ->assertJsonPath('data.daftarBuku.0.judul', $this->buku->judul)
+            ->assertJsonPath('data.daftarBuku.1.judul', 'Kisah Para Nabi');
+
+        // 2. Tampilan halaman create dengan booking terisi
+        $viewResponse = $this->get(route('peminjaman.create', ['booking' => $booking->kode_booking]));
+
+        $viewResponse->assertOk()
+            ->assertSee('- '.$this->buku->judul)
+            ->assertSee('- Kisah Para Nabi');
+
+        // 3. Setelah serah terima, rincian buku di show.blade.php juga tersusun ke bawah dengan strip
+        $this->post(route('petugas.booking.serah-terima', $booking->idPeminjaman));
+
+        $showResponse = $this->get(route('peminjaman.show', $booking->idPeminjaman));
+        $showResponse->assertOk()
+            ->assertSee('- '.$this->buku->judul)
+            ->assertSee('- Kisah Para Nabi');
+    }
+
+    public function test_petugas_scan_member_qr_in_peminjaman_context_loads_active_booking(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $this->member->update(['qr_token' => 'usr_permanent_member_qr_123']);
+
+        $booking = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'kode_booking' => 'BK-20261007-9999',
+            'qr_token' => 'book_token_9999',
+            'opsi_pengambilan' => 'ambil_mandiri',
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Booking',
+            'totalBuku' => 1,
+            'batasAmbil' => now()->addHours(48),
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $booking->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        // Petugas scan QR Anggota di menu peminjaman
+        $response = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => 'usr_permanent_member_qr_123',
+            'context' => 'peminjaman',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('type', 'booking')
+            ->assertJsonPath('data.kodeBooking', 'BK-20261007-9999')
+            ->assertJsonPath('data.member.name', $this->member->name)
+            ->assertJsonPath('data.buku.judul', $this->buku->judul);
+    }
 }

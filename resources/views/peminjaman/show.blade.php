@@ -201,7 +201,7 @@
     .rincian-item {
         display: flex;
         justify-content: space-between;
-        align-items: center;
+        align-items: flex-start;
         gap: 16px;
     }
 
@@ -210,6 +210,7 @@
         color: #64748b;
         font-weight: 500;
         flex-shrink: 0;
+        padding-top: 1px;
     }
 
     .rincian-value {
@@ -251,6 +252,7 @@
             width: 100%;
         }
     }
+
 </style>
 @endsection
 
@@ -355,8 +357,12 @@
             <div class="rincian-item">
                 <span class="rincian-label">Buku</span>
                 <span class="rincian-value" id="dispRincianBuku">
-                    @if($peminjaman->totalBuku > 1)
-                        {{ $detailBukuJudul }} · {{ $kodeBuku }} (+{{ $peminjaman->totalBuku - 1 }} lainnya)
+                    @if($peminjaman->details->count() > 1)
+                        <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
+                            @foreach($peminjaman->details as $d)
+                                <div style="line-height: 1.45;">- {{ $d->buku?->judul ?? 'Buku' }}</div>
+                            @endforeach
+                        </div>
                     @else
                         {{ $detailBukuJudul }} · {{ $kodeBuku }}
                     @endif
@@ -376,5 +382,6 @@
             </div>
         </div>
     </div>
+
 </div>
 @endsection

@@ -215,4 +215,41 @@ class PetugasBarcodePengembalianTest extends TestCase
         $this->assertEquals(93500, $denda->jumlah);
         $this->assertEquals('Belum Dibayar', $denda->status);
     }
+
+    public function test_petugas_scan_member_qr_in_pengembalian_context_loads_borrowed_books(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $this->member->update(['qr_token' => 'usr_member_ret_test_456']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(5)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(25)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        // Petugas scan QR Anggota di menu pengembalian
+        $response = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => 'usr_member_ret_test_456',
+            'context' => 'pengembalian',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('type', 'pengembalian_batch')
+            ->assertJsonPath('data.totalBuku', 1)
+            ->assertJsonPath('data.member.name', $this->member->name)
+            ->assertJsonPath('data.daftarBuku.0.judul', $this->buku->judul);
+    }
 }

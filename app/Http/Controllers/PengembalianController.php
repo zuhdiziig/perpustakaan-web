@@ -94,28 +94,6 @@ class PengembalianController extends Controller
             }
         }
 
-        // Jika tidak ada query atau belum ditemukan, ambil data pinjaman aktif terbaru (prioritas 'Diajukan Kembali')
-        if (! $selectedDetail) {
-            $selectedDetail = DetailPeminjaman::with([
-                'peminjaman.member',
-                'buku.kategori',
-                'buku.barcode',
-                'eksemplar',
-            ])
-                ->where('statusBuku', 'Diajukan Kembali')
-                ->latest('updated_at')
-                ->first()
-                ?? DetailPeminjaman::with([
-                    'peminjaman.member',
-                    'buku.kategori',
-                    'buku.barcode',
-                    'eksemplar',
-                ])
-                    ->where('statusBuku', 'Dipinjam')
-                    ->latest('id')
-                    ->first();
-        }
-
         // Kalkulasi keterlambatan & denda jika ada data detail
         $isOverdue = false;
         $hariTerlambat = 0;
@@ -135,8 +113,22 @@ class PengembalianController extends Controller
             $estDendaKeterlambatan = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
         }
 
+        $batchDetails = null;
+        if ($selectedDetail && ! empty($selectedDetail->kode_batch_kembali)) {
+            $batchDetails = DetailPeminjaman::with([
+                'peminjaman.member',
+                'buku.kategori',
+                'buku.barcode',
+                'eksemplar',
+                'denda',
+            ])
+                ->where('kode_batch_kembali', $selectedDetail->kode_batch_kembali)
+                ->get();
+        }
+
         return view('pengembalian.create', compact(
             'selectedDetail',
+            'batchDetails',
             'code',
             'isOverdue',
             'hariTerlambat',
@@ -238,29 +230,53 @@ class PengembalianController extends Controller
                 $totalDenda = $dendaKeterlambatan + $dendaKondisi;
 
                 // 3. Simpan Transaksi Pengembalian & Denda
-                $pengembalian = Pengembalian::create([
-                    'idPeminjaman' => $peminjaman->idPeminjaman,
-                    'idUserPetugas' => auth()->id(),
-                    'tanggalKembali' => $tanggalKembali->toDateString(),
-                    'kondisiBuku' => $validated['kondisiBuku'],
-                ]);
+                $existingDenda = $detail->id_denda ? Denda::find($detail->id_denda) : null;
 
-                if ($totalDenda > 0) {
-                    $keteranganJenis = [];
-                    if ($dendaKeterlambatan > 0) {
-                        $persenTampil = min($mingguTerlambat * 10, 100);
-                        $keteranganJenis[] = "Terlambat {$mingguTerlambat} Minggu ({$persenTampil}%)";
+                if ($existingDenda && $existingDenda->idPengembalian) {
+                    $pengembalian = Pengembalian::find($existingDenda->idPengembalian);
+                    if ($pengembalian) {
+                        $pengembalian->update([
+                            'idUserPetugas' => auth()->id(),
+                            'tanggalKembali' => $tanggalKembali->toDateString(),
+                            'kondisiBuku' => $validated['kondisiBuku'],
+                        ]);
+                    } else {
+                        $pengembalian = Pengembalian::create([
+                            'idPeminjaman' => $peminjaman->idPeminjaman,
+                            'idUserPetugas' => auth()->id(),
+                            'tanggalKembali' => $tanggalKembali->toDateString(),
+                            'kondisiBuku' => $validated['kondisiBuku'],
+                        ]);
+                        $existingDenda->update(['idPengembalian' => $pengembalian->idPengembalian]);
                     }
-                    if ($dendaKondisi > 0) {
-                        $keteranganJenis[] = $jenisKondisi;
-                    }
-
-                    Denda::create([
-                        'idPengembalian' => $pengembalian->idPengembalian,
-                        'jenisDenda' => implode(' + ', $keteranganJenis),
-                        'jumlah' => $totalDenda,
-                        'status' => 'Belum Dibayar',
+                } else {
+                    $pengembalian = Pengembalian::create([
+                        'idPeminjaman' => $peminjaman->idPeminjaman,
+                        'idUserPetugas' => auth()->id(),
+                        'tanggalKembali' => $tanggalKembali->toDateString(),
+                        'kondisiBuku' => $validated['kondisiBuku'],
                     ]);
+
+                    if ($existingDenda) {
+                        $existingDenda->update(['idPengembalian' => $pengembalian->idPengembalian]);
+                    } elseif ($totalDenda > 0) {
+                        $keteranganJenis = [];
+                        if ($dendaKeterlambatan > 0) {
+                            $persenTampil = min($mingguTerlambat * 10, 100);
+                            $keteranganJenis[] = "Terlambat {$mingguTerlambat} Minggu ({$persenTampil}%)";
+                        }
+                        if ($dendaKondisi > 0) {
+                            $keteranganJenis[] = $jenisKondisi;
+                        }
+
+                        $dendaBaru = Denda::create([
+                            'idPengembalian' => $pengembalian->idPengembalian,
+                            'jenisDenda' => implode(' + ', $keteranganJenis),
+                            'jumlah' => $totalDenda,
+                            'status' => 'Belum Dibayar',
+                        ]);
+                        $detail->update(['id_denda' => $dendaBaru->idDenda]);
+                    }
                 }
 
                 // Update status detail peminjaman
@@ -301,9 +317,50 @@ class PengembalianController extends Controller
     // Tampilkan rincian status pengembalian & total denda
     public function show($id)
     {
-        $pengembalian = Pengembalian::with(['peminjaman.member', 'petugas', 'denda'])->findOrFail($id);
+        $pengembalian = Pengembalian::with([
+            'peminjaman.member',
+            'peminjaman.details.buku.barcode',
+            'peminjaman.details.buku.kategori',
+            'peminjaman.details.eksemplar',
+            'petugas',
+            'denda',
+        ])->findOrFail($id);
 
-        return view('pengembalian.show', compact('pengembalian'));
+        $detailBuku = null;
+        if ($pengembalian->denda) {
+            $detailBuku = DetailPeminjaman::with(['buku.barcode', 'eksemplar'])
+                ->where('id_denda', $pengembalian->denda->idDenda)
+                ->first();
+        }
+
+        $batchDetails = null;
+        $kodeBatch = null;
+
+        if ($detailBuku && ! empty($detailBuku->kode_batch_kembali)) {
+            $kodeBatch = $detailBuku->kode_batch_kembali;
+            $batchDetails = DetailPeminjaman::with(['buku.barcode', 'eksemplar', 'denda'])
+                ->where('kode_batch_kembali', $kodeBatch)
+                ->get();
+        } else {
+            $firstDetail = DetailPeminjaman::with(['buku.barcode', 'eksemplar', 'denda'])
+                ->where('idPeminjaman', $pengembalian->idPeminjaman)
+                ->where('statusBuku', 'Kembali')
+                ->latest('updated_at')
+                ->first();
+
+            if ($firstDetail && ! empty($firstDetail->kode_batch_kembali)) {
+                $kodeBatch = $firstDetail->kode_batch_kembali;
+                $batchDetails = DetailPeminjaman::with(['buku.barcode', 'eksemplar', 'denda'])
+                    ->where('kode_batch_kembali', $kodeBatch)
+                    ->get();
+            }
+
+            if (! $detailBuku) {
+                $detailBuku = $firstDetail;
+            }
+        }
+
+        return view('pengembalian.show', compact('pengembalian', 'detailBuku', 'batchDetails', 'kodeBatch'));
     }
 
     /**
@@ -322,6 +379,7 @@ class PengembalianController extends Controller
             'buku.barcode',
             'eksemplar',
             'peminjaman.petugas',
+            'denda',
         ])
             ->whereHas('peminjaman', function ($q) use ($userId) {
                 $q->where('idUserMember', $userId)->where('status', 'Dipinjam');
@@ -434,9 +492,9 @@ class PengembalianController extends Controller
         ]);
 
         try {
-            $detail = DB::transaction(function () use ($idDetail, $user, $request) {
+            $result = DB::transaction(function () use ($idDetail, $user, $request) {
                 // 1. Kunci dan validasi detail peminjaman milik member
-                $detail = DetailPeminjaman::with('peminjaman')
+                $detail = DetailPeminjaman::with(['peminjaman', 'buku', 'denda'])
                     ->where('id', $idDetail)
                     ->lockForUpdate()
                     ->firstOrFail();
@@ -451,6 +509,9 @@ class PengembalianController extends Controller
                     throw new \DomainException('Buku ini sudah berstatus dikembalikan sebelumnya.');
                 }
 
+                $buku = Buku::findOrFail($detail->idBuku);
+                $kondisi = $request->input('kondisiBuku', 'Baik');
+
                 // Generate kode kembali unik (format KB-YYYYMMDD-XXXX)
                 $kodeKembali = $detail->kode_kembali ?: ('KB-'.Carbon::now()->format('Ymd').'-'.str_pad($detail->id, 4, '0', STR_PAD_LEFT));
                 $qrKembali = $detail->qr_kembali ?: ('ret_'.bin2hex(random_bytes(16)));
@@ -459,15 +520,97 @@ class PengembalianController extends Controller
                     'statusBuku' => 'Diajukan Kembali',
                     'kode_kembali' => $kodeKembali,
                     'qr_kembali' => $qrKembali,
-                    'kondisi_laporan' => $request->input('kondisiBuku', 'Baik'),
+                    'kondisi_laporan' => $kondisi,
                     'waktu_pengajuan_kembali' => Carbon::now(),
                 ]);
 
-                return $detail;
+                // Hitung denda keterlambatan (10% per minggu dari harga buku)
+                $today = Carbon::now();
+                $batasKembali = Carbon::parse($peminjaman->batasKembali);
+                $dendaKeterlambatan = 0;
+                $mingguTerlambat = 0;
+                if ($today->greaterThan($batasKembali)) {
+                    $hariTerlambat = max(1, $batasKembali->diffInDays($today));
+                    $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                    $faktorMinggu = min($mingguTerlambat, 10);
+                    $persentaseDenda = $faktorMinggu * 0.10;
+                    $dendaKeterlambatan = (float) $buku->harga * $persentaseDenda;
+                }
+
+                // Hitung denda kondisi (100% harga buku jika Rusak atau Hilang)
+                $dendaKondisi = 0;
+                $jenisKondisi = null;
+                if ($kondisi === 'Rusak') {
+                    $dendaKondisi = (float) $buku->harga;
+                    $jenisKondisi = 'Kerusakan (100% Harga Buku)';
+                } elseif ($kondisi === 'Hilang') {
+                    $dendaKondisi = (float) $buku->harga;
+                    $jenisKondisi = 'Kehilangan (100% Harga Buku)';
+                }
+
+                $totalDenda = $dendaKeterlambatan + $dendaKondisi;
+                $denda = null;
+
+                if ($totalDenda > 0) {
+                    $keteranganJenis = [];
+                    if ($dendaKeterlambatan > 0) {
+                        $persenTampil = min($mingguTerlambat * 10, 100);
+                        $keteranganJenis[] = "Terlambat {$mingguTerlambat} Minggu ({$persenTampil}%)";
+                    }
+                    if ($dendaKondisi > 0) {
+                        $keteranganJenis[] = $jenisKondisi;
+                    }
+
+                    if ($detail->id_denda) {
+                        $denda = Denda::find($detail->id_denda);
+                    }
+
+                    if (! $denda) {
+                        // Buat record pre-pengembalian (idUserPetugas = null hingga disahkan di meja sirkulasi)
+                        $pengembalian = Pengembalian::create([
+                            'idPeminjaman' => $peminjaman->idPeminjaman,
+                            'idUserPetugas' => null,
+                            'tanggalKembali' => Carbon::now()->toDateString(),
+                            'kondisiBuku' => $kondisi,
+                        ]);
+
+                        $denda = Denda::create([
+                            'idPengembalian' => $pengembalian->idPengembalian,
+                            'jenisDenda' => implode(' + ', $keteranganJenis),
+                            'jumlah' => $totalDenda,
+                            'status' => 'Belum Dibayar',
+                        ]);
+
+                        $detail->update(['id_denda' => $denda->idDenda]);
+                    } else {
+                        if ($denda->status === 'Belum Dibayar') {
+                            $denda->update([
+                                'jenisDenda' => implode(' + ', $keteranganJenis),
+                                'jumlah' => $totalDenda,
+                            ]);
+                        }
+                    }
+                }
+
+                return [
+                    'detail' => $detail,
+                    'totalDenda' => $totalDenda,
+                    'denda' => $denda,
+                ];
             });
 
-            return redirect()->route('pengembalian.member.tiket', $detail->id)
-                ->with('success', 'Pengajuan pengembalian berhasil! Tunjukkan QR Code tiket ini kepada petugas perpustakaan di meja sirkulasi.');
+            $detail = $result['detail'];
+            $totalDenda = $result['totalDenda'];
+            $denda = $result['denda'];
+
+            // Jika ada denda dan belum dibayar, redirect terlebih dahulu ke pembayaran QRIS
+            if ($denda && $denda->status === 'Belum Dibayar') {
+                return redirect()->route('bayar.qr', $denda->idDenda)
+                    ->with('info', 'Buku yang dikembalikan memiliki tagihan denda sebesar Rp '.number_format($totalDenda, 0, ',', '.').'. Sesuai ketentuan, denda wajib dibayar melalui QRIS terlebih dahulu sebelum tiket pengembalian diterbitkan.');
+            }
+
+            return redirect()->route('pengembalian.member')
+                ->with('success', 'Pengajuan pengembalian berhasil dicatat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
@@ -487,10 +630,17 @@ class PengembalianController extends Controller
             'buku.kategori',
             'buku.barcode',
             'eksemplar',
+            'denda',
         ])->findOrFail($idDetail);
 
         if ($user && $user->role === 'member' && (int) $detail->peminjaman->idUserMember !== (int) $user->id) {
             abort(403, 'Anda tidak memiliki hak akses melihat tiket pengembalian ini.');
+        }
+
+        // WAJIB: Jika terdapat denda yang BELUM DIBAYAR, blokir tiket dan alihkan ke pembayaran QRIS
+        if ($detail->denda && $detail->denda->status === 'Belum Dibayar') {
+            return redirect()->route('bayar.qr', $detail->denda->idDenda)
+                ->with('error', 'Tiket pengembalian fisik belum dapat diterbitkan. Harap selesaikan pembayaran denda sebesar Rp '.number_format($detail->denda->jumlah, 0, ',', '.').' via QRIS terlebih dahulu.');
         }
 
         // Pastikan kode_kembali dan qr_kembali tersedia
@@ -515,6 +665,7 @@ class PengembalianController extends Controller
 
         $qrPayload = $detail->qr_kembali ?: $detail->kode_kembali;
         $qrCodeSvg = $this->generateSvgQr($qrPayload, 220);
+        $isCompleted = ($detail->statusBuku === 'Kembali');
 
         return view('pengembalian.member_tiket', compact(
             'detail',
@@ -523,7 +674,8 @@ class PengembalianController extends Controller
             'hariTerlambat',
             'mingguTerlambat',
             'estDenda',
-            'batasKembali'
+            'batasKembali',
+            'isCompleted'
         ));
     }
 
@@ -548,7 +700,7 @@ class PengembalianController extends Controller
         ]);
 
         try {
-            $kodeBatch = DB::transaction(function () use ($request, $user) {
+            $result = DB::transaction(function () use ($request, $user) {
                 $detailIds = $request->input('detail_ids', []);
                 $kondisiMap = $request->input('kondisi', []);
 
@@ -562,6 +714,8 @@ class PengembalianController extends Controller
                 }
 
                 $batchCode = 'KB-BATCH-'.Carbon::now()->format('Ymd').'-'.strtoupper(bin2hex(random_bytes(3)));
+                $totalBatchDenda = 0;
+                $today = Carbon::now();
 
                 foreach ($details as $detail) {
                     if ((int) $detail->peminjaman->idUserMember !== (int) $user->id) {
@@ -577,8 +731,8 @@ class PengembalianController extends Controller
                         $kondisiDipilih = 'Baik';
                     }
 
-                    $kodeKembali = $detail->kode_kembali ?: ('KB-'.Carbon::now()->format('Ymd').'-'.str_pad($detail->id, 4, '0', STR_PAD_LEFT));
-                    $qrKembali = $detail->qr_kembali ?: ('ret_'.bin2hex(random_bytes(16)));
+                    $kodeKembali = $batchCode;
+                    $qrKembali = $batchCode;
 
                     $detail->update([
                         'statusBuku' => 'Diajukan Kembali',
@@ -588,13 +742,66 @@ class PengembalianController extends Controller
                         'kondisi_laporan' => $kondisiDipilih,
                         'waktu_pengajuan_kembali' => Carbon::now(),
                     ]);
+
+                    // Hitung denda keterlambatan
+                    $batasKembali = Carbon::parse($detail->peminjaman->batasKembali);
+                    $dendaTelat = 0;
+                    if ($today->greaterThan($batasKembali)) {
+                        $hariTerlambat = max(1, $batasKembali->diffInDays($today));
+                        $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                        $faktorMinggu = min($mingguTerlambat, 10);
+                        $dendaTelat = (float) ($detail->buku->harga ?? 0) * ($faktorMinggu * 0.10);
+                    }
+
+                    // Hitung denda kondisi
+                    $dendaKondisi = 0;
+                    if ($kondisiDipilih === 'Rusak' || $kondisiDipilih === 'Hilang') {
+                        $dendaKondisi = (float) ($detail->buku->harga ?? 0);
+                    }
+
+                    $totalBatchDenda += ($dendaTelat + $dendaKondisi);
                 }
 
-                return $batchCode;
+                $denda = null;
+                if ($totalBatchDenda > 0) {
+                    $firstDetail = $details->first();
+                    $prePengembalian = Pengembalian::create([
+                        'idPeminjaman' => $firstDetail->idPeminjaman,
+                        'idUserPetugas' => null,
+                        'tanggalKembali' => Carbon::now()->toDateString(),
+                        'kondisiBuku' => (count(array_unique($kondisiMap)) === 1 ? reset($kondisiMap) : 'Baik'),
+                    ]);
+
+                    $denda = Denda::create([
+                        'idPengembalian' => $prePengembalian->idPengembalian,
+                        'jenisDenda' => "Denda Pengembalian Sekaligus ({$batchCode})",
+                        'jumlah' => $totalBatchDenda,
+                        'status' => 'Belum Dibayar',
+                    ]);
+
+                    foreach ($details as $detail) {
+                        $detail->update(['id_denda' => $denda->idDenda]);
+                    }
+                }
+
+                return [
+                    'batchCode' => $batchCode,
+                    'totalBatchDenda' => $totalBatchDenda,
+                    'denda' => $denda,
+                ];
             });
 
-            return redirect()->route('pengembalian.member.batch-tiket', $kodeBatch)
-                ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Tunjukkan QR Code tiket ini ke petugas meja sirkulasi.');
+            $batchCode = $result['batchCode'];
+            $totalBatchDenda = $result['totalBatchDenda'];
+            $denda = $result['denda'];
+
+            if ($denda && $denda->status === 'Belum Dibayar') {
+                return redirect()->route('bayar.qr', $denda->idDenda)
+                    ->with('info', 'Terdapat denda pengembalian sekaligus sebesar Rp '.number_format($totalBatchDenda, 0, ',', '.').'. Sesuai ketentuan, denda wajib dibayar melalui QRIS terlebih dahulu sebelum tiket batch diterbitkan.');
+            }
+
+            return redirect()->route('pengembalian.member')
+                ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda ke petugas meja sirkulasi.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
@@ -614,6 +821,7 @@ class PengembalianController extends Controller
             'buku.kategori',
             'buku.barcode',
             'eksemplar',
+            'denda',
         ])
             ->where('kode_batch_kembali', $kodeBatch)
             ->get();
@@ -625,6 +833,16 @@ class PengembalianController extends Controller
         $firstDetail = $details->first();
         if ($user && $user->role === 'member' && (int) $firstDetail->peminjaman->idUserMember !== (int) $user->id) {
             abort(403, 'Anda tidak memiliki hak akses melihat tiket pengembalian ini.');
+        }
+
+        // WAJIB: Jika terdapat denda yang BELUM DIBAYAR, blokir tiket batch dan alihkan ke pembayaran QRIS
+        $unpaidDetail = $details->first(function ($item) {
+            return $item->denda && $item->denda->status === 'Belum Dibayar';
+        });
+
+        if ($unpaidDetail) {
+            return redirect()->route('bayar.qr', $unpaidDetail->denda->idDenda)
+                ->with('error', 'Tiket pengembalian fisik sekaligus belum dapat diterbitkan. Harap selesaikan pembayaran denda sebesar Rp '.number_format($unpaidDetail->denda->jumlah, 0, ',', '.').' via QRIS terlebih dahulu.');
         }
 
         $today = Carbon::now();
@@ -669,6 +887,7 @@ class PengembalianController extends Controller
 
         $totalEstDenda = $totalEstDendaTelat + $totalEstDendaKondisi;
         $qrCodeSvg = $this->generateSvgQr($kodeBatch, 220);
+        $isCompleted = $details->isNotEmpty() && $details->every(fn ($item) => $item->statusBuku === 'Kembali');
 
         return view('pengembalian.member_batch_tiket', compact(
             'details',
@@ -680,8 +899,79 @@ class PengembalianController extends Controller
             'countHilang',
             'totalEstDendaTelat',
             'totalEstDendaKondisi',
-            'totalEstDenda'
+            'totalEstDenda',
+            'isCompleted'
         ));
+    }
+
+    /**
+     * Cek status realtime tiket pengembalian (polling AJAX untuk notifikasi pop-up member).
+     */
+    public function apiCheckStatusTiket(Request $request, string $kode)
+    {
+        $user = auth()->user();
+
+        $query = DetailPeminjaman::with(['peminjaman.member', 'buku', 'eksemplar']);
+
+        if (is_numeric($kode)) {
+            $details = $query->where('id', (int) $kode)
+                ->orWhere('kode_kembali', $kode)
+                ->orWhere('kode_batch_kembali', $kode)
+                ->get();
+        } else {
+            $details = $query->where('kode_batch_kembali', $kode)
+                ->orWhere('kode_kembali', $kode)
+                ->orWhere('qr_kembali', $kode)
+                ->get();
+        }
+
+        if ($details->isEmpty()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tiket pengembalian tidak ditemukan.',
+            ], 404);
+        }
+
+        $first = $details->first();
+        if ($user && $user->role === 'member' && (int) $first->peminjaman->idUserMember !== (int) $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki hak akses melihat tiket ini.',
+            ], 403);
+        }
+
+        $totalBuku = $details->count();
+        $completedCount = $details->where('statusBuku', 'Kembali')->count();
+        $isCompleted = ($completedCount === $totalBuku && $totalBuku > 0);
+
+        if ($isCompleted) {
+            $pengembalian = Pengembalian::with('petugas')
+                ->where('idPeminjaman', $first->idPeminjaman)
+                ->latest('idPengembalian')
+                ->first();
+
+            $namaPetugas = $pengembalian?->petugas?->name ?? 'Petugas Meja Sirkulasi';
+            $waktuSelesai = $pengembalian?->updated_at ? $pengembalian->updated_at->translatedFormat('d M Y, H:i') : Carbon::now()->translatedFormat('d M Y, H:i');
+
+            return response()->json([
+                'success' => true,
+                'completed' => true,
+                'totalBuku' => $totalBuku,
+                'kodeTiket' => $first->kode_batch_kembali ?: $first->kode_kembali,
+                'namaPetugas' => $namaPetugas,
+                'waktuSelesai' => $waktuSelesai,
+                'idPengembalian' => $pengembalian?->idPengembalian,
+                'message' => 'Pengembalian buku berhasil diverifikasi dan diselesaikan oleh petugas!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'completed' => false,
+            'totalBuku' => $totalBuku,
+            'completedCount' => $completedCount,
+            'status' => 'Menunggu Scan Petugas',
+        ]);
     }
 
     /**
@@ -691,7 +981,7 @@ class PengembalianController extends Controller
     {
         $user = auth()->user();
 
-        $details = DetailPeminjaman::with('peminjaman')
+        $details = DetailPeminjaman::with(['peminjaman', 'denda'])
             ->where('kode_batch_kembali', $kodeBatch)
             ->get();
 
@@ -699,9 +989,24 @@ class PengembalianController extends Controller
             return redirect()->route('pengembalian.member')->with('error', 'Tiket batch pengembalian tidak ditemukan.');
         }
 
+        $hasPaidDenda = $details->contains(function ($item) {
+            return $item->denda && $item->denda->status === 'Lunas';
+        });
+
+        if ($hasPaidDenda) {
+            return redirect()->route('pengembalian.member')
+                ->with('error', 'Pengajuan pengembalian sekaligus tidak dapat dibatalkan karena denda telah dibayar secara online. Silakan hubungi petugas meja sirkulasi.');
+        }
+
+        $dendaIdsToDelete = [];
+
         foreach ($details as $detail) {
             if ($user && $user->role === 'member' && (int) $detail->peminjaman->idUserMember !== (int) $user->id) {
                 abort(403, 'Akses ditolak.');
+            }
+
+            if ($detail->id_denda) {
+                $dendaIdsToDelete[] = $detail->id_denda;
             }
 
             if ($detail->statusBuku === 'Diajukan Kembali') {
@@ -712,7 +1017,19 @@ class PengembalianController extends Controller
                     'kode_batch_kembali' => null,
                     'kondisi_laporan' => 'Baik',
                     'waktu_pengajuan_kembali' => null,
+                    'id_denda' => null,
                 ]);
+            }
+        }
+
+        foreach (array_unique($dendaIdsToDelete) as $dendaId) {
+            $denda = Denda::find($dendaId);
+            if ($denda && $denda->status === 'Belum Dibayar') {
+                $prePengembalian = $denda->pengembalian;
+                $denda->delete();
+                if ($prePengembalian && $prePengembalian->idUserPetugas === null) {
+                    $prePengembalian->delete();
+                }
             }
         }
 
@@ -727,7 +1044,7 @@ class PengembalianController extends Controller
     {
         $user = auth()->user();
 
-        $detail = DetailPeminjaman::with('peminjaman')->findOrFail($idDetail);
+        $detail = DetailPeminjaman::with(['peminjaman', 'denda'])->findOrFail($idDetail);
 
         if ($user && $user->role === 'member' && (int) $detail->peminjaman->idUserMember !== (int) $user->id) {
             abort(403, 'Akses ditolak.');
@@ -737,6 +1054,12 @@ class PengembalianController extends Controller
             return back()->with('error', 'Pengajuan tidak dapat dibatalkan karena status buku saat ini: '.$detail->statusBuku);
         }
 
+        if ($detail->denda && $detail->denda->status === 'Lunas') {
+            return back()->with('error', 'Pengajuan pengembalian tidak dapat dibatalkan karena denda telah dibayar secara online. Silakan hubungi petugas perpustakaan.');
+        }
+
+        $dendaId = $detail->id_denda;
+
         $detail->update([
             'statusBuku' => 'Dipinjam',
             'kode_kembali' => null,
@@ -744,7 +1067,19 @@ class PengembalianController extends Controller
             'kode_batch_kembali' => null,
             'kondisi_laporan' => 'Baik',
             'waktu_pengajuan_kembali' => null,
+            'id_denda' => null,
         ]);
+
+        if ($dendaId) {
+            $denda = Denda::find($dendaId);
+            if ($denda && $denda->status === 'Belum Dibayar') {
+                $prePengembalian = $denda->pengembalian;
+                $denda->delete();
+                if ($prePengembalian && $prePengembalian->idUserPetugas === null) {
+                    $prePengembalian->delete();
+                }
+            }
+        }
 
         return redirect()->route('pengembalian.member')
             ->with('success', 'Pengajuan pengembalian buku berhasil dibatalkan. Status buku kembali "Dipinjam".');
@@ -771,5 +1106,138 @@ class PengembalianController extends Controller
         }
 
         return view('pengembalian.member_bukti', compact('pengembalian'));
+    }
+
+    /**
+     * Selesaikan pengembalian seluruh buku dalam tiket batch sekaligus oleh petugas meja sirkulasi.
+     */
+    public function petugasBatchStore(Request $request)
+    {
+        $request->validate([
+            'kodeBatch' => ['required', 'string'],
+            'kondisi' => ['nullable', 'array'],
+            'kondisi.*' => ['nullable', 'in:Baik,Rusak,Hilang'],
+        ]);
+
+        $kodeBatch = trim($request->input('kodeBatch'));
+        $kondisiMap = $request->input('kondisi', []);
+
+        try {
+            $result = DB::transaction(function () use ($kodeBatch, $kondisiMap) {
+                $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
+                    ->where('kode_batch_kembali', $kodeBatch)
+                    ->orWhere('kode_kembali', $kodeBatch)
+                    ->lockForUpdate()
+                    ->get();
+
+                if ($details->isEmpty()) {
+                    throw new \DomainException("Data tiket pengembalian sekaligus '{$kodeBatch}' tidak ditemukan.");
+                }
+
+                $pendingDetails = $details->where('statusBuku', '!=', 'Kembali');
+                if ($pendingDetails->isEmpty()) {
+                    throw new \DomainException("Seluruh buku pada tiket '{$kodeBatch}' sudah dikembalikan sebelumnya.");
+                }
+
+                // Cek jika ada denda yang BELUM DIBAYAR
+                $hasUnpaidFine = $pendingDetails->contains(function ($item) {
+                    return $item->denda && $item->denda->status === 'Belum Dibayar';
+                });
+
+                if ($hasUnpaidFine) {
+                    throw new \DomainException('Terdapat denda pengembalian yang belum dibayar. Minta anggota menyelesaikan pembayaran denda terlebih dahulu sebelum pengembalian diselesaikan.');
+                }
+
+                $tanggalKembali = Carbon::now();
+                $petugasId = auth()->id();
+                $peminjamanIds = [];
+
+                $firstPengembalianId = null;
+
+                foreach ($pendingDetails as $detail) {
+                    $peminjaman = Peminjaman::lockForUpdate()->find($detail->idPeminjaman);
+                    if ($peminjaman) {
+                        $peminjamanIds[$detail->idPeminjaman] = $peminjaman;
+                    }
+
+                    $buku = Buku::lockForUpdate()->find($detail->idBuku);
+                    $eksemplar = $detail->idEksemplar ? BukuEksemplar::lockForUpdate()->find($detail->idEksemplar) : null;
+
+                    $kondisiFinal = $kondisiMap[$detail->id] ?? $detail->kondisi_laporan ?? 'Baik';
+                    if (! in_array($kondisiFinal, ['Baik', 'Rusak', 'Hilang'])) {
+                        $kondisiFinal = 'Baik';
+                    }
+
+                    // Pengembalian record
+                    $pengembalian = null;
+                    if ($detail->id_denda) {
+                        $denda = Denda::find($detail->id_denda);
+                        if ($denda && $denda->idPengembalian) {
+                            $pengembalian = Pengembalian::find($denda->idPengembalian);
+                        }
+                    }
+
+                    if ($pengembalian) {
+                        $pengembalian->update([
+                            'idUserPetugas' => $petugasId,
+                            'tanggalKembali' => $tanggalKembali->toDateString(),
+                            'kondisiBuku' => $kondisiFinal,
+                        ]);
+                    } else {
+                        $pengembalian = Pengembalian::create([
+                            'idPeminjaman' => $detail->idPeminjaman,
+                            'idUserPetugas' => $petugasId,
+                            'tanggalKembali' => $tanggalKembali->toDateString(),
+                            'kondisiBuku' => $kondisiFinal,
+                        ]);
+
+                        if ($detail->id_denda) {
+                            Denda::where('idDenda', $detail->id_denda)->update(['idPengembalian' => $pengembalian->idPengembalian]);
+                        }
+                    }
+
+                    if (! $firstPengembalianId && $pengembalian) {
+                        $firstPengembalianId = $pengembalian->idPengembalian;
+                    }
+
+                    $detail->update(['statusBuku' => 'Kembali']);
+
+                    if ($eksemplar) {
+                        $statusBaru = ($kondisiFinal === 'Hilang') ? 'Hilang' : 'Tersedia';
+                        $eksemplar->update([
+                            'status' => $statusBaru,
+                            'kondisi' => $kondisiFinal,
+                        ]);
+                    }
+
+                    if ($buku) {
+                        $buku->syncStok();
+                        $buku->update(['kondisi' => $kondisiFinal]);
+                    }
+                }
+
+                foreach ($peminjamanIds as $pjId => $pj) {
+                    $sisaBuku = DetailPeminjaman::where('idPeminjaman', $pjId)
+                        ->where('statusBuku', '!=', 'Kembali')
+                        ->count();
+
+                    if ($sisaBuku === 0) {
+                        $pj->update(['status' => 'Selesai']);
+                    }
+                }
+
+                return [
+                    'count' => $pendingDetails->count(),
+                    'idPengembalian' => $firstPengembalianId,
+                ];
+            });
+
+            return redirect()->route('pengembalian.show', $result['idPengembalian'])
+                ->with('success', "Pengembalian seluruh buku fisik ({$result['count']} buku) berhasil diselesaikan oleh petugas!");
+        } catch (\DomainException $e) {
+            return back()->with('error', $e->getMessage());
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengembalian sekaligus: '.$e->getMessage());
+        }
     }
 }

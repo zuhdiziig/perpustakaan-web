@@ -742,17 +742,17 @@
                                 <td>
                                     @if (in_array($item->status, ['Booking', 'Siap Diambil']))
                                         <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
-                                            <a href="{{ route('peminjaman.booking.tiket', $item->idPeminjaman) }}" class="action-pay-qr" style="background: #0f766e; text-decoration: none;">
+                                            <a href="{{ route('member.kartu-saya') }}" target="_blank" class="action-pay-qr" style="background: #0f766e; text-decoration: none;" title="Tunjukkan QR Anggota ke petugas meja sirkulasi">
                                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                                     <rect x="3" y="3" width="7" height="7"></rect>
                                                     <rect x="14" y="3" width="7" height="7"></rect>
                                                     <rect x="14" y="14" width="7" height="7"></rect>
                                                     <rect x="3" y="14" width="7" height="7"></rect>
                                                 </svg>
-                                                <span>Buka Tiket QR</span>
+                                                <span>QR Anggota</span>
                                             </a>
                                             <span style="font-size: 11px; color: #64748b;">
-                                                {{ $item->opsi_pengambilan === 'siapkan_petugas' ? 'Disiapkan Petugas' : 'Ambil di Rak' }}
+                                                Tunjukkan ke Petugas
                                             </span>
                                         </div>
                                     @elseif ($item->pengembalians->isNotEmpty())

@@ -440,6 +440,244 @@
             width: 100%;
         }
     }
+
+    /* --- POPUP NOTIFICATION MODAL STYLES --- */
+    .popup-modal-overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 99999;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+    }
+
+    .popup-modal-overlay.show {
+        display: flex;
+    }
+
+    .popup-modal-container {
+        position: relative;
+        background: #ffffff;
+        border-radius: 20px;
+        width: 100%;
+        max-width: 440px;
+        padding: 28px 24px;
+        box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(15, 23, 42, 0.08);
+        text-align: center;
+        animation: popupZoomIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        z-index: 10;
+    }
+
+    @keyframes popupZoomIn {
+        from { transform: scale(0.92); opacity: 0; }
+        to { transform: scale(1); opacity: 1; }
+    }
+
+    .popup-modal-close {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #f1f5f9;
+        border: none;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .popup-modal-close:hover {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .popup-icon-wrapper {
+        position: relative;
+        width: 68px;
+        height: 68px;
+        margin: 0 auto 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .popup-icon-pulse {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: #10b981;
+        opacity: 0.2;
+        animation: popupPulse 2s infinite;
+    }
+
+    @keyframes popupPulse {
+        0% { transform: scale(0.95); opacity: 0.4; }
+        50% { transform: scale(1.25); opacity: 0; }
+        100% { transform: scale(0.95); opacity: 0; }
+    }
+
+    .popup-icon-circle {
+        position: relative;
+        width: 58px;
+        height: 58px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: #ffffff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
+    }
+
+    .popup-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        background: #dcfce7;
+        color: #15803d;
+        border-radius: 9999px;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 10px;
+    }
+
+    .popup-pulse-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #16a34a;
+    }
+
+    .popup-modal-title {
+        font-size: 20px;
+        font-weight: 800;
+        color: #0f172a;
+        letter-spacing: -0.3px;
+        margin: 0 0 6px;
+        line-height: 1.3;
+    }
+
+    .popup-modal-desc {
+        font-size: 13px;
+        color: #64748b;
+        line-height: 1.55;
+        margin: 0 0 18px;
+    }
+
+    .popup-info-card {
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        text-align: left;
+    }
+
+    .popup-info-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12.5px;
+    }
+
+    .popup-info-row .info-label {
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .popup-info-row .info-value {
+        color: #0f172a;
+        font-weight: 700;
+    }
+
+    .popup-info-row .info-value.font-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        background: #e2e8f0;
+        padding: 2px 6px;
+        border-radius: 4px;
+    }
+
+    .popup-info-row .info-value.text-teal {
+        color: #0f766e;
+    }
+
+    .popup-info-row .info-badge-success {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        color: #15803d;
+        background: #dcfce7;
+        padding: 2px 8px;
+        border-radius: 6px;
+    }
+
+    .popup-modal-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .btn-popup-primary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        width: 100%;
+        padding: 11px 16px;
+        border-radius: 10px;
+        background: #0f766e;
+        color: #ffffff;
+        font-size: 13.5px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: all 0.15s ease;
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
+    }
+
+    .btn-popup-primary:hover {
+        background: #115e59;
+        transform: translateY(-1px);
+        color: #ffffff;
+    }
+
+    .btn-popup-secondary {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        padding: 10px 16px;
+        border-radius: 10px;
+        background: transparent;
+        color: #64748b;
+        font-size: 13px;
+        font-weight: 600;
+        border: 1px solid #cbd5e1;
+        cursor: pointer;
+        transition: all 0.15s ease;
+    }
+
+    .btn-popup-secondary:hover {
+        background: #f1f5f9;
+        color: #0f172a;
+    }
 </style>
 @endsection
 
@@ -486,22 +724,22 @@
         {{-- KOLOM KIRI: QR CARD PASS --}}
         <div class="ticket-qr-card">
             @if ($peminjaman->status === 'Booking')
-                <div class="qr-badge-header badge-booking">
+                <div class="qr-badge-header badge-booking" id="bookingStatusBadge">
                     <span style="width: 7px; height: 7px; border-radius: 50%; background: #d97706; display: inline-block;"></span>
                     Menunggu Pengambilan
                 </div>
             @elseif ($peminjaman->status === 'Siap Diambil')
-                <div class="qr-badge-header badge-siap">
+                <div class="qr-badge-header badge-siap" id="bookingStatusBadge">
                     <span style="width: 7px; height: 7px; border-radius: 50%; background: #2563eb; display: inline-block;"></span>
-                    Buku Siap di Meja Layanan
+                    Siap Diambil di Perpustakaan
                 </div>
             @elseif ($peminjaman->status === 'Dipinjam')
-                <div class="qr-badge-header badge-dipinjam">
+                <div class="qr-badge-header badge-dipinjam" id="bookingStatusBadge">
                     <span style="width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block;"></span>
                     Telah Diserahkan & Aktif
                 </div>
             @else
-                <div class="qr-badge-header badge-booking">
+                <div class="qr-badge-header badge-booking" id="bookingStatusBadge">
                     {{ $peminjaman->status }}
                 </div>
             @endif
@@ -604,12 +842,8 @@
 
                 <div class="ticket-spec-row">
                     <span class="spec-key">Metode Pengambilan</span>
-                    <span class="spec-val" style="color: var(--brand-primary);">
-                        @if ($isDisiapkanPetugas)
-                            📦 Disiapkan oleh Petugas di Meja Layanan
-                        @else
-                            🔍 Ambil Mandiri di {{ $buku->rak ?? 'Rak Buku' }}
-                        @endif
+                    <span class="spec-val" style="color: var(--brand-primary); font-weight: 800;">
+                        🔍 Ambil Mandiri di {{ $buku->rak ?? 'Rak Buku' }}
                     </span>
                 </div>
 
@@ -631,15 +865,9 @@
                     Panduan Pengambilan Buku:
                 </div>
                 <ol class="pickup-steps-list">
-                    @if ($isDisiapkanPetugas)
-                        <li>Datang ke meja layanan sirkulasi perpustakaan pusat sebelum batas waktu berakhir.</li>
-                        <li>Tunjukkan layar QR Code tiket ini ke petugas.</li>
-                        <li>Petugas akan menyerahkan buku yang telah disiapkan dan mengonfirmasi peminjaman Anda.</li>
-                    @else
-                        <li>Datang ke perpustakaan pusat dan menuju <strong>{{ $buku->rak ?? 'rak koleksi' }}</strong>.</li>
-                        <li>Ambil buku fisik dengan nomor eksemplar <strong>#{{ $eksemplar?->nomor_eksemplar ?? 1 }}</strong>.</li>
-                        <li>Bawa buku ke meja layanan lalu tunjukkan QR Code tiket ini ke petugas untuk verifikasi.</li>
-                    @endif
+                    <li>Datang ke perpustakaan pusat dan langsung menuju <strong>{{ $buku->rak ?? 'rak koleksi buku' }}</strong>.</li>
+                    <li>Ambil buku fisik secara mandiri di rak (Eksemplar <strong>#{{ $eksemplar?->nomor_eksemplar ?? 1 }}</strong>).</li>
+                    <li>Bawa buku ke meja layanan sirkulasi lalu tunjukkan QR Code tiket ini ke petugas untuk verifikasi dan serah terima peminjaman.</li>
                 </ol>
             </div>
 
@@ -656,7 +884,7 @@
                 </a>
 
                 @if (in_array($peminjaman->status, ['Booking', 'Siap Diambil']))
-                    <form method="POST" action="{{ route('peminjaman.booking.batal', $peminjaman->idPeminjaman) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking peminjaman ini? Eksemplar buku akan dikembalikan ke stok umum.');" style="margin: 0;">
+                    <form method="POST" action="{{ route('peminjaman.booking.batal', $peminjaman->idPeminjaman) }}" id="formBatalBooking" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking peminjaman ini? Eksemplar buku akan dikembalikan ke stok umum.');" style="margin: 0;">
                         @csrf
                         <button type="submit" class="btn-ticket-cancel">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
@@ -670,5 +898,225 @@
 
     </div>
 
+    {{-- POP-UP MESSAGE MODAL: PEMINJAMAN BERHASIL DIKONFIRMASI PETUGAS --}}
+    <div id="popupSuccessModal" class="popup-modal-overlay" style="display: none;" role="dialog" aria-modal="true" aria-labelledby="popupModalTitle" onclick="if(event.target === this) closeSuccessModal()">
+        <div class="popup-modal-container">
+            <!-- Close Button -->
+            <button type="button" class="popup-modal-close" onclick="closeSuccessModal()" aria-label="Tutup">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+
+            <!-- Animated Success Icon -->
+            <div class="popup-icon-wrapper">
+                <div class="popup-icon-pulse"></div>
+                <div class="popup-icon-circle">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Heading & Message (Simple & Clear) -->
+            <div class="popup-badge-pill">
+                <span class="popup-pulse-dot"></span>
+                Peminjaman Berhasil
+            </div>
+            <h3 id="popupModalTitle" class="popup-modal-title">Peminjaman Berhasil! 🎉</h3>
+            <p class="popup-modal-desc">
+                Buku fisik telah diserahkan oleh petugas di Meja Sirkulasi. Selamat membaca!
+            </p>
+
+            <!-- Information Card / Receipt Snapshot -->
+            <div class="popup-info-card">
+                <div class="popup-info-row">
+                    <span class="info-label">Kode Booking</span>
+                    <span class="info-value font-mono" id="popupTiketVal">{{ $peminjaman->kode_booking ?? $peminjaman->kodeTransaksi }}</span>
+                </div>
+                <div class="popup-info-row">
+                    <span class="info-label">Jumlah Buku</span>
+                    <span class="info-value" id="popupTotalBukuVal">{{ $peminjaman->details->count() }} Buku Fisik</span>
+                </div>
+                <div class="popup-info-row">
+                    <span class="info-label">Petugas Meja</span>
+                    <span class="info-value text-teal" id="popupPetugasVal">{{ $peminjaman->petugas?->name ?? 'Petugas Meja Sirkulasi' }}</span>
+                </div>
+                <div class="popup-info-row">
+                    <span class="info-label">Batas Kembali</span>
+                    <span class="info-value" id="popupBatasKembaliVal">{{ $peminjaman->batasKembali ? \Carbon\Carbon::parse($peminjaman->batasKembali)->translatedFormat('d M Y') : now()->addDays(30)->translatedFormat('d M Y') }}</span>
+                </div>
+                <div class="popup-info-row" style="border-top: 1px dashed #e2e8f0; padding-top: 8px; margin-top: 2px;">
+                    <span class="info-label">Status Fisik</span>
+                    <span class="info-badge-success">✓ Buku Telah Diserahkan</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="popup-modal-actions">
+                <a href="{{ route('riwayat.index') }}" class="btn-popup-primary">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 14 14"></polyline>
+                    </svg>
+                    Lihat Pinjaman Saya
+                </a>
+                <button type="button" class="btn-popup-secondary" onclick="redirectToDashboard()">
+                    Beralih ke Dasbor Sekarang
+                </button>
+            </div>
+
+            <!-- Auto-redirect Countdown Notice -->
+            <div style="margin-top: 14px; font-size: 12px; color: #64748b; font-weight: 500; display: flex; align-items: center; justify-content: center; gap: 6px;">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.5"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+                <span>Otomatis beralih ke Dasbor dalam <strong id="popupCountdown" style="color: #0f766e; font-weight: 800;">5</strong> detik...</span>
+            </div>
+        </div>
+    </div>
+
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    let autoRedirectTimer = null;
+    let autoCountdownInterval = null;
+
+    function redirectToDashboard() {
+        if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+        if (autoCountdownInterval) clearInterval(autoCountdownInterval);
+        closeSuccessModal();
+        window.location.href = "{{ route('dashboard') }}";
+    }
+
+    // Audio Chime synth via HTML5 Web Audio API
+    function playSuccessChime() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const audioCtx = new AudioContext();
+            const playTone = (freq, start, duration) => {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.12, audioCtx.currentTime + start);
+                gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + start + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start(audioCtx.currentTime + start);
+                osc.stop(audioCtx.currentTime + start + duration);
+            };
+            playTone(523.25, 0, 0.16);     // C5
+            playTone(659.25, 0.12, 0.16);  // E5
+            playTone(783.99, 0.24, 0.45);  // G5
+        } catch (e) {
+            // Audio error ignored
+        }
+    }
+
+    function showSuccessModal(data) {
+        playSuccessChime();
+        const modal = document.getElementById('popupSuccessModal');
+        if (data) {
+            if (data.kodeBooking) {
+                const el = document.getElementById('popupTiketVal');
+                if (el) el.textContent = data.kodeBooking;
+            }
+            if (data.totalBuku) {
+                const el = document.getElementById('popupTotalBukuVal');
+                if (el) el.textContent = data.totalBuku + ' Buku Fisik';
+            }
+            if (data.namaPetugas) {
+                const el = document.getElementById('popupPetugasVal');
+                if (el) el.textContent = data.namaPetugas;
+            }
+            if (data.batasKembali) {
+                const el = document.getElementById('popupBatasKembaliVal');
+                if (el) el.textContent = data.batasKembali;
+            }
+        }
+
+        // Perbarui badge status QR secara real-time
+        const badge = document.getElementById('bookingStatusBadge');
+        if (badge) {
+            badge.className = 'qr-badge-header badge-dipinjam';
+            badge.innerHTML = `
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #16a34a; display: inline-block;"></span>
+                Telah Diserahkan & Aktif
+            `;
+        }
+
+        // Sembunyikan form batalkan booking
+        const cancelForm = document.getElementById('formBatalBooking');
+        if (cancelForm) {
+            cancelForm.style.display = 'none';
+        }
+
+        if (modal) {
+            modal.classList.add('show');
+            modal.style.display = 'flex';
+        }
+
+        // Countdown 5 detik lalu beralih ke Dashboard Anggota
+        let countdownSec = 5;
+        const countdownEl = document.getElementById('popupCountdown');
+        if (countdownEl) countdownEl.textContent = countdownSec;
+
+        if (autoCountdownInterval) clearInterval(autoCountdownInterval);
+        autoCountdownInterval = setInterval(() => {
+            countdownSec--;
+            if (countdownEl) countdownEl.textContent = countdownSec;
+            if (countdownSec <= 0) {
+                clearInterval(autoCountdownInterval);
+            }
+        }, 1000);
+
+        if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+        autoRedirectTimer = setTimeout(() => {
+            redirectToDashboard();
+        }, 5000);
+    }
+
+    function closeSuccessModal() {
+        if (autoRedirectTimer) clearTimeout(autoRedirectTimer);
+        if (autoCountdownInterval) clearInterval(autoCountdownInterval);
+        const modal = document.getElementById('popupSuccessModal');
+        if (modal) {
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const isAlreadyCompleted = {{ !empty($isCompleted) ? 'true' : 'false' }};
+        if (isAlreadyCompleted) {
+            return;
+        }
+
+        const statusUrl = "{{ route('peminjaman.booking.status-tiket', $peminjaman->idPeminjaman) }}";
+        let pollTimer = setInterval(() => {
+            fetch(statusUrl, {
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Status check failed');
+                return res.json();
+            })
+            .then(res => {
+                if (res && res.success && res.completed) {
+                    clearInterval(pollTimer);
+                    showSuccessModal(res);
+                }
+            })
+            .catch(err => {
+                // Silently wait for next polling tick
+            });
+        }, 2500);
+    });
+</script>
 @endsection

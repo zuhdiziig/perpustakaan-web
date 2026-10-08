@@ -263,7 +263,7 @@ class KeranjangBookingController extends Controller
             'opsi_pengambilan' => ['nullable', 'in:siapkan_petugas,ambil_mandiri'],
         ]);
 
-        $opsiPengambilan = $request->input('opsi_pengambilan', 'siapkan_petugas');
+        $opsiPengambilan = $request->input('opsi_pengambilan', 'ambil_mandiri');
         $totalBukuBooking = count($cart);
 
         // Cek Kuota 7 buku
@@ -278,7 +278,7 @@ class KeranjangBookingController extends Controller
                 $batasKembali = Carbon::now()->addDays(Peminjaman::MASA_PINJAM_HARI);
                 $estimasiBatasAmbil = Carbon::now()->addHours(Peminjaman::BATAS_AMBIL_BOOKING_JAM);
 
-                $statusAwal = $opsiPengambilan === 'ambil_mandiri' ? 'Siap Diambil' : 'Booking';
+                $statusAwal = 'Booking';
 
                 $peminjamanBaru = Peminjaman::create([
                     'idUserMember' => $user->id,
@@ -327,8 +327,8 @@ class KeranjangBookingController extends Controller
             // Kosongkan keranjang setelah berhasil checkout
             session()->forget('keranjang_booking');
 
-            return redirect()->route('peminjaman.booking.tiket', $peminjaman->idPeminjaman)
-                ->with('success', "Booking untuk {$peminjaman->totalBuku} buku sekaligus berhasil dibuat! Simpan kode booking atau tiket QR di bawah untuk ditunjukkan kepada petugas.");
+            return redirect()->route('dashboard')
+                ->with('success', "Booking untuk {$peminjaman->totalBuku} buku sekaligus berhasil dibuat! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.");
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {

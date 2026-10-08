@@ -29,4 +29,9 @@ class DetailPeminjaman extends Model
     {
         return $this->belongsTo(BukuEksemplar::class, 'idEksemplar', 'idEksemplar');
     }
+
+    public function denda()
+    {
+        return $this->belongsTo(Denda::class, 'id_denda', 'idDenda');
+    }
 }

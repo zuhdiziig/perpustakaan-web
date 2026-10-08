@@ -174,7 +174,7 @@ class PetugasDashboardTest extends TestCase
         );
     }
 
-    public function test_petugas_dashboard_displays_booking_notification_banner_and_queue(): void
+    public function test_petugas_dashboard_displays_booking_stat_card(): void
     {
         $petugas = User::factory()->create([
             'role' => 'petugas',
@@ -214,15 +214,10 @@ class PetugasDashboardTest extends TestCase
         $response = $this->actingAs($petugas)->get('/dashboard');
 
         $response->assertStatus(200);
-        $response->assertSee('Pemberitahuan Sirkulasi:');
-        $response->assertSee('Booking Buku Menunggu Pengambilan');
-        $response->assertSee('Disiapkan oleh Petugas');
-        $response->assertSee('BK-20261007-9999');
-        $response->assertSee('Budi Santoso');
-        $response->assertSee('Atomic Habits');
-        $response->assertSee('Tandai Siap');
-        $response->assertSee('Proses');
-        $response->assertSee(route('peminjaman.create', ['booking' => 'BK-20261007-9999']));
+        $response->assertSee('Booking menunggu');
+        $response->assertViewHas('statistik', fn (array $statistik): bool => ($statistik['bookingMenunggu'] ?? 0) === 1);
+        $response->assertDontSee('Pemberitahuan Sirkulasi:');
+        $response->assertDontSee('Antrean Booking & Reservasi Mandiri');
     }
 
     public function test_petugas_can_mark_booking_as_ready_for_pickup(): void

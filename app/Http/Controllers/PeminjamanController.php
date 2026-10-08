@@ -59,17 +59,10 @@ class PeminjamanController extends Controller
             $defaultBuku = $firstDetail?->buku;
             $defaultEksemplar = $firstDetail?->eksemplar;
         } else {
-            // Data default / preview sesuai layout Figma (Rizky Pratama & Laut Bercerita)
-            $defaultMember = User::where('role', 'member')->where('name', 'like', '%Rizky Pratama%')->first()
-                ?? User::where('role', 'member')->where('status', 'aktif')->first();
-
-            $defaultBuku = Buku::with(['barcode', 'eksemplarTersedia'])
-                ->where('judul', 'like', '%Laut Bercerita%')
-                ->first()
-                ?? Buku::with(['barcode', 'eksemplarTersedia'])->has('eksemplarTersedia')->first();
-
-            $defaultEksemplar = $defaultBuku?->eksemplarTersedia?->first()
-                ?? $defaultBuku?->eksemplar()->first();
+            // Awalnya kosong: rincian di sebelah kanan akan terisi secara realtime saat discan atau dicari
+            $defaultMember = null;
+            $defaultBuku = null;
+            $defaultEksemplar = null;
         }
 
         return view('peminjaman.create', compact('members', 'defaultMember', 'defaultBuku', 'defaultEksemplar', 'selectedBooking'));
@@ -341,7 +334,7 @@ class PeminjamanController extends Controller
             'opsi_pengambilan' => ['nullable', 'in:siapkan_petugas,ambil_mandiri'],
         ]);
 
-        $opsiPengambilan = $request->input('opsi_pengambilan', 'siapkan_petugas');
+        $opsiPengambilan = $request->input('opsi_pengambilan', 'ambil_mandiri');
 
         $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
         if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
@@ -415,8 +408,8 @@ class PeminjamanController extends Controller
                 return $peminjaman;
             });
 
-            return redirect()->route('peminjaman.booking.tiket', $peminjaman->idPeminjaman)
-                ->with('success', 'Booking buku berhasil! Simpan tiket QR ini dan tunjukkan kepada petugas di perpustakaan.');
+            return redirect()->route('dashboard')
+                ->with('success', 'Booking buku berhasil diajukan! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.');
         } catch (\DomainException $e) {
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
@@ -446,8 +439,59 @@ class PeminjamanController extends Controller
         // Teks QR yang di-encode: qr_token transaksi booking
         $qrPayload = $peminjaman->qr_token ?: $peminjaman->kode_booking;
         $qrCodeSvg = $this->generateSvgQr($qrPayload, 220);
+        $isCompleted = ($peminjaman->status === 'Dipinjam');
 
-        return view('peminjaman.booking_tiket', compact('peminjaman', 'qrCodeSvg'));
+        return view('peminjaman.booking_tiket', compact('peminjaman', 'qrCodeSvg', 'isCompleted'));
+    }
+
+    /**
+     * Cek status realtime tiket booking peminjaman (polling AJAX untuk notifikasi pop-up member).
+     */
+    public function apiCheckStatusBooking(Request $request, $id)
+    {
+        $user = auth()->user();
+
+        $peminjaman = Peminjaman::with([
+            'member',
+            'petugas',
+            'details.buku',
+            'details.eksemplar',
+        ])->findOrFail($id);
+
+        if ($user && $user->role === 'member' && (int) $peminjaman->idUserMember !== (int) $user->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki hak akses melihat tiket booking ini.',
+            ], 403);
+        }
+
+        $totalBuku = $peminjaman->details->count();
+        $isCompleted = ($peminjaman->status === 'Dipinjam');
+
+        if ($isCompleted) {
+            $namaPetugas = $peminjaman->petugas?->name ?? 'Petugas Meja Sirkulasi';
+            $waktuSelesai = $peminjaman->updated_at ? $peminjaman->updated_at->translatedFormat('d M Y, H:i') : Carbon::now()->translatedFormat('d M Y, H:i');
+            $batasKembali = $peminjaman->batasKembali ? Carbon::parse($peminjaman->batasKembali)->translatedFormat('d M Y') : Carbon::now()->addDays(30)->translatedFormat('d M Y');
+
+            return response()->json([
+                'success' => true,
+                'completed' => true,
+                'status' => 'Dipinjam',
+                'totalBuku' => $totalBuku,
+                'kodeBooking' => $peminjaman->kode_booking,
+                'namaPetugas' => $namaPetugas,
+                'batasKembali' => $batasKembali,
+                'waktuSelesai' => $waktuSelesai,
+                'message' => 'Peminjaman buku berhasil dikonfirmasi dan diserahkan oleh petugas!',
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'completed' => false,
+            'status' => $peminjaman->status,
+            'totalBuku' => $totalBuku,
+        ]);
     }
 
     /**

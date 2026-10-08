@@ -622,15 +622,17 @@
         <!-- ==================== KOLOM KANAN ==================== -->
         <div>
             <!-- Status Pill: Barcode Ditemukan -->
-            <div id="badgeContainer" style="display: {{ $initialDetail ? 'block' : 'none' }};">
+            <div id="badgeContainer" style="display: {{ ($initialDetail || ($batchDetails && $batchDetails->count() > 0)) ? 'block' : 'none' }};">
                 <span class="badge-barcode-found" id="badgeBarcodeDitemukan">
                     <span class="badge-dot"></span>
-                    <span id="badgeText">Pengembalian Teridentifikasi</span>
+                    <span id="badgeText">{{ ($batchDetails && $batchDetails->count() > 1) ? 'Pengembalian Sekaligus Teridentifikasi' : 'Pengembalian Teridentifikasi' }}</span>
                 </span>
             </div>
 
-            <!-- CARD 1: RINCIAN PENGEMBALIAN -->
-            <div class="card-panel" style="margin-bottom: 20px;">
+            <!-- CONTAINER SINGLE RETURN -->
+            <div id="singleReturnContainer" style="display: {{ ($batchDetails && $batchDetails->count() > 1) ? 'none' : 'block' }};">
+                <!-- CARD 1: RINCIAN PENGEMBALIAN -->
+                <div class="card-panel" style="margin-bottom: 20px;">
                 <h2 class="card-title-xl">Rincian pengembalian</h2>
 
                 <div class="rincian-list">
@@ -704,7 +706,7 @@
                     <div class="rincian-item">
                         <span class="rincian-label">Laporan member</span>
                         <span class="rincian-val" id="dispKondisiLaporan">
-                            {{ $initialDetail->kondisi_laporan ?? 'Baik' }}
+                            {{ $initialDetail->kondisi_laporan ?? '-' }}
                         </span>
                     </div>
                 </div>
@@ -767,6 +769,92 @@
                     Konfirmasi Pengembalian
                 </button>
             </form>
+            </div>
+
+            <!-- CONTAINER BATCH RETURN -->
+            <div id="batchReturnContainer" style="display: {{ ($batchDetails && $batchDetails->count() > 1) ? 'block' : 'none' }};">
+                <!-- CARD 1: RINCIAN PENGEMBALIAN BATCH -->
+                <div class="card-panel" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
+                        <div>
+                            <span style="font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px;">Tiket Pengembalian Sekaligus</span>
+                            <h2 class="card-title-xl" id="batchDispKode" style="margin-top: 2px;">{{ $batchDetails ? ($batchDetails->first()->kode_batch_kembali ?? '-') : '-' }}</h2>
+                        </div>
+                        <span id="batchDispPillCount" style="padding: 6px 12px; background: #ccfbf1; color: #0f766e; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                            {{ $batchDetails ? $batchDetails->count() : 0 }} Buku Sekaligus
+                        </span>
+                    </div>
+
+                    <div class="rincian-list" style="margin-bottom: 16px;">
+                        <div class="rincian-item">
+                            <span class="rincian-label">Anggota Peminjam</span>
+                            <span class="rincian-val" id="batchDispMemberName">{{ $initialMember->name ?? '-' }}</span>
+                        </div>
+                        <div class="rincian-item">
+                            <span class="rincian-label">Nomor Anggota</span>
+                            <span class="rincian-val" id="batchDispMemberCode">{{ $initialMember->kode_anggota ?? '-' }}</span>
+                        </div>
+                    </div>
+
+                    <h4 style="font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 10px;">
+                        Daftar Seluruh Buku yang Dikembalikan:
+                    </h4>
+
+                    <div id="batchBookList" style="display: flex; flex-direction: column; gap: 10px; max-height: 380px; overflow-y: auto; padding-right: 4px;">
+                        @if($batchDetails && $batchDetails->count() > 1)
+                            @foreach($batchDetails as $bItem)
+                                @php
+                                    $bKondisi = $bItem->kondisi_laporan ?? 'Baik';
+                                    $bBadgeColor = $bKondisi === 'Rusak' ? '#dc2626' : ($bKondisi === 'Hilang' ? '#7c2d12' : '#166534');
+                                    $bBadgeBg = $bKondisi === 'Rusak' ? '#fef2f2' : ($bKondisi === 'Hilang' ? '#ffedd5' : '#f0fdf4');
+                                @endphp
+                                <div style="display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; gap: 12px;">
+                                    <div style="min-width: 0; flex: 1;">
+                                        <div style="font-size: 13px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                            {{ $bItem->buku->judul ?? 'Buku' }}
+                                        </div>
+                                        <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
+                                            {{ $bItem->eksemplar?->kode_barcode ?? $bItem->buku?->barcode?->kodeBarcode ?? ('BK-'.($bItem->idBuku)) }} · Eks #{{ $bItem->eksemplar?->nomor_eksemplar ?? 1 }} · Rak: {{ $bItem->buku?->rak ?? '-' }}
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right; flex-shrink: 0;">
+                                        <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: {{ $bBadgeBg }}; color: {{ $bBadgeColor }};">
+                                            Kondisi: {{ $bKondisi }}
+                                        </span>
+                                    </div>
+                                </div>
+                            @endforeach
+                        @endif
+                    </div>
+                </div>
+
+                <!-- CARD 2: TOTAL KALKULASI & VALIDASI BATCH -->
+                <div class="card-panel" style="margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #e2e8f0;">
+                        <span style="font-size: 13px; color: #475569; font-weight: 600;">Total Denda Pengembalian:</span>
+                        <strong id="batchDispTotalDenda" style="font-size: 15px; color: #0f172a;">Rp 0</strong>
+                    </div>
+
+                    <div class="validation-box" style="margin-top: 14px; margin-bottom: 0;">
+                        <h4 class="validation-title">Validasi Petugas Meja Sirkulasi</h4>
+                        <p class="validation-text" id="batchDispValidasiText">
+                            Pastikan seluruh fisik buku di atas telah diterima dari anggota. Klik tombol di bawah untuk menyelesaikan pengembalian sekaligus dalam 1 kali proses.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- FORM & TOMBOL: KONFIRMASI BATCH PENGEMBALIAN -->
+                <form id="formBatchPengembalian" action="{{ route('pengembalian.petugas.batch-selesai') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="kodeBatch" id="formBatchKode" value="{{ $batchDetails ? ($batchDetails->first()->kode_batch_kembali ?? '') : '' }}">
+                    <button type="button" 
+                            class="btn-confirm-return" 
+                            id="btnKonfirmasiBatch"
+                            onclick="openBatchModal()">
+                        Selesaikan Pengembalian Sekaligus
+                    </button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -822,6 +910,55 @@
         </div>
     </div>
 
+    <!-- ============================================================
+         OVERLAY & MODAL KONFIRMASI PENGEMBALIAN (BATCH)
+         ============================================================ -->
+    <div id="modalBatchOverlay" class="modal-overlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div style="padding-right: 32px;">
+                    <h3 class="modal-title">Konfirmasi Pengembalian Sekaligus</h3>
+                    <p class="modal-subtitle">Pastikan seluruh fisik buku pada tiket batch ini telah diterima dari anggota.</p>
+                </div>
+                <button type="button" class="modal-close-btn" id="btnModalBatchClose" aria-label="Tutup modal">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="modal-card-info">
+                <div class="modal-icon-box">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <div style="min-width: 0; flex: 1;">
+                    <div class="modal-info-book" id="modalBatchTiket">
+                        Tiket: <span id="modalBatchKodeText">-</span>
+                    </div>
+                    <div class="modal-info-member" id="modalBatchMember">
+                        -
+                    </div>
+                    <div class="modal-info-fine" id="modalBatchTotalFine">
+                        -
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions">
+                <button type="button" class="btn-modal-cancel" id="btnModalBatchBatal">
+                    Batal
+                </button>
+                <button type="button" class="btn-modal-confirm" id="btnModalBatchKonfirmasi">
+                    Ya, Selesaikan Seluruh Buku
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFIKASI -->
     <div id="toastFeedback" class="toast-feedback toast-success"></div>
 
@@ -866,10 +1003,68 @@
                 ],
                 'tanggalPinjam' => $initialPeminjaman ? \Carbon\Carbon::parse($initialPeminjaman->tanggalPinjam)->translatedFormat('d M Y') : '-',
             ] : null) !!},
+            batch: {!! json_encode(($batchDetails && $batchDetails->count() > 1) ? [
+                'kodeBatch' => $batchDetails->first()->kode_batch_kembali,
+                'idPeminjaman' => $batchDetails->first()->idPeminjaman,
+                'totalBuku' => $batchDetails->count(),
+                'member' => [
+                    'id' => $initialMember?->id,
+                    'name' => $initialMember?->name,
+                    'kodeAnggota' => $initialMember?->kode_anggota,
+                    'email' => $initialMember?->email,
+                ],
+                'daftarBuku' => $batchDetails->map(function ($d) {
+                    $b = $d->buku;
+                    $e = $d->eksemplar;
+                    $today = \Carbon\Carbon::now();
+                    $batasKembali = \Carbon\Carbon::parse($d->peminjaman->batasKembali);
+                    $isOverdue = $today->greaterThan($batasKembali);
+                    $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+                    $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                    $faktorMinggu = min($mingguTerlambat, 10);
+                    $persenDenda = $faktorMinggu * 0.10;
+                    $hargaBuku = (float) ($b?->harga ?? 0);
+                    $dendaTelat = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+                    $dendaKondisi = ($d->kondisi_laporan === 'Rusak' || $d->kondisi_laporan === 'Hilang') ? $hargaBuku : 0;
+                    return [
+                        'idDetail' => $d->id,
+                        'idBuku' => $b?->idBuku,
+                        'idEksemplar' => $e?->idEksemplar,
+                        'nomor_eksemplar' => $e?->nomor_eksemplar ?? 1,
+                        'judul' => $b?->judul ?? 'Buku',
+                        'penulis' => $b?->penulis ?? 'Anonim',
+                        'kodeBuku' => $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0),
+                        'rak' => $b?->rak ?? '-',
+                        'kondisiLaporan' => $d->kondisi_laporan ?? 'Baik',
+                        'statusBuku' => $d->statusBuku,
+                        'harga' => $hargaBuku,
+                        'isOverdue' => $isOverdue,
+                        'hariTerlambat' => $hariTerlambat,
+                        'estDenda' => $dendaTelat + $dendaKondisi,
+                    ];
+                })->values(),
+                'totalDenda' => $batchDetails->sum(function ($d) {
+                    $b = $d->buku;
+                    $today = \Carbon\Carbon::now();
+                    $batasKembali = \Carbon\Carbon::parse($d->peminjaman->batasKembali);
+                    $isOverdue = $today->greaterThan($batasKembali);
+                    $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+                    $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                    $faktorMinggu = min($mingguTerlambat, 10);
+                    $persenDenda = $faktorMinggu * 0.10;
+                    $hargaBuku = (float) ($b?->harga ?? 0);
+                    $dendaTelat = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+                    $dendaKondisi = ($d->kondisi_laporan === 'Rusak' || $d->kondisi_laporan === 'Hilang') ? $hargaBuku : 0;
+                    return $dendaTelat + $dendaKondisi;
+                }),
+            ] : null) !!},
             kondisiPetugas: '{{ $initialDetail->kondisi_laporan ?? "Baik" }}'
         };
 
         // DOM Elemen
+        const singleReturnContainer = document.getElementById('singleReturnContainer');
+        const batchReturnContainer = document.getElementById('batchReturnContainer');
+
         const inputManual = document.getElementById('inputManual');
         const btnCariTransaksi = document.getElementById('btnCariTransaksi');
         const btnToggleScan = document.getElementById('btnToggleScan');
@@ -912,6 +1107,16 @@
         const btnModalClose = document.getElementById('btnModalClose');
         const btnModalBatal = document.getElementById('btnModalBatal');
         const btnModalKonfirmasi = document.getElementById('btnModalKonfirmasi');
+
+        // Modal Batch DOM
+        const modalBatchOverlay = document.getElementById('modalBatchOverlay');
+        const modalBatchKodeText = document.getElementById('modalBatchKodeText');
+        const modalBatchMember = document.getElementById('modalBatchMember');
+        const modalBatchTotalFine = document.getElementById('modalBatchTotalFine');
+        const btnModalBatchClose = document.getElementById('btnModalBatchClose');
+        const btnModalBatchBatal = document.getElementById('btnModalBatchBatal');
+        const btnModalBatchKonfirmasi = document.getElementById('btnModalBatchKonfirmasi');
+        const formBatchPengembalian = document.getElementById('formBatchPengembalian');
 
         const toastFeedback = document.getElementById('toastFeedback');
 
@@ -974,6 +1179,9 @@
 
         // Render Rincian dari State
         function renderState() {
+            if (singleReturnContainer) singleReturnContainer.style.display = 'block';
+            if (batchReturnContainer) batchReturnContainer.style.display = 'none';
+
             if (!state.detail) {
                 badgeContainer.style.display = 'none';
                 dispTransaksi.textContent = '-';
@@ -1000,6 +1208,9 @@
 
             const d = state.detail;
             badgeContainer.style.display = 'block';
+            const badgeTextEl = document.getElementById('badgeText');
+            if (badgeTextEl) badgeTextEl.textContent = 'Pengembalian Teridentifikasi';
+
             dispTransaksi.textContent = d.kodeKembali || ('#TRX-' + String(d.idPeminjaman).padStart(5, '0'));
             dispAnggota.textContent = d.member?.name || '-';
             dispNomorAnggota.textContent = d.member?.kodeAnggota || '-';
@@ -1034,6 +1245,66 @@
             window.recalculateFine();
         }
 
+        // Render Rincian Pengembalian Sekaligus (Batch)
+        function renderBatchState() {
+            if (!state.batch) return;
+            const b = state.batch;
+
+            if (singleReturnContainer) singleReturnContainer.style.display = 'none';
+            if (batchReturnContainer) batchReturnContainer.style.display = 'block';
+
+            badgeContainer.style.display = 'block';
+            const badgeTextEl = document.getElementById('badgeText');
+            if (badgeTextEl) badgeTextEl.textContent = 'Pengembalian Sekaligus Teridentifikasi';
+
+            const kodeEl = document.getElementById('batchDispKode');
+            if (kodeEl) kodeEl.textContent = b.kodeBatch;
+
+            const pillEl = document.getElementById('batchDispPillCount');
+            if (pillEl) pillEl.textContent = `${b.totalBuku} Buku Sekaligus`;
+
+            const memberNameEl = document.getElementById('batchDispMemberName');
+            if (memberNameEl) memberNameEl.textContent = b.member?.name || '-';
+
+            const memberCodeEl = document.getElementById('batchDispMemberCode');
+            if (memberCodeEl) memberCodeEl.textContent = b.member?.kodeAnggota || '-';
+
+            const dendaEl = document.getElementById('batchDispTotalDenda');
+            if (dendaEl) dendaEl.textContent = formatRupiah(b.totalDenda || 0);
+
+            const formKodeEl = document.getElementById('formBatchKode');
+            if (formKodeEl) formKodeEl.value = b.kodeBatch;
+
+            const listContainer = document.getElementById('batchBookList');
+            if (listContainer) {
+                listContainer.innerHTML = '';
+                (b.daftarBuku || []).forEach(item => {
+                    const kondisi = item.kondisiLaporan || 'Baik';
+                    const badgeBg = kondisi === 'Rusak' ? '#fef2f2' : (kondisi === 'Hilang' ? '#ffedd5' : '#f0fdf4');
+                    const badgeColor = kondisi === 'Rusak' ? '#dc2626' : (kondisi === 'Hilang' ? '#7c2d12' : '#166534');
+
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.cssText = 'display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; gap: 12px;';
+                    itemDiv.innerHTML = `
+                        <div style="min-width: 0; flex: 1;">
+                            <div style="font-size: 13px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                                ${item.judul}
+                            </div>
+                            <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
+                                ${item.kodeBuku} · Eks #${item.nomor_eksemplar} · Rak: ${item.rak || '-'}
+                            </div>
+                        </div>
+                        <div style="text-align: right; flex-shrink: 0;">
+                            <span style="display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 700; background: ${badgeBg}; color: ${badgeColor};">
+                                Kondisi: ${kondisi}
+                            </span>
+                        </div>
+                    `;
+                    listContainer.appendChild(itemDiv);
+                });
+            }
+        }
+
         // Cari & Identifikasi Kode (AJAX)
         async function prosesIdentifikasi(rawCode) {
             const cleanCode = (rawCode || '').trim();
@@ -1061,8 +1332,14 @@
 
                 const res = await response.json();
 
-                if (res.success && res.type === 'pengembalian') {
+                if (res.success && res.type === 'pengembalian_batch') {
+                    state.batch = res.data;
+                    state.detail = null;
+                    renderBatchState();
+                    showToast(res.message || 'Data pengembalian sekaligus berhasil diidentifikasi!', true);
+                } else if (res.success && res.type === 'pengembalian') {
                     state.detail = res.data;
+                    state.batch = null;
                     renderState();
                     showToast(res.message || 'Data pengembalian berhasil diidentifikasi!', true);
                 } else if (res.success && (res.type === 'buku' || res.type === 'transaksi' || res.type === 'member')) {
@@ -1192,8 +1469,39 @@
             if (e.target === modalOverlay) closeModal();
         });
 
-        // Initial calculation
-        window.recalculateFine();
+        // Modal Batch Konfirmasi
+        window.openBatchModal = function() {
+            if (!state.batch) return;
+            const b = state.batch;
+            if (modalBatchKodeText) modalBatchKodeText.textContent = b.kodeBatch;
+            if (modalBatchMember) modalBatchMember.textContent = `${b.member?.name || '-'} (${b.member?.kodeAnggota || '-'})`;
+            if (modalBatchTotalFine) modalBatchTotalFine.textContent = `Total Denda: ${formatRupiah(b.totalDenda || 0)} · ${b.totalBuku} Buku Fisik`;
+            if (modalBatchOverlay) modalBatchOverlay.style.display = 'flex';
+        };
+
+        function closeBatchModal() {
+            if (modalBatchOverlay) modalBatchOverlay.style.display = 'none';
+        }
+
+        btnModalBatchClose?.addEventListener('click', closeBatchModal);
+        btnModalBatchBatal?.addEventListener('click', closeBatchModal);
+
+        btnModalBatchKonfirmasi?.addEventListener('click', function () {
+            btnModalBatchKonfirmasi.disabled = true;
+            btnModalBatchKonfirmasi.textContent = 'Memproses...';
+            formBatchPengembalian.submit();
+        });
+
+        modalBatchOverlay?.addEventListener('click', function (e) {
+            if (e.target === modalBatchOverlay) closeBatchModal();
+        });
+
+        // Initial calculation & render
+        if (state.batch) {
+            renderBatchState();
+        } else {
+            renderState();
+        }
     });
 </script>
 @endsection

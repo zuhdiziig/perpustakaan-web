@@ -167,6 +167,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/booking/{id}/tiket', [PeminjamanController::class, 'tiketBooking'])
             ->name('peminjaman.booking.tiket');
 
+        Route::get('/booking/{id}/status-tiket', [PeminjamanController::class, 'apiCheckStatusBooking'])
+            ->name('peminjaman.booking.status-tiket');
+
         Route::post('/booking/{id}/batal', [PeminjamanController::class, 'batalBooking'])
             ->name('peminjaman.booking.batal');
 
@@ -184,6 +187,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/pengembalian-saya/tiket-batch/{kodeBatch}', [PengembalianController::class, 'memberBatchTiket'])
             ->name('pengembalian.member.batch-tiket');
+
+        Route::get('/pengembalian-saya/status-tiket/{kode}', [PengembalianController::class, 'apiCheckStatusTiket'])
+            ->name('pengembalian.member.status-tiket');
 
         Route::post('/pengembalian-saya/{idDetail}/batal', [PengembalianController::class, 'memberBatal'])
             ->name('pengembalian.member.batal');
@@ -274,6 +280,9 @@ Route::middleware('auth')->group(function () {
 
         Route::resource('pengembalian', PengembalianController::class)
             ->only(['index', 'create', 'store', 'show']);
+
+        Route::post('/pengembalian/batch-selesai', [PengembalianController::class, 'petugasBatchStore'])
+            ->name('pengembalian.petugas.batch-selesai');
 
         // Barcode & Kondisi Buku
         Route::get('/scan-barcode', [BarcodeController::class, 'scan'])

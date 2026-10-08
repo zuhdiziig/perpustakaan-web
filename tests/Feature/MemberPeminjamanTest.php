@@ -50,7 +50,8 @@ class MemberPeminjamanTest extends TestCase
         $response->assertSee('Leila S. Chudori');
         $response->assertSee('Rizky Pratama');
         $response->assertSee($member->kodeAnggota);
-        $response->assertSee('Pilih Metode Pengambilan Buku');
+        $response->assertSee('Metode Pengambilan Buku');
+        $response->assertSee('Ambil Mandiri Langsung di Rak Buku');
         $response->assertSee('Booking Buku');
         $response->assertSee('Dapatkan QR Code');
     }
@@ -70,17 +71,17 @@ class MemberPeminjamanTest extends TestCase
         $this->assertEquals(3, $buku->stok);
 
         $response = $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku), [
-            'opsi_pengambilan' => 'siapkan_petugas',
+            'opsi_pengambilan' => 'ambil_mandiri',
         ]);
 
         $peminjaman = Peminjaman::where('idUserMember', $member->id)->first();
         $this->assertNotNull($peminjaman);
 
-        $response->assertRedirect(route('peminjaman.booking.tiket', $peminjaman->idPeminjaman));
+        $response->assertRedirect(route('dashboard'));
         $response->assertSessionHas('success');
 
         $this->assertEquals('Booking', $peminjaman->status);
-        $this->assertEquals('siapkan_petugas', $peminjaman->opsi_pengambilan);
+        $this->assertEquals('ambil_mandiri', $peminjaman->opsi_pengambilan);
         $this->assertNotNull($peminjaman->kode_booking);
         $this->assertNotNull($peminjaman->qr_token);
         $this->assertNotNull($peminjaman->batasAmbil);
@@ -200,5 +201,42 @@ class MemberPeminjamanTest extends TestCase
         $response = $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku));
 
         $response->assertSessionHas('error');
+    }
+
+    public function test_member_can_poll_booking_status_realtime(): void
+    {
+        $member = User::factory()->create(['role' => 'member', 'status' => 'aktif']);
+        $petugas = User::factory()->create(['role' => 'petugas', 'name' => 'Petugas Sirkulasi']);
+        $buku = Buku::factory()->create(['stok' => 2]);
+
+        $this->actingAs($member)->post(route('peminjaman.ajukan', $buku->idBuku));
+        $peminjaman = Peminjaman::where('idUserMember', $member->id)->first();
+
+        // 1. Cek saat status masih Booking
+        $resPending = $this->actingAs($member)->getJson(route('peminjaman.booking.status-tiket', $peminjaman->idPeminjaman));
+        $resPending->assertOk()
+            ->assertJson([
+                'success' => true,
+                'completed' => false,
+                'status' => 'Booking',
+            ]);
+
+        // 2. Petugas mengonfirmasi penyerahan buku
+        $peminjaman->update([
+            'status' => 'Dipinjam',
+            'idUserPetugas' => $petugas->id,
+            'batasKembali' => now()->addDays(30)->toDateString(),
+        ]);
+
+        // 3. Polling ulang mendeteksi completed dan data serah terima
+        $resCompleted = $this->actingAs($member)->getJson(route('peminjaman.booking.status-tiket', $peminjaman->idPeminjaman));
+        $resCompleted->assertOk()
+            ->assertJson([
+                'success' => true,
+                'completed' => true,
+                'status' => 'Dipinjam',
+                'kodeBooking' => $peminjaman->kode_booking,
+                'namaPetugas' => 'Petugas Sirkulasi',
+            ]);
     }
 }

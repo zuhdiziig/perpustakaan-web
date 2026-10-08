@@ -450,6 +450,93 @@ class QrController extends Controller
         }
 
         if ($detailPengembalian) {
+            // JIKA TIKET INI ADALAH PENGEMBALIAN BATCH (SEKALIGUS)
+            if (! empty($detailPengembalian->kode_batch_kembali)) {
+                $batchCode = $detailPengembalian->kode_batch_kembali;
+                $batchDetails = DetailPeminjaman::with([
+                    'peminjaman.member',
+                    'buku.kategori',
+                    'buku.barcode',
+                    'eksemplar',
+                    'denda',
+                ])
+                    ->where('kode_batch_kembali', $batchCode)
+                    ->get();
+
+                if ($batchDetails->count() > 0) {
+                    $firstDetail = $batchDetails->first();
+                    $peminjaman = $firstDetail->peminjaman;
+                    $member = $peminjaman?->member;
+                    $today = Carbon::now();
+                    $totalEstDenda = 0;
+
+                    $daftarBuku = [];
+                    foreach ($batchDetails as $d) {
+                        $b = $d->buku;
+                        $e = $d->eksemplar;
+                        $kodeBuku = $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0);
+
+                        $batasKembali = Carbon::parse($d->peminjaman->batasKembali);
+                        $isOverdue = $today->greaterThan($batasKembali);
+                        $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+                        $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                        $faktorMinggu = min($mingguTerlambat, 10);
+                        $persenDenda = $faktorMinggu * 0.10;
+                        $hargaBuku = (float) ($b?->harga ?? 0);
+                        $dendaTelat = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+                        $dendaKondisi = 0;
+                        if ($d->kondisi_laporan === 'Rusak' || $d->kondisi_laporan === 'Hilang') {
+                            $dendaKondisi = $hargaBuku;
+                        }
+                        $itemDenda = $dendaTelat + $dendaKondisi;
+                        $totalEstDenda += $itemDenda;
+
+                        $daftarBuku[] = [
+                            'idDetail' => $d->id,
+                            'idBuku' => $b?->idBuku,
+                            'idEksemplar' => $e?->idEksemplar,
+                            'nomor_eksemplar' => $e?->nomor_eksemplar ?? 1,
+                            'judul' => $b?->judul ?? 'Buku',
+                            'penulis' => $b?->penulis ?? 'Anonim',
+                            'kodeBuku' => $kodeBuku,
+                            'kategori' => $b?->kategori?->namaKategori ?? '-',
+                            'rak' => $b?->rak ?? '-',
+                            'statusBuku' => $d->statusBuku,
+                            'kondisiLaporan' => $d->kondisi_laporan ?? 'Baik',
+                            'harga' => $hargaBuku,
+                            'isOverdue' => $isOverdue,
+                            'hariTerlambat' => $hariTerlambat,
+                            'estDenda' => $itemDenda,
+                        ];
+                    }
+
+                    $totalBuku = $batchDetails->count();
+
+                    return response()->json([
+                        'success' => true,
+                        'type' => 'pengembalian_batch',
+                        'data' => [
+                            'kodeBatch' => $batchCode,
+                            'idPeminjaman' => $peminjaman?->idPeminjaman,
+                            'totalBuku' => $totalBuku,
+                            'daftarBuku' => $daftarBuku,
+                            'totalDenda' => $totalEstDenda,
+                            'member' => [
+                                'id' => $member?->id,
+                                'name' => $member?->name ?? 'Anggota',
+                                'kodeAnggota' => $member?->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), $peminjaman?->idUserMember ?? 0),
+                                'email' => $member?->email,
+                                'noTelepon' => $member?->noTelepon ?? '-',
+                                'status' => $member?->status ?? 'aktif',
+                            ],
+                            'waktuPengajuan' => $firstDetail->waktu_pengajuan_kembali ? Carbon::parse($firstDetail->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-',
+                            'validasiPesan' => "Tiket Pengembalian Sekaligus {$batchCode} ({$totalBuku} Buku) teridentifikasi. Anggota: {$member?->name}.",
+                        ],
+                        'message' => "Tiket Pengembalian Sekaligus '{$batchCode}' ({$totalBuku} buku) berhasil diidentifikasi.",
+                    ]);
+                }
+            }
+
             $peminjaman = $detailPengembalian->peminjaman;
             $member = $peminjaman?->member;
             $buku = $detailPengembalian->buku;
@@ -626,6 +713,8 @@ class QrController extends Controller
             }
         }
 
+        $context = trim((string) $request->input('context', ''));
+
         if ($member) {
             if ($member->status !== 'aktif') {
                 return response()->json([
@@ -634,6 +723,184 @@ class QrController extends Controller
                 ], 403);
             }
 
+            // KASUS A: Petugas scan di menu PEMINJAMAN (atau scan tanpa konteks khusus)
+            // Cek apakah member memiliki antrean booking aktif (status Booking atau Siap Diambil)
+            if ($context === 'peminjaman' || empty($context)) {
+                $bookingAktif = Peminjaman::with(['member', 'petugas', 'details.buku.barcode', 'details.eksemplar'])
+                    ->where('idUserMember', $member->id)
+                    ->whereIn('status', ['Booking', 'Siap Diambil'])
+                    ->latest('idPeminjaman')
+                    ->first();
+
+                if ($bookingAktif) {
+                    $firstDetail = $bookingAktif->details->first();
+                    $buku = $firstDetail?->buku;
+                    $eksemplar = $firstDetail?->eksemplar;
+                    $kodeBuku = $eksemplar?->kode_barcode ?? $buku?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku?->idBuku ?? 0);
+
+                    $daftarBuku = [];
+                    foreach ($bookingAktif->details as $d) {
+                        $b = $d->buku;
+                        $e = $d->eksemplar;
+                        $daftarBuku[] = [
+                            'idBuku' => $b?->idBuku,
+                            'idEksemplar' => $e?->idEksemplar,
+                            'judul' => $b?->judul ?? 'Buku',
+                            'rak' => $b?->rak ?? '-',
+                            'kodeBuku' => $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0),
+                            'kondisi' => $e?->kondisi ?? 'Baik',
+                            'statusEksemplar' => $e?->status ?? 'Dibooking',
+                            'nomor_eksemplar' => $e?->nomor_eksemplar,
+                        ];
+                    }
+
+                    $totalBuku = $bookingAktif->totalBuku ?: count($daftarBuku);
+                    $judulDisplay = $totalBuku > 1
+                        ? "{$totalBuku} Buku: ".$bookingAktif->details->pluck('buku.judul')->take(2)->join(', ').($totalBuku > 2 ? ', dst' : '')
+                        : ($buku?->judul ?? 'Buku');
+
+                    return response()->json([
+                        'success' => true,
+                        'type' => 'booking',
+                        'data' => [
+                            'idPeminjaman' => $bookingAktif->idPeminjaman,
+                            'kodeBooking' => $bookingAktif->kode_booking,
+                            'opsiPengambilan' => $bookingAktif->opsi_pengambilan,
+                            'status' => $bookingAktif->status,
+                            'totalBuku' => $totalBuku,
+                            'daftarBuku' => $daftarBuku,
+                            'member' => [
+                                'id' => $member->id,
+                                'name' => $member->name,
+                                'kodeAnggota' => $member->kode_anggota,
+                                'email' => $member->email,
+                                'status' => $member->status,
+                                'sedangDipinjam' => $member->jumlahBukuSedangDipinjam(),
+                                'sisaKuota' => $member->sisaKuotaPinjam(),
+                                'kuotaPenuh' => $member->sudahMencapaiBatasMaksimalPinjam(),
+                            ],
+                            'buku' => [
+                                'idBuku' => $buku?->idBuku,
+                                'idEksemplar' => $eksemplar?->idEksemplar,
+                                'judul' => $judulDisplay,
+                                'rak' => $buku?->rak ?? '-',
+                                'kodeBuku' => $totalBuku > 1 ? "{$totalBuku} item" : $kodeBuku,
+                                'kondisi' => $eksemplar?->kondisi ?? 'Baik',
+                                'statusEksemplar' => $eksemplar?->status ?? 'Dibooking',
+                                'nomor_eksemplar' => $eksemplar?->nomor_eksemplar,
+                            ],
+                            'batasAmbil' => $bookingAktif->batasAmbil ? Carbon::parse($bookingAktif->batasAmbil)->translatedFormat('d M Y, H:i') : '-',
+                            'validasiPesan' => "Tiket Booking Online {$bookingAktif->kode_booking} milik {$member->name} teridentifikasi ({$totalBuku} Buku).",
+                        ],
+                        'message' => "QR Anggota '{$member->name}' teridentifikasi. Ditemukan antrean booking aktif ({$totalBuku} buku).",
+                    ]);
+                }
+            }
+
+            // KASUS B: Petugas scan di menu PENGEMBALIAN (context === 'pengembalian')
+            if ($context === 'pengembalian') {
+                $activeDetails = DetailPeminjaman::with([
+                    'peminjaman',
+                    'buku.kategori',
+                    'buku.barcode',
+                    'eksemplar',
+                    'denda',
+                ])
+                    ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $member->id))
+                    ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                    ->get();
+
+                if ($activeDetails->isEmpty()) {
+                    return response()->json([
+                        'success' => false,
+                        'type' => 'member_no_loan',
+                        'message' => "Anggota '{$member->name}' ({$member->kode_anggota}) saat ini tidak memiliki pinjaman buku aktif yang perlu dikembalikan.",
+                    ], 404);
+                }
+
+                $firstWithBatch = $activeDetails->first(fn ($d) => ! empty($d->kode_batch_kembali));
+                $batchCode = $firstWithBatch?->kode_batch_kembali ?: ('KB-MEMBER-'.Carbon::now()->format('Ymd').'-'.str_pad($member->id, 5, '0', STR_PAD_LEFT));
+
+                $today = Carbon::now();
+                $totalEstDenda = 0;
+                $daftarBuku = [];
+
+                foreach ($activeDetails as $d) {
+                    $b = $d->buku;
+                    $e = $d->eksemplar;
+                    $kodeBuku = $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0);
+
+                    if (empty($d->kode_batch_kembali)) {
+                        $d->update([
+                            'kode_batch_kembali' => $batchCode,
+                            'statusBuku' => 'Diajukan Kembali',
+                            'waktu_pengajuan_kembali' => $d->waktu_pengajuan_kembali ?: Carbon::now(),
+                        ]);
+                    }
+
+                    $batasKembali = Carbon::parse($d->peminjaman->batasKembali);
+                    $isOverdue = $today->greaterThan($batasKembali);
+                    $hariTerlambat = $isOverdue ? max(1, $batasKembali->diffInDays($today)) : 0;
+                    $mingguTerlambat = (int) ceil($hariTerlambat / 7);
+                    $faktorMinggu = min($mingguTerlambat, 10);
+                    $persenDenda = $faktorMinggu * 0.10;
+                    $hargaBuku = (float) ($b?->harga ?? 0);
+                    $dendaTelat = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
+
+                    $kondisiLaporan = $d->kondisi_laporan ?: 'Baik';
+                    $dendaKondisi = 0;
+                    if ($kondisiLaporan === 'Rusak' || $kondisiLaporan === 'Hilang') {
+                        $dendaKondisi = $hargaBuku;
+                    }
+                    $itemDenda = $dendaTelat + $dendaKondisi;
+                    $totalEstDenda += $itemDenda;
+
+                    $daftarBuku[] = [
+                        'idDetail' => $d->id,
+                        'idBuku' => $b?->idBuku,
+                        'idEksemplar' => $e?->idEksemplar,
+                        'nomor_eksemplar' => $e?->nomor_eksemplar ?? 1,
+                        'judul' => $b?->judul ?? 'Buku',
+                        'penulis' => $b?->penulis ?? 'Anonim',
+                        'kodeBuku' => $kodeBuku,
+                        'kategori' => $b?->kategori?->namaKategori ?? '-',
+                        'rak' => $b?->rak ?? '-',
+                        'statusBuku' => $d->statusBuku,
+                        'kondisiLaporan' => $kondisiLaporan,
+                        'harga' => $hargaBuku,
+                        'isOverdue' => $isOverdue,
+                        'hariTerlambat' => $hariTerlambat,
+                        'estDenda' => $itemDenda,
+                    ];
+                }
+
+                $totalBuku = $activeDetails->count();
+
+                return response()->json([
+                    'success' => true,
+                    'type' => 'pengembalian_batch',
+                    'data' => [
+                        'kodeBatch' => $batchCode,
+                        'idPeminjaman' => $activeDetails->first()?->idPeminjaman,
+                        'totalBuku' => $totalBuku,
+                        'daftarBuku' => $daftarBuku,
+                        'totalDenda' => $totalEstDenda,
+                        'member' => [
+                            'id' => $member->id,
+                            'name' => $member->name,
+                            'kodeAnggota' => $member->kode_anggota,
+                            'email' => $member->email,
+                            'noTelepon' => $member->noTelepon ?? '-',
+                            'status' => $member->status,
+                        ],
+                        'waktuPengajuan' => Carbon::now()->translatedFormat('d M Y, H:i'),
+                        'validasiPesan' => "Ditemukan {$totalBuku} buku pinjaman aktif atas nama {$member->name} ({$member->kode_anggota}).",
+                    ],
+                    'message' => "QR Anggota '{$member->name}' teridentifikasi. Menampilkan {$totalBuku} buku pinjaman aktif yang siap dikembalikan.",
+                ]);
+            }
+
+            // KASUS C: Default profil member (jika tidak ada booking aktif di menu peminjaman)
             $bukuSedangDipinjam = $member->jumlahBukuSedangDipinjam();
             $sisaKuota = $member->sisaKuotaPinjam();
             $kuotaPenuh = $member->sudahMencapaiBatasMaksimalPinjam();
