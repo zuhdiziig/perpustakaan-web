@@ -541,35 +541,54 @@
                 </span>
             </div>
 
-            {{-- MINI BOOK CARD --}}
-            @if ($buku)
-                <div class="book-item-box">
-                    <div class="book-item-cover">
-                        @if (! empty($buku->cover))
-                            <img src="{{ $buku->cover }}" alt="{{ $buku->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
-                        @else
-                            <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b;">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+            {{-- DAFTAR BUKU YANG DIBOOKING --}}
+            <div style="margin-bottom: 22px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="font-size: 12px; font-weight: 800; color: #475569; text-transform: uppercase; letter-spacing: 0.5px;">
+                        Buku Dibooking ({{ $peminjaman->details->count() }} Judul)
+                    </span>
+                    <span style="font-size: 12px; font-weight: 700; color: #0f766e; background: #ccfbf1; padding: 2px 10px; border-radius: 9999px;">
+                        Total {{ $peminjaman->totalBuku ?? $peminjaman->details->count() }} Buku
+                    </span>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 12px;">
+                    @foreach ($peminjaman->details as $detail)
+                        @php
+                            $b = $detail->buku;
+                            $e = $detail->eksemplar;
+                        @endphp
+                        @if ($b)
+                            <div class="book-item-box" style="margin-bottom: 0;">
+                                <div class="book-item-cover">
+                                    @if (! empty($b->cover))
+                                        <img src="{{ $b->cover }}" alt="{{ $b->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
+                                    @else
+                                        <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b;">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                        </div>
+                                    @endif
+                                </div>
+                                <div class="book-item-info">
+                                    <h3 class="book-item-title">{{ $b->judul }}</h3>
+                                    <p class="book-item-author">{{ $b->penulis }} · {{ $b->kategori?->namaKategori ?? 'Umum' }}</p>
+                                    <div class="book-item-meta-badges">
+                                        <span class="badge-shelf">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+                                            Lokasi: {{ $b->rak ?? 'Perpustakaan Pusat' }}
+                                        </span>
+                                        @if ($e)
+                                            <span style="font-size: 11.5px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px;">
+                                                Eksemplar #{{ $e->nomor_eksemplar }} ({{ $e->kode_barcode ?? '-' }})
+                                            </span>
+                                        @endif
+                                    </div>
+                                </div>
                             </div>
                         @endif
-                    </div>
-                    <div class="book-item-info">
-                        <h3 class="book-item-title">{{ $buku->judul }}</h3>
-                        <p class="book-item-author">{{ $buku->penulis }} · {{ $buku->penerbit ?? 'Penerbit' }}</p>
-                        <div class="book-item-meta-badges">
-                            <span class="badge-shelf">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                                Lokasi: {{ $buku->rak ?? 'Perpustakaan Pusat' }}
-                            </span>
-                            @if ($eksemplar)
-                                <span style="font-size: 11.5px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 3px 8px; border-radius: 6px;">
-                                    Eksemplar #{{ $eksemplar->nomor_eksemplar }}
-                                </span>
-                            @endif
-                        </div>
-                    </div>
+                    @endforeach
                 </div>
-            @endif
+            </div>
 
             {{-- SPESIFIKASI TABEL --}}
             <div class="ticket-spec-list">

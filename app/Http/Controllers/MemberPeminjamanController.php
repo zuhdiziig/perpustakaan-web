@@ -41,14 +41,12 @@ class MemberPeminjamanController extends Controller
                 ->withErrors(['stok' => 'Maaf, semua eksemplar buku ini sedang dipinjam oleh anggota lain.']);
         }
 
-        // Cek kuota peminjaman aktif anggota
-        $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
+        // Cek kuota peminjaman aktif anggota (maksimal 7 buku dengan status dipinjam)
+        $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
 
         if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
             return redirect()->route('katalog.show', $buku->idBuku)
-                ->withErrors(['kuota' => "Anda saat ini sedang meminjam {$bukuSedangDipinjam} buku (batas maksimal: ".Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Kembalikan buku sebelumnya terlebih dahulu.']);
+                ->withErrors(['kuota' => "Anda saat ini sedang meminjam {$bukuSedangDipinjam} buku (batas maksimal: ".Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Kembalikan buku terlebih dahulu untuk meminjam buku baru.']);
         }
 
         $tanggalPinjam = Carbon::now();
@@ -94,14 +92,12 @@ class MemberPeminjamanController extends Controller
 
         $buku = Buku::findOrFail($id);
 
-        // Cek kuota peminjaman aktif
-        $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
+        // Cek kuota peminjaman aktif (maksimal 7 buku dengan status dipinjam)
+        $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
 
         if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
             return redirect()->route('katalog.show', $buku->idBuku)
-                ->withErrors(['kuota' => 'Batas maksimal peminjaman aktif adalah '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku.']);
+                ->withErrors(['kuota' => "Anda saat ini sedang meminjam {$bukuSedangDipinjam} buku (batas maksimal: ".Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Kembalikan buku terlebih dahulu untuk meminjam buku baru.']);
         }
 
         try {

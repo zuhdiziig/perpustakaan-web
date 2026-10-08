@@ -81,9 +81,9 @@ class DendaSampleSeeder extends Seeder
             ]
         );
 
-        Barcode::firstOrCreate(
-            ['kodeBarcode' => 'BK-FLS-001'],
-            ['idBuku' => $buku->idBuku]
+        Barcode::updateOrCreate(
+            ['idBuku' => $buku->idBuku],       // Kunci unik yang dicari di database
+            ['kodeBarcode' => 'BK-FLS-001']    // Data yang dibuat atau diperbarui kodenya
         );
 
         // 3. Peminjaman (14 Sep 2026 - 28 Sep 2026)

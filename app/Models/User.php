@@ -91,4 +91,48 @@ class User extends Authenticatable
     {
         return Attribute::get(fn (): ?string => $this->foto ? asset('storage/'.$this->foto) : null);
     }
+
+    /**
+     * Jumlah buku yang saat ini sedang berstatus 'Dipinjam' oleh member.
+     */
+    public function jumlahBukuSedangDipinjam(): int
+    {
+        return DetailPeminjaman::whereHas('peminjaman', function ($q) {
+            $q->where('idUserMember', $this->id)->where('status', 'Dipinjam');
+        })->where('statusBuku', 'Dipinjam')->count();
+    }
+
+    /**
+     * Jumlah seluruh buku aktif milik member (termasuk status Booking dan Siap Diambil).
+     */
+    public function jumlahBukuAktif(): int
+    {
+        return DetailPeminjaman::whereHas('peminjaman', function ($q) {
+            $q->where('idUserMember', $this->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+        })->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->count();
+    }
+
+    /**
+     * Sisa kuota buku yang masih boleh dipinjam oleh member (maksimal 7 buku).
+     */
+    public function sisaKuotaPinjam(): int
+    {
+        return max(0, Peminjaman::BATAS_MAKSIMAL_BUKU - $this->jumlahBukuSedangDipinjam());
+    }
+
+    /**
+     * Apakah member telah mencapai batas kuota maksimal 7 buku dengan status dipinjam.
+     */
+    public function sudahMencapaiBatasMaksimalPinjam(): bool
+    {
+        return $this->jumlahBukuSedangDipinjam() >= Peminjaman::BATAS_MAKSIMAL_BUKU;
+    }
+
+    /**
+     * Apakah member masih diperbolehkan meminjam sejumlah buku tertentu.
+     */
+    public function bolehMeminjam(int $jumlah = 1): bool
+    {
+        return ($this->jumlahBukuSedangDipinjam() + $jumlah) <= Peminjaman::BATAS_MAKSIMAL_BUKU;
+    }
 }

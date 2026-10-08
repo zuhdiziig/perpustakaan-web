@@ -528,6 +528,23 @@
 
             <!-- Top Right -->
             <div class="topbar-right">
+                <!-- Keranjang Booking Icon & Badge -->
+                @php
+                    $jumlahKeranjang = count(session('keranjang_booking', []));
+                @endphp
+                <a href="{{ route('keranjang.index') }}" class="topbar-icon-btn" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="position: relative;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="9" cy="21" r="1"></circle>
+                        <circle cx="20" cy="21" r="1"></circle>
+                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                    </svg>
+                    @if($jumlahKeranjang > 0)
+                        <span style="position: absolute; top: -4px; right: -4px; background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 2px solid #ffffff;">
+                            {{ $jumlahKeranjang }}
+                        </span>
+                    @endif
+                </a>
+
                 <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>

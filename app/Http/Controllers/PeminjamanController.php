@@ -88,28 +88,55 @@ class PeminjamanController extends Controller
 
         // 1. Validasi Batas Maksimal 7 Buku
         $totalBuku = count($inputBarcodes);
-        if ($totalBuku > 7) {
-            return back()->withErrors(['barcodes' => 'Gagal: Batas maksimal peminjaman adalah 7 buku.'])->withInput();
+        if ($totalBuku > Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            $pesan = 'Gagal: Batas maksimal peminjaman adalah '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
         }
 
         if ($totalBuku === 0) {
-            return back()->withErrors(['barcodes' => 'Masukkan setidaknya 1 kode barcode buku.'])->withInput();
+            $pesan = 'Masukkan setidaknya 1 kode barcode buku.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
         }
 
         // Cek apakah member masih memiliki buku yang sedang dipinjam
-        $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($request) {
-            $q->where('idUserMember', $request->idUserMember)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
+        $member = User::findOrFail($request->idUserMember);
+        $bukuSedangDipinjam = $member->jumlahBukuSedangDipinjam();
 
-        if (($bukuSedangDipinjam + $totalBuku) > 7) {
-            return back()->withErrors([
-                'barcodes' => "Member saat ini masih meminjam {$bukuSedangDipinjam} buku. Total pinjaman aktif tidak boleh melebihi batas 7 buku.",
-            ])->withInput();
+        if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            $pesan = "Gagal meminjam: Anggota '{$member->name}' saat ini telah meminjam {$bukuSedangDipinjam} buku (batas maksimal ".Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Anggota wajib melakukan pengembalian buku terlebih dahulu untuk dapat meminjam kembali.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
+        }
+
+        if (($bukuSedangDipinjam + $totalBuku) > Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            $sisaKuota = max(0, Peminjaman::BATAS_MAKSIMAL_BUKU - $bukuSedangDipinjam);
+            $pesan = "Gagal meminjam: Anggota '{$member->name}' saat ini sedang meminjam {$bukuSedangDipinjam} buku. Sisa kuota peminjaman hanya {$sisaKuota} buku, sedangkan buku yang akan dipinjam sebanyak {$totalBuku} buku. Anggota wajib melakukan pengembalian buku terlebih dahulu.";
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
         }
 
         // Cek duplikasi kode scan dalam 1 transaksi
         if (count($inputBarcodes) !== count(array_unique($inputBarcodes))) {
-            return back()->withErrors(['barcodes' => 'Terdapat kode buku fisik yang di-scan lebih dari satu kali dalam transaksi yang sama.'])->withInput();
+            $pesan = 'Terdapat kode buku fisik yang di-scan lebih dari satu kali dalam transaksi yang sama.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
         }
 
         // 2. Transaksi Atomik dengan Row Locking (lockForUpdate)
@@ -312,12 +339,14 @@ class PeminjamanController extends Controller
 
         $opsiPengambilan = $request->input('opsi_pengambilan', 'siapkan_petugas');
 
-        $bukuAktif = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
-            $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
-        })->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->count();
+        $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
+        if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku dengan status dipinjam. Anda harus melakukan pengembalian terlebih dahulu untuk meminjam atau membooking buku baru.');
+        }
 
+        $bukuAktif = $user->jumlahBukuAktif();
         if ($bukuAktif >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku aktif (booking/pinjaman).');
+            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku aktif (booking/pinjaman). Harap kembalikan buku terlebih dahulu.');
         }
 
         $sedangPinjamBukuIni = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
@@ -496,6 +525,22 @@ class PeminjamanController extends Controller
             return back()->with('error', 'Transaksi ini tidak dalam status Booking atau Siap Diambil (status: '.$peminjaman->status.').');
         }
 
+        $member = $peminjaman->member;
+        $bukuSedangDipinjam = $member ? $member->jumlahBukuSedangDipinjam() : 0;
+        $jumlahBukuBooking = $peminjaman->details->count();
+
+        if (($bukuSedangDipinjam + $jumlahBukuBooking) > Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            $pesanError = "Penyerahan ditolak: Anggota {$member?->name} saat ini telah meminjam {$bukuSedangDipinjam} buku. Total peminjaman setelah serah terima akan menjadi ".($bukuSedangDipinjam + $jumlahBukuBooking).' buku (Batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Member wajib mengembalikan buku terlebih dahulu.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $pesanError,
+                ], 422);
+            }
+
+            return back()->with('error', $pesanError);
+        }
+
         DB::transaction(function () use ($peminjaman) {
             $tanggalPinjam = Carbon::now();
             $batasKembali = Carbon::now()->addDays(Peminjaman::MASA_PINJAM_HARI);
@@ -516,6 +561,14 @@ class PeminjamanController extends Controller
         });
 
         $namaMember = $peminjaman->member?->name ?? 'Member';
+
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Serah terima buku kepada '.$namaMember.' berhasil! Masa pinjam 30 hari resmi aktif.',
+                'redirect' => route('peminjaman.show', $peminjaman->idPeminjaman),
+            ]);
+        }
 
         return redirect()->route('peminjaman.show', $peminjaman->idPeminjaman)
             ->with('success', 'Serah terima buku kepada '.$namaMember.' berhasil! Masa pinjam 30 hari resmi aktif.');

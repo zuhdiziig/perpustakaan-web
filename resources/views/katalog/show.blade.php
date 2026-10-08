@@ -705,6 +705,88 @@
             .action-row { flex-direction: column; }
             .related-grid { grid-template-columns: 1fr; }
         }
+
+        /* --- FLY-TO-CART & TOAST NOTIFICATION STYLES --- */
+        .cart-toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 100000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 390px;
+            width: calc(100vw - 32px);
+            pointer-events: none;
+        }
+
+        .cart-toast {
+            pointer-events: auto;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 13px 16px;
+            box-shadow: 0 16px 36px -6px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(15, 23, 42, 0.06);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transform: translateY(20px) scale(0.96);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .cart-toast.show {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+        }
+
+        .cart-toast.toast-success { border-left: 4px solid #0f766e; }
+        .cart-toast.toast-info { border-left: 4px solid #0284c7; }
+        .cart-toast.toast-error { border-left: 4px solid #e11d48; }
+
+        .toast-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toast-success .toast-icon { background: #ccfbf1; color: #0f766e; }
+        .toast-info .toast-icon { background: #e0f2fe; color: #0284c7; }
+        .toast-error .toast-icon { background: #ffe4e6; color: #e11d48; }
+
+        .toast-content { flex: 1; min-width: 0; }
+        .toast-title { font-size: 13.5px; font-weight: 700; color: #0f172a; line-height: 1.3; margin-bottom: 2px; }
+        .toast-message { font-size: 12px; color: #64748b; line-height: 1.45; }
+        .toast-link { display: inline-flex; align-items: center; gap: 4px; margin-top: 5px; font-size: 11.5px; font-weight: 700; color: #0f766e; text-decoration: none; }
+        .toast-link:hover { text-decoration: underline; }
+        .toast-close-btn { background: none; border: none; color: #94a3b8; cursor: pointer; padding: 2px; border-radius: 6px; transition: all 0.15s; }
+        .toast-close-btn:hover { color: #0f172a; background: #f1f5f9; }
+
+        @keyframes cartBouncePop {
+            0% { transform: scale(1); }
+            30% { transform: scale(1.35) rotate(-6deg); background-color: #ccfbf1; }
+            60% { transform: scale(0.92) rotate(3deg); }
+            85% { transform: scale(1.08) rotate(-1deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        .cart-bounce-pop { animation: cartBouncePop 0.65s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+
+        @keyframes badgePopBump {
+            0% { transform: scale(1); }
+            40% { transform: scale(1.6); background-color: #14b8a6; }
+            100% { transform: scale(1); }
+        }
+        .badge-pop-bump { animation: badgePopBump 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) !important; }
+
+        @keyframes btnCartShake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-4px); }
+            40%, 80% { transform: translateX(4px); }
+        }
+        .btn-cart-shake { animation: btnCartShake 0.4s ease !important; }
     </style>
 
     @include('layouts.partials.sidebar_styles')
@@ -754,6 +836,20 @@
 
             <div class="topbar-actions">
                 @auth
+                    @if(auth()->user()->role === 'member')
+                        @php
+                            $jumlahKeranjang = count(session('keranjang_booking', []));
+                        @endphp
+                        <a href="{{ route('keranjang.index') }}" id="topbarCartBtn" class="btn-user-badge" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="padding: 7px 12px; gap: 6px; position: relative; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0f766e; text-decoration: none; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <span style="font-size: 13px; font-weight: 700;">Keranjang</span>
+                            <span id="topbarCartBadge" style="background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 9999px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); {{ $jumlahKeranjang > 0 ? 'display: inline-block;' : 'display: none;' }}">{{ $jumlahKeranjang }}</span>
+                        </a>
+                    @endif
                     <a href="{{ route('dashboard') }}" class="btn-user-badge">
                         <div class="user-initials">{{ auth()->user()->inisial ?? 'US' }}</div>
                         <span>Dasbor</span>
@@ -859,11 +955,32 @@
                     </dl>
                 </div>
 
-                <div class="action-row">
+                <div class="action-row" style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
                     @if ($isTersedia)
                         <a href="{{ route('peminjaman.konfirmasi', $buku->idBuku) }}" id="btnPinjamBuku" class="btn-pinjam">
                             Pinjam Buku
                         </a>
+
+                        @if (auth()->check() && auth()->user()->role === 'member')
+                            @php
+                                $cart = session('keranjang_booking', []);
+                                $inCart = isset($cart[$buku->idBuku]);
+                            @endphp
+                            @if ($inCart)
+                                <a href="{{ route('keranjang.index') }}" class="btn-cart-added" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; border-radius: 8px; font-size: 13.5px; font-weight: 700; text-decoration: none;">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                    Sudah di Keranjang
+                                </a>
+                            @else
+                                <form action="{{ route('keranjang.tambah', $buku->idBuku) }}" method="POST" style="display: inline;" class="form-ajax-cart" id="formCartDetail">
+                                    @csrf
+                                    <button type="submit" class="btn-add-cart" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ffffff; color: #0f766e; border: 1.5px solid #0f766e; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.15s;">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                        + Masukkan Keranjang
+                                    </button>
+                                </form>
+                            @endif
+                        @endif
                     @else
                         <button type="button" class="btn-pinjam" disabled>
                             Semua eksemplar sedang dipinjam
@@ -1075,7 +1192,238 @@
                 }
             });
         })();
+
+        /* =========================================================
+           FLY-TO-CART & AJAX KERANJANG SYSTEM (TANPA RELOAD)
+           ========================================================= */
+
+        function showCartToast(options) {
+            const container = document.getElementById('cartToastContainer');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `cart-toast toast-${options.type || 'success'}`;
+
+            let iconSvg = '';
+            if (options.type === 'error' || options.type === 'info') {
+                iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+            } else {
+                iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+            }
+
+            const linkHtml = options.url ? `<a href="${options.url}" class="toast-link">${options.linkText || 'Buka Keranjang Booking &rarr;'}</a>` : '';
+
+            toast.innerHTML = `
+                <div class="toast-icon">${iconSvg}</div>
+                <div class="toast-content">
+                    <div class="toast-title">${options.title}</div>
+                    <div class="toast-message">${options.message}</div>
+                    ${linkHtml}
+                </div>
+                <button type="button" class="toast-close-btn" aria-label="Tutup notifikasi">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            `;
+
+            container.appendChild(toast);
+            requestAnimationFrame(() => toast.classList.add('show'));
+
+            const closeToast = () => {
+                toast.classList.remove('show');
+                setTimeout(() => { if (toast.parentElement) toast.remove(); }, 350);
+            };
+
+            toast.querySelector('.toast-close-btn').addEventListener('click', closeToast);
+            setTimeout(closeToast, 4000);
+        }
+
+        function flyToCartAnimation(sourceEl, onLanding) {
+            const targetCart = document.getElementById('topbarCartBtn');
+            if (!targetCart) {
+                if (typeof onLanding === 'function') onLanding();
+                return;
+            }
+
+            const startRect = sourceEl.getBoundingClientRect();
+            const targetRect = targetCart.getBoundingClientRect();
+
+            const flyer = document.createElement(sourceEl.tagName === 'IMG' ? 'img' : 'div');
+            if (sourceEl.tagName === 'IMG' && sourceEl.src) {
+                flyer.src = sourceEl.src;
+            } else {
+                flyer.innerHTML = `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
+                flyer.style.background = 'linear-gradient(135deg, #0f766e, #14b8a6)';
+                flyer.style.display = 'flex';
+                flyer.style.alignItems = 'center';
+                flyer.style.justifyContent = 'center';
+            }
+
+            const initW = Math.min(Math.max(startRect.width, 60), 96);
+            const initH = Math.min(Math.max(startRect.height, 60), 136);
+            const startX = startRect.left + (startRect.width - initW) / 2;
+            const startY = startRect.top + (startRect.height - initH) / 2;
+
+            flyer.style.position = 'fixed';
+            flyer.style.left = `${startX}px`;
+            flyer.style.top = `${startY}px`;
+            flyer.style.width = `${initW}px`;
+            flyer.style.height = `${initH}px`;
+            flyer.style.borderRadius = '12px';
+            flyer.style.objectFit = 'cover';
+            flyer.style.boxShadow = '0 18px 38px rgba(15, 118, 110, 0.4), 0 0 0 2px #0f766e';
+            flyer.style.zIndex = '999999';
+            flyer.style.pointerEvents = 'none';
+            flyer.style.willChange = 'transform, opacity';
+
+            document.body.appendChild(flyer);
+
+            const targetCenterX = targetRect.left + targetRect.width / 2;
+            const targetCenterY = targetRect.top + targetRect.height / 2;
+            const deltaX = targetCenterX - (startX + initW / 2);
+            const deltaY = targetCenterY - (startY + initH / 2);
+
+            const midX = deltaX * 0.42;
+            const midY = deltaY * 0.2 - 60;
+
+            if ('animate' in flyer) {
+                const anim = flyer.animate([
+                    { transform: 'translate(0px, 0px) scale(1) rotate(0deg)', opacity: 1 },
+                    { offset: 0.45, transform: `translate(${midX}px, ${midY}px) scale(0.65) rotate(-14deg)`, opacity: 0.95 },
+                    { offset: 0.85, transform: `translate(${deltaX * 0.92}px, ${deltaY * 0.92}px) scale(0.3) rotate(12deg)`, opacity: 0.7 },
+                    { transform: `translate(${deltaX}px, ${deltaY}px) scale(0.18) rotate(0deg)`, opacity: 0.2 }
+                ], {
+                    duration: 650,
+                    easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)',
+                    fill: 'forwards'
+                });
+
+                anim.onfinish = () => {
+                    flyer.remove();
+                    if (typeof onLanding === 'function') onLanding();
+                };
+            } else {
+                flyer.remove();
+                if (typeof onLanding === 'function') onLanding();
+            }
+        }
+
+        function triggerCartLandingEffects(newTotal) {
+            const targetCart = document.getElementById('topbarCartBtn');
+            if (targetCart) {
+                targetCart.classList.remove('cart-bounce-pop');
+                void targetCart.offsetWidth;
+                targetCart.classList.add('cart-bounce-pop');
+            }
+
+            const badge = document.getElementById('topbarCartBadge');
+            if (badge) {
+                badge.textContent = newTotal;
+                badge.style.display = 'inline-block';
+                badge.classList.remove('badge-pop-bump');
+                void badge.offsetWidth;
+                badge.classList.add('badge-pop-bump');
+            }
+
+            const sideBadge = document.getElementById('sidebarCartBadge');
+            if (sideBadge) {
+                sideBadge.textContent = newTotal;
+                sideBadge.style.display = 'inline-block';
+            }
+        }
+
+        document.addEventListener('submit', async function(e) {
+            const form = e.target.closest('.form-ajax-cart');
+            if (!form) return;
+
+            e.preventDefault();
+
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn && submitBtn.disabled) return;
+            if (submitBtn) submitBtn.disabled = true;
+
+            const coverImg = document.querySelector('.cover-card img') || submitBtn;
+            const actionUrl = form.action;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+
+            try {
+                const response = await fetch(actionUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': csrfToken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    flyToCartAnimation(coverImg, function() {
+                        triggerCartLandingEffects(data.totalItem);
+
+                        showCartToast({
+                            type: 'success',
+                            title: 'Buku Masuk Keranjang!',
+                            message: `"${data.judul || 'Buku'}" berhasil ditambahkan ke keranjang booking.`,
+                            url: "{{ route('keranjang.index') }}"
+                        });
+                    });
+
+                    // Ganti form tombol dengan state "Sudah di Keranjang"
+                    const cartAddedLink = document.createElement('a');
+                    cartAddedLink.href = "{{ route('keranjang.index') }}";
+                    cartAddedLink.className = 'btn-cart-added';
+                    cartAddedLink.style.cssText = 'display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; border-radius: 8px; font-size: 13.5px; font-weight: 700; text-decoration: none;';
+                    cartAddedLink.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg> Sudah di Keranjang`;
+                    form.replaceWith(cartAddedLink);
+
+                } else if (data.already_in_cart) {
+                    if (submitBtn) {
+                        submitBtn.classList.add('btn-cart-shake');
+                        setTimeout(() => submitBtn.classList.remove('btn-cart-shake'), 500);
+                        submitBtn.disabled = false;
+                    }
+
+                    showCartToast({
+                        type: 'info',
+                        title: 'Sudah di Keranjang',
+                        message: data.message || 'Buku ini sudah tersimpan di keranjang booking Anda.',
+                        url: "{{ route('keranjang.index') }}"
+                    });
+
+                } else {
+                    if (submitBtn) {
+                        submitBtn.classList.add('btn-cart-shake');
+                        setTimeout(() => submitBtn.classList.remove('btn-cart-shake'), 500);
+                        submitBtn.disabled = false;
+                    }
+
+                    showCartToast({
+                        type: 'error',
+                        title: 'Tidak Dapat Menambahkan',
+                        message: data.message || 'Terjadi kendala saat menambahkan buku ke keranjang.'
+                    });
+                }
+            } catch (err) {
+                console.error('Cart Ajax Error:', err);
+                if (submitBtn) {
+                    submitBtn.classList.add('btn-cart-shake');
+                    setTimeout(() => submitBtn.classList.remove('btn-cart-shake'), 500);
+                    submitBtn.disabled = false;
+                }
+
+                showCartToast({
+                    type: 'error',
+                    title: 'Kesalahan Sistem',
+                    message: 'Gagal menghubungi server. Silakan coba beberapa saat lagi.'
+                });
+            }
+        });
     </script>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div id="cartToastContainer" class="cart-toast-container" aria-live="polite"></div>
 
     @include('layouts.partials.sidebar_scripts')
 </body>

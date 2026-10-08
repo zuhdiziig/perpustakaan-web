@@ -560,20 +560,32 @@
         <div>
             <h2 class="welcome-title">Selamat membaca, {{ explode(' ', $member->name)[0] }}!</h2>
             <div class="welcome-meta">Keanggotaan aktif · {{ $member->kode_anggota }}</div>
-            <p class="welcome-desc">Masih ada cerita baru yang menunggumu.</p>
+            <p class="welcome-desc">
+                @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam'])
+                    <span style="color: #fef08a; font-weight: 600;">⚠️ Anda telah meminjam {{ $statistik['sedangDipinjam'] }} dari {{ $statistik['batasPinjam'] }} buku (Batas Maksimal). Kembalikan buku untuk meminjam buku lain.</span>
+                @else
+                    Masih ada cerita baru yang menunggumu. Sisa kuota peminjaman Anda: <strong>{{ max(0, $statistik['batasPinjam'] - $statistik['sedangDipinjam']) }} buku</strong>.
+                @endif
+            </p>
         </div>
 
-        <a href="{{ route('katalog.index') }}" class="btn-cari-buku">
-            Cari Buku Baru
-        </a>
+        @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam'])
+            <a href="{{ route('pengembalian.member') }}" class="btn-cari-buku" style="background: #ffffff; color: #b91c1c;">
+                Kembalikan Buku
+            </a>
+        @else
+            <a href="{{ route('katalog.index') }}" class="btn-cari-buku">
+                Cari Buku Baru
+            </a>
+        @endif
     </div>
 
     <!-- 3. STATS CARDS (4 COLS) -->
     <div class="stats-grid-4">
         <!-- Card 1: Sedang Dipinjam -->
-        <div class="stat-box">
+        <div class="stat-box" @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam']) style="border-color: #fca5a5; background: #fff5f5;" @endif>
             <div>
-                <div class="stat-icon">
+                <div class="stat-icon" @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam']) style="background: #fee2e2; color: #dc2626;" @endif>
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="18" y1="20" x2="18" y2="10"></line>
                         <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -581,9 +593,17 @@
                     </svg>
                 </div>
                 <div class="stat-label">Sedang dipinjam</div>
-                <div class="stat-value">{{ $statistik['sedangDipinjam'] }} buku</div>
+                <div class="stat-value" @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam']) style="color: #dc2626;" @endif>{{ $statistik['sedangDipinjam'] }} buku</div>
             </div>
-            <div class="stat-caption">Batas maksimal {{ $statistik['batasPinjam'] }} buku</div>
+            @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam'])
+                <div class="stat-caption" style="color: #dc2626; font-weight: 700;">
+                    ⛔ Batas maksimal {{ $statistik['batasPinjam'] }} buku tercapai (Kembalikan buku dahulu)
+                </div>
+            @else
+                <div class="stat-caption">
+                    Sisa kuota: <strong>{{ max(0, $statistik['batasPinjam'] - $statistik['sedangDipinjam']) }} buku</strong> (Maksimal {{ $statistik['batasPinjam'] }})
+                </div>
+            @endif
         </div>
 
         <!-- Card 2: Total Dibaca -->

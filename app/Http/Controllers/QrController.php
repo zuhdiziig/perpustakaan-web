@@ -156,11 +156,9 @@ class QrController extends Controller
             ], 403);
         }
 
-        $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($member) {
-            $q->where('idUserMember', $member->id)->where('status', 'Dipinjam');
-        })->where('statusBuku', 'Dipinjam')->count();
-
-        $sisaKuota = max(0, 7 - $bukuSedangDipinjam);
+        $bukuSedangDipinjam = $member->jumlahBukuSedangDipinjam();
+        $sisaKuota = $member->sisaKuotaPinjam();
+        $kuotaPenuh = $member->sudahMencapaiBatasMaksimalPinjam();
 
         return response()->json([
             'success' => true,
@@ -173,7 +171,9 @@ class QrController extends Controller
                 'status' => $member->status,
                 'sedangDipinjam' => $bukuSedangDipinjam,
                 'sisaKuota' => $sisaKuota,
+                'kuotaPenuh' => $kuotaPenuh,
             ],
+            'warning' => $kuotaPenuh ? "Anggota telah meminjam {$bukuSedangDipinjam} buku (batas maksimal 7 buku). Wajib mengembalikan buku terlebih dahulu." : null,
         ]);
     }
 
@@ -374,6 +374,27 @@ class QrController extends Controller
             $eksemplar = $firstDetail?->eksemplar;
             $kodeBuku = $eksemplar?->kode_barcode ?? $buku?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $buku?->idBuku ?? 0);
 
+            $daftarBuku = [];
+            foreach ($bookingPeminjaman->details as $d) {
+                $b = $d->buku;
+                $e = $d->eksemplar;
+                $daftarBuku[] = [
+                    'idBuku' => $b?->idBuku,
+                    'idEksemplar' => $e?->idEksemplar,
+                    'judul' => $b?->judul ?? 'Buku',
+                    'rak' => $b?->rak ?? '-',
+                    'kodeBuku' => $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0),
+                    'kondisi' => $e?->kondisi ?? 'Baik',
+                    'statusEksemplar' => $e?->status ?? 'Dibooking',
+                    'nomor_eksemplar' => $e?->nomor_eksemplar,
+                ];
+            }
+
+            $totalBuku = $bookingPeminjaman->totalBuku ?: count($daftarBuku);
+            $judulDisplay = $totalBuku > 1
+                ? "{$totalBuku} Buku: ".$bookingPeminjaman->details->pluck('buku.judul')->take(2)->join(', ').($totalBuku > 2 ? ', dst' : '')
+                : ($buku?->judul ?? 'Buku');
+
             return response()->json([
                 'success' => true,
                 'type' => 'booking',
@@ -382,27 +403,32 @@ class QrController extends Controller
                     'kodeBooking' => $bookingPeminjaman->kode_booking,
                     'opsiPengambilan' => $bookingPeminjaman->opsi_pengambilan,
                     'status' => $bookingPeminjaman->status,
+                    'totalBuku' => $totalBuku,
+                    'daftarBuku' => $daftarBuku,
                     'member' => [
                         'id' => $bookingPeminjaman->member?->id,
                         'name' => $bookingPeminjaman->member?->name ?? 'Anggota',
                         'kodeAnggota' => $bookingPeminjaman->member?->kode_anggota ?? sprintf('AG-%s-%05d', date('Y'), $bookingPeminjaman->idUserMember),
                         'email' => $bookingPeminjaman->member?->email,
                         'status' => $bookingPeminjaman->member?->status ?? 'aktif',
+                        'sedangDipinjam' => $bookingPeminjaman->member?->jumlahBukuSedangDipinjam() ?? 0,
+                        'sisaKuota' => $bookingPeminjaman->member?->sisaKuotaPinjam() ?? 7,
+                        'kuotaPenuh' => $bookingPeminjaman->member?->sudahMencapaiBatasMaksimalPinjam() ?? false,
                     ],
                     'buku' => [
                         'idBuku' => $buku?->idBuku,
                         'idEksemplar' => $eksemplar?->idEksemplar,
-                        'judul' => $buku?->judul ?? 'Buku',
+                        'judul' => $judulDisplay,
                         'rak' => $buku?->rak ?? '-',
-                        'kodeBuku' => $kodeBuku,
+                        'kodeBuku' => $totalBuku > 1 ? "{$totalBuku} item" : $kodeBuku,
                         'kondisi' => $eksemplar?->kondisi ?? 'Baik',
                         'statusEksemplar' => $eksemplar?->status ?? 'Dibooking',
                         'nomor_eksemplar' => $eksemplar?->nomor_eksemplar,
                     ],
                     'batasAmbil' => $bookingPeminjaman->batasAmbil ? Carbon::parse($bookingPeminjaman->batasAmbil)->translatedFormat('d M Y, H:i') : '-',
-                    'validasiPesan' => "Tiket Booking {$bookingPeminjaman->kode_booking} teridentifikasi. Status: {$bookingPeminjaman->status}. Anggota: {$bookingPeminjaman->member?->name}.",
+                    'validasiPesan' => "Tiket Booking {$bookingPeminjaman->kode_booking} ({$totalBuku} Buku) teridentifikasi. Status: {$bookingPeminjaman->status}. Anggota: {$bookingPeminjaman->member?->name}.",
                 ],
-                'message' => "Tiket Booking '{$bookingPeminjaman->kode_booking}' berhasil diidentifikasi.",
+                'message' => "Tiket Booking '{$bookingPeminjaman->kode_booking}' ({$totalBuku} buku) berhasil diidentifikasi.",
             ]);
         }
 
@@ -606,11 +632,9 @@ class QrController extends Controller
                 ], 403);
             }
 
-            $bukuSedangDipinjam = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($member) {
-                $q->where('idUserMember', $member->id)->where('status', 'Dipinjam');
-            })->where('statusBuku', 'Dipinjam')->count();
-
-            $sisaKuota = max(0, 7 - $bukuSedangDipinjam);
+            $bukuSedangDipinjam = $member->jumlahBukuSedangDipinjam();
+            $sisaKuota = $member->sisaKuotaPinjam();
+            $kuotaPenuh = $member->sudahMencapaiBatasMaksimalPinjam();
 
             return response()->json([
                 'success' => true,
@@ -624,8 +648,11 @@ class QrController extends Controller
                     'status' => $member->status,
                     'sedangDipinjam' => $bukuSedangDipinjam,
                     'sisaKuota' => $sisaKuota,
+                    'kuotaPenuh' => $kuotaPenuh,
                 ],
-                'message' => "Anggota '{$member->name}' ({$member->kode_anggota}) berhasil diidentifikasi.",
+                'message' => $kuotaPenuh
+                    ? "Anggota '{$member->name}' teridentifikasi, namun kuota pinjaman penuh ({$bukuSedangDipinjam}/7 buku). Wajib pengembalian terlebih dahulu."
+                    : "Anggota '{$member->name}' ({$member->kode_anggota}) berhasil diidentifikasi. Sisa kuota: {$sisaKuota} buku.",
             ]);
         }
 

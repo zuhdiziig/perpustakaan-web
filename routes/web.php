@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\KatalogController;
 use App\Http\Controllers\KategoriController;
+use App\Http\Controllers\KeranjangBookingController;
 use App\Http\Controllers\KondisiBukuController;
 use App\Http\Controllers\LaporanController;
 use App\Http\Controllers\MemberController;
@@ -142,6 +143,18 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::middleware('role:member')->group(function () {
+        // Keranjang Booking Buku Simultan (Khusus Member)
+        Route::get('/keranjang-booking', [KeranjangBookingController::class, 'index'])
+            ->name('keranjang.index');
+        Route::post('/keranjang-booking/tambah/{idBuku}', [KeranjangBookingController::class, 'tambah'])
+            ->name('keranjang.tambah');
+        Route::post('/keranjang-booking/hapus/{idBuku}', [KeranjangBookingController::class, 'hapus'])
+            ->name('keranjang.hapus');
+        Route::post('/keranjang-booking/kosongkan', [KeranjangBookingController::class, 'kosongkan'])
+            ->name('keranjang.kosongkan');
+        Route::post('/keranjang-booking/checkout', [KeranjangBookingController::class, 'checkout'])
+            ->name('keranjang.checkout');
+
         Route::get('/riwayat', [RiwayatController::class, 'index'])
             ->name('riwayat.index');
 
