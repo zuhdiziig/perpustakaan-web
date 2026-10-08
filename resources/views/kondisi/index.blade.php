@@ -2,21 +2,26 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pemeriksaan Kondisi Buku</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; padding: 25px; margin: 0; }
-        .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); max-width: 950px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        .card { background: white; padding: 20px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; max-width: 950px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+        .header h2 { margin: 0; font-size: 1.25rem; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-top: 15px; }
+        table { width: 100%; min-width: 650px; border-collapse: collapse; }
         th, td { border: 1px solid #e2e8f0; padding: 10px; text-align: left; font-size: 13px; }
         th { background: #f1f5f9; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; white-space: nowrap; }
         .badge-baik { background: #dcfce7; color: #166534; }
         .badge-rusak { background: #fef3c7; color: #92400e; }
         .badge-hilang { background: #fee2e2; color: #991b1b; }
-        .alert-biaya { background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
-        .alert-aman { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 4px; }
-        .btn-check { background: #0284c7; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; }
+        .alert-biaya { background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
+        .alert-aman { background: #f0fdf4; border-left: 4px solid #22c55e; padding: 12px; margin-bottom: 15px; border-radius: 4px; font-size: 13px; }
+        .btn-check { background: #0284c7; color: white; padding: 6px 12px; border-radius: 4px; text-decoration: none; font-size: 12px; font-weight: bold; white-space: nowrap; display: inline-block; }
     </style>
 </head>
 <body>
@@ -56,40 +61,42 @@
         @endif
     </form>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Barcode</th>
-                <th>Judul Buku</th>
-                <th>Kategori</th>
-                <th>Harga Satuan</th>
-                <th>Kondisi Saat Ini</th>
-                <th>Aksi Petugas</th>
-            </tr>
-        </thead>
-        <tbody>
-            @forelse ($bukus as $b)
+    <div class="table-responsive">
+        <table>
+            <thead>
                 <tr>
-                    <td><code>{{ $b->barcode->kodeBarcode ?? '-' }}</code></td>
-                    <td><strong>{{ $b->judul }}</strong></td>
-                    <td>{{ $b->kategori->namaKategori ?? '-' }}</td>
-                    <td>Rp {{ number_format($b->harga, 0, ',', '.') }}</td>
-                    <td>
-                        <span class="badge {{ $b->kondisi == 'Baik' ? 'badge-baik' : ($b->kondisi == 'Rusak' ? 'badge-rusak' : 'badge-hilang') }}">
-                            {{ $b->kondisi }}
-                        </span>
-                    </td>
-                    <td>
-                        <a href="{{ route('kondisi.edit', $b->idBuku) }}" class="btn-check">Periksa / Ubah Kondisi</a>
-                    </td>
+                    <th>Barcode</th>
+                    <th>Judul Buku</th>
+                    <th>Kategori</th>
+                    <th>Harga Satuan</th>
+                    <th>Kondisi Saat Ini</th>
+                    <th>Aksi Petugas</th>
                 </tr>
-            @empty
-                <tr>
-                    <td colspan="6" style="text-align: center; color: #64748b;">Tidak ada data buku.</td>
-                </tr>
-            @endforelse
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                @forelse ($bukus as $b)
+                    <tr>
+                        <td><code>{{ $b->barcode->kodeBarcode ?? '-' }}</code></td>
+                        <td><strong>{{ $b->judul }}</strong></td>
+                        <td>{{ $b->kategori->namaKategori ?? '-' }}</td>
+                        <td>Rp {{ number_format($b->harga, 0, ',', '.') }}</td>
+                        <td>
+                            <span class="badge {{ $b->kondisi == 'Baik' ? 'badge-baik' : ($b->kondisi == 'Rusak' ? 'badge-rusak' : 'badge-hilang') }}">
+                                {{ $b->kondisi }}
+                            </span>
+                        </td>
+                        <td>
+                            <a href="{{ route('kondisi.edit', $b->idBuku) }}" class="btn-check">Periksa / Ubah Kondisi</a>
+                        </td>
+                    </tr>
+                @empty
+                    <tr>
+                        <td colspan="6" style="text-align: center; color: #64748b;">Tidak ada data buku.</td>
+                    </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
 
     <div style="margin-top: 15px;">
         {{ $bukus->links() }}

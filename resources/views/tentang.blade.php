@@ -38,6 +38,12 @@
             padding: 0;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         html {
             scroll-behavior: smooth;
         }
@@ -688,6 +694,42 @@
             .about-footer-grid {
                 grid-template-columns: 1fr;
                 gap: 22px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar-container {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .topbar-brand {
+                font-size: 16px;
+                gap: 8px;
+            }
+
+            .topbar-brand-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .about-page {
+                padding: 14px 12px 36px;
+            }
+
+            .about-hero-content {
+                padding: 22px 16px 24px;
+            }
+
+            .about-hero-title {
+                font-size: 24px;
+                line-height: 1.25;
+            }
+
+            .about-value-card,
+            .about-info-card,
+            .about-membership {
+                padding: 18px 16px;
             }
         }
     </style>

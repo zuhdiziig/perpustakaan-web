@@ -216,6 +216,15 @@
         font-size: 12.5px;
     }
 
+    @media (max-width: 600px) {
+        .top-actions { flex-direction: column; width: 100%; }
+        .btn-nav-back, .btn-print { width: 100%; justify-content: center; }
+        .receipt-banner { padding: 18px 14px; }
+        .receipt-body { padding: 18px 14px; }
+        .info-grid { grid-template-columns: 1fr; gap: 14px; }
+        .book-item-box { flex-direction: column; align-items: flex-start; }
+    }
+
     @media print {
         body {
             background: #ffffff !important;

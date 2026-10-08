@@ -2,13 +2,16 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tagihan Denda #{{ $denda->idDenda }}</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; padding: 25px; margin: 0; }
-        .invoice { background: white; max-width: 520px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); border-top: 4px solid #dc2626; }
-        .row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
-        .total { font-size: 18px; font-weight: bold; color: #dc2626; padding-top: 10px; border-top: 2px dashed #cbd5e1; }
-        .btn-qr { display: block; text-align: center; background: #2563eb; color: white; padding: 10px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        .invoice { background: white; width: 100%; max-width: 520px; margin: auto; padding: 22px 18px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.1); border-top: 4px solid #dc2626; }
+        .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; font-size: 13px; }
+        .total { font-size: 18px; font-weight: bold; color: #dc2626; padding-top: 12px; border-top: 2px dashed #cbd5e1; }
+        .btn-qr { display: block; text-align: center; background: #2563eb; color: white; padding: 12px; text-decoration: none; border-radius: 4px; font-weight: bold; margin-top: 15px; font-size: 14px; }
     </style>
 </head>
 <body>

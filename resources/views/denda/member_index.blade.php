@@ -140,12 +140,15 @@
         background: #ffffff;
         border: 1px solid #e2e8f0;
         border-radius: 16px;
-        overflow: hidden;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        width: 100%;
     }
 
     .figma-table {
         width: 100%;
+        min-width: 620px;
         border-collapse: collapse;
         font-size: 13.5px;
         text-align: left;
@@ -365,6 +368,21 @@
 
         .denda-bottom-grid {
             grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .denda-main-heading {
+            font-size: 22px;
+        }
+        .stat-number {
+            font-size: 24px;
+        }
+        .bayar-total-nominal {
+            font-size: 26px;
+        }
+        .bayar-card, .rincian-card {
+            padding: 18px 14px;
         }
     }
 </style>

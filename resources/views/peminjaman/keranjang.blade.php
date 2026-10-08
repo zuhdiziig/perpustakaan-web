@@ -492,6 +492,41 @@
             position: static;
         }
     }
+
+    @media (max-width: 600px) {
+        .cart-page {
+            padding: 4px 0 40px;
+        }
+
+        .cart-title {
+            font-size: 22px;
+        }
+
+        .cart-items-card,
+        .checkout-card {
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        .cart-item-cover {
+            width: 58px;
+            height: 82px;
+        }
+
+        .cart-item-row {
+            gap: 12px;
+            padding: 14px 0;
+        }
+
+        .cart-item-title {
+            font-size: 13.5px;
+        }
+
+        .btn-remove-item {
+            width: 32px;
+            height: 32px;
+        }
+    }
 </style>
 @endsection
 

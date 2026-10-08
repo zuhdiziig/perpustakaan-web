@@ -874,6 +874,17 @@
         .stats-grid {
             grid-template-columns: 1fr;
         }
+
+        .bulk-action-bar {
+            width: calc(100% - 24px);
+            max-width: 100%;
+            bottom: 12px;
+            padding: 8px 12px;
+        }
+
+        .condition-selector-group {
+            grid-template-columns: 1fr;
+        }
     }
 </style>
 @endsection

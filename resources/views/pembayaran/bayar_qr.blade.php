@@ -305,6 +305,13 @@
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 640px) {
+        .qris-main-heading { font-size: 22px; }
+        .qris-card, .rincian-card-box, .cara-bayar-box { padding: 20px 16px; border-radius: 16px; }
+        .qris-amount-large { font-size: 26px; }
+        .qris-qr-box img { width: 180px; height: 180px; }
+    }
 </style>
 @endsection
 

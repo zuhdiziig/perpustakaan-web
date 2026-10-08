@@ -540,6 +540,22 @@
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 600px) {
+        .dashboard-title {
+            font-size: 22px;
+        }
+
+        .btn-cari-buku {
+            width: 100%;
+            text-align: center;
+        }
+
+        .btn-lihat-denda {
+            width: 100%;
+            text-align: center;
+        }
+    }
 </style>
 @endsection
 

@@ -34,6 +34,12 @@
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-page);
@@ -699,6 +705,59 @@
             .topbar-nav { display: none; }
             .detail-grid { grid-template-columns: 1fr; }
             .footer-container { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 640px) {
+            .topbar-container {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .topbar-brand {
+                font-size: 16px;
+                gap: 8px;
+            }
+
+            .topbar-brand-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .btn-user-badge span:not(#topbarCartBadge) {
+                display: none;
+            }
+
+            .btn-user-badge {
+                padding: 6px 9px;
+                gap: 4px;
+            }
+
+            .detail-container {
+                padding: 16px 14px 40px !important;
+            }
+
+            .page-title {
+                font-size: 22px;
+            }
+
+            .cover-card {
+                max-width: 260px;
+                margin: 0 auto;
+            }
+
+            .dialog-actions {
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+            }
+
+            .btn-dialog-cancel,
+            .btn-dialog-primary {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+                display: flex;
+            }
         }
 
         @media (max-width: 480px) {

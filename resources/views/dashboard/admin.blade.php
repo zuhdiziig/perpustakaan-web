@@ -437,6 +437,17 @@
             align-items: flex-start;
         }
     }
+
+    @media (max-width: 600px) {
+        .dashboard-title {
+            font-size: 22px;
+        }
+
+        .btn-unduh-laporan {
+            width: 100%;
+            justify-content: center;
+        }
+    }
 </style>
 @endsection
 

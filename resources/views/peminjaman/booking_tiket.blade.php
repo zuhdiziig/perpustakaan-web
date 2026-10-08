@@ -399,6 +399,39 @@
         background: #fef2f2;
     }
 
+    @media (max-width: 860px) {
+        .ticket-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 600px) {
+        .ticket-page-title {
+            font-size: 22px;
+        }
+
+        .ticket-qr-card,
+        .ticket-details-card {
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        .ticket-actions-row {
+            flex-direction: column;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .btn-ticket-print,
+        .btn-ticket-history,
+        .btn-ticket-cancel {
+            width: 100%;
+            margin-left: 0;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+    }
+
     /* Print Styles */
     @media print {
         body {

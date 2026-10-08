@@ -452,6 +452,30 @@
         }
     }
 
+    @media (max-width: 600px) {
+        .ticket-page-title {
+            font-size: 22px;
+        }
+
+        .ticket-qr-card,
+        .ticket-detail-card {
+            padding: 16px;
+            border-radius: 14px;
+        }
+
+        .ticket-action-buttons {
+            flex-direction: column;
+            width: 100%;
+            gap: 8px;
+        }
+
+        .btn-qr-action {
+            width: 100%;
+            box-sizing: border-box;
+            justify-content: center;
+        }
+    }
+
     /* --- PRINT STYLES --- */
     @media print {
         header, .sidebar, .ticket-breadcrumb, .btn-qr-action, .ticket-nav-back, .app-header {

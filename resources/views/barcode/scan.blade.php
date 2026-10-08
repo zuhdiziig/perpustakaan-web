@@ -2,19 +2,22 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scan Barcode Buku</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; padding: 25px; margin: 0; }
-        .card { background: white; max-width: 620px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .input-group { display: flex; gap: 8px; margin-bottom: 20px; }
-        input[type="text"] { flex: 1; padding: 10px; font-size: 15px; border: 2px solid #2563eb; border-radius: 6px; outline: none; }
-        button { padding: 10px 18px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
-        .alert-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 14px; }
-        .result-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 18px; background: #ffffff; }
-        .row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        .card { background: white; width: 100%; max-width: 620px; margin: auto; padding: 20px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+        input[type="text"] { flex: 1; min-width: 200px; padding: 10px; font-size: 14px; border: 2px solid #2563eb; border-radius: 6px; outline: none; }
+        button { padding: 10px 18px; background: #2563eb; color: white; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .alert-error { background: #fee2e2; border: 1px solid #fca5a5; color: #991b1b; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; }
+        .result-box { border: 1px solid #e2e8f0; border-radius: 6px; padding: 16px; background: #ffffff; }
+        .row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; padding: 8px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
         .label { color: #64748b; font-weight: bold; }
-        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
+        .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; white-space: nowrap; }
         .badge-tersedia { background: #dcfce7; color: #166534; }
         .badge-habis { background: #fee2e2; color: #991b1b; }
     </style>

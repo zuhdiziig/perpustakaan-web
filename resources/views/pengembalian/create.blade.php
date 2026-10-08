@@ -520,6 +520,12 @@
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 640px) {
+        .pengembalian-title { font-size: 22px; }
+        .card-panel { padding: 18px 14px; border-radius: 14px; }
+        .btn-scan-action { padding: 11px 14px; font-size: 13px; }
+    }
 </style>
 @endsection
 

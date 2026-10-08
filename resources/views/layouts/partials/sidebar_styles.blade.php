@@ -308,6 +308,16 @@
         .page-wrapper {
             padding: 16px;
             gap: 0;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+
+        @media (max-width: 640px) {
+            .page-wrapper {
+                padding: 12px 10px;
+            }
         }
 
         .sidebar {

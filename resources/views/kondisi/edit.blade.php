@@ -2,15 +2,18 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Input Hasil Pemeriksaan Buku</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; padding: 25px; margin: 0; }
-        .card { background: white; max-width: 520px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
+        body { font-family: sans-serif; background: #f8fafc; }
+        .card { background: white; width: 100%; max-width: 520px; margin: auto; padding: 20px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 15px; }
         label { display: block; font-weight: bold; margin-bottom: 5px; font-size: 13px; }
-        select, textarea { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px; }
-        .btn-submit { background: #0284c7; color: white; width: 100%; padding: 10px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
-        .info-box { background: #f1f5f9; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; }
+        select, textarea { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 14px; }
+        .btn-submit { background: #0284c7; color: white; width: 100%; padding: 12px; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 14px; }
+        .info-box { background: #f1f5f9; padding: 12px; border-radius: 6px; margin-bottom: 15px; font-size: 13px; line-height: 1.6; }
     </style>
 </head>
 <body>

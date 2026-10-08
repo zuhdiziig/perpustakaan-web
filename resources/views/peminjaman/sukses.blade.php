@@ -279,6 +279,11 @@
             width: 100%;
         }
     }
+
+    @media (max-width: 640px) {
+        .peminjaman-title { font-size: 22px; }
+        .status-banner-card, .card-rincian, .card-barcode { padding: 20px 16px; border-radius: 16px; }
+    }
 </style>
 @endsection
 

@@ -218,6 +218,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/kartu-saya', function () {
             return redirect()->route('member.cetak-qr', auth()->id());
         })->name('member.kartu-saya');
+
+        Route::get('/api/member/status-sirkulasi-terbaru', [QrController::class, 'apiCheckRealtimeSirkulasi'])
+            ->name('api.member.status-sirkulasi-terbaru');
     });
 
     /*

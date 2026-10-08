@@ -243,6 +243,15 @@
         margin: 0;
     }
 
+    @media (max-width: 640px) {
+        .nota-main-heading { font-size: 22px; }
+        .nota-actions-bar { flex-direction: column; width: 100%; }
+        .btn-cetak-nota, .btn-kembali-dasbor { width: 100%; text-align: center; }
+        .nota-receipt-card { padding: 20px 14px; border-radius: 14px; }
+        .receipt-header { flex-direction: column; gap: 14px; }
+        .receipt-brand-meta { text-align: left; }
+    }
+
     /* --- PRINT STYLES --- */
     @media print {
         @page {

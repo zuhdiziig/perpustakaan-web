@@ -7,6 +7,7 @@ use App\Models\BukuEksemplar;
 use App\Models\DetailPeminjaman;
 use App\Models\Kategori;
 use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\User;
 use Database\Seeders\BukuEksemplarSeeder;
 use Illuminate\Database\QueryException;
@@ -524,5 +525,71 @@ class QrCodeSystemTest extends TestCase
             ->assertJsonPath('success', true)
             ->assertJsonPath('type', 'pengembalian')
             ->assertJsonPath('data.kodeKembali', 'KB-20261007-0099');
+    }
+
+    public function test_member_can_poll_realtime_circulation_status_for_loan_and_return(): void
+    {
+        $this->actingAs($this->member1);
+
+        $buku = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Pemrograman Laravel',
+            'penulis' => 'Taylor Otwell',
+            'penerbit' => 'Laravel LLC',
+            'tahunTerbit' => 2026,
+            'harga' => 150000,
+            'stok' => 5,
+            'kondisi' => 'Baik',
+        ]);
+        $eksemplar = $buku->eksemplar()->first();
+
+        // 1. Awalnya belum ada event aktif dalam 3 menit
+        $resInitial = $this->getJson(route('api.member.status-sirkulasi-terbaru'));
+        $resInitial->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('peminjaman', null)
+            ->assertJsonPath('pengembalian', null);
+
+        // 2. Petugas melakukan serah terima peminjaman
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member1->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(30)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+            'kode_booking' => 'BK-TEST-REALTIME',
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $resLoan = $this->getJson(route('api.member.status-sirkulasi-terbaru'));
+        $resLoan->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('peminjaman.id', $peminjaman->idPeminjaman)
+            ->assertJsonPath('peminjaman.kode', 'BK-TEST-REALTIME')
+            ->assertJsonPath('peminjaman.namaPetugas', $this->petugas->name)
+            ->assertJsonPath('peminjaman.daftarBuku.0', 'Pemrograman Laravel');
+
+        // 3. Petugas menyelesaikan pengembalian
+        $pengembalian = Pengembalian::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalKembali' => now()->toDateString(),
+            'kondisiBuku' => 'Baik',
+        ]);
+
+        $resReturn = $this->getJson(route('api.member.status-sirkulasi-terbaru'));
+        $resReturn->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('pengembalian.id', $pengembalian->idPengembalian)
+            ->assertJsonPath('pengembalian.namaPetugas', $this->petugas->name)
+            ->assertJsonPath('pengembalian.kondisiBuku', 'Baik');
     }
 }

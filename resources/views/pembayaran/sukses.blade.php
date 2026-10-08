@@ -310,6 +310,11 @@
             grid-template-columns: 1fr;
         }
     }
+
+    @media (max-width: 640px) {
+        .sukses-main-heading { font-size: 22px; }
+        .sukses-card, .rincian-card-box, .catat-box { padding: 20px 16px; border-radius: 16px; }
+    }
 </style>
 @endsection
 

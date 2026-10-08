@@ -2,14 +2,17 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tambah Data Buku</title>
     <style>
-        body { font-family: sans-serif; background: #f8fafc; padding: 25px; }
-        .card { background: white; max-width: 600px; margin: auto; padding: 25px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
+        body { font-family: sans-serif; background: #f8fafc; padding: 20px 14px; margin: 0; }
+        .card { background: white; max-width: 600px; width: 100%; margin: auto; padding: 22px 18px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         .form-group { margin-bottom: 12px; }
         label { display: block; font-weight: bold; margin-bottom: 4px; font-size: 13px; }
-        input, select { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 4px; }
-        .btn-submit { background: #2563eb; color: white; padding: 10px 16px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        input, select { width: 100%; padding: 10px; box-sizing: border-box; border: 1px solid #cbd5e1; border-radius: 6px; font-size: 13.5px; }
+        .btn-submit { background: #2563eb; color: white; padding: 11px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; font-size: 14px; }
         .error { color: #dc2626; font-size: 12px; margin-top: 2px; display: block; }
     </style>
 </head>

@@ -379,6 +379,12 @@
             min-width: 580px;
         }
     }
+
+    @media (max-width: 600px) {
+        .dashboard-title {
+            font-size: 22px;
+        }
+    }
 </style>
 @endsection
 

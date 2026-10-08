@@ -7,6 +7,7 @@ use App\Models\Buku;
 use App\Models\BukuEksemplar;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
@@ -1059,5 +1060,70 @@ class QrController extends Controller
             'success' => false,
             'message' => "Kode '{$raw}' tidak ditemukan dalam database (anggota, buku, atau transaksi).",
         ], 404);
+    }
+
+    /**
+     * Polling status sirkulasi real-time khusus member (Peminjaman Serah Terima & Pengembalian Selesai).
+     */
+    public function apiCheckRealtimeSirkulasi(Request $request): JsonResponse
+    {
+        $user = auth()->user();
+        if (! $user || $user->role !== 'member') {
+            return response()->json([
+                'success' => false,
+                'message' => 'Hanya anggota yang dapat mengakses pembaruan sirkulasi mandiri.',
+            ], 403);
+        }
+
+        $now = Carbon::now();
+        // Cek peminjaman yang baru saja diserahkan/berstatus Dipinjam dalam 3 menit terakhir
+        $latestPeminjaman = Peminjaman::with(['petugas', 'details.buku'])
+            ->where('idUserMember', $user->id)
+            ->where('status', 'Dipinjam')
+            ->where('updated_at', '>=', $now->copy()->subMinutes(3))
+            ->latest('updated_at')
+            ->first();
+
+        // Cek pengembalian yang baru saja diselesaikan petugas dalam 3 menit terakhir
+        $latestPengembalian = Pengembalian::with(['petugas', 'peminjaman.details.buku'])
+            ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $user->id))
+            ->where('updated_at', '>=', $now->copy()->subMinutes(3))
+            ->latest('updated_at')
+            ->first();
+
+        $peminjamanEvent = null;
+        if ($latestPeminjaman) {
+            $peminjamanEvent = [
+                'id' => $latestPeminjaman->idPeminjaman,
+                'kode' => $latestPeminjaman->kode_booking ?: ('PJ-'.$latestPeminjaman->idPeminjaman),
+                'namaPetugas' => $latestPeminjaman->petugas?->name ?? 'Petugas Meja Sirkulasi',
+                'totalBuku' => $latestPeminjaman->totalBuku,
+                'batasKembali' => $latestPeminjaman->batasKembali ? Carbon::parse($latestPeminjaman->batasKembali)->translatedFormat('d M Y') : '-',
+                'waktuSelesai' => $latestPeminjaman->updated_at ? $latestPeminjaman->updated_at->translatedFormat('d M Y, H:i') : '-',
+                'daftarBuku' => $latestPeminjaman->details->map(fn ($d) => $d->buku?->judul ?? 'Buku')->values()->all(),
+                'timestamp' => $latestPeminjaman->updated_at?->timestamp ?? 0,
+            ];
+        }
+
+        $pengembalianEvent = null;
+        if ($latestPengembalian) {
+            $details = $latestPengembalian->peminjaman?->details ?? collect();
+            $pengembalianEvent = [
+                'id' => $latestPengembalian->idPengembalian,
+                'idPeminjaman' => $latestPengembalian->idPeminjaman,
+                'namaPetugas' => $latestPengembalian->petugas?->name ?? 'Petugas Meja Sirkulasi',
+                'kondisiBuku' => $latestPengembalian->kondisiBuku ?? 'Baik',
+                'totalBuku' => $details->count() ?: 1,
+                'waktuSelesai' => $latestPengembalian->updated_at ? $latestPengembalian->updated_at->translatedFormat('d M Y, H:i') : '-',
+                'daftarBuku' => $details->map(fn ($d) => $d->buku?->judul ?? 'Buku')->values()->all(),
+                'timestamp' => $latestPengembalian->updated_at?->timestamp ?? 0,
+            ];
+        }
+
+        return response()->json([
+            'success' => true,
+            'peminjaman' => $peminjamanEvent,
+            'pengembalian' => $pengembalianEvent,
+        ]);
     }
 }

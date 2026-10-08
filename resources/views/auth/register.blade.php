@@ -238,6 +238,8 @@
             margin-top: auto;
         }
 
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
+
         @media (max-width: 900px) {
             .navbar {
                 justify-content: center;
@@ -252,6 +254,18 @@
             .card-auth {
                 padding: 30px 24px;
             }
+        }
+
+        @media (max-width: 640px) {
+            .navbar-container { margin: 16px auto 0; width: calc(100% - 24px); }
+            .navbar { padding: 12px 18px; border-radius: 14px; }
+            .main-wrapper { margin: 20px auto; width: calc(100% - 24px); gap: 24px; }
+            .hero-img-box { height: 220px; border-radius: 16px; margin-bottom: 16px; }
+            .hero-title { font-size: 20px; }
+            .hero-desc { font-size: 13.5px; }
+            .card-auth { padding: 24px 16px; border-radius: 18px; }
+            .form-title { font-size: 24px; }
+            .form-subtitle { font-size: 13px; margin-bottom: 20px; }
         }
     </style>
 </head>

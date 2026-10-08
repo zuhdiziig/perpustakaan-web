@@ -2,16 +2,19 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Label QR Semua Eksemplar - {{ $buku->judul }}</title>
     <style>
+        * { box-sizing: border-box; }
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: #f1f5f9;
             margin: 0;
-            padding: 30px 20px;
-            box-sizing: border-box;
+            padding: 20px 14px;
         }
         .container {
+            width: 100%;
             max-width: 900px;
             margin: 0 auto;
         }
@@ -19,8 +22,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
             background: white;
-            padding: 15px 20px;
+            padding: 14px 18px;
             border-radius: 8px;
             margin-bottom: 20px;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);

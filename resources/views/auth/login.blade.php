@@ -134,10 +134,26 @@
         .alert-success { background: #f0fdf4; color: #166534; border: 1px solid #dcfce7; }
         .footer { text-align: center; padding: 24px 20px 32px; font-size: 13px; color: #64748b; margin-top: auto; }
 
+        html, body { overflow-x: hidden; width: 100%; max-width: 100%; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
+
         @media (max-width: 900px) {
             .navbar { justify-content: center; }
             .main-wrapper { grid-template-columns: 1fr; gap: 32px; }
             .card-auth { padding: 32px 24px; }
+        }
+
+        @media (max-width: 640px) {
+            .navbar-container { margin: 16px auto 0; width: calc(100% - 24px); }
+            .navbar { padding: 12px 18px; border-radius: 14px; }
+            .main-wrapper { margin: 20px auto; width: calc(100% - 24px); gap: 24px; }
+            .hero-img-box { height: 220px; border-radius: 16px; margin-bottom: 16px; }
+            .hero-title { font-size: 20px; }
+            .hero-desc { font-size: 13.5px; }
+            .card-auth { padding: 24px 16px; border-radius: 18px; }
+            .form-title { font-size: 24px; }
+            .form-subtitle { font-size: 13px; margin-bottom: 20px; }
+            .form-row-remember { flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
         }
     </style>
 </head>

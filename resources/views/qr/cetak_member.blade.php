@@ -11,6 +11,12 @@
             box-sizing: border-box;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
@@ -648,6 +654,9 @@
     </div>
 
 </div>
+
+{{-- Realtime Sirkulasi Notification Modal & Polling --}}
+@include('layouts.partials.member_realtime_notification')
 
 </body>
 </html>

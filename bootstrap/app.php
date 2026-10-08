@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
             users: '/dashboard',
         );
 
+        $middleware->trustProxies(at: '*');
+
         $middleware->alias([
             'role' => RoleMiddleware::class,
         ]);

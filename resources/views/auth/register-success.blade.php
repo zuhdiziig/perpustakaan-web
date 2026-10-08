@@ -17,6 +17,12 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             background-color: #f8fafc;
             color: #1e293b;
@@ -24,17 +30,27 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 24px;
+            padding: 16px;
         }
 
         .success-card {
             background: #ffffff;
             border-radius: 24px;
-            padding: 44px 40px;
+            padding: 36px 28px;
             max-width: 500px;
             width: 100%;
             box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.04), 0 0 1px 1px rgba(15, 23, 42, 0.02);
             border: 1px solid #e2e8f0;
+        }
+
+        @media (max-width: 480px) {
+            .success-card {
+                padding: 28px 18px;
+                border-radius: 18px;
+            }
+            .card-title {
+                font-size: 22px;
+            }
         }
 
         .icon-circle {

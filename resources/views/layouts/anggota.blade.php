@@ -34,6 +34,12 @@
             padding: 0;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-page);
@@ -458,6 +464,16 @@
             .page-wrapper {
                 padding: 16px;
                 gap: 0;
+                width: 100%;
+                max-width: 100%;
+                box-sizing: border-box;
+                overflow-x: hidden;
+            }
+
+            .content-area {
+                min-width: 0;
+                width: 100%;
+                max-width: 100%;
             }
 
             .sidebar {
@@ -479,6 +495,27 @@
 
             .sidebar-backdrop.show {
                 display: block;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar-container {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+
+            .topbar-brand {
+                font-size: 16px;
+                gap: 8px;
+            }
+
+            .topbar-brand-icon {
+                width: 32px;
+                height: 32px;
+            }
+
+            .page-wrapper {
+                padding: 12px 10px;
             }
         }
     </style>

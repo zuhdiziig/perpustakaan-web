@@ -327,6 +327,12 @@
             color: #64748b;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         /* Responsive Breakpoint */
         @media (max-width: 900px) {
             .content-grid {
@@ -357,6 +363,31 @@
 
             .auth-card {
                 padding: 30px 24px;
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 12px;
+            }
+
+            .top-navbar {
+                padding: 12px 14px;
+                border-radius: 14px;
+                margin-bottom: 20px;
+            }
+
+            .auth-card {
+                padding: 22px 16px;
+                border-radius: 18px;
+            }
+
+            .card-title {
+                font-size: 24px;
+            }
+
+            .banner-hero-img-box {
+                height: 200px;
             }
         }
     </style>

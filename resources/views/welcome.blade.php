@@ -17,6 +17,12 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             background-color: #ffffff;
             color: #0f172a;
@@ -27,6 +33,7 @@
             max-width: 1140px;
             margin: 0 auto;
             padding: 0 24px;
+            width: 100%;
         }
 
         /* --- TOP NAVBAR --- */
@@ -888,13 +895,112 @@
             }
         }
 
-        @media (max-width: 600px) {
+        @media (max-width: 640px) {
+            .container {
+                padding: 0 16px;
+            }
+            .navbar {
+                padding: 16px 0 10px;
+                gap: 8px;
+            }
+            .logo-text {
+                font-size: 17px;
+            }
+            .logo-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .nav-links {
+                gap: 6px;
+            }
+            .nav-link-item {
+                padding: 6px 9px;
+                font-size: 12.5px;
+                gap: 4px;
+            }
+            .hero {
+                padding: 24px 0 36px;
+                gap: 24px;
+            }
+            .hero-title {
+                font-size: 28px;
+                line-height: 1.22;
+                letter-spacing: -0.5px;
+                margin-bottom: 12px;
+                word-break: break-word;
+            }
+            .hero-desc {
+                font-size: 13.5px;
+                line-height: 1.55;
+                margin-bottom: 18px;
+                max-width: 100%;
+            }
+            .welcome-chip {
+                max-width: 100%;
+                font-size: 12px;
+                padding: 6px 12px;
+                box-sizing: border-box;
+            }
+            .hero-buttons {
+                flex-direction: column;
+                width: 100%;
+                gap: 10px;
+                margin-bottom: 16px;
+            }
+            .btn-green,
+            .btn-blue {
+                width: 100%;
+                justify-content: center;
+                text-align: center;
+                box-sizing: border-box;
+                padding: 12px 18px;
+                font-size: 14px;
+                display: flex;
+                align-items: center;
+            }
+            .search-box {
+                width: 100%;
+                gap: 8px;
+            }
+            .search-input-wrap {
+                min-width: 0;
+                flex: 1;
+            }
+            .search-input-wrap input {
+                font-size: 13px;
+                width: 100%;
+            }
+            .btn-search {
+                padding: 10px 16px;
+                flex-shrink: 0;
+            }
+            .hero-img-container {
+                height: 220px;
+            }
             .categories-grid {
                 grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+                margin-bottom: 40px;
+            }
+            .cat-card {
+                padding: 16px 8px;
             }
             .stats-grid {
                 grid-template-columns: 1fr;
-                gap: 20px;
+                gap: 16px;
+                padding: 20px 0 32px;
+            }
+            .cta-banner {
+                padding: 20px 16px;
+                border-radius: 14px;
+                margin-bottom: 40px;
+            }
+            .btn-cta {
+                width: 100%;
+                text-align: center;
+                justify-content: center;
+                display: flex;
+                box-sizing: border-box;
             }
             .role-badge {
                 display: none;
@@ -906,7 +1012,22 @@
                 display: none;
             }
             .btn-nav-dashboard {
-                padding: 8px 10px;
+                padding: 7px 10px;
+            }
+            .btn-nav-login {
+                padding: 7px 12px;
+                font-size: 12.5px;
+            }
+            .btn-nav-register {
+                padding: 7px 12px;
+                font-size: 12.5px;
+            }
+            .footer {
+                padding: 36px 0 24px;
+            }
+            .footer-grid {
+                gap: 24px;
+                margin-bottom: 24px;
             }
         }
     </style>

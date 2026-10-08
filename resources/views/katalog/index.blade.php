@@ -33,6 +33,12 @@
             padding: 0;
         }
 
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
+            max-width: 100%;
+        }
+
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--bg-page);
@@ -864,6 +870,13 @@
             display: flex;
             gap: 10px;
             justify-content: flex-end;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .modal-actions form {
+            display: inline-block;
+            margin: 0;
         }
 
         .btn-modal-cancel {
@@ -874,6 +887,10 @@
             font-weight: 700;
             color: #475569;
             transition: all 0.15s;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .btn-modal-cancel:hover {
@@ -889,12 +906,36 @@
             font-weight: 700;
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 6px;
             transition: background 0.15s;
+            text-decoration: none;
+            cursor: pointer;
         }
 
         .btn-modal-primary:hover {
             background: #115e59;
+        }
+
+        .btn-modal-secondary {
+            padding: 10px 18px;
+            background: #f0fdfa;
+            border: 1.5px solid #0f766e;
+            color: #0f766e;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.15s;
+            text-decoration: none;
+        }
+
+        .btn-modal-secondary:hover {
+            background: #ccfbf1;
         }
 
         /* --- FOOTER --- */
@@ -994,6 +1035,117 @@
             .results-bar {
                 flex-direction: column;
                 align-items: flex-start;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .topbar-container {
+                padding: 10px 14px;
+                gap: 8px;
+            }
+            .topbar-brand {
+                font-size: 16px;
+                gap: 8px;
+            }
+            .topbar-brand-icon {
+                width: 32px;
+                height: 32px;
+            }
+            .topbar-actions {
+                gap: 6px;
+            }
+            .btn-user-badge span:not(#topbarCartBadge) {
+                display: none;
+            }
+            .btn-user-badge {
+                padding: 6px 9px;
+                gap: 4px;
+            }
+            .btn-auth-login, .btn-auth-register {
+                padding: 6px 12px;
+                font-size: 12.5px;
+            }
+            .catalog-container {
+                padding: 16px 14px 40px !important;
+            }
+            .catalog-title {
+                font-size: 24px;
+            }
+            .filter-card {
+                padding: 16px 14px;
+            }
+
+            /* --- MODAL MOBILE FULL-WIDTH & STACKING --- */
+            .modal-backdrop {
+                padding: 12px;
+            }
+            .modal-card {
+                border-radius: 16px;
+                max-width: 100%;
+                width: 100%;
+            }
+            .modal-header {
+                padding: 14px 16px;
+            }
+            .modal-title {
+                font-size: 15px;
+            }
+            .modal-body {
+                padding: 16px;
+            }
+            .modal-book-preview {
+                padding: 10px 12px;
+                gap: 12px;
+                margin-bottom: 14px;
+            }
+            .modal-book-cover {
+                width: 50px;
+                height: 70px;
+            }
+            .modal-book-title {
+                font-size: 14px;
+            }
+            .modal-location-box {
+                padding: 10px 12px;
+                gap: 10px;
+                margin-bottom: 14px;
+            }
+            .modal-instructions {
+                font-size: 12.5px;
+                margin-bottom: 16px;
+            }
+            .modal-actions {
+                display: flex;
+                flex-direction: column;
+                width: 100%;
+                gap: 8px;
+            }
+            .modal-actions form {
+                width: 100%;
+                margin: 0 !important;
+                display: block !important;
+            }
+            .modal-actions form button,
+            .modal-actions .btn-modal-primary,
+            .modal-actions .btn-modal-secondary,
+            .modal-actions .btn-modal-cancel {
+                width: 100% !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
+                padding: 11px 16px !important;
+                font-size: 13.5px !important;
+            }
+            .modal-actions .btn-modal-primary {
+                order: 1;
+            }
+            .modal-actions form {
+                order: 2;
+            }
+            .modal-actions .btn-modal-cancel {
+                order: 3;
             }
         }
 
@@ -1653,18 +1805,18 @@
                         <p class="modal-instructions">
                             Pilih cara booking buku ini: masukkan ke <strong>Keranjang Booking</strong> untuk meminjam beberapa buku sekaligus, atau ajukan booking sekarang untuk mendapatkan tiket QR instan.
                         </p>
-                        <div class="modal-actions" style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;">
+                        <div class="modal-actions">
                             <button type="button" class="btn-modal-cancel" onclick="hideBorrowModal()">
                                 Tutup
                             </button>
-                            <form id="modalFormCart" method="POST" action="" style="display: inline; margin: 0;" class="form-ajax-cart">
+                            <form id="modalFormCart" method="POST" action="" class="form-ajax-cart">
                                 @csrf
-                                <button type="submit" class="btn-modal-secondary" style="padding: 10px 16px; border-radius: 10px; background: #f0fdfa; border: 1.5px solid #0f766e; color: #0f766e; font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; transition: all 0.15s;">
+                                <button type="submit" class="btn-modal-secondary">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                                     + Keranjang Booking
                                 </button>
                             </form>
-                            <a id="modalBtnBookingDirect" href="#" class="btn-modal-primary" style="display: inline-flex; align-items: center; gap: 6px;">
+                            <a id="modalBtnBookingDirect" href="#" class="btn-modal-primary">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="7" height="7"></rect>
                                     <rect x="14" y="3" width="7" height="7"></rect>
