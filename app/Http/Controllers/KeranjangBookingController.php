@@ -266,10 +266,10 @@ class KeranjangBookingController extends Controller
         $opsiPengambilan = $request->input('opsi_pengambilan', 'ambil_mandiri');
         $totalBukuBooking = count($cart);
 
-        // Cek Kuota 7 buku
-        $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
-        if (($bukuSedangDipinjam + $totalBukuBooking) > Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal booking: Total peminjaman akan menjadi '.($bukuSedangDipinjam + $totalBukuBooking).' buku (batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Harap kurangi buku di keranjang atau kembalikan buku yang sedang dipinjam terlebih dahulu.');
+        // Cek Kuota 7 buku aktif (Booking + Siap Diambil + Dipinjam)
+        $bukuAktif = $user->jumlahBukuAktif();
+        if (($bukuAktif + $totalBukuBooking) > Peminjaman::BATAS_MAKSIMAL_BUKU) {
+            return back()->with('error', 'Gagal booking: Total pinjaman dan booking aktif Anda akan menjadi '.($bukuAktif + $totalBukuBooking).' buku (batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Harap kurangi buku di keranjang atau selesaikan sirkulasi buku terlebih dahulu.');
         }
 
         try {
@@ -300,6 +300,16 @@ class KeranjangBookingController extends Controller
 
                 foreach (array_keys($cart) as $idBuku) {
                     $buku = Buku::lockForUpdate()->findOrFail($idBuku);
+
+                    // Pastikan anggota belum meminjam/membooking judul buku ini secara aktif
+                    $sedangPinjamBukuIni = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
+                        $q->where('idUserMember', $user->id)->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+                    })->where('idBuku', $idBuku)->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->exists();
+
+                    if ($sedangPinjamBukuIni) {
+                        throw new \DomainException("Anda sudah memiliki pinjaman atau booking aktif untuk judul '{$buku->judul}'.");
+                    }
+
                     $eksemplar = BukuEksemplar::where('idBuku', $idBuku)
                         ->where('status', 'Tersedia')
                         ->lockForUpdate()

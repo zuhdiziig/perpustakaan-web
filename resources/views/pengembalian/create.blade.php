@@ -1348,6 +1348,11 @@
                     state.batch = null;
                     renderState();
                     showToast(res.message || 'Data pengembalian berhasil diidentifikasi!', true);
+                } else if (res.type === 'member_has_booking') {
+                    showToast(res.message, false);
+                    if (confirm(res.message + "\n\nApakah Anda ingin langsung membuka menu Peminjaman untuk memproses penyerahan buku ini?")) {
+                        window.location.href = '{{ route("peminjaman.create") }}?booking=' + encodeURIComponent(res.booking_code || '');
+                    }
                 } else if (res.success && (res.type === 'buku' || res.type === 'transaksi' || res.type === 'member')) {
                     showToast(res.message || 'Item ditemukan namun tidak memiliki pengembalian aktif.', false);
                 } else {

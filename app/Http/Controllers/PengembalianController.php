@@ -12,6 +12,7 @@ use App\Models\Pengembalian;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PengembalianController extends Controller
 {
@@ -293,7 +294,6 @@ class PengembalianController extends Controller
 
                 // Sinkronkan stok master buku secara akurat dari jumlah eksemplar yang Tersedia
                 $buku->syncStok();
-                $buku->update(['kondisi' => $validated['kondisiBuku']]);
 
                 // Periksa apakah seluruh buku di peminjaman ini sudah tuntas dikembalikan
                 $sisaBuku = DetailPeminjaman::where('idPeminjaman', $peminjaman->idPeminjaman)
@@ -442,7 +442,7 @@ class PengembalianController extends Controller
 
         // QR Token member untuk verifikasi fisik di meja sirkulasi
         $memberQrToken = $user->qr_token;
-        if (empty($memberQrToken)) {
+        if (empty($memberQrToken) || str_starts_with($memberQrToken, 'AG-') || str_starts_with($memberQrToken, 'MBR-')) {
             $memberQrToken = 'usr_'.bin2hex(random_bytes(16));
             $user->qr_token = $memberQrToken;
             $user->save();
@@ -462,18 +462,11 @@ class PengembalianController extends Controller
     }
 
     /**
-     * Helper universal untuk generate string SVG QR Code
+     * Helper universal untuk generate string SVG QR Code secara offline
      */
-    private function generateSvgQr($text, $size = 200)
+    private function generateSvgQr($text, $size = 200): string
     {
-        $url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&format=svg&data=".urlencode($text);
-        $svg = @file_get_contents($url);
-
-        if ($svg) {
-            return $svg;
-        }
-
-        return '<img src="'.$url.'" width="'.$size.'" height="'.$size.'" alt="QR Code">';
+        return (string) QrCode::size($size)->generate((string) $text);
     }
 
     /**
@@ -1212,7 +1205,6 @@ class PengembalianController extends Controller
 
                     if ($buku) {
                         $buku->syncStok();
-                        $buku->update(['kondisi' => $kondisiFinal]);
                     }
                 }
 

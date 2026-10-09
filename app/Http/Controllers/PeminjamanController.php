@@ -11,6 +11,7 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PeminjamanController extends Controller
 {
@@ -105,6 +106,15 @@ class PeminjamanController extends Controller
 
         // Cek apakah member masih memiliki buku yang sedang dipinjam
         $member = User::findOrFail($request->idUserMember);
+        if ($member->status !== 'aktif') {
+            $pesan = "Gagal meminjam: Akun anggota '{$member->name}' sedang NONAKTIF.";
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $pesan], 422);
+            }
+
+            return back()->withErrors(['barcodes' => $pesan])->withInput();
+        }
+
         $bukuSedangDipinjam = $member->jumlahBukuSedangDipinjam();
 
         if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
@@ -252,18 +262,11 @@ class PeminjamanController extends Controller
     }
 
     /**
-     * Helper universal untuk generate string SVG QR Code
+     * Helper universal untuk generate string SVG QR Code secara offline
      */
-    private function generateSvgQr($text, $size = 200)
+    private function generateSvgQr($text, $size = 200): string
     {
-        $url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&format=svg&data=".urlencode($text);
-        $svg = @file_get_contents($url);
-
-        if ($svg) {
-            return $svg;
-        }
-
-        return '<img src="'.$url.'" width="'.$size.'" height="'.$size.'" alt="QR Code">';
+        return (string) QrCode::size($size)->generate((string) $text);
     }
 
     /**

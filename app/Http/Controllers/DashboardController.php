@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class DashboardController extends Controller
@@ -109,10 +110,11 @@ class DashboardController extends Controller
                 'peminjaman.member:id,name',
             ])
             ->when($kataKunci !== '', function (Builder $query) use ($kataKunci) {
-                $query->where(function (Builder $query) use ($kataKunci) {
-                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', 'like', "%{$kataKunci}%"))
-                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', 'like', "%{$kataKunci}%"))
-                        ->orWhereHas('peminjaman.member', fn (Builder $member) => $member->where('name', 'like', "%{$kataKunci}%"));
+                $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $query->where(function (Builder $query) use ($kataKunci, $likeOp) {
+                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', $likeOp, "%{$kataKunci}%"))
+                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', $likeOp, "%{$kataKunci}%"))
+                        ->orWhereHas('peminjaman.member', fn (Builder $member) => $member->where('name', $likeOp, "%{$kataKunci}%"));
                 });
             });
 
@@ -234,10 +236,11 @@ class DashboardController extends Controller
                 'peminjaman.member:id,name',
             ])
             ->when($kataKunci !== '', function (Builder $query) use ($kataKunci) {
-                $query->where(function (Builder $query) use ($kataKunci) {
-                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', 'like', "%{$kataKunci}%"))
-                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', 'like', "%{$kataKunci}%"))
-                        ->orWhereHas('peminjaman.member', fn (Builder $member) => $member->where('name', 'like', "%{$kataKunci}%"));
+                $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $query->where(function (Builder $query) use ($kataKunci, $likeOp) {
+                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', $likeOp, "%{$kataKunci}%"))
+                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', $likeOp, "%{$kataKunci}%"))
+                        ->orWhereHas('peminjaman.member', fn (Builder $member) => $member->where('name', $likeOp, "%{$kataKunci}%"));
                 });
             });
 
@@ -459,9 +462,10 @@ class DashboardController extends Controller
                 'peminjaman:idPeminjaman,batasKembali',
             ])
             ->when($kataKunci !== '', function (Builder $query) use ($kataKunci) {
-                $query->where(function (Builder $query) use ($kataKunci) {
-                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', 'like', "%{$kataKunci}%"))
-                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', 'like', "%{$kataKunci}%"));
+                $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $query->where(function (Builder $query) use ($kataKunci, $likeOp) {
+                    $query->whereHas('buku', fn (Builder $buku) => $buku->where('judul', $likeOp, "%{$kataKunci}%"))
+                        ->orWhereHas('eksemplar', fn (Builder $eksemplar) => $eksemplar->where('kode_barcode', $likeOp, "%{$kataKunci}%"));
                 });
             })
             ->latest('id')
@@ -482,11 +486,27 @@ class DashboardController extends Controller
 
     private function statusTransaksi(string $statusBuku, Carbon $jatuhTempo): string
     {
-        if ($statusBuku !== 'Dipinjam') {
+        if ($statusBuku === 'Booking' || $statusBuku === 'Siap Diambil') {
+            return 'Booking';
+        }
+
+        if ($statusBuku === 'Diajukan Kembali') {
+            return 'Diajukan Kembali';
+        }
+
+        if ($statusBuku === 'Dibatalkan') {
+            return 'Dibatalkan';
+        }
+
+        if ($statusBuku === 'Kembali') {
             return 'Dikembalikan';
         }
 
-        return today()->greaterThan($jatuhTempo) ? 'Terlambat' : 'Dipinjam';
+        if ($statusBuku === 'Dipinjam') {
+            return today()->greaterThan($jatuhTempo) ? 'Terlambat' : 'Dipinjam';
+        }
+
+        return $statusBuku;
     }
 
     /**

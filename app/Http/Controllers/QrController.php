@@ -12,26 +12,17 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrController extends Controller
 {
     /**
-     * Helper universal untuk generate string SVG QR Code
+     * Helper universal untuk generate string SVG QR Code secara offline
      */
-    private function generateSvgQr($text, $size = 200)
+    private function generateSvgQr($text, $size = 200): string
     {
-        // Menggunakan API QR gratis (menghasilkan SVG murni langsung tanpa butuh package BaconQrCode)
-        $url = "https://api.qrserver.com/v1/create-qr-code/?size={$size}x{$size}&format=svg&data=".urlencode($text);
-
-        // Ambil isi SVG langsung
-        $svg = @file_get_contents($url);
-
-        if ($svg) {
-            return $svg;
-        }
-
-        // Fallback jika offline
-        return '<img src="'.$url.'" width="'.$size.'" height="'.$size.'" alt="QR Code">';
+        return (string) QrCode::size($size)->generate((string) $text);
     }
 
     /**
@@ -62,7 +53,7 @@ class QrController extends Controller
 
         $member = User::where('role', 'member')->findOrFail($id);
 
-        if (empty($member->qr_token)) {
+        if (empty($member->qr_token) || str_starts_with($member->qr_token, 'AG-') || str_starts_with($member->qr_token, 'MBR-')) {
             $member->qr_token = 'usr_'.bin2hex(random_bytes(16));
             $member->save();
         }
@@ -611,46 +602,6 @@ class QrController extends Controller
 
         if ($trxId) {
             $peminjaman = Peminjaman::with(['member', 'petugas', 'details.buku.barcode', 'details.eksemplar'])->find($trxId);
-            if (! $peminjaman && $raw === 'PJ-20261003-0417') {
-                $memberSample = User::where('role', 'member')->where('name', 'like', '%Rizky Pratama%')->first()
-                    ?? User::where('role', 'member')->where('status', 'aktif')->first();
-                $bukuSample = Buku::with(['barcode', 'eksemplarTersedia'])->where('judul', 'like', '%Laut Bercerita%')->first()
-                    ?? Buku::with(['barcode', 'eksemplarTersedia'])->has('eksemplarTersedia')->first();
-                $eksemplarSample = $bukuSample?->eksemplarTersedia?->first() ?? $bukuSample?->eksemplar()->first();
-
-                if ($memberSample && $bukuSample && $eksemplarSample) {
-                    return response()->json([
-                        'success' => true,
-                        'type' => 'transaksi',
-                        'data' => [
-                            'idPeminjaman' => 0,
-                            'kodeTransaksi' => 'PJ-20261003-0417',
-                            'member' => [
-                                'id' => $memberSample->id,
-                                'name' => $memberSample->name,
-                                'kodeAnggota' => $memberSample->kode_anggota,
-                                'email' => $memberSample->email,
-                                'status' => $memberSample->status,
-                            ],
-                            'buku' => [
-                                'idBuku' => $bukuSample->idBuku,
-                                'idEksemplar' => $eksemplarSample->idEksemplar,
-                                'judul' => $bukuSample->judul,
-                                'kodeBuku' => 'BK-00417',
-                                'kondisi' => $eksemplarSample->kondisi ?? 'Baik',
-                                'status' => $eksemplarSample->status,
-                                'qr_token' => $eksemplarSample->qr_token,
-                            ],
-                            'tanggalPinjam' => '03 Okt 2026',
-                            'batasKembali' => '02 Nov 2026',
-                            'durasiJumlah' => '30 hari / 1 buku',
-                            'status' => 'Dipinjam',
-                            'validasiPesan' => 'Anggota aktif. Kode buku BK-00417 sesuai. Buku dalam kondisi baik dan siap diserahkan. Pastikan identitas sebelum melanjutkan.',
-                        ],
-                        'message' => 'Transaksi peminjaman ditemukan.',
-                    ]);
-                }
-            }
 
             if ($peminjaman) {
                 $firstDetail = $peminjaman->details->first();
@@ -699,8 +650,7 @@ class QrController extends Controller
         if (str_starts_with($raw, 'usr_')) {
             $member = (clone $memberQuery)->where('qr_token', $raw)->first();
         } elseif (preg_match('/^AG-\d{4}-(\d+)$/i', $raw, $m)) {
-            $member = (clone $memberQuery)->where('id', (int) $m[1])->first()
-                ?? (clone $memberQuery)->where('name', 'like', '%Rizky Pratama%')->first();
+            $member = (clone $memberQuery)->where('id', (int) $m[1])->first();
         } elseif (filter_var($raw, FILTER_VALIDATE_EMAIL)) {
             $member = (clone $memberQuery)->where('email', $raw)->first();
         } else {
@@ -710,7 +660,8 @@ class QrController extends Controller
                 ->first();
 
             if (! $member && ! str_starts_with($raw, 'BK') && ! str_starts_with($raw, 'bk_')) {
-                $member = (clone $memberQuery)->where('name', 'like', "%{$raw}%")->first();
+                $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $member = (clone $memberQuery)->where('name', $likeOp, "%{$raw}%")->first();
             }
         }
 
@@ -812,6 +763,24 @@ class QrController extends Controller
                     ->get();
 
                 if ($activeDetails->isEmpty()) {
+                    $activeBooking = Peminjaman::with('details.buku')
+                        ->where('idUserMember', $member->id)
+                        ->whereIn('status', ['Booking', 'Siap Diambil'])
+                        ->latest('idPeminjaman')
+                        ->first();
+
+                    if ($activeBooking) {
+                        $totalBukuBooking = $activeBooking->totalBuku ?: $activeBooking->details->count();
+
+                        return response()->json([
+                            'success' => false,
+                            'type' => 'member_has_booking',
+                            'booking_code' => $activeBooking->kode_booking,
+                            'peminjaman_id' => $activeBooking->idPeminjaman,
+                            'message' => "Anggota '{$member->name}' ({$member->kode_anggota}) memiliki antrean booking aktif ({$totalBukuBooking} buku, Kode: {$activeBooking->kode_booking}) yang siap diambil. Silakan proses penyerahan buku di menu Peminjaman.",
+                        ], 200);
+                    }
+
                     return response()->json([
                         'success' => false,
                         'type' => 'member_no_loan',
@@ -831,13 +800,8 @@ class QrController extends Controller
                     $e = $d->eksemplar;
                     $kodeBuku = $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0);
 
-                    if (empty($d->kode_batch_kembali)) {
-                        $d->update([
-                            'kode_batch_kembali' => $batchCode,
-                            'statusBuku' => 'Diajukan Kembali',
-                            'waktu_pengajuan_kembali' => $d->waktu_pengajuan_kembali ?: Carbon::now(),
-                        ]);
-                    }
+                    // Jangan mutasi state database saat sekadar lookup/preview scan
+                    $statusPreview = $d->statusBuku === 'Dipinjam' ? 'Dipinjam' : $d->statusBuku;
 
                     $batasKembali = Carbon::parse($d->peminjaman->batasKembali);
                     $isOverdue = $today->greaterThan($batasKembali);
@@ -943,8 +907,7 @@ class QrController extends Controller
         if (! $eksemplar) {
             $bukuFound = null;
             if (preg_match('/^BK-(\d+)$/i', $raw, $m)) {
-                $bukuFound = Buku::with(['eksemplarTersedia', 'barcode'])->find((int) $m[1])
-                    ?? Buku::with(['eksemplarTersedia', 'barcode'])->where('judul', 'like', '%Laut Bercerita%')->first();
+                $bukuFound = Buku::with(['eksemplarTersedia', 'barcode'])->find((int) $m[1]);
             }
 
             if (! $bukuFound) {
@@ -955,7 +918,8 @@ class QrController extends Controller
             }
 
             if (! $bukuFound) {
-                $bukuFound = Buku::with('eksemplarTersedia')->where('judul', 'like', "%{$raw}%")->first();
+                $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+                $bukuFound = Buku::with('eksemplarTersedia')->where('judul', $likeOp, "%{$raw}%")->first();
             }
 
             if ($bukuFound) {
@@ -1087,6 +1051,7 @@ class QrController extends Controller
         // Cek pengembalian yang baru saja diselesaikan petugas dalam 3 menit terakhir
         $latestPengembalian = Pengembalian::with(['petugas', 'peminjaman.details.buku'])
             ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $user->id))
+            ->whereNotNull('idUserPetugas')
             ->where('updated_at', '>=', $now->copy()->subMinutes(3))
             ->latest('updated_at')
             ->first();

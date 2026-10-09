@@ -7,6 +7,7 @@ use App\Models\Pembayaran;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PembayaranController extends Controller
 {
@@ -18,7 +19,18 @@ class PembayaranController extends Controller
         $denda = Denda::with([
             'pengembalian.peminjaman.details.buku.barcode',
             'pengembalian.peminjaman.member',
+            'details.peminjaman.member',
         ])->findOrFail($idDenda);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $ownerId = $denda->pengembalian?->peminjaman?->idUserMember
+                ?? $denda->details->first()?->peminjaman?->idUserMember;
+
+            if ($ownerId && (int) $ownerId !== (int) $user->id) {
+                abort(403, 'Anda tidak memiliki hak akses melihat tagihan denda ini.');
+            }
+        }
 
         // Ambil atau buat record pembayaran pending untuk denda ini
         $pembayaran = Pembayaran::firstOrCreate(
@@ -38,7 +50,7 @@ class PembayaranController extends Controller
         }
 
         $pengembalian = $denda->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 
@@ -62,9 +74,10 @@ class PembayaranController extends Controller
 
         $berlakuHingga = now()->addMinutes(15)->locale('id')->translatedFormat('d M Y, H.i').' WIB';
 
-        // Mock QR string & URL
+        // QRIS offline-first generation
         $qrData = 'PERPUS-QRIS-'.$pembayaran->idPembayaran.'-NOMINAL-'.$pembayaran->nominal;
-        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&data='.urlencode($qrData);
+        $qrSvg = (string) QrCode::size(260)->generate($qrData);
+        $qrImageUrl = 'data:image/svg+xml;base64,'.base64_encode($qrSvg);
 
         return view('pembayaran.bayar_qr', compact(
             'denda',
@@ -87,7 +100,20 @@ class PembayaranController extends Controller
      */
     public function prosesBayarQr(Request $request, $idPembayaran)
     {
-        $pembayaran = Pembayaran::with('denda')->findOrFail($idPembayaran);
+        $pembayaran = Pembayaran::with([
+            'denda.pengembalian.peminjaman',
+            'denda.details.peminjaman',
+        ])->findOrFail($idPembayaran);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $ownerId = $pembayaran->denda?->pengembalian?->peminjaman?->idUserMember
+                ?? $pembayaran->denda?->details->first()?->peminjaman?->idUserMember;
+
+            if ($ownerId && (int) $ownerId !== (int) $user->id) {
+                abort(403, 'Akses ditolak.');
+            }
+        }
 
         // Simulasi hasil pembayaran dari gateway (default berhasil)
         $statusInput = $request->input('simulasi_status', 'berhasil');
@@ -123,11 +149,22 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::with([
             'denda.pengembalian.peminjaman.details.buku.barcode',
             'denda.pengembalian.peminjaman.member',
+            'denda.details.peminjaman.member',
         ])->findOrFail($idPembayaran);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $ownerId = $pembayaran->denda?->pengembalian?->peminjaman?->idUserMember
+                ?? $pembayaran->denda?->details->first()?->peminjaman?->idUserMember;
+
+            if ($ownerId && (int) $ownerId !== (int) $user->id) {
+                abort(403, 'Anda tidak memiliki hak akses melihat bukti pembayaran ini.');
+            }
+        }
 
         $denda = $pembayaran->denda;
         $pengembalian = $denda?->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda?->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 
@@ -174,11 +211,22 @@ class PembayaranController extends Controller
         $pembayaran = Pembayaran::with([
             'denda.pengembalian.peminjaman.details.buku.barcode',
             'denda.pengembalian.peminjaman.member',
+            'denda.details.peminjaman.member',
         ])->findOrFail($idPembayaran);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $ownerId = $pembayaran->denda?->pengembalian?->peminjaman?->idUserMember
+                ?? $pembayaran->denda?->details->first()?->peminjaman?->idUserMember;
+
+            if ($ownerId && (int) $ownerId !== (int) $user->id) {
+                abort(403, 'Anda tidak memiliki hak akses melihat nota pembayaran ini.');
+            }
+        }
 
         $denda = $pembayaran->denda;
         $pengembalian = $denda?->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda?->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 

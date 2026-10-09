@@ -135,6 +135,7 @@ class MemberDashboardTest extends TestCase
         $response->assertSee('Dipinjam');
         $response->assertSee('Terlambat');
         $response->assertSee('Dikembalikan');
+        $response->assertDontSee('>Anggota</th>', false);
     }
 
     public function test_fine_alert_appears_when_unpaid_fine_exists(): void
@@ -226,5 +227,38 @@ class MemberDashboardTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Laut Bercerita');
         $response->assertDontSee('Pulang');
+    }
+
+    public function test_booked_books_display_as_menunggu_ambil_not_dikembalikan(): void
+    {
+        $member = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $buku = Buku::factory()->create(['judul' => 'Sistem Basis Data']);
+
+        $pinjam = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'kode_booking' => 'BK-TEST-1234',
+            'totalBuku' => 1,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $pinjam->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->actingAs($member)->get('/dashboard');
+
+        $response->assertStatus(200);
+        $response->assertSee('Sistem Basis Data');
+        $response->assertSee('Menunggu Ambil');
+        $response->assertDontSee('badge-status-pill dikembalikan', false);
     }
 }

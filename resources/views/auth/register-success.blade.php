@@ -187,7 +187,7 @@
             </div>
             <div class="info-row">
                 <span class="info-label">Nomor anggota</span>
-                <span class="info-value">{{ $user->qr_token ?? ('AG-2026-' . str_pad($user->id, 5, '0', STR_PAD_LEFT)) }}</span>
+                <span class="info-value">{{ $user->kode_anggota }}</span>
             </div>
             <div class="info-row">
                 <span class="info-label">Email</span>
@@ -200,7 +200,7 @@
         </div>
 
         <!-- Tombol Menuju Login -->
-        <a href="{{ route('login') }}" class="btn-login">Masuk ke Akun</a>
+        <a href="{{ route('login', session('url.intended') ? ['redirect' => session('url.intended')] : []) }}" class="btn-login">Masuk ke Akun</a>
 
         <p class="footnote">
             Simpan nomor anggota untuk pengambilan buku di perpustakaan.

@@ -314,6 +314,13 @@
             <form action="{{ route('register') }}" method="POST">
                 @csrf
 
+                @php
+                    $redirectTarget = old('redirect', request('redirect', session('url.intended')));
+                @endphp
+                @if($redirectTarget)
+                    <input type="hidden" name="redirect" value="{{ $redirectTarget }}">
+                @endif
+
                 <div class="form-group">
                     <label class="form-label" for="name">Nama Lengkap</label>
                     <input type="text" id="name" name="name" value="{{ old('name') }}" class="form-input" placeholder="Masukkan nama lengkap" required autofocus>
@@ -349,7 +356,7 @@
                 <button type="submit" class="btn-submit">Daftar Sekarang</button>
 
                 <div class="switch-auth-text">
-                    Sudah punya akun? <a href="{{ route('login') }}">Masuk di sini</a>
+                    Sudah punya akun? <a href="{{ route('login', $redirectTarget ? ['redirect' => $redirectTarget] : []) }}">Masuk di sini</a>
                 </div>
             </form>
         </section>

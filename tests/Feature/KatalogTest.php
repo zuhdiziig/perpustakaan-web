@@ -53,11 +53,23 @@ class KatalogTest extends TestCase
             'penulis' => 'Pramoedya Ananta Toer',
         ]);
 
-        $response = $this->get('/katalog?q=Laut');
+        // 1. Pencarian lowercase ('laut')
+        $resLower = $this->get('/katalog?q=laut');
+        $resLower->assertStatus(200);
+        $resLower->assertSee('Laut Bercerita');
+        $resLower->assertDontSee('Bumi Manusia');
 
-        $response->assertStatus(200);
-        $response->assertSee('Laut Bercerita');
-        $response->assertDontSee('Bumi Manusia');
+        // 2. Pencarian uppercase ('LAUT')
+        $resUpper = $this->get('/katalog?q=LAUT');
+        $resUpper->assertStatus(200);
+        $resUpper->assertSee('Laut Bercerita');
+        $resUpper->assertDontSee('Bumi Manusia');
+
+        // 3. Pencarian fleksibel multi-kata (judul + penulis: 'laut leila')
+        $resMulti = $this->get('/katalog?q=laut+leila');
+        $resMulti->assertStatus(200);
+        $resMulti->assertSee('Laut Bercerita');
+        $resMulti->assertDontSee('Bumi Manusia');
     }
 
     public function test_user_can_filter_by_category_and_availability(): void

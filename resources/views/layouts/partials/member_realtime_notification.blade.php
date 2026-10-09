@@ -295,7 +295,6 @@
 (function() {
     let globalNotifTimer = null;
     let globalNotifCountdownInterval = null;
-    const pageOpenTime = Math.floor(Date.now() / 1000);
 
     // Audio Chime (C5 -> E5 -> G5)
     function playGlobalSuccessChime() {
@@ -327,6 +326,12 @@
     }
 
     function showGlobalSirkulasiPopup(type, data) {
+        // Jika ada modal tiket khusus yang sedang aktif/terbuka di halaman ini, jangan tumpuk
+        const localModal = document.getElementById('popupSuccessModal');
+        if (localModal && (localModal.classList.contains('show') || localModal.style.display === 'flex')) {
+            return;
+        }
+
         playGlobalSuccessChime();
         const overlay = document.getElementById('globalMemberSirkulasiModal');
         if (!overlay) return;
@@ -382,7 +387,12 @@
 
         if (globalNotifTimer) clearTimeout(globalNotifTimer);
         globalNotifTimer = setTimeout(() => {
-            window.location.href = "{{ route('dashboard') }}";
+            const currentPath = window.location.pathname;
+            if (currentPath === '/dashboard' || currentPath.endsWith('/dashboard')) {
+                window.location.reload();
+            } else {
+                window.location.href = "{{ route('dashboard') }}";
+            }
         }, 5000);
     }
 
@@ -395,7 +405,24 @@
         }
     };
 
-    // Polling setiap 3 detik
+    // Tutup saat klik backdrop atau Escape
+    document.addEventListener('click', function(e) {
+        const overlay = document.getElementById('globalMemberSirkulasiModal');
+        if (overlay && e.target === overlay) {
+            window.closeMemberRealtimeModal();
+        }
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const overlay = document.getElementById('globalMemberSirkulasiModal');
+            if (overlay && overlay.classList.contains('show')) {
+                window.closeMemberRealtimeModal();
+            }
+        }
+    });
+
+    // Polling status sirkulasi
     function pollSirkulasiStatus() {
         const url = "{{ route('api.member.status-sirkulasi-terbaru') }}";
         fetch(url, {
@@ -411,10 +438,12 @@
             // 1. Cek Peminjaman Baru
             if (res.peminjaman) {
                 const key = 'notif_pj_' + res.peminjaman.id + '_' + res.peminjaman.timestamp;
-                const wasNotified = sessionStorage.getItem(key);
-                // Trigger jika belum pernah ditampilkan pada sesi ini dan terjadi saat/setelah halaman dibuka (toleransi 10 detik sebelumnya)
-                if (!wasNotified && (res.peminjaman.timestamp >= (pageOpenTime - 10))) {
-                    sessionStorage.setItem(key, '1');
+                const wasNotified = localStorage.getItem(key) || sessionStorage.getItem(key);
+                if (!wasNotified) {
+                    try {
+                        localStorage.setItem(key, '1');
+                        sessionStorage.setItem(key, '1');
+                    } catch (e) {}
                     showGlobalSirkulasiPopup('peminjaman', res.peminjaman);
                     return;
                 }
@@ -423,9 +452,12 @@
             // 2. Cek Pengembalian Baru
             if (res.pengembalian) {
                 const key = 'notif_ret_' + res.pengembalian.id + '_' + res.pengembalian.timestamp;
-                const wasNotified = sessionStorage.getItem(key);
-                if (!wasNotified && (res.pengembalian.timestamp >= (pageOpenTime - 10))) {
-                    sessionStorage.setItem(key, '1');
+                const wasNotified = localStorage.getItem(key) || sessionStorage.getItem(key);
+                if (!wasNotified) {
+                    try {
+                        localStorage.setItem(key, '1');
+                        sessionStorage.setItem(key, '1');
+                    } catch (e) {}
                     showGlobalSirkulasiPopup('pengembalian', res.pengembalian);
                     return;
                 }
@@ -436,10 +468,17 @@
         });
     }
 
-    // Mulai polling setelah DOM siap
-    document.addEventListener('DOMContentLoaded', function() {
+    // Mulai polling
+    function startRealtimePolling() {
+        setTimeout(pollSirkulasiStatus, 800);
         setInterval(pollSirkulasiStatus, 3000);
-    });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', startRealtimePolling);
+    } else {
+        startRealtimePolling();
+    }
 })();
 </script>
 @endif

@@ -50,6 +50,7 @@ class MemberController extends Controller
             'status' => 'aktif',
             'noTelepon' => $validated['noTelepon'],
             'alamat' => $validated['alamat'],
+            'qr_token' => 'usr_'.bin2hex(random_bytes(16)),
         ]);
 
         return redirect()->route('member.index')->with('success', 'Data member baru berhasil ditambahkan.');

@@ -619,5 +619,8 @@
     @include('layouts.partials.sidebar_scripts')
 
     @yield('scripts')
+
+    {{-- Realtime Sirkulasi Notification Modal & Polling --}}
+    @include('layouts.partials.member_realtime_notification')
 </body>
 </html>

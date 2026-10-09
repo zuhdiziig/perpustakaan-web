@@ -366,6 +366,42 @@
         background: #16a34a;
     }
 
+    .badge-status-pill.booking {
+        background: #fef3c7;
+        color: #92400e;
+    }
+
+    .badge-status-pill.booking .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d97706;
+    }
+
+    .badge-status-pill.diajukan {
+        background: #e0e7ff;
+        color: #4338ca;
+    }
+
+    .badge-status-pill.diajukan .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4f46e5;
+    }
+
+    .badge-status-pill.dibatalkan {
+        background: #f1f5f9;
+        color: #64748b;
+    }
+
+    .badge-status-pill.dibatalkan .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #94a3b8;
+    }
+
     /* --- REKOMENDASI BUKU --- */
     .rekomendasi-grid {
         display: grid;
@@ -533,7 +569,7 @@
         }
 
         .custom-table {
-            min-width: 600px;
+            min-width: 500px;
         }
 
         .rekomendasi-grid {
@@ -744,11 +780,10 @@
             <table class="custom-table">
                 <thead>
                     <tr>
-                        <th style="width: 32%;">Judul Buku</th>
-                        <th style="width: 15%;">Kode</th>
-                        <th style="width: 20%;">Anggota</th>
-                        <th style="width: 18%;">Jatuh Tempo</th>
-                        <th style="width: 15%;">Status</th>
+                        <th style="width: 44%;">Judul Buku</th>
+                        <th style="width: 18%;">Kode</th>
+                        <th style="width: 20%;">Jatuh Tempo</th>
+                        <th style="width: 18%;">Status</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -756,7 +791,6 @@
                         <tr>
                             <td class="td-judul-buku">{{ $trx['judul'] }}</td>
                             <td class="td-kode">{{ $trx['kode'] }}</td>
-                            <td>{{ $trx['anggota'] }}</td>
                             <td>{{ $trx['jatuhTempo']->translatedFormat('d M Y') }}</td>
                             <td>
                                 @if($trx['status'] === 'Dipinjam')
@@ -767,6 +801,18 @@
                                     <span class="badge-status-pill terlambat">
                                         <span class="dot"></span> Terlambat
                                     </span>
+                                @elseif($trx['status'] === 'Booking' || $trx['status'] === 'Siap Diambil')
+                                    <span class="badge-status-pill booking">
+                                        <span class="dot"></span> Menunggu Ambil
+                                    </span>
+                                @elseif($trx['status'] === 'Diajukan Kembali')
+                                    <span class="badge-status-pill diajukan">
+                                        <span class="dot"></span> Diajukan Kembali
+                                    </span>
+                                @elseif($trx['status'] === 'Dibatalkan')
+                                    <span class="badge-status-pill dibatalkan">
+                                        <span class="dot"></span> Dibatalkan
+                                    </span>
                                 @else
                                     <span class="badge-status-pill dikembalikan">
                                         <span class="dot"></span> Dikembalikan
@@ -776,7 +822,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align: center; padding: 36px 20px; color: #94a3b8;">
+                            <td colspan="4" style="text-align: center; padding: 36px 20px; color: #94a3b8;">
                                 @if($kataKunci !== '')
                                     Tidak ditemukan transaksi dengan kata kunci "{{ $kataKunci }}".
                                     <br><a href="{{ route('dashboard') }}" style="color: #0f766e; font-weight: 700; margin-top: 6px; display: inline-block;">Reset Pencarian</a>

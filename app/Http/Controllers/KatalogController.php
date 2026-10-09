@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class KatalogController extends Controller
@@ -37,13 +38,32 @@ class KatalogController extends Controller
             ->with(['kategori', 'barcode'])
             ->withCount('detailPeminjaman');
 
-        // 1. Pencarian bebas (judul, penulis, penerbit, kategori)
+        // 1. Pencarian bebas fleksibel & tidak sensitif huruf besar/kecil (case-insensitive)
         if ($keyword !== '') {
-            $query->where(function (Builder $q) use ($keyword) {
-                $q->where('judul', 'like', "%{$keyword}%")
-                    ->orWhere('penulis', 'like', "%{$keyword}%")
-                    ->orWhere('penerbit', 'like', "%{$keyword}%")
-                    ->orWhereHas('kategori', fn (Builder $kat) => $kat->where('namaKategori', 'like', "%{$keyword}%"));
+            $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+            $cleanKeyword = preg_replace('/\s+/', ' ', $keyword);
+            $words = array_values(array_filter(explode(' ', $cleanKeyword)));
+
+            $query->where(function (Builder $q) use ($cleanKeyword, $words, $likeOp) {
+                // Prioritas 1: Cocokkan seluruh frasa
+                $q->where('judul', $likeOp, "%{$cleanKeyword}%")
+                    ->orWhere('penulis', $likeOp, "%{$cleanKeyword}%")
+                    ->orWhere('penerbit', $likeOp, "%{$cleanKeyword}%")
+                    ->orWhereHas('kategori', fn (Builder $kat) => $kat->where('namaKategori', $likeOp, "%{$cleanKeyword}%"));
+
+                // Prioritas 2: Jika terdiri dari beberapa kata, cocokkan setiap kata di antara atribut buku
+                if (count($words) > 1) {
+                    $q->orWhere(function (Builder $multiQ) use ($words, $likeOp) {
+                        foreach ($words as $word) {
+                            $multiQ->where(function (Builder $wordQ) use ($word, $likeOp) {
+                                $wordQ->where('judul', $likeOp, "%{$word}%")
+                                    ->orWhere('penulis', $likeOp, "%{$word}%")
+                                    ->orWhere('penerbit', $likeOp, "%{$word}%")
+                                    ->orWhereHas('kategori', fn (Builder $kat) => $kat->where('namaKategori', $likeOp, "%{$word}%"));
+                            });
+                        }
+                    });
+                }
             });
         }
 

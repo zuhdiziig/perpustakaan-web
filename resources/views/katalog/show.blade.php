@@ -914,8 +914,8 @@
                         <span>Dasbor</span>
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>
-                    <a href="{{ route('register') }}" class="btn-auth-register">Daftar</a>
+                    <a href="{{ route('login', ['redirect' => '/katalog/' . $buku->idBuku]) }}" class="btn-auth-login">Masuk</a>
+                    <a href="{{ route('register', ['redirect' => '/katalog/' . $buku->idBuku]) }}" class="btn-auth-register">Daftar</a>
                 @endauth
             </div>
         </div>
@@ -1182,8 +1182,8 @@
                     <li>Tunjukkan kartu QR anggota ke petugas di meja layanan.</li>
                 </ol>
                 <div class="dialog-actions">
-                    <a href="{{ route('register') }}" class="btn-dialog-cancel">Daftar</a>
-                    <a href="{{ route('login') }}" class="btn-dialog-primary">Masuk untuk pinjam</a>
+                    <a href="{{ route('register', ['redirect' => '/katalog/' . $buku->idBuku]) }}" class="btn-dialog-cancel">Daftar</a>
+                    <a href="{{ route('login', ['redirect' => '/katalog/' . $buku->idBuku]) }}" class="btn-dialog-primary">Masuk untuk pinjam</a>
                 </div>
             @else
                 @if (auth()->user()->role === 'member')
@@ -1507,5 +1507,8 @@
     <div id="cartToastContainer" class="cart-toast-container" aria-live="polite"></div>
 
     @include('layouts.partials.sidebar_scripts')
+
+    {{-- Realtime Sirkulasi Notification Modal & Polling --}}
+    @include('layouts.partials.member_realtime_notification')
 </body>
 </html>

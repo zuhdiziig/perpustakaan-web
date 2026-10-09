@@ -12,8 +12,15 @@ class AuthController extends Controller
     /**
      * Menampilkan form login
      */
-    public function showLoginForm()
+    public function showLoginForm(Request $request)
     {
+        if ($request->has('redirect')) {
+            $redirectUrl = $request->query('redirect');
+            if ($this->isValidRedirectUrl($redirectUrl)) {
+                session(['url.intended' => $redirectUrl]);
+            }
+        }
+
         return view('auth.login');
     }
 
@@ -26,6 +33,8 @@ class AuthController extends Controller
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
+
+        $redirectUrl = $request->input('redirect') ?: session('url.intended');
 
         if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $request->session()->regenerate();
@@ -43,6 +52,13 @@ class AuthController extends Controller
                 ]);
             }
 
+            // Jika ada parameter redirect yang valid (misal: halaman buku yang dipilih)
+            if ($redirectUrl && $this->isValidRedirectUrl($redirectUrl)) {
+                session()->forget('url.intended');
+
+                return redirect()->to($redirectUrl);
+            }
+
             // Arahkan ke dashboard utama
             return redirect()->intended(route('dashboard'));
         }
@@ -55,9 +71,41 @@ class AuthController extends Controller
     /**
      * Menampilkan form register
      */
-    public function showRegisterForm()
+    public function showRegisterForm(Request $request)
     {
+        if ($request->has('redirect')) {
+            $redirectUrl = $request->query('redirect');
+            if ($this->isValidRedirectUrl($redirectUrl)) {
+                session(['url.intended' => $redirectUrl]);
+            }
+        }
+
         return view('auth.register');
+    }
+
+    /**
+     * Memvalidasi apakah URL redirect aman dan berada dalam aplikasi yang sama.
+     */
+    private function isValidRedirectUrl(?string $url): bool
+    {
+        if (empty($url)) {
+            return false;
+        }
+
+        // Relative path (misal: /katalog/15) dan bukan protocol-relative (//evil.com)
+        if (str_starts_with($url, '/') && ! str_starts_with($url, '//')) {
+            return true;
+        }
+
+        // Absolute URL yang memiliki host sama dengan host request saat ini
+        $parsed = parse_url($url);
+        if (isset($parsed['host'])) {
+            $currentHost = request()->getHost();
+
+            return strcasecmp($parsed['host'], $currentHost) === 0;
+        }
+
+        return false;
     }
 
     /**
@@ -73,10 +121,6 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:6', 'confirmed'],
         ]);
 
-        // Generate nomor anggota berformat AG-2026-xxxxx
-        $nextNumber = User::count() + 1;
-        $nomorAnggota = 'AG-2026-'.str_pad($nextNumber, 5, '0', STR_PAD_LEFT);
-
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
@@ -85,8 +129,15 @@ class AuthController extends Controller
             'password' => Hash::make($validated['password']),
             'role' => 'member',
             'status' => 'aktif',
-            'qr_token' => $nomorAnggota,
+            'qr_token' => 'usr_'.bin2hex(random_bytes(16)),
         ]);
+
+        if ($request->filled('redirect')) {
+            $redirectUrl = $request->input('redirect');
+            if ($this->isValidRedirectUrl($redirectUrl)) {
+                session(['url.intended' => $redirectUrl]);
+            }
+        }
 
         // Simpan id user ke flash session untuk ditampilkan pada kartu register-success
         return redirect()->route('register.success')->with('registered_user_id', $user->id);
@@ -121,16 +172,32 @@ class AuthController extends Controller
     }
 
     /**
-     * Memproses update password baru
+     * Memproses update password baru dengan verifikasi nomor telepon terdaftar
      */
     public function forgotPassword(Request $request)
     {
         $request->validate([
             'email' => ['required', 'email', 'exists:users,email'],
+            'noTelepon' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'email.exists' => 'Alamat email tidak terdaftar dalam sistem.',
+            'noTelepon.required' => 'Nomor telepon akun wajib diisi untuk verifikasi.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak sesuai.',
         ]);
 
         $user = User::where('email', $request->email)->first();
+
+        // Verifikasi kesesuaian nomor telepon yang tersimpan di profil
+        $inputPhone = preg_replace('/\D/', '', (string) $request->noTelepon);
+        $userPhone = preg_replace('/\D/', '', (string) ($user->noTelepon ?? ''));
+
+        if (empty($userPhone) || $inputPhone !== $userPhone) {
+            return back()->withErrors([
+                'noTelepon' => 'Nomor telepon tidak cocok dengan data akun terdaftar.',
+            ])->withInput($request->only('email', 'noTelepon'));
+        }
+
         $user->update([
             'password' => Hash::make($request->password),
         ]);

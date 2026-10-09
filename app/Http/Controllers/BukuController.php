@@ -99,6 +99,23 @@ class BukuController extends Controller
         ]);
 
         DB::transaction(function () use ($buku, $validated) {
+            $currentEksemplarCount = $buku->eksemplar()->count();
+            $newStok = (int) $validated['stok'];
+
+            // Jika stok bertambah, buat eksemplar fisik baru sesuai kekurangan
+            if ($newStok > $currentEksemplarCount) {
+                $maxNomor = (int) ($buku->eksemplar()->max('nomor_eksemplar') ?? 0);
+                $tambahan = $newStok - $currentEksemplarCount;
+                for ($i = 1; $i <= $tambahan; $i++) {
+                    $buku->eksemplar()->create([
+                        'nomor_eksemplar' => $maxNomor + $i,
+                        'qr_token' => 'bk_'.bin2hex(random_bytes(16)),
+                        'kondisi' => $validated['kondisi'] ?? 'Baik',
+                        'status' => 'Tersedia',
+                    ]);
+                }
+            }
+
             $buku->update([
                 'idKategori' => $validated['idKategori'],
                 'judul' => $validated['judul'],
@@ -106,9 +123,12 @@ class BukuController extends Controller
                 'penerbit' => $validated['penerbit'],
                 'tahunTerbit' => $validated['tahunTerbit'],
                 'harga' => $validated['harga'],
-                'stok' => $validated['stok'],
+                'stok' => $newStok,
                 'kondisi' => $validated['kondisi'],
             ]);
+
+            // Sinkronkan stok riil buku berdasarkan jumlah eksemplar fisik Tersedia
+            $buku->syncStok();
 
             if ($buku->barcode) {
                 $buku->barcode->update(['kodeBarcode' => $validated['kodeBarcode']]);
