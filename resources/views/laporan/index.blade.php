@@ -69,8 +69,9 @@
             <h3 style="color: #d97706;">Rp {{ number_format($ringkasan['total_denda'], 0, ',', '.') }}</h3>
         </div>
         <div class="stat-card" style="border-left-color: #16a34a;">
-            <span>Realisasi Denda Lunas</span>
+            <span>Pembayaran berstatus sukses (belum diverifikasi gateway)</span>
             <h3 style="color: #16a34a;">Rp {{ number_format($ringkasan['denda_lunas'], 0, ',', '.') }}</h3>
+            <small>Nominal pembayaran berstatus sukses; belum diverifikasi gateway.</small>
         </div>
     </div>
 
@@ -206,10 +207,10 @@
                                 <td>{{ $d->pengembalian->peminjaman->member->name ?? '-' }}</td>
                                 <td>{{ $d->jenisDenda }}</td>
                                 <td><strong>Rp {{ number_format($d->jumlah, 0, ',', '.') }}</strong></td>
-                                <td>{{ $d->pembayaran->metode ?? 'Tunai / Belum' }}</td>
+                                <td>{{ $d->pembayaran->first()?->metode ?? 'Tunai / Belum' }}</td>
                                 <td>
                                     <span class="badge {{ $d->status === 'Lunas' ? 'badge-success' : 'badge-danger' }}">
-                                        {{ $d->status }}
+                                        {{ $d->status === 'Lunas' ? 'Tercatat lunas' : $d->status }}
                                     </span>
                                 </td>
                                 <td>{{ $d->created_at->format('Y-m-d') }}</td>

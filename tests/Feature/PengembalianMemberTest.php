@@ -736,7 +736,8 @@ class PengembalianMemberTest extends TestCase
         $response->assertViewIs('pengembalian.member_tiket');
         $response->assertSee('Tiket Pengembalian Buku Fisik');
         $response->assertSee('Status Denda');
-        $response->assertSee('Lunas');
+        $response->assertSee('Tercatat lunas');
+        $response->assertSee('belum diverifikasi gateway');
     }
 
     public function test_petugas_desk_verification_does_not_duplicate_paid_fine(): void

@@ -49,6 +49,8 @@ class KatalogDetailTest extends TestCase
         $response->assertSee('Masa pinjam '.Peminjaman::MASA_PINJAM_BULAN.' bulan');
         $response->assertSee('Maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku per anggota');
         $response->assertSee(route('login'));
+        $response->assertDontSee('id="member-feedback-toasts"', false);
+        $response->assertDontSee('id="globalMemberSirkulasiModal"', false);
     }
 
     public function test_borrow_button_is_disabled_when_all_copies_are_borrowed(): void
@@ -72,6 +74,8 @@ class KatalogDetailTest extends TestCase
         $response->assertOk();
         $response->assertSee('Buka Kartu / QR Saya');
         $response->assertSee(route('member.kartu-saya'));
+        $this->assertSame(1, substr_count($response->getContent(), 'id="member-feedback-toasts"'));
+        $this->assertSame(1, substr_count($response->getContent(), 'id="globalMemberSirkulasiModal"'));
     }
 
     public function test_related_books_prioritize_same_category_and_exclude_current_book(): void

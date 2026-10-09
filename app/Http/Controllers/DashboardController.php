@@ -74,16 +74,9 @@ class DashboardController extends Controller
             ->distinct('idUserPetugas')
             ->count('idUserPetugas');
 
-        $pembayaranBulanIni = Pembayaran::where(function (Builder $query) {
-            $query->where(function (Builder $q) {
-                $q->whereMonth('tanggalBayar', now()->month)
-                    ->whereYear('tanggalBayar', now()->year);
-            })->orWhere(function (Builder $q) {
-                $q->whereNull('tanggalBayar')
-                    ->whereMonth('created_at', now()->month)
-                    ->whereYear('created_at', now()->year);
-            });
-        });
+        $pembayaranBulanIni = Pembayaran::where('status', 'Sukses')
+            ->whereMonth('tanggalBayar', now()->month)
+            ->whereYear('tanggalBayar', now()->year);
 
         $dendaTerkumpulBulanIni = (float) (clone $pembayaranBulanIni)->sum('nominal');
         $transaksiDendaBulanIni = (clone $pembayaranBulanIni)->count();
@@ -341,7 +334,7 @@ class DashboardController extends Controller
                         'timestamp' => $bayar->created_at ?? now(),
                         'waktu' => ($bayar->created_at ?? now())->format('H.i'),
                         'anggota' => $member->name,
-                        'deskripsi' => "Denda Rp{$nominal} · ".($bayar->metode ?? 'QRIS'),
+                        'deskripsi' => "Pembayaran denda {$bayar->status}: Rp{$nominal}",
                     ]);
                 }
             });

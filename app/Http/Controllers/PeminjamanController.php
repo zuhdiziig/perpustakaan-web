@@ -8,6 +8,7 @@ use App\Models\BukuEksemplar;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use App\Models\User;
+use App\Notifications\BookingReadyNotification;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -541,16 +542,32 @@ class PeminjamanController extends Controller
             abort(403, 'Akses terbatas untuk Petugas dan Administrator.');
         }
 
-        $peminjaman = Peminjaman::with('details.buku')->findOrFail($id);
+        [$peminjaman, $approved] = DB::transaction(function () use ($request, $id): array {
+            $peminjaman = Peminjaman::with(['member', 'details.buku'])
+                ->lockForUpdate()
+                ->findOrFail($id);
 
-        if ($peminjaman->status !== 'Booking') {
+            if ($peminjaman->status !== 'Booking') {
+                return [$peminjaman, false];
+            }
+
+            $peminjaman->update([
+                'status' => 'Siap Diambil',
+                'catatan_petugas' => $request->input('catatan_petugas', 'Buku telah disiapkan di meja reservasi sirkulasi.'),
+            ]);
+
+            $peminjaman->member?->notify(new BookingReadyNotification(
+                (int) $peminjaman->idPeminjaman,
+                (string) ($peminjaman->kode_booking ?: $peminjaman->kode_transaksi),
+                $peminjaman->details->pluck('buku.judul')->filter()->values()->all()
+            ));
+
+            return [$peminjaman, true];
+        });
+
+        if (! $approved) {
             return back()->with('error', 'Status peminjaman bukan Booking (status saat ini: '.$peminjaman->status.').');
         }
-
-        $peminjaman->update([
-            'status' => 'Siap Diambil',
-            'catatan_petugas' => $request->input('catatan_petugas', 'Buku telah disiapkan di meja reservasi sirkulasi.'),
-        ]);
 
         $judulBuku = $peminjaman->details->first()?->buku?->judul ?? 'Buku';
 

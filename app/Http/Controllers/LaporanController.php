@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Denda;
+use App\Models\Pembayaran;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use Carbon\Carbon;
@@ -25,7 +26,9 @@ class LaporanController extends Controller
             'total_pinjam' => Peminjaman::whereBetween('tanggalPinjam', [$tglMulai, $tglSelesai])->count(),
             'total_kembali' => Pengembalian::whereBetween('tanggalKembali', [$tglMulai, $tglSelesai])->count(),
             'total_denda' => Denda::whereBetween('created_at', [$tglMulai.' 00:00:00', $tglSelesai.' 23:59:59'])->sum('jumlah'),
-            'denda_lunas' => Denda::where('status', 'Lunas')->whereBetween('created_at', [$tglMulai.' 00:00:00', $tglSelesai.' 23:59:59'])->sum('jumlah'),
+            'denda_lunas' => Pembayaran::where('status', 'Sukses')
+                ->whereBetween('tanggalBayar', [$tglMulai.' 00:00:00', $tglSelesai.' 23:59:59'])
+                ->sum('nominal'),
         ];
 
         // Olah data sesuai jenis laporan yang dipilih

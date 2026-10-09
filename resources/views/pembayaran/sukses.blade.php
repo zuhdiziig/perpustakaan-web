@@ -1,6 +1,6 @@
 @extends('layouts.anggota')
 
-@section('title', 'Pembayaran Berhasil - BOOKNEST')
+@section('title', 'Status Pembayaran - BOOKNEST')
 
 @section('styles')
 <style>
@@ -330,8 +330,8 @@
 
     <!-- PAGE HEADER -->
     <div class="sukses-header-area">
-        <h1 class="sukses-main-heading">Pembayaran Berhasil</h1>
-        <p class="sukses-main-subtitle">Denda telah dilunasi. Bukti pembayaranmu siap disimpan.</p>
+        <h1 class="sukses-main-heading">Status Pembayaran</h1>
+        <p class="sukses-main-subtitle">Riwayat pembayaran ini tercatat sukses di BOOKNEST, tetapi belum diverifikasi oleh gateway.</p>
     </div>
 
     <!-- MAIN 2-COLUMN GRID -->
@@ -347,12 +347,12 @@
 
             <h2 class="sukses-card-title">Terima kasih, {{ $namaPanggilan }}!</h2>
             <p class="sukses-card-desc">
-                Pembayaran denda {{ $buku?->judul ?? 'Buku' }} sebesar Rp{{ number_format($pembayaran->nominal, 0, ',', '.') }} berhasil diterima melalui QRIS.
+                Pembayaran denda {{ $buku?->judul ?? 'Buku' }} sebesar Rp{{ number_format($pembayaran->nominal, 0, ',', '.') }} tercatat dengan status sukses. Penerimaan dana belum dapat diverifikasi oleh gateway.
             </p>
 
             <div>
                 <span class="badge-status-pill badge-lunas">
-                    <span class="badge-dot">●</span> LUNAS
+                    <span class="badge-dot">●</span> TERCATAT SUKSES · BELUM DIVERIFIKASI
                 </span>
             </div>
 
@@ -362,11 +362,11 @@
                     <span class="sukses-meta-value">{{ $waktuPembayaranText }}</span>
                 </div>
                 <div class="sukses-meta-row">
-                    <span class="sukses-meta-label">Metode</span>
-                    <span class="sukses-meta-value">QRIS</span>
+                    <span class="sukses-meta-label">Metode tercatat</span>
+                    <span class="sukses-meta-value">{{ $pembayaran->metode ?? 'Tidak tersedia' }}</span>
                 </div>
                 <div class="sukses-meta-row">
-                    <span class="sukses-meta-label">Sisa denda</span>
+                    <span class="sukses-meta-label">Sisa denda menurut status tercatat</span>
                     <span class="sukses-meta-value">Rp0</span>
                 </div>
             </div>
@@ -475,7 +475,7 @@
                     </div>
 
                     <div class="kv-item total-row">
-                        <span class="kv-label" style="font-weight: 700; color: #0f172a;">Total QRIS</span>
+                        <span class="kv-label" style="font-weight: 700; color: #0f172a;">Total pembayaran tercatat</span>
                         <span class="kv-val">Rp{{ number_format($pembayaran->nominal, 0, ',', '.') }}</span>
                     </div>
                 </div>

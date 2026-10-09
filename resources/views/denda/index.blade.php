@@ -94,7 +94,7 @@
                             <td><strong style="color: #dc2626;">Rp {{ number_format($d->jumlah, 0, ',', '.') }}</strong></td>
                             <td>
                                 <span class="badge {{ $d->status === 'Lunas' ? 'badge-lunas' : 'badge-belum' }}">
-                                    {{ $d->status }}
+                                    {{ $d->status === 'Lunas' ? 'Tercatat lunas' : $d->status }}
                                 </span>
                             </td>
                             <td>

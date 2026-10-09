@@ -731,19 +731,6 @@
         Tunjukkan kode QR ini kepada petugas di meja layanan sirkulasi perpustakaan untuk serah terima buku fisik.
     </p>
 
-    {{-- ALERT SUKSES --}}
-    @if (session('success'))
-        <div class="ticket-alert-success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <div>
-                <strong>Berhasil:</strong> {{ session('success') }}
-            </div>
-        </div>
-    @endif
-
     @php
         $detailUtama = $peminjaman->details->first();
         $buku = $detailUtama?->buku;

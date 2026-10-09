@@ -9,6 +9,7 @@ use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use App\Models\User;
+use App\Notifications\BookingReadyNotification;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -1124,6 +1125,35 @@ class QrController extends Controller
             'success' => true,
             'peminjaman' => $peminjamanEvent,
             'pengembalian' => $pengembalianEvent,
+            'notifications' => $user->notifications()
+                ->whereNull('read_at')
+                ->where('type', BookingReadyNotification::class)
+                ->oldest()
+                ->limit(5)
+                ->get()
+                ->map(fn ($notification): array => [
+                    'id' => $notification->id,
+                    'title' => $notification->data['title'] ?? 'Peminjaman diperbarui',
+                    'status' => $notification->data['status'] ?? 'Siap Diambil',
+                    'booking_code' => $notification->data['kode_booking'] ?? '',
+                    'books' => $notification->data['books'] ?? [],
+                ])
+                ->values(),
         ]);
+    }
+
+    /** Tandai notifikasi persetujuan booking milik member yang login sebagai telah dibaca. */
+    public function markRealtimeNotificationRead(Request $request, string $id): JsonResponse
+    {
+        $notification = $request->user()->notifications()
+            ->whereKey($id)
+            ->where('type', BookingReadyNotification::class)
+            ->firstOrFail();
+
+        if ($notification->read_at === null) {
+            $notification->markAsRead();
+        }
+
+        return response()->json(['success' => true]);
     }
 }

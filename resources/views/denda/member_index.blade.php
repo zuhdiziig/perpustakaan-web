@@ -404,19 +404,6 @@
         <p class="denda-main-subtitle">Rincian keterlambatan dan pembayaran, transparan dalam satu tempat.</p>
     </div>
 
-    <!-- FLASH MESSAGES -->
-    @if (session('success'))
-        <div style="background: #dcfce7; border: 1px solid #bbf7d0; color: #166534; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-size: 13.5px; font-weight: 600;">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    @if (session('error'))
-        <div style="background: #fee2e2; border: 1px solid #fecaca; color: #991b1b; padding: 14px 18px; border-radius: 12px; margin-bottom: 24px; font-size: 13.5px; font-weight: 600;">
-            {{ session('error') }}
-        </div>
-    @endif
-
     <!-- 3 SUMMARY STAT CARDS -->
     <div class="denda-stats-row">
         <!-- Card 1: Total Belum Dibayar -->
@@ -495,7 +482,7 @@
                 @elseif ($dendaBelumDibayar->count() > 0)
                     {{ $dendaBelumDibayar->count() }} transaksi denda aktif
                 @else
-                    Semua transaksi telah lunas atau belum ada catatan denda
+                    Semua tagihan tercatat lunas atau belum ada catatan denda
                 @endif
             </p>
         </div>
@@ -549,7 +536,7 @@
                                     </span>
                                 @else
                                     <span class="badge-status badge-lunas">
-                                        <span class="badge-dot">●</span> Lunas
+                                        <span class="badge-dot">●</span> Tercatat lunas · belum diverifikasi
                                     </span>
                                 @endif
                             </td>
@@ -643,13 +630,13 @@
                         </span>
                     @else
                         <span class="badge-status badge-lunas">
-                            <span class="badge-dot">●</span> Lunas
+                            <span class="badge-dot">●</span> Tercatat lunas · belum diverifikasi
                         </span>
                     @endif
                 </div>
 
                 <p class="bayar-disclaimer">
-                    Bayar melalui QRIS. Tidak ada biaya administrasi. Nota tersedia setelah pembayaran berhasil.
+                    Status pembayaran tersimpan di BOOKNEST dan belum dapat diverifikasi gateway. Nota tersedia untuk catatan transaksi berstatus sukses.
                 </p>
             </div>
 
@@ -664,7 +651,7 @@
                     </a>
                 @else
                     <button type="button" class="btn-bayar-denda disabled" disabled>
-                        Tagihan Lunas
+                        Tagihan tercatat lunas
                     </button>
                 @endif
             </div>

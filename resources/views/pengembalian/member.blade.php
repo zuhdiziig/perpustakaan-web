@@ -927,28 +927,6 @@
         </div>
     </div>
 
-    {{-- FLASH MESSAGES --}}
-    @if(session('success'))
-        <div class="alert-banner success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <div>{{ session('success') }}</div>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="alert-banner error">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <line x1="12" y1="8" x2="12" y2="12"></line>
-                <line x1="12" y1="16" x2="12.01" y2="16"></line>
-            </svg>
-            <div>{{ session('error') }}</div>
-        </div>
-    @endif
-
     {{-- STATS SUMMARY ROW --}}
     <div class="stats-grid">
         <div class="stat-card">
@@ -1145,7 +1123,7 @@
                                                     ⏳ Menunggu Scan Petugas
                                                 </span>
                                                 <div style="font-size: 11px; color: #059669; font-weight: 700; margin-top: 3px;">
-                                                    ✓ Denda Lunas (Tiket: {{ $item->kode_batch_kembali ?? $item->kode_kembali ?? '-' }})
+                                                    ✓ Denda tercatat lunas · belum diverifikasi (Tiket: {{ $item->kode_batch_kembali ?? $item->kode_kembali ?? '-' }})
                                                 </div>
                                             @else
                                                 <span class="badge-status-waiting">
@@ -1338,7 +1316,7 @@
                                                     </a>
                                                 </div>
                                             @else
-                                                <span class="badge-status ontime">✓ Denda Lunas</span>
+                                                <span class="badge-status ontime">✓ Denda tercatat lunas · belum diverifikasi</span>
                                             @endif
                                         @else
                                             <span class="badge-status ontime">✓ Bebas Denda</span>

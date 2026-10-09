@@ -44,7 +44,7 @@
         <a href="{{ route('bayar.qr', $denda->idDenda) }}" class="btn-qr">Lanjut ke Pembayaran QR &rarr;</a>
     @else
         <div style="background: #dcfce7; color: #166534; padding: 10px; text-align: center; border-radius: 4px; margin-top: 15px; font-weight: bold; font-size: 13px;">
-            Tagihan ini Sudah Lunas Terverifikasi.
+            Status tagihan tercatat lunas; riwayat pembayaran belum diverifikasi oleh gateway.
         </div>
     @endif
 

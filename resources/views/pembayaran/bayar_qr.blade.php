@@ -360,14 +360,13 @@
 
             <form action="{{ route('bayar.proses_qr', $pembayaran->idPembayaran) }}" method="POST">
                 @csrf
-                <input type="hidden" name="simulasi_status" value="berhasil">
                 <button type="submit" class="btn-cek-status">
                     Cek Status Pembayaran
                 </button>
             </form>
 
             <div class="qris-disclaimer">
-                Kode QR adalah ilustrasi untuk desain statis.
+                Kode QR hanya ilustrasi. Integrasi payment gateway belum tersedia, sehingga pembayaran belum dapat diverifikasi.
             </div>
         </div>
 

@@ -1981,19 +1981,31 @@
                 iconSvg = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
             }
 
-            const linkHtml = options.url ? `<a href="${options.url}" class="toast-link">${options.linkText || 'Buka Keranjang Booking &rarr;'}</a>` : '';
-
-            toast.innerHTML = `
-                <div class="toast-icon">${iconSvg}</div>
-                <div class="toast-content">
-                    <div class="toast-title">${options.title}</div>
-                    <div class="toast-message">${options.message}</div>
-                    ${linkHtml}
-                </div>
-                <button type="button" class="toast-close-btn" aria-label="Tutup notifikasi">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
-                </button>
-            `;
+            const toastIcon = document.createElement('div');
+            toastIcon.className = 'toast-icon';
+            toastIcon.innerHTML = iconSvg;
+            const toastContent = document.createElement('div');
+            toastContent.className = 'toast-content';
+            const toastTitle = document.createElement('div');
+            toastTitle.className = 'toast-title';
+            toastTitle.textContent = options.title;
+            const toastMessage = document.createElement('div');
+            toastMessage.className = 'toast-message';
+            toastMessage.textContent = options.message;
+            toastContent.append(toastTitle, toastMessage);
+            if (options.url) {
+                const toastLink = document.createElement('a');
+                toastLink.href = options.url;
+                toastLink.className = 'toast-link';
+                toastLink.textContent = options.linkText || 'Buka Keranjang Booking \u2192';
+                toastContent.appendChild(toastLink);
+            }
+            const closeButton = document.createElement('button');
+            closeButton.type = 'button';
+            closeButton.className = 'toast-close-btn';
+            closeButton.setAttribute('aria-label', 'Tutup notifikasi');
+            closeButton.innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="18" x2="18" y2="6"></line></svg>';
+            toast.append(toastIcon, toastContent, closeButton);
 
             container.appendChild(toast);
 
@@ -2246,5 +2258,12 @@
     <div id="cartToastContainer" class="cart-toast-container" aria-live="polite"></div>
 
     @include('layouts.partials.sidebar_scripts')
+
+    @auth
+        @if (auth()->user()->role === 'member')
+            @include('layouts.partials.member_feedback_toasts')
+            @include('layouts.partials.member_realtime_notification')
+        @endif
+    @endauth
 </body>
 </html>

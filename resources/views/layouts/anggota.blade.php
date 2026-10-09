@@ -619,5 +619,8 @@
     @include('layouts.partials.sidebar_scripts')
 
     @yield('scripts')
+
+    @include('layouts.partials.member_feedback_toasts')
+    @include('layouts.partials.member_realtime_notification')
 </body>
 </html>

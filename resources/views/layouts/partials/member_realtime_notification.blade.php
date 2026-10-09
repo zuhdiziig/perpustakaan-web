@@ -295,6 +295,8 @@
 (function() {
     let globalNotifTimer = null;
     let globalNotifCountdownInterval = null;
+    let isPolling = false;
+    const displayedBookingApprovalNotifications = new Set();
     const pageOpenTime = Math.floor(Date.now() / 1000);
 
     // Audio Chime (C5 -> E5 -> G5)
@@ -361,7 +363,11 @@
 
         if (data.daftarBuku && data.daftarBuku.length > 0) {
             daftarBukuEl.style.display = 'block';
-            daftarBukuEl.innerHTML = data.daftarBuku.map(j => `<div>• ${j}</div>`).join('');
+            daftarBukuEl.replaceChildren(...data.daftarBuku.map(judul => {
+                const item = document.createElement('div');
+                item.textContent = `• ${judul}`;
+                return item;
+            }));
         } else {
             daftarBukuEl.style.display = 'none';
         }
@@ -386,6 +392,77 @@
         }, 5000);
     }
 
+    function showBookingApprovalToast(notification) {
+        const stack = document.getElementById('member-feedback-toasts');
+        if (!stack) return false;
+
+        const toast = document.createElement('div');
+        toast.className = 'member-feedback-toast';
+        toast.dataset.status = 'success';
+        toast.setAttribute('role', 'status');
+
+        const icon = document.createElement('span');
+        icon.className = 'member-feedback-toast-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('width', '18');
+        svg.setAttribute('height', '18');
+        svg.setAttribute('fill', 'none');
+        svg.setAttribute('stroke', 'currentColor');
+        svg.setAttribute('stroke-width', '2');
+        svg.setAttribute('stroke-linecap', 'round');
+        svg.setAttribute('stroke-linejoin', 'round');
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M20 6 9 17l-5-5');
+        svg.append(path);
+        icon.append(svg);
+
+        const message = document.createElement('div');
+        message.className = 'member-feedback-toast-message';
+        const title = document.createElement('strong');
+        title.textContent = notification.title || 'Peminjaman disetujui';
+        const details = document.createElement('div');
+        const books = Array.isArray(notification.books)
+            ? notification.books.filter((book) => typeof book === 'string' && book.trim() !== '')
+            : [];
+        details.textContent = `Status: ${notification.status || 'Siap Diambil'}${books.length ? ` · ${books.join(', ')}` : ''}`;
+        message.append(title, details);
+
+        const close = document.createElement('button');
+        close.className = 'member-feedback-toast-close';
+        close.type = 'button';
+        close.setAttribute('aria-label', 'Tutup notifikasi');
+        close.textContent = '×';
+
+        const dismiss = () => {
+            toast.classList.add('is-leaving');
+            toast.addEventListener('animationend', () => toast.remove(), { once: true });
+            window.setTimeout(() => toast.remove(), 250);
+        };
+
+        close.addEventListener('click', dismiss);
+        toast.append(icon, message, close);
+        stack.append(toast);
+        window.setTimeout(dismiss, 10000);
+
+        return true;
+    }
+
+    function acknowledgeBookingApproval(notificationId) {
+        const urlTemplate = "{{ route('api.member.notifikasi-peminjaman.dibaca', ['id' => '__NOTIFICATION_ID__']) }}";
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+
+        return fetch(urlTemplate.replace('__NOTIFICATION_ID__', encodeURIComponent(notificationId)), {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken || '',
+            },
+        });
+    }
+
     window.closeMemberRealtimeModal = function() {
         if (globalNotifTimer) clearTimeout(globalNotifTimer);
         if (globalNotifCountdownInterval) clearInterval(globalNotifCountdownInterval);
@@ -397,6 +474,9 @@
 
     // Polling setiap 3 detik
     function pollSirkulasiStatus() {
+        if (isPolling) return;
+
+        isPolling = true;
         const url = "{{ route('api.member.status-sirkulasi-terbaru') }}";
         fetch(url, {
             headers: {
@@ -407,6 +487,44 @@
         .then(r => r.json())
         .then(res => {
             if (!res || !res.success) return;
+
+            const approval = Array.isArray(res.notifications) ? res.notifications[0] : null;
+            if (approval && typeof approval.id === 'string') {
+                const seenKey = `booknest_booking_approval_${approval.id}`;
+                let seenAt = 0;
+
+                try {
+                    seenAt = Number(localStorage.getItem(seenKey) || 0);
+                } catch (e) {
+                    // Continue with database acknowledgement when browser storage is unavailable.
+                }
+
+                const alreadyDisplayed = displayedBookingApprovalNotifications.has(approval.id);
+                if (!alreadyDisplayed && (!seenAt || Date.now() - seenAt > 30 * 24 * 60 * 60 * 1000)) {
+                    if (!showBookingApprovalToast(approval)) return;
+                    displayedBookingApprovalNotifications.add(approval.id);
+
+                    try {
+                        localStorage.setItem(seenKey, String(Date.now()));
+                    } catch (e) {
+                        // Database read state remains the durable duplicate guard.
+                    }
+                }
+
+                acknowledgeBookingApproval(approval.id)
+                    .then(response => {
+                        if (!response.ok) throw new Error('Unable to acknowledge notification');
+                    })
+                    .catch(() => {
+                        try {
+                            localStorage.removeItem(seenKey);
+                        } catch (e) {
+                            // The unread notification will be retried on the next poll.
+                        }
+                    });
+
+                return;
+            }
 
             // 1. Cek Peminjaman Baru
             if (res.peminjaman) {
@@ -433,6 +551,9 @@
         })
         .catch(() => {
             // Silent error on network hiccup
+        })
+        .finally(() => {
+            isPolling = false;
         });
     }
 

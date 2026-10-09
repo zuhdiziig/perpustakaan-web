@@ -73,6 +73,14 @@ Route::middleware('guest')->group(function () {
         ->name('password.request');
 
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+        ->middleware('throttle:5,1')
+        ->name('password.email');
+
+    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])
+        ->name('password.reset');
+
+    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+        ->middleware('throttle:10,1')
         ->name('password.update');
 });
 
@@ -221,6 +229,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/api/member/status-sirkulasi-terbaru', [QrController::class, 'apiCheckRealtimeSirkulasi'])
             ->name('api.member.status-sirkulasi-terbaru');
+
+        Route::post('/api/member/notifikasi-peminjaman/{id}/dibaca', [QrController::class, 'markRealtimeNotificationRead'])
+            ->name('api.member.notifikasi-peminjaman.dibaca');
     });
 
     /*

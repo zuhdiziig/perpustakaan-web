@@ -691,7 +691,7 @@
                 @if($statistik['dendaTerbaru'])
                     {{ Str::limit($statistik['dendaTerbaru']['judul'], 18) }} · {{ $statistik['dendaTerbaru']['hariTerlambat'] }} hari
                 @else
-                    Semua tagihan lunas
+                    Semua tagihan tercatat lunas
                 @endif
             </div>
         </div>
@@ -704,7 +704,7 @@
                 <div class="denda-alert-title">Ada denda yang perlu diselesaikan</div>
                 <p class="denda-alert-text">
                     @if($statistik['dendaTerbaru'])
-                        {{ $statistik['dendaTerbaru']['judul'] }} dikembalikan {{ $statistik['dendaTerbaru']['tanggalKembali']->translatedFormat('d M Y') }}, terlambat {{ $statistik['dendaTerbaru']['hariTerlambat'] }} hari. Total Rp{{ number_format($statistik['totalDenda'], 0, ',', '.') }}. Bayar dengan QRIS agar akun tetap nyaman digunakan.
+                        {{ $statistik['dendaTerbaru']['judul'] }} dikembalikan {{ $statistik['dendaTerbaru']['tanggalKembali']->translatedFormat('d M Y') }}, terlambat {{ $statistik['dendaTerbaru']['hariTerlambat'] }} hari. Total Rp{{ number_format($statistik['totalDenda'], 0, ',', '.') }}. Selesaikan tagihan melalui metode pembayaran yang tersedia.
                     @else
                         Terdapat total tagihan denda sebesar Rp{{ number_format($statistik['totalDenda'], 0, ',', '.') }}. Silakan lakukan pembayaran agar riwayat tetap bersih.
                     @endif
