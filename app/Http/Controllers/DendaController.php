@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Denda;
+use App\Models\Pembayaran;
 use App\Models\Pengembalian;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DendaController extends Controller
 {
@@ -95,21 +97,60 @@ class DendaController extends Controller
         ));
     }
 
-    // TAMBAHKAN METHOD INDEX DI SINI → Buka data denda & daftar transaksi yang perlu dihitung/dikelola
-    public function index()
+    // Buka data denda & monitoring kas tagihan (Petugas/Admin)
+    public function index(Request $request)
     {
-        // Daftar denda yang sudah tercatat
-        $dendas = Denda::with(['pengembalian.peminjaman.member', 'pembayaran'])
-            ->latest('idDenda')
-            ->paginate(10);
+        $query = Denda::with([
+            'pengembalian.peminjaman.member',
+            'pengembalian.peminjaman.details.buku',
+            'details.peminjaman.member',
+            'details.buku',
+            'pembayaran',
+        ])
+            ->where('jumlah', '>', 0)
+            ->latest('idDenda');
 
-        // Pengembalian yang belum dibuatkan tagihan denda (jika ada keterlambatan/kerusakan)
-        $pengembalianTertunda = Pengembalian::with(['peminjaman.member', 'peminjaman.details.buku'])
-            ->doesntHave('denda')
-            ->latest('idPengembalian')
-            ->get();
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('idDenda', 'like', "%{$search}%")
+                    ->orWhere('jenisDenda', 'like', "%{$search}%")
+                    ->orWhereHas('pengembalian.peminjaman.member', function ($m) use ($search) {
+                        $m->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('details.peminjaman.member', function ($m) use ($search) {
+                        $m->where('name', 'like', "%{$search}%")
+                            ->orWhere('email', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('pengembalian.peminjaman.details.buku', function ($b) use ($search) {
+                        $b->where('judul', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('details.buku', function ($b) use ($search) {
+                        $b->where('judul', 'like', "%{$search}%");
+                    });
+            });
+        }
 
-        return view('denda.index', compact('dendas', 'pengembalianTertunda'));
+        if ($request->filled('status') && in_array($request->status, ['Belum Dibayar', 'Lunas'], true)) {
+            $query->where('status', $request->status);
+        }
+
+        $dendas = $query->paginate(10)->withQueryString();
+
+        // Rekapitulasi Kas & Tagihan Denda Riil
+        $totalTunggakan = (float) Denda::where('jumlah', '>', 0)->where('status', 'Belum Dibayar')->sum('jumlah');
+        $totalKasMasuk = (float) Denda::where('jumlah', '>', 0)->where('status', 'Lunas')->sum('jumlah');
+        $countBelumLunas = Denda::where('jumlah', '>', 0)->where('status', 'Belum Dibayar')->count();
+        $countLunas = Denda::where('jumlah', '>', 0)->where('status', 'Lunas')->count();
+
+        return view('denda.index', compact(
+            'dendas',
+            'totalTunggakan',
+            'totalKasMasuk',
+            'countBelumLunas',
+            'countLunas'
+        ));
     }
 
     // Pilih transaksi & tinjau simulasi perhitungan denda
@@ -189,5 +230,34 @@ class DendaController extends Controller
         $denda = Denda::with(['pengembalian.peminjaman.member', 'pembayaran'])->findOrFail($id);
 
         return view('denda.show', compact('denda'));
+    }
+
+    // Terima pembayaran tunai di meja sirkulasi (Petugas/Admin)
+    public function bayarTunai(Request $request, $id)
+    {
+        $denda = Denda::findOrFail($id);
+
+        if ($denda->status === 'Lunas') {
+            return redirect()->route('denda.index')->with('info', 'Tagihan denda ini sudah berstatus Lunas.');
+        }
+
+        DB::transaction(function () use ($denda) {
+            $denda->update([
+                'status' => 'Lunas',
+            ]);
+
+            Pembayaran::updateOrCreate(
+                ['idDenda' => $denda->idDenda],
+                [
+                    'nominal' => $denda->jumlah,
+                    'tanggalBayar' => now(),
+                    'metode' => 'Tunai',
+                    'status' => 'Sukses',
+                ]
+            );
+        });
+
+        return redirect()->route('denda.index')
+            ->with('success', 'Pembayaran denda #'.str_pad($denda->idDenda, 5, '0', STR_PAD_LEFT).' sebesar Rp '.number_format($denda->jumlah, 0, ',', '.').' secara Tunai di meja sirkulasi berhasil dicatat.');
     }
 }

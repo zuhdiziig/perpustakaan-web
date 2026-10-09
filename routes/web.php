@@ -316,6 +316,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/denda/{id}', [DendaController::class, 'show'])
             ->name('denda.show');
 
+        Route::post('/denda/{id}/bayar-tunai', [DendaController::class, 'bayarTunai'])
+            ->name('denda.bayar-tunai');
+
         Route::get('/pembayaran', [PembayaranController::class, 'index'])
             ->name('pembayaran.index');
 

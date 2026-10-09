@@ -11,11 +11,39 @@ use Illuminate\Support\Facades\DB;
 class BukuController extends Controller
 {
     // Buka menu data buku & tampilkan data terbaru
-    public function index()
+    public function index(Request $request)
     {
-        $bukus = Buku::with(['kategori', 'barcode'])->latest('idBuku')->paginate(10);
+        $query = Buku::with(['kategori', 'barcode'])->latest('idBuku');
 
-        return view('buku.index', compact('bukus'));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%")
+                    ->orWhere('penerbit', 'like', "%{$search}%")
+                    ->orWhereHas('barcode', function ($b) use ($search) {
+                        $b->where('kodeBarcode', 'like', "%{$search}%");
+                    });
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('idKategori', $request->kategori);
+        }
+
+        if ($request->filled('kondisi') && in_array($request->kondisi, ['Baik', 'Rusak', 'Hilang'], true)) {
+            $query->where('kondisi', $request->kondisi);
+        }
+
+        $bukus = $query->paginate(10)->withQueryString();
+        $kategoris = Kategori::orderBy('namaKategori')->get();
+
+        $totalJudul = Buku::count();
+        $totalStok = (int) Buku::sum('stok');
+        $bukuBaik = Buku::where('kondisi', 'Baik')->count();
+        $bukuRusak = Buku::whereIn('kondisi', ['Rusak', 'Hilang'])->count();
+
+        return view('buku.index', compact('bukus', 'kategoris', 'totalJudul', 'totalStok', 'bukuBaik', 'bukuRusak'));
     }
 
     // Tampilkan form tambah buku
