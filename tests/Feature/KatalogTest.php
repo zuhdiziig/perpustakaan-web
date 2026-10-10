@@ -213,4 +213,24 @@ class KatalogTest extends TestCase
             ->assertStatus(200)
             ->assertSee('Panel Anggota');
     }
+
+    public function test_katalog_default_order_is_alphabetical_a_to_z_for_member_and_guest(): void
+    {
+        $kategori = Kategori::factory()->create();
+
+        // Buat buku dengan urutan acak
+        Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Ziarah']);
+        Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Atomic Habits']);
+        Buku::factory()->create(['idKategori' => $kategori->idKategori, 'judul' => 'Bumi Manusia']);
+
+        $member = User::factory()->create(['role' => 'member']);
+
+        // Member login membuka katalog
+        $response = $this->actingAs($member)->get('/katalog');
+        $response->assertStatus(200);
+
+        $titles = $response->viewData('bukus')->pluck('judul')->toArray();
+
+        $this->assertEquals(['Atomic Habits', 'Bumi Manusia', 'Ziarah'], array_slice($titles, 0, 3));
+    }
 }

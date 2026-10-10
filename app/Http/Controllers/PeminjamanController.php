@@ -148,9 +148,10 @@ class PeminjamanController extends Controller
 
         // 2. Transaksi Atomik dengan Row Locking (lockForUpdate)
         try {
-            $peminjaman = DB::transaction(function () use ($request, $inputBarcodes, $totalBuku) {
+            $peminjaman = DB::transaction(function () use ($request, $member, $inputBarcodes, $totalBuku) {
                 $eksemplarItems = [];
                 $selectedEksemplarIds = [];
+                $selectedBookIds = [];
 
                 foreach ($inputBarcodes as $code) {
                     $code = trim($code);
@@ -164,27 +165,53 @@ class PeminjamanController extends Controller
                         $eksemplar = (clone $eksemplarQuery)->where('qr_token', $code)->orWhere('kode_barcode', $code)->first();
                     }
 
+                    // B. Jika belum ditemukan, periksa apakah ini Barcode dari tabel Barcode
                     if (! $eksemplar) {
-                        // Tolak jika yang di-scan adalah title-level QR code
+                        $barcodeRecord = Barcode::where('kodeBarcode', $code)->first();
+                        if ($barcodeRecord) {
+                            $eksemplar = (clone $eksemplarQuery)->where('idBuku', $barcodeRecord->idBuku)->where('status', 'Tersedia')->first();
+                        }
+                    }
+
+                    // C. Jika belum ditemukan, periksa pattern format BK-{idBuku}
+                    if (! $eksemplar && preg_match('/^BK-(\d+)$/i', $code, $mBuku)) {
+                        $bukuId = (int) $mBuku[1];
+                        $eksemplar = (clone $eksemplarQuery)->where('idBuku', $bukuId)->where('status', 'Tersedia')->first();
+                    }
+
+                    if (! $eksemplar) {
+                        // Tolak jika yang di-scan adalah title-level QR code (Requirement C: tidak memilih copy arbitrary)
                         if (Buku::where('qr_token', $code)->exists()) {
                             throw new \DomainException("Kode [{$code}] adalah QR judul buku, bukan eksemplar fisik. Silakan scan QR stiker pada buku fisik.");
                         }
 
-                        throw new \DomainException("Buku fisik dengan QR/Barcode [{$code}] tidak ditemukan dalam database.");
+                        throw new \DomainException("Buku fisik dengan QR/Barcode [{$code}] tidak ditemukan atau stoknya habis.");
                     }
+
+                    $judul = $eksemplar->buku->judul ?? 'Buku';
+                    $idBuku = (int) $eksemplar->idBuku;
 
                     // Re-check status fisik setelah lock didapatkan
                     if ($eksemplar->status !== 'Tersedia') {
-                        $judul = $eksemplar->buku->judul ?? 'Buku';
                         throw new \DomainException("Buku '{$judul}' (Eksemplar #{$eksemplar->nomor_eksemplar}) statusnya sedang {$eksemplar->status}.");
                     }
 
                     if (in_array($eksemplar->idEksemplar, $selectedEksemplarIds)) {
-                        $judul = $eksemplar->buku->judul ?? 'Buku';
                         throw new \DomainException("Buku '{$judul}' (Eksemplar #{$eksemplar->nomor_eksemplar}) di-scan lebih dari satu kali dalam transaksi yang sama.");
                     }
 
+                    // Validasi: Tidak boleh meminjam judul buku yang sama lebih dari 1 kali dalam transaksi yang sama
+                    if (in_array($idBuku, $selectedBookIds)) {
+                        throw new \DomainException("Gagal: Judul buku '{$judul}' dipilih lebih dari satu kali dalam transaksi yang sama. Anggota hanya diperbolehkan meminjam 1 eksemplar per judul buku.");
+                    }
+
+                    // Validasi: Anggota tidak boleh meminjam buku yang saat ini masih sedang dipinjam
+                    if ($member->sedangMeminjamBuku($idBuku)) {
+                        throw new \DomainException("Gagal: Anggota '{$member->name}' saat ini masih sedang meminjam buku '{$judul}'. Tidak diperbolehkan meminjam buku dengan judul yang sama sebelum buku tersebut dikembalikan.");
+                    }
+
                     $selectedEksemplarIds[] = $eksemplar->idEksemplar;
+                    $selectedBookIds[] = $idBuku;
                     $eksemplarItems[] = $eksemplar;
                 }
 
@@ -236,6 +263,11 @@ class PeminjamanController extends Controller
                 'idPeminjaman' => $peminjaman->idPeminjaman,
                 'redirect' => route('peminjaman.show', $peminjaman->idPeminjaman),
             ]);
+        }
+
+        if ($request->input('source') === 'walkin_scanner') {
+            return redirect()->route('barcode.scan', ['member_id' => $request->idUserMember])
+                ->with('success', "Peminjaman {$totalBuku} buku untuk anggota {$member->name} berhasil dikonfirmasi dan dicatat dalam sistem.");
         }
 
         // 4. Arahkan ke halaman bukti peminjaman

@@ -801,6 +801,16 @@
                     *Lewat batas waktu, booking akan kedaluwarsa otomatis agar buku bisa diakses anggota lain.
                 </div>
             </div>
+
+            @if (in_array($peminjaman->status, ['Booking', 'Siap Diambil']))
+                <form method="POST" action="{{ route('peminjaman.booking.batal', $peminjaman->idPeminjaman) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking peminjaman ini? Eksemplar buku akan dikembalikan ke ketersediaan umum.');" style="margin-top: 14px; width: 100%;">
+                    @csrf
+                    <button type="submit" class="btn-ticket-cancel" style="width: 100%; justify-content: center; padding: 11px 16px;">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        Batalkan Booking
+                    </button>
+                </form>
+            @endif
         </div>
 
         {{-- KOLOM KANAN: RINCIAN BUKU & ANGGOTA --}}

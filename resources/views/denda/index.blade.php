@@ -499,7 +499,7 @@
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
                 </svg>
-                <span>Metode: QRIS Otomatis & Kasir Tunai</span>
+                <span>Metode Pembayaran: QRIS Otomatis</span>
             </div>
         </div>
     </div>
@@ -709,49 +709,34 @@
                             <td>
                                 <div class="action-group">
                                     @if ($d->status !== 'Lunas')
-                                        {{-- Tombol Terima Pembayaran Tunai --}}
-                                        <form action="{{ route('denda.bayar-tunai', $d->idDenda) }}"
-                                              method="POST"
-                                              style="display: inline; margin: 0;"
-                                              onsubmit="return confirm('Konfirmasi terima pembayaran denda tunai sebesar Rp {{ number_format($d->jumlah, 0, ',', '.') }} dari {{ $member->name ?? 'Anggota' }}?');">
-                                            @csrf
-                                            <button type="submit" class="btn-action-cash" title="Terima Pembayaran Tunai di Meja Sirkulasi">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                                                    <rect x="2" y="6" width="20" height="12" rx="2"></rect>
-                                                    <circle cx="12" cy="12" r="2"></circle>
-                                                    <path d="M6 12h.01M18 12h.01"></path>
-                                                </svg>
-                                                Terima Tunai
-                                            </button>
-                                        </form>
-
-                                        {{-- Link Buka QRIS --}}
+                                        {{-- Link Buka / Generate QRIS --}}
                                         <a href="{{ route('bayar.qr', $d->idDenda) }}"
                                            target="_blank"
                                            class="btn-action-qris"
-                                           title="Buka QRIS Pembayaran Online">
+                                           title="Generate & Tampilkan QRIS Pembayaran Online">
                                             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                                 <rect x="3" y="3" width="7" height="7"></rect>
                                                 <rect x="14" y="3" width="7" height="7"></rect>
                                                 <rect x="14" y="14" width="7" height="7"></rect>
                                                 <rect x="3" y="14" width="7" height="7"></rect>
                                             </svg>
-                                            QRIS
+                                            Generate QRIS
                                         </a>
                                     @else
-                                        @if ($pembayaranSukses)
-                                            <a href="{{ route('pembayaran.nota', $pembayaranSukses->idPembayaran) }}"
-                                               target="_blank"
-                                               class="btn-action-nota"
-                                               title="Cetak Bukti Nota Pembayaran">
-                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                    <polyline points="6 9 6 2 18 2 18 9"></polyline>
-                                                    <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
-                                                    <rect x="6" y="14" width="12" height="8"></rect>
-                                                </svg>
-                                                Nota
-                                            </a>
-                                        @endif
+                                        @php
+                                            $notaTargetId = $pembayaranSukses?->idPembayaran ?? $d->idDenda;
+                                        @endphp
+                                        <a href="{{ route('pembayaran.nota', $notaTargetId) }}"
+                                           target="_blank"
+                                           class="btn-action-nota"
+                                           title="Cetak Bukti Nota Pembayaran Resmi">
+                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                                                <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                                                <rect x="6" y="14" width="12" height="8"></rect>
+                                            </svg>
+                                            Nota
+                                        </a>
 
                                         <a href="{{ route('denda.show', $d->idDenda) }}"
                                            target="_blank"

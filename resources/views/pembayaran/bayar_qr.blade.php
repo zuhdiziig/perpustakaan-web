@@ -1,4 +1,4 @@
-@extends('layouts.anggota')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : (auth()->user()->role === 'petugas' ? 'layouts.petugas' : 'layouts.anggota'))
 
 @section('title', 'Pembayaran QRIS - BOOKNEST')
 
@@ -322,7 +322,7 @@
     <nav class="qris-breadcrumb" aria-label="Breadcrumb">
         <a href="{{ route('dashboard') }}" class="brand-crumb">BOOKNEST</a>
         <span class="divider-crumb">/</span>
-        <span class="active-crumb">Anggota</span>
+        <span class="active-crumb">{{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? 'Kelola Denda' : 'Anggota' }}</span>
     </nav>
 
     <!-- PAGE HEADER -->
@@ -432,8 +432,8 @@
             </div>
 
             <!-- Tombol Kembali -->
-            <a href="{{ route('denda.saya') }}" class="btn-back-denda">
-                Kembali ke Denda
+            <a href="{{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? route('denda.index') : route('denda.saya') }}" class="btn-back-denda">
+                {{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? 'Kembali ke Kelola Denda' : 'Kembali ke Denda' }}
             </a>
         </div>
 

@@ -206,25 +206,33 @@ Route::middleware('auth')->group(function () {
         Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
             ->name('denda.saya');
 
-        Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
-            ->name('bayar.qr');
-
-        Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
-            ->name('bayar.proses_qr');
-
-        Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
-            ->name('bayar.sukses');
-
-        Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
-            ->name('pembayaran.nota');
-
         Route::get('/kartu-saya', function () {
             return redirect()->route('member.cetak-qr', auth()->id());
         })->name('member.kartu-saya');
 
         Route::get('/api/member/status-sirkulasi-terbaru', [QrController::class, 'apiCheckRealtimeSirkulasi'])
             ->name('api.member.status-sirkulasi-terbaru');
+
+        Route::get('/api/member/universal-search', [RiwayatController::class, 'apiUniversalSearch'])
+            ->name('member.universal-search');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PEMBAYARAN & NOTA (Bisa Diakses Member, Petugas, dan Admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
+        ->name('bayar.qr');
+
+    Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
+        ->name('bayar.proses_qr');
+
+    Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
+        ->name('bayar.sukses');
+
+    Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
+        ->name('pembayaran.nota');
 
     /*
     |--------------------------------------------------------------------------
@@ -263,6 +271,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/buku/{buku}', [BukuController::class, 'show'])
             ->name('buku.show');
 
+        Route::patch('/buku/{id}/update-stok', [BukuController::class, 'updateStok'])
+            ->name('buku.update-stok');
+
         Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])
             ->name('buku.cetak-qr');
 
@@ -290,9 +301,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/pengembalian/batch-selesai', [PengembalianController::class, 'petugasBatchStore'])
             ->name('pengembalian.petugas.batch-selesai');
 
-        // Barcode & Kondisi Buku
+        // Barcode & Sirkulasi Meja Langsung
         Route::get('/scan-barcode', [BarcodeController::class, 'scan'])
             ->name('barcode.scan');
+        Route::post('/sirkulasi/pengembalian-langsung', [BarcodeController::class, 'kembalikanLangsung'])
+            ->name('sirkulasi.pengembalian-langsung');
+        Route::post('/api/sirkulasi/scan-member', [BarcodeController::class, 'apiScanMemberWalkin'])
+            ->name('api.sirkulasi.scan-member');
+        Route::get('/api/sirkulasi/buku-tersedia', [BarcodeController::class, 'apiCariBuku'])
+            ->name('api.sirkulasi.buku-tersedia');
 
         Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
             ->name('kondisi.index');

@@ -111,23 +111,30 @@ class DendaController extends Controller
             ->latest('idDenda');
 
         if ($request->filled('search')) {
-            $search = trim($request->search);
-            $query->where(function ($q) use ($search) {
-                $q->where('idDenda', 'like', "%{$search}%")
-                    ->orWhere('jenisDenda', 'like', "%{$search}%")
-                    ->orWhereHas('pengembalian.peminjaman.member', function ($m) use ($search) {
-                        $m->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+            $rawSearch = trim($request->search);
+            $searchLower = mb_strtolower($rawSearch);
+            $numericId = preg_replace('/[^0-9]/', '', $rawSearch);
+
+            $query->where(function ($q) use ($searchLower, $numericId) {
+                if ($numericId !== '') {
+                    $q->orWhere('idDenda', (int) $numericId);
+                }
+                $q->orWhereRaw('LOWER(jenisDenda) LIKE ?', ["%{$searchLower}%"])
+                    ->orWhereHas('pengembalian.peminjaman.member', function ($m) use ($searchLower) {
+                        $m->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
+                            ->orWhereRaw('LOWER(email) LIKE ?', ["%{$searchLower}%"]);
                     })
-                    ->orWhereHas('details.peminjaman.member', function ($m) use ($search) {
-                        $m->where('name', 'like', "%{$search}%")
-                            ->orWhere('email', 'like', "%{$search}%");
+                    ->orWhereHas('details.peminjaman.member', function ($m) use ($searchLower) {
+                        $m->whereRaw('LOWER(name) LIKE ?', ["%{$searchLower}%"])
+                            ->orWhereRaw('LOWER(email) LIKE ?', ["%{$searchLower}%"]);
                     })
-                    ->orWhereHas('pengembalian.peminjaman.details.buku', function ($b) use ($search) {
-                        $b->where('judul', 'like', "%{$search}%");
+                    ->orWhereHas('pengembalian.peminjaman.details.buku', function ($b) use ($searchLower) {
+                        $b->whereRaw('LOWER(judul) LIKE ?', ["%{$searchLower}%"])
+                            ->orWhereRaw('LOWER(penulis) LIKE ?', ["%{$searchLower}%"]);
                     })
-                    ->orWhereHas('details.buku', function ($b) use ($search) {
-                        $b->where('judul', 'like', "%{$search}%");
+                    ->orWhereHas('details.buku', function ($b) use ($searchLower) {
+                        $b->whereRaw('LOWER(judul) LIKE ?', ["%{$searchLower}%"])
+                            ->orWhereRaw('LOWER(penulis) LIKE ?', ["%{$searchLower}%"]);
                     });
             });
         }

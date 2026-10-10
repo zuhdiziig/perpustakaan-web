@@ -32,7 +32,7 @@ class KatalogController extends Controller
         $kategoriId = $request->query('kategori');
         $status = $request->query('status');
         $lokasi = $request->query('lokasi', 'Perpustakaan Pusat');
-        $sort = $request->query('sort', 'popularitas');
+        $sort = $request->query('sort', 'judul_asc');
 
         $query = Buku::query()
             ->with(['kategori', 'barcode'])
@@ -79,12 +79,12 @@ class KatalogController extends Controller
             $query->where('stok', '<=', 0);
         }
 
-        // 4. Pengurutan buku
+        // 4. Pengurutan buku (Default: Abjad A-Z)
         match ($sort) {
             'terbaru' => $query->latest('idBuku'),
-            'judul_asc' => $query->orderBy('judul', 'asc'),
-            'judul_desc' => $query->orderBy('judul', 'desc'),
-            default => $query->orderByDesc('detail_peminjaman_count')->latest('idBuku'), // Popularitas
+            'popularitas' => $query->orderByDesc('detail_peminjaman_count')->orderBy('judul', 'asc'),
+            'judul_desc' => $query->orderBy('judul', 'desc')->orderBy('idBuku', 'asc'),
+            default => $query->orderBy('judul', 'asc')->orderBy('idBuku', 'asc'), // Abjad A-Z
         };
 
         $bukus = $query->paginate(self::PER_HALAMAN)->withQueryString();

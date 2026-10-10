@@ -8,9 +8,19 @@ use Illuminate\Http\Request;
 class KategoriController extends Controller
 {
     // Buka menu kategori & tampilkan daftar kategori terbaru
-    public function index()
+    public function index(Request $request)
     {
-        $kategoris = Kategori::withCount('buku')->latest('idKategori')->paginate(10);
+        $query = Kategori::withCount('buku');
+
+        if ($request->filled('search')) {
+            $search = mb_strtolower(trim($request->search));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(namaKategori) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(deskripsi) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        $kategoris = $query->latest('idKategori')->paginate(10)->withQueryString();
 
         return view('kategori.index', compact('kategoris'));
     }

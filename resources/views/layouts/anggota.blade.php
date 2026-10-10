@@ -582,12 +582,12 @@
                     @endif
                 </a>
 
-                <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
+                <button type="button" class="topbar-icon-btn" onclick="openUniversalSearchModal()" title="Pencarian Cepat (Buku, Pinjam, Denda)" aria-label="Buka Pencarian Cepat" style="background: none; cursor: pointer;">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                </a>
+                </button>
 
                 <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Anggota">
                     @if(auth()->user()->foto ?? false)
@@ -622,5 +622,8 @@
 
     {{-- Realtime Sirkulasi Notification Modal & Polling --}}
     @include('layouts.partials.member_realtime_notification')
+
+    {{-- Modal Pencarian Terpadu Anggota (Buku, Pinjam, Kembali, Denda) --}}
+    @include('layouts.partials.member_universal_search')
 </body>
 </html>

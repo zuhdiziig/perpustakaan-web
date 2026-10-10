@@ -1454,7 +1454,7 @@
                 <div class="dropdown-field">
                     <label for="filterKategori" class="dropdown-label">Kategori</label>
                     <div class="dropdown-select-wrap">
-                        <select name="kategori" id="filterKategori" class="dropdown-select" onchange="document.getElementById('catalogFilterForm').submit()">
+                        <select name="kategori" id="filterKategori" class="dropdown-select" onchange="applyRealtimeCatalogFilter()">
                             <option value="">Semua Kategori</option>
                             @foreach ($kategoris as $kat)
                                 <option value="{{ $kat->idKategori }}" {{ (string)$kategoriId === (string)$kat->idKategori ? 'selected' : '' }}>
@@ -1472,7 +1472,7 @@
                 <div class="dropdown-field">
                     <label for="filterLokasi" class="dropdown-label">Lokasi</label>
                     <div class="dropdown-select-wrap">
-                        <select name="lokasi" id="filterLokasi" class="dropdown-select" onchange="document.getElementById('catalogFilterForm').submit()">
+                        <select name="lokasi" id="filterLokasi" class="dropdown-select" onchange="applyRealtimeCatalogFilter()">
                             <option value="Perpustakaan Pusat" {{ $lokasi === 'Perpustakaan Pusat' ? 'selected' : '' }}>Perpustakaan Pusat</option>
                             <option value="Semua Lokasi" {{ $lokasi === 'Semua Lokasi' ? 'selected' : '' }}>Semua Cabang Layanan</option>
                         </select>
@@ -1486,7 +1486,7 @@
                 <div class="dropdown-field">
                     <label for="filterStatus" class="dropdown-label">Status</label>
                     <div class="dropdown-select-wrap">
-                        <select name="status" id="filterStatus" class="dropdown-select" onchange="document.getElementById('catalogFilterForm').submit()">
+                        <select name="status" id="filterStatus" class="dropdown-select" onchange="applyRealtimeCatalogFilter()">
                             <option value="" {{ empty($status) ? 'selected' : '' }}>Semua Status</option>
                             <option value="tersedia" {{ $status === 'tersedia' ? 'selected' : '' }}>Tersedia</option>
                             <option value="habis" {{ $status === 'habis' ? 'selected' : '' }}>Habis / Dipinjam</option>
@@ -1502,21 +1502,22 @@
             <input type="hidden" name="sort" value="{{ $sort }}">
         </form>
 
+        <div id="catalogResultsArea">
         <!-- RESULTS INFO BAR -->
         <div class="results-bar">
             <div class="results-count-text">
                 {{ $bukus->total() }} buku ditemukan
-                <span>· Diurutkan berdasarkan {{ $sort === 'terbaru' ? 'terbaru' : ($sort === 'judul_asc' ? 'judul (A-Z)' : ($sort === 'judul_desc' ? 'judul (Z-A)' : 'popularitas')) }}</span>
+                <span>· Diurutkan berdasarkan {{ $sort === 'terbaru' ? 'buku terbaru' : ($sort === 'popularitas' ? 'popularitas' : ($sort === 'judul_desc' ? 'abjad (Z-A)' : 'abjad (A-Z)')) }}</span>
             </div>
 
             <!-- Sorting Dropdown -->
             <div class="sort-select-wrap">
                 <label for="catalogSort">Urutkan:</label>
                 <select id="catalogSort" class="sort-select" onchange="handleSortChange(this.value)">
-                    <option value="popularitas" {{ $sort === 'popularitas' ? 'selected' : '' }}>Popularitas</option>
+                    <option value="judul_asc" {{ $sort === 'judul_asc' ? 'selected' : '' }}>Abjad (A-Z)</option>
+                    <option value="judul_desc" {{ $sort === 'judul_desc' ? 'selected' : '' }}>Abjad (Z-A)</option>
                     <option value="terbaru" {{ $sort === 'terbaru' ? 'selected' : '' }}>Buku Terbaru</option>
-                    <option value="judul_asc" {{ $sort === 'judul_asc' ? 'selected' : '' }}>Judul (A-Z)</option>
-                    <option value="judul_desc" {{ $sort === 'judul_desc' ? 'selected' : '' }}>Judul (Z-A)</option>
+                    <option value="popularitas" {{ $sort === 'popularitas' ? 'selected' : '' }}>Popularitas</option>
                 </select>
             </div>
         </div>
@@ -1527,8 +1528,8 @@
                 <div class="book-card">
                     <!-- Cover Container -->
                     <a href="{{ route('katalog.show', $buku->idBuku) }}" class="book-cover-container" aria-label="Lihat detail {{ $buku->judul }}">
-                        @if (!empty($buku->cover))
-                            <img src="{{ $buku->cover }}"
+                        @if (!empty($buku->cover_url))
+                            <img src="{{ $buku->cover_url }}"
                                  alt="{{ $buku->judul }}"
                                  class="book-cover-img"
                                  loading="lazy"
@@ -1633,7 +1634,7 @@
                                         data-rak="{{ $buku->rak ?? 'Rak F-12' }}"
                                         data-stok="{{ $buku->stok }}"
                                         data-halaman="{{ $buku->jumlahHalaman ?? 320 }}"
-                                        data-cover="{{ $buku->cover ?? '' }}"
+                                        data-cover="{{ $buku->cover_url ?? '' }}"
                                         onclick="openBorrowModal(this)">
                                     Pinjam Buku
                                 </button>
@@ -1744,6 +1745,7 @@
                 </div>
             </div>
         @endif
+        </div> <!-- /#catalogResultsArea -->
     </div>
 
     @auth
@@ -1816,18 +1818,19 @@
                         <p class="modal-instructions">
                             Pilih cara booking buku ini: masukkan ke <strong>Keranjang Booking</strong> untuk meminjam beberapa buku sekaligus, atau ajukan booking sekarang untuk mendapatkan tiket QR instan.
                         </p>
-                        <div class="modal-actions">
-                            <button type="button" class="btn-modal-cancel" onclick="hideBorrowModal()">
-                                Tutup
-                            </button>
-                            <form id="modalFormCart" method="POST" action="" class="form-ajax-cart">
+                        <div id="modalAlertSedangDipinjam" style="display: none; background: #fef2f2; border: 1.5px solid #fecaca; color: #b91c1c; border-radius: 12px; padding: 12px 16px; font-size: 13px; font-weight: 700; margin-bottom: 16px; align-items: center; gap: 10px;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink: 0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                            <span>Perhatian: Buku ini sedang dipinjam oleh anggota lain dan belum tersedia untuk dibooking saat ini.</span>
+                        </div>
+                        <div class="modal-actions" style="display: flex; flex-direction: row; gap: 12px; align-items: center; width: 100%;">
+                            <form id="modalFormCart" method="POST" action="" class="form-ajax-cart" style="flex: 1; margin: 0;">
                                 @csrf
-                                <button type="submit" class="btn-modal-secondary">
+                                <button type="submit" class="btn-modal-secondary" style="width: 100%; height: 46px; justify-content: center;" id="modalBtnCartSubmit">
                                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                                     + Keranjang Booking
                                 </button>
                             </form>
-                            <a id="modalBtnBookingDirect" href="#" class="btn-modal-primary">
+                            <a id="modalBtnBookingDirect" href="#" class="btn-modal-primary" style="flex: 1; height: 46px; justify-content: center;">
                                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                     <rect x="3" y="3" width="7" height="7"></rect>
                                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -1905,13 +1908,84 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
+        let currentModalBookStok = 0;
+        let currentModalBookJudul = '';
+        let currentModalBookDipinjam = false;
+        let catalogFilterAbortController = null;
+
+        async function applyRealtimeCatalogFilter(targetUrl) {
+            const form = document.getElementById('catalogFilterForm');
+            const resultsArea = document.getElementById('catalogResultsArea');
+            if (!resultsArea) {
+                if (form) form.submit();
+                return;
+            }
+
+            const formData = new FormData(form);
+            const params = new URLSearchParams(formData);
+            const url = targetUrl || ('{{ route('katalog.index') }}?' + params.toString());
+
+            if (catalogFilterAbortController) {
+                catalogFilterAbortController.abort();
+            }
+            catalogFilterAbortController = new AbortController();
+
+            resultsArea.style.opacity = '0.5';
+            resultsArea.style.pointerEvents = 'none';
+
+            try {
+                const response = await fetch(url, {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    },
+                    signal: catalogFilterAbortController.signal
+                });
+
+                if (response.ok) {
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+                    const newResults = doc.getElementById('catalogResultsArea');
+
+                    if (newResults) {
+                        resultsArea.innerHTML = newResults.innerHTML;
+                        window.history.replaceState({}, '', url);
+                    }
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Realtime catalog filter error:', err);
+                }
+            } finally {
+                resultsArea.style.opacity = '1';
+                resultsArea.style.pointerEvents = '';
+            }
+        }
+
+        document.addEventListener('click', function(e) {
+            const pageLink = e.target.closest('#catalogResultsArea a.page-btn, #catalogResultsArea .pagination a');
+            if (pageLink && pageLink.href) {
+                e.preventDefault();
+                applyRealtimeCatalogFilter(pageLink.href);
+            }
+        });
+
+        const catalogFilterFormEl = document.getElementById('catalogFilterForm');
+        if (catalogFilterFormEl) {
+            catalogFilterFormEl.addEventListener('submit', function(e) {
+                e.preventDefault();
+                applyRealtimeCatalogFilter();
+            });
+        }
+
         function handleSortChange(sortValue) {
             const form = document.getElementById('catalogFilterForm');
             const sortInput = form.querySelector('input[name="sort"]');
             if (sortInput) {
                 sortInput.value = sortValue;
             }
-            form.submit();
+            applyRealtimeCatalogFilter();
         }
 
         function openBorrowModal(btn) {
@@ -1923,10 +1997,19 @@
             const stok = parseInt(btn.getAttribute('data-stok') || '0', 10);
             const cover = btn.getAttribute('data-cover') || '';
 
+            currentModalBookStok = stok;
+            currentModalBookJudul = judul;
+            currentModalBookDipinjam = (stok <= 0);
+
+            const alertBox = document.getElementById('modalAlertSedangDipinjam');
+            if (alertBox) {
+                alertBox.style.display = currentModalBookDipinjam ? 'flex' : 'none';
+            }
+
             document.getElementById('modalJudul').textContent = judul;
             document.getElementById('modalPenulis').textContent = `${penulis} · ${kategori}`;
             document.getElementById('modalRak').textContent = `Lokasi: ${rak}`;
-            document.getElementById('modalStok').textContent = stok > 0 ? `${stok} eksemplar` : 'Stok habis';
+            document.getElementById('modalStok').textContent = stok > 0 ? `${stok} eksemplar` : 'Sedang dipinjam (stok habis)';
 
             const coverImg = document.getElementById('modalCover');
             if (cover) {
@@ -1956,6 +2039,32 @@
             modal.classList.add('show');
             document.body.style.overflow = 'hidden';
         }
+
+        // Event listener: Alert jika buku sedang dipinjam saat klik tombol di modal
+        document.addEventListener('DOMContentLoaded', function() {
+            const btnDirect = document.getElementById('modalBtnBookingDirect');
+            if (btnDirect) {
+                btnDirect.addEventListener('click', function(e) {
+                    if (currentModalBookDipinjam || currentModalBookStok <= 0) {
+                        e.preventDefault();
+                        alert('Perhatian: Buku "' + currentModalBookJudul + '" saat ini sedang dipinjam oleh anggota lain dan belum tersedia untuk dibooking.');
+                        return false;
+                    }
+                });
+            }
+
+            const formCart = document.getElementById('modalFormCart');
+            if (formCart) {
+                formCart.addEventListener('submit', function(e) {
+                    if (currentModalBookDipinjam || currentModalBookStok <= 0) {
+                        e.preventDefault();
+                        e.stopImmediatePropagation();
+                        alert('Perhatian: Buku "' + currentModalBookJudul + '" saat ini sedang dipinjam oleh anggota lain dan belum tersedia untuk dibooking.');
+                        return false;
+                    }
+                }, true);
+            }
+        });
 
         function hideBorrowModal() {
             const modal = document.getElementById('borrowModal');

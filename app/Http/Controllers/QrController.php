@@ -546,6 +546,10 @@ class QrController extends Controller
             $hargaBuku = (float) ($buku?->harga ?? 0);
             $estDenda = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
 
+            $dendaRecord = $detailPengembalian->denda;
+            $isDendaLunas = $dendaRecord && $dendaRecord->status === 'Lunas';
+            $isManualReturn = empty($detailPengembalian->kode_kembali) && empty($detailPengembalian->qr_kembali);
+
             return response()->json([
                 'success' => true,
                 'type' => 'pengembalian',
@@ -555,6 +559,10 @@ class QrController extends Controller
                     'kodeKembali' => $detailPengembalian->kode_kembali,
                     'statusBuku' => $detailPengembalian->statusBuku,
                     'kondisiLaporan' => $detailPengembalian->kondisi_laporan ?? 'Baik',
+                    'dendaLunas' => $isDendaLunas,
+                    'statusDenda' => $dendaRecord?->status,
+                    'jumlahDendaTerbayar' => $isDendaLunas ? (float) $dendaRecord->jumlah : 0,
+                    'isManualReturn' => $isManualReturn,
                     'waktuPengajuan' => $detailPengembalian->waktu_pengajuan_kembali ? Carbon::parse($detailPengembalian->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-',
                     'member' => [
                         'id' => $member?->id,
@@ -958,6 +966,10 @@ class QrController extends Controller
                     $hargaBuku = (float) ($buku?->harga ?? 0);
                     $estDenda = $isOverdue ? ($hargaBuku * $persenDenda) : 0;
 
+                    $dendaRecord = $activeDetail->denda;
+                    $isDendaLunas = $dendaRecord && $dendaRecord->status === 'Lunas';
+                    $isManualReturn = empty($activeDetail->kode_kembali) && empty($activeDetail->qr_kembali);
+
                     return response()->json([
                         'success' => true,
                         'type' => 'pengembalian',
@@ -967,6 +979,10 @@ class QrController extends Controller
                             'kodeKembali' => $activeDetail->kode_kembali ?? ('KB-'.Carbon::now()->format('Ymd').'-'.str_pad($activeDetail->id, 4, '0', STR_PAD_LEFT)),
                             'statusBuku' => $activeDetail->statusBuku,
                             'kondisiLaporan' => $activeDetail->kondisi_laporan ?? 'Baik',
+                            'dendaLunas' => $isDendaLunas,
+                            'statusDenda' => $dendaRecord?->status,
+                            'jumlahDendaTerbayar' => $isDendaLunas ? (float) $dendaRecord->jumlah : 0,
+                            'isManualReturn' => $isManualReturn,
                             'waktuPengajuan' => $activeDetail->waktu_pengajuan_kembali ? Carbon::parse($activeDetail->waktu_pengajuan_kembali)->translatedFormat('d M Y, H:i') : '-',
                             'member' => [
                                 'id' => $member?->id,

@@ -96,7 +96,8 @@ class DendaMonitoringTest extends TestCase
         $response->assertSee('Total Kas Denda Masuk');
         $response->assertSee('Fajar Nugroho');
         $response->assertSee('Laskar Pelangi');
-        $response->assertSee('Terima Tunai');
+        $response->assertSee('Generate QRIS');
+        $response->assertDontSee('Terima Tunai');
         // Tidak ada lagi tabel penetapan denda manual
         $response->assertDontSee('Pengembalian Membutuhkan Penetapan Denda');
         $response->assertDontSee('Hitung & Konfirmasi Denda');

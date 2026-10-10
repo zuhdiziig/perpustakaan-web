@@ -1,4 +1,4 @@
-@extends('layouts.anggota')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : (auth()->user()->role === 'petugas' ? 'layouts.petugas' : 'layouts.anggota'))
 
 @section('title', 'Profil Saya - BOOKNEST')
 
@@ -523,10 +523,14 @@
         <div class="profile-breadcrumb">
             <a href="{{ route('home') }}">BOOKNEST</a>
             <span class="separator">/</span>
-            <span class="current">Anggota</span>
+            <span class="current">{{ ucfirst($user->role === 'petugas' ? 'Petugas' : ($user->role === 'admin' ? 'Admin' : 'Anggota')) }}</span>
         </div>
         <h1 class="profile-title">Profil Saya</h1>
-        <p class="profile-subtitle">Kelola data pribadi, keanggotaan, dan keamanan akunmu.</p>
+        @if($user->role === 'member')
+            <p class="profile-subtitle">Kelola data pribadi, keanggotaan, dan keamanan akunmu.</p>
+        @else
+            <p class="profile-subtitle">Kelola data pribadi, informasi akun, dan keamanan.</p>
+        @endif
     </div>
 
     <!-- FLASH MESSAGES -->
@@ -574,11 +578,11 @@
                 </div>
 
                 <h2 class="summary-name">{{ $user->name }}</h2>
-                <p class="summary-code">{{ $user->kode_anggota }}</p>
+                <p class="summary-code">{{ $user->kode_anggota ?? ('ID #'.$user->id) }}</p>
 
                 <div class="badge-status-pill {{ $user->status === 'aktif' ? 'aktif' : 'nonaktif' }}">
                     <span class="dot"></span>
-                    <span>Anggota {{ $user->status ?? 'aktif' }}</span>
+                    <span>{{ ucfirst($user->role === 'petugas' ? 'Petugas' : ($user->role === 'admin' ? 'Admin' : 'Anggota')) }} {{ $user->status ?? 'aktif' }}</span>
                 </div>
 
                 <div class="summary-meta-table">
@@ -588,10 +592,17 @@
                             {{ $user->created_at ? $user->created_at->translatedFormat('d M Y') : '01 Sep 2026' }}
                         </span>
                     </div>
-                    <div class="summary-meta-row">
-                        <span class="summary-meta-label">Batas pinjam</span>
-                        <span class="summary-meta-value">{{ $batasPinjam ?? 3 }} buku</span>
-                    </div>
+                    @if($user->role === 'member')
+                        <div class="summary-meta-row">
+                            <span class="summary-meta-label">Batas pinjam</span>
+                            <span class="summary-meta-value">{{ $batasPinjam ?? 3 }} buku</span>
+                        </div>
+                    @else
+                        <div class="summary-meta-row">
+                            <span class="summary-meta-label">Peran sistem</span>
+                            <span class="summary-meta-value">{{ ucfirst($user->role) }}</span>
+                        </div>
+                    @endif
                 </div>
 
                 <!-- FORM UPLOAD FOTO -->
@@ -616,11 +627,11 @@
                 @endif
             </div>
 
-            <!-- PRIVASI DATA ANGGOTA -->
+            <!-- PRIVASI DATA -->
             <div class="privacy-card">
-                <h3 class="privacy-title">Privasi data anggota</h3>
+                <h3 class="privacy-title">{{ $user->role === 'member' ? 'Privasi data anggota' : 'Privasi & Keamanan' }}</h3>
                 <p class="privacy-desc">
-                    NIK hanya digunakan untuk verifikasi. Hubungi petugas untuk memperbarui identitas resmi.
+                    Identitas dan akses akun Anda dilindungi oleh protokol keamanan terintegrasi BOOKNEST.
                 </p>
             </div>
         </div>
@@ -716,7 +727,12 @@
                         <!-- Password Saat Ini -->
                         <div class="form-group">
                             <label class="form-label" for="inputCurrentPassword">Password Saat Ini</label>
-                            <input type="password" id="inputCurrentPassword" name="current_password" class="form-control" required placeholder="••••••••••">
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="inputCurrentPassword" name="current_password" class="form-control" required placeholder="••••••••••" style="padding-right: 42px;">
+                                <button type="button" onclick="togglePassVisibility('inputCurrentPassword', this)" aria-label="Lihat password" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                             @error('current_password')
                                 <span class="form-error-msg">{{ $message }}</span>
                             @enderror
@@ -725,7 +741,12 @@
                         <!-- Password Baru -->
                         <div class="form-group">
                             <label class="form-label" for="inputNewPassword">Password Baru</label>
-                            <input type="password" id="inputNewPassword" name="password" class="form-control" required placeholder="Minimal 8 karakter">
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="inputNewPassword" name="password" class="form-control" required placeholder="Minimal 8 karakter" style="padding-right: 42px;">
+                                <button type="button" onclick="togglePassVisibility('inputNewPassword', this)" aria-label="Lihat password" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                             @error('password')
                                 <span class="form-error-msg">{{ $message }}</span>
                             @enderror
@@ -734,7 +755,12 @@
                         <!-- Konfirmasi Password Baru -->
                         <div class="form-group full-width">
                             <label class="form-label" for="inputConfirmPassword">Konfirmasi Password Baru</label>
-                            <input type="password" id="inputConfirmPassword" name="password_confirmation" class="form-control" required placeholder="Ulangi password baru">
+                            <div style="position: relative; display: flex; align-items: center;">
+                                <input type="password" id="inputConfirmPassword" name="password_confirmation" class="form-control" required placeholder="Ulangi password baru" style="padding-right: 42px;">
+                                <button type="button" onclick="togglePassVisibility('inputConfirmPassword', this)" aria-label="Lihat password" style="position: absolute; right: 10px; background: none; border: none; cursor: pointer; color: #94a3b8; display: flex; align-items: center; justify-content: center; padding: 4px;">
+                                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
 
@@ -860,6 +886,16 @@
         .catch(err => {
             console.error('Gagal menyimpan preferensi:', err);
         });
+    }
+
+    function togglePassVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const isPassword = input.type === 'password';
+        input.type = isPassword ? 'text' : 'password';
+        btn.innerHTML = isPassword
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>`;
     }
 </script>
 @endsection

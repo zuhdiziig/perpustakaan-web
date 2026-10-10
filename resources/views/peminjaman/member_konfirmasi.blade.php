@@ -891,20 +891,7 @@
                 </div>
             </form>
 
-            @if ($bisaMeminjam)
-                <div style="margin-top: 12px; padding-top: 14px; border-top: 1px dashed #e2e8f0; text-align: center;">
-                    <form method="POST" action="{{ route('keranjang.tambah', $buku->idBuku) }}">
-                        @csrf
-                        <button type="submit" style="width: 100%; padding: 12px 18px; border-radius: 12px; background: #f0fdfa; border: 1.5px solid #0f766e; color: #0f766e; font-weight: 700; font-size: 13.5px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer; transition: all 0.2s;">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
-                            + Masukkan ke Keranjang (Booking Bersama Buku Lain)
-                        </button>
-                    </form>
-                    <div style="font-size: 12px; color: #64748b; margin-top: 6px;">
-                        Ingin meminjam lebih dari 1 buku sekaligus? Kumpulkan dulu di keranjang dan ajukan dalam 1 tiket QR.
-                    </div>
-                </div>
-            @endif
+
 
             <div style="margin-top: 14px; text-align: center;">
                 <a href="{{ route('katalog.show', $buku->idBuku) }}" class="btn-back-detail" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; color: #64748b; font-size: 13px; font-weight: 600; text-decoration: none;">

@@ -252,4 +252,173 @@ class PetugasBarcodePengembalianTest extends TestCase
             ->assertJsonPath('data.member.name', $this->member->name)
             ->assertJsonPath('data.daftarBuku.0.judul', $this->buku->judul);
     }
+
+    public function test_petugas_dapat_menyelesaikan_pengembalian_langsung_satu_buku_di_meja_sirkulasi(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(3)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(11)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
+            'idUserMember' => $this->member->id,
+            'detail_ids' => [$detail->id],
+            'kondisi' => [
+                $detail->id => 'Baik',
+            ],
+        ]);
+
+        $response->assertRedirect(route('barcode.scan', ['member_id' => $this->member->id, 'tab' => 'kembali']));
+        $response->assertSessionHas('success');
+
+        $detail->refresh();
+        $this->assertSame('Kembali', $detail->statusBuku);
+
+        $this->eksemplar->refresh();
+        $this->assertSame('Tersedia', $this->eksemplar->status);
+        $this->assertSame('Baik', $this->eksemplar->kondisi);
+
+        $peminjaman->refresh();
+        $this->assertSame('Selesai', $peminjaman->status);
+
+        $this->assertDatabaseHas('pengembalian', [
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idUserPetugas' => $this->petugas->id,
+            'kondisiBuku' => 'Baik',
+        ]);
+    }
+
+    public function test_petugas_dapat_menyelesaikan_pengembalian_langsung_banyak_buku_sekaligus(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $buku2 = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Fiqih Sunnah',
+            'penulis' => 'Sayyid Sabiq',
+            'penerbit' => 'Pena Pundi',
+            'tahunTerbit' => 2026,
+            'harga' => 120000,
+            'stok' => 1,
+            'kondisi' => 'Baik',
+        ]);
+        $eksemplar2 = $buku2->eksemplar()->first();
+        $eksemplar2->update(['status' => 'Dipinjam']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(2)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(12)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 2,
+        ]);
+
+        $detail1 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $detail2 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $eksemplar2->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
+            'idUserMember' => $this->member->id,
+            'detail_ids' => [$detail1->id, $detail2->id],
+            'kondisi' => [
+                $detail1->id => 'Baik',
+                $detail2->id => 'Baik',
+            ],
+        ]);
+
+        $response->assertRedirect(route('barcode.scan', ['member_id' => $this->member->id, 'tab' => 'kembali']));
+        $response->assertSessionHas('success');
+
+        $detail1->refresh();
+        $detail2->refresh();
+        $this->assertSame('Kembali', $detail1->statusBuku);
+        $this->assertSame('Kembali', $detail2->statusBuku);
+
+        $this->eksemplar->refresh();
+        $eksemplar2->refresh();
+        $this->assertSame('Tersedia', $this->eksemplar->status);
+        $this->assertSame('Tersedia', $eksemplar2->status);
+
+        $peminjaman->refresh();
+        $this->assertSame('Selesai', $peminjaman->status);
+    }
+
+    public function test_pengembalian_langsung_menghitung_denda_jika_buku_rusak_atau_terlambat(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(25)->toDateString(),
+            'batasKembali' => Carbon::now()->subDays(10)->toDateString(), // Terlambat 10 hari (2 minggu)
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
+            'idUserMember' => $this->member->id,
+            'detail_ids' => [$detail->id],
+            'kondisi' => [
+                $detail->id => 'Rusak',
+            ],
+        ]);
+
+        $response->assertRedirect(route('barcode.scan', ['member_id' => $this->member->id, 'tab' => 'kembali']));
+        $response->assertSessionHas('success');
+
+        $detail->refresh();
+        $this->assertSame('Kembali', $detail->statusBuku);
+        $this->assertNotNull($detail->id_denda);
+
+        // Harga buku: 85.000
+        // Terlambat 10 hari = 2 minggu terlambat = 20% x 85.000 = 17.000
+        // Rusak = 100% x 85.000 = 85.000
+        // Total = 102.000
+        $denda = Denda::find($detail->id_denda);
+        $this->assertNotNull($denda);
+        $this->assertEquals(102000, $denda->jumlah);
+        $this->assertSame('Belum Dibayar', $denda->status);
+        $this->assertStringContainsString('Terlambat 2 Minggu (20%)', $denda->jenisDenda);
+        $this->assertStringContainsString('Kerusakan (100% Harga Buku)', $denda->jenisDenda);
+
+        $this->eksemplar->refresh();
+        $this->assertSame('Tersedia', $this->eksemplar->status);
+        $this->assertSame('Rusak', $this->eksemplar->kondisi);
+    }
 }

@@ -741,7 +741,7 @@
                                 {{-- RETURN & FINE DETAILS --}}
                                 <td>
                                     @if (in_array($item->status, ['Booking', 'Siap Diambil']))
-                                        <div style="display: flex; flex-direction: column; gap: 4px; align-items: flex-start;">
+                                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
                                             <a href="{{ route('member.kartu-saya') }}" target="_blank" class="action-pay-qr" style="background: #0f766e; text-decoration: none;" title="Tunjukkan QR Anggota ke petugas meja sirkulasi">
                                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                                     <rect x="3" y="3" width="7" height="7"></rect>
@@ -751,6 +751,13 @@
                                                 </svg>
                                                 <span>QR Anggota</span>
                                             </a>
+                                            <form method="POST" action="{{ route('peminjaman.booking.batal', $item->idPeminjaman) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking peminjaman ini? Eksemplar buku akan dikembalikan ke ketersediaan umum.');" style="margin: 0;">
+                                                @csrf
+                                                <button type="submit" style="background: #fff; border: 1.5px solid #f87171; color: #dc2626; padding: 4px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
+                                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                                    Batalkan Booking
+                                                </button>
+                                            </form>
                                             <span style="font-size: 11px; color: #64748b;">
                                                 Tunjukkan ke Petugas
                                             </span>

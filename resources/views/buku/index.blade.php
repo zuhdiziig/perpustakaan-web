@@ -685,9 +685,7 @@
                         <th>Kategori</th>
                         <th>Stok Fisik</th>
                         <th>Kondisi</th>
-                        @if (auth()->user()->role === 'admin')
-                            <th style="text-align: right; width: 140px;">Aksi</th>
-                        @endif
+                        <th style="text-align: right; width: 170px;">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -699,8 +697,8 @@
                             <td>
                                 <div class="book-cell">
                                     <div class="book-thumb">
-                                        @if ($item->cover)
-                                            <img src="{{ asset('storage/' . $item->cover) }}"
+                                        @if ($item->cover_url)
+                                            <img src="{{ $item->cover_url }}"
                                                  alt="Cover"
                                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                                             <div style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center; background: #f1f5f9; color: #94a3b8;">
@@ -755,9 +753,22 @@
                                     {{ $item->kondisi ?? 'Baik' }}
                                 </span>
                             </td>
-                            @if (auth()->user()->role === 'admin')
-                                <td>
-                                    <div class="action-group" style="justify-content: flex-end;">
+                            <td>
+                                <div class="action-group" style="justify-content: flex-end;">
+                                    {{-- Tombol Edit Stok: Petugas & Admin --}}
+                                    <button type="button"
+                                            class="btn-action-edit"
+                                            style="background: #f0fdfa; border: 1.5px solid #99f6e4; color: #0f766e; cursor: pointer; padding: 6px 12px; font-weight: 700; border-radius: 8px; font-size: 12px; display: inline-flex; align-items: center; gap: 5px;"
+                                            onclick="openModalEditStok({{ $item->idBuku }}, '{{ addslashes($item->judul) }}', {{ $item->stok }}, '{{ $item->kondisi ?? 'Baik' }}')"
+                                            title="Ubah Stok Fisik Buku">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                        </svg>
+                                        Edit Stok
+                                    </button>
+
+                                    @if (auth()->user()->role === 'admin')
                                         {{-- Tombol Ubah: Khusus Admin --}}
                                         <a href="{{ route('buku.edit', $item->idBuku) }}"
                                            class="btn-action-edit"
@@ -784,9 +795,9 @@
                                                 Hapus
                                             </button>
                                         </form>
-                                    </div>
-                                </td>
-                            @endif
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
@@ -829,4 +840,79 @@
         </div>
     </div>
 </div>
+
+{{-- MODAL UBAH STOK BUKU --}}
+<div id="modalEditStok" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px);">
+    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;" onclick="event.stopPropagation()">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+            <div>
+                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Ubah Stok Fisik Buku</h3>
+                <p id="editStokJudul" style="font-size: 13px; color: #64748b; margin: 0; word-break: break-word;">Judul Buku</p>
+            </div>
+            <button type="button" onclick="closeModalEditStok()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
+        </div>
+
+        <form id="formEditStok" action="" method="POST">
+            @csrf
+            @method('PATCH')
+
+            <div style="margin-bottom: 16px;">
+                <label for="inputJumlahStok" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                    Jumlah Stok Fisik Tersedia
+                </label>
+                <input type="number"
+                       name="stok"
+                       id="inputJumlahStok"
+                       min="0"
+                       class="form-control"
+                       required
+                       style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 14px; font-weight: 700; color: #0f172a;">
+                <span style="font-size: 11.5px; color: #64748b; margin-top: 4px; display: block;">
+                    *Menambah stok akan mencetak eksemplar fisik baru secara otomatis.
+                </span>
+            </div>
+
+            <div style="margin-bottom: 22px;">
+                <label for="selectKondisiStok" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                    Kondisi Fisik Buku
+                </label>
+                <select name="kondisi" id="selectKondisiStok" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
+                    <option value="Baik">Baik (Bebas Kerusakan)</option>
+                    <option value="Rusak">Rusak</option>
+                    <option value="Hilang">Hilang</option>
+                </select>
+            </div>
+
+            <div style="display: flex; justify-content: flex-end; gap: 10px;">
+                <button type="button" onclick="closeModalEditStok()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
+                    Batal
+                </button>
+                <button type="submit" style="padding: 10px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; background: #0f766e; color: #ffffff; cursor: pointer;">
+                    Simpan Stok
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openModalEditStok(idBuku, judul, stok, kondisi) {
+        const modal = document.getElementById('modalEditStok');
+        const form = document.getElementById('formEditStok');
+        document.getElementById('editStokJudul').textContent = judul;
+        document.getElementById('inputJumlahStok').value = stok;
+        document.getElementById('selectKondisiStok').value = kondisi || 'Baik';
+        form.action = "{{ url('/buku') }}/" + idBuku + "/update-stok";
+
+        modal.style.display = 'flex';
+    }
+
+    function closeModalEditStok() {
+        document.getElementById('modalEditStok').style.display = 'none';
+    }
+
+    document.getElementById('modalEditStok').addEventListener('click', function(e) {
+        if (e.target === this) closeModalEditStok();
+    });
+</script>
 @endsection

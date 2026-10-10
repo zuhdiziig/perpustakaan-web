@@ -555,12 +555,6 @@
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
                 </a>
-                <a href="{{ route('buku.index') }}" class="topbar-nav-link {{ request()->routeIs('buku.*') ? 'active' : '' }}">
-                    Kelola Buku
-                </a>
-                <a href="{{ route('laporan.index') }}" class="topbar-nav-link {{ request()->routeIs('laporan.*') ? 'active' : '' }}">
-                    Laporan
-                </a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
                     Tentang
                 </a>

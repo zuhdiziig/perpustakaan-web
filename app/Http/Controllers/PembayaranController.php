@@ -212,7 +212,37 @@ class PembayaranController extends Controller
             'denda.pengembalian.peminjaman.details.buku.barcode',
             'denda.pengembalian.peminjaman.member',
             'denda.details.peminjaman.member',
-        ])->findOrFail($idPembayaran);
+        ])->find($idPembayaran);
+
+        if (! $pembayaran) {
+            // Cek apakah $idPembayaran adalah idDenda
+            $denda = Denda::with([
+                'pengembalian.peminjaman.details.buku.barcode',
+                'pengembalian.peminjaman.member',
+                'details.peminjaman.member',
+            ])->find($idPembayaran);
+
+            if ($denda) {
+                $pembayaran = Pembayaran::firstOrCreate(
+                    ['idDenda' => $denda->idDenda],
+                    [
+                        'tanggalBayar' => now(),
+                        'nominal' => $denda->jumlah,
+                        'metode' => 'QRIS',
+                        'status' => 'Sukses',
+                    ]
+                );
+                $pembayaran->load([
+                    'denda.pengembalian.peminjaman.details.buku.barcode',
+                    'denda.pengembalian.peminjaman.member',
+                    'denda.details.peminjaman.member',
+                ]);
+            }
+        }
+
+        if (! $pembayaran) {
+            abort(404, 'Data nota pembayaran tidak ditemukan.');
+        }
 
         $user = auth()->user();
         if ($user && $user->role === 'member') {

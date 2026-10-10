@@ -956,8 +956,8 @@
             <!-- Kolom kiri: cover & lokasi -->
             <div>
                 <div class="cover-card">
-                    @if (! empty($buku->cover))
-                        <img src="{{ $buku->cover }}"
+                    @if (! empty($buku->cover_url))
+                        <img src="{{ $buku->cover_url }}"
                              alt="Sampul buku {{ $buku->judul }}"
                              fetchpriority="high"
                              onerror="this.onerror=null; this.src='{{ $fallbackCover }}';">
