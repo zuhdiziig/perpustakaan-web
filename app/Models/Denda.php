@@ -25,6 +25,11 @@ class Denda extends Model
         return $this->hasMany(Pembayaran::class, 'idDenda', 'idDenda');
     }
 
+    public function latestPembayaran()
+    {
+        return $this->hasOne(Pembayaran::class, 'idDenda', 'idDenda')->latestOfMany('idPembayaran');
+    }
+
     public function details()
     {
         return $this->hasMany(DetailPeminjaman::class, 'id_denda', 'idDenda');

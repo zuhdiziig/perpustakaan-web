@@ -40,7 +40,7 @@ class LaporanController extends Controller
                 ->latest('idPengembalian')
                 ->get();
         } elseif ($jenisLaporan === 'denda') {
-            $dataDenda = Denda::with(['pengembalian.peminjaman.member', 'pembayaran'])
+            $dataDenda = Denda::with(['pengembalian.peminjaman.member', 'details.peminjaman.member', 'pembayaran'])
                 ->whereBetween('created_at', [$tglMulai.' 00:00:00', $tglSelesai.' 23:59:59'])
                 ->latest('idDenda')
                 ->get();

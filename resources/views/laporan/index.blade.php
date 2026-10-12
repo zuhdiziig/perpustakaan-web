@@ -119,8 +119,8 @@
                         @forelse ($dataPeminjaman as $p)
                             <tr>
                                 <td><strong>#TRX-{{ str_pad($p->idPeminjaman, 5, '0', STR_PAD_LEFT) }}</strong></td>
-                                <td>{{ $p->member->name ?? '-' }}</td>
-                                <td>{{ $p->petugas->name ?? '-' }}</td>
+                                <td>{{ $p->member?->name ?? '-' }}</td>
+                                <td>{{ $p->petugas?->name ?? '-' }}</td>
                                 <td>
                                     @foreach ($p->details as $d)
                                         <div>• {{ $d->buku->judul ?? '-' }}</div>
@@ -160,8 +160,8 @@
                         @forelse ($dataPengembalian as $ret)
                             <tr>
                                 <td><strong>#RET-{{ str_pad($ret->idPengembalian, 5, '0', STR_PAD_LEFT) }}</strong></td>
-                                <td>{{ $ret->peminjaman->member->name ?? '-' }}</td>
-                                <td>{{ $ret->petugas->name ?? '-' }}</td>
+                                <td>{{ $ret->peminjaman?->member?->name ?? '-' }}</td>
+                                <td>{{ $ret->petugas?->name ?? '-' }}</td>
                                 <td>{{ $ret->tanggalKembali }}</td>
                                 <td>
                                     <span class="badge {{ $ret->kondisiBuku === 'Baik' ? 'badge-success' : ($ret->kondisiBuku === 'Rusak' ? 'badge-warning' : 'badge-danger') }}">
@@ -203,10 +203,24 @@
                         @forelse ($dataDenda as $d)
                             <tr>
                                 <td><strong>#DND-{{ str_pad($d->idDenda, 5, '0', STR_PAD_LEFT) }}</strong></td>
-                                <td>{{ $d->pengembalian->peminjaman->member->name ?? '-' }}</td>
+                                <td>{{ $d->pengembalian?->peminjaman?->member?->name ?? $d->details?->first()?->peminjaman?->member?->name ?? '-' }}</td>
                                 <td>{{ $d->jenisDenda }}</td>
                                 <td><strong>Rp {{ number_format($d->jumlah, 0, ',', '.') }}</strong></td>
-                                <td>{{ $d->pembayaran->metode ?? 'Tunai / Belum' }}</td>
+                                <td>
+                                    @php
+                                        $suksesPay = $d->pembayaran->firstWhere('status', 'Sukses');
+                                        $pay = $suksesPay ?? $d->pembayaran->first();
+                                    @endphp
+                                    @if ($pay)
+                                        <span class="badge {{ $d->status === 'Lunas' ? 'badge-success' : 'badge-warning' }}">
+                                            {{ $pay->metode }}
+                                        </span>
+                                    @elseif ($d->status === 'Lunas')
+                                        <span class="badge badge-success">Tunai</span>
+                                    @else
+                                        <span style="color: #64748b;">Belum Dibayar</span>
+                                    @endif
+                                </td>
                                 <td>
                                     <span class="badge {{ $d->status === 'Lunas' ? 'badge-success' : 'badge-danger' }}">
                                         {{ $d->status }}
