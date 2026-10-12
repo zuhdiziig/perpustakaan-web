@@ -1796,7 +1796,7 @@
                         <button type="button" class="btn-modal-cancel" onclick="hideBorrowModal()">
                             Tutup
                         </button>
-                        <a href="{{ route('login') }}" class="btn-modal-primary">
+                        <a id="modalGuestLoginBtn" href="{{ route('login') }}" class="btn-modal-primary">
                             Masuk Akun
                         </a>
                     </div>
@@ -1936,6 +1936,10 @@
             const btnAdminManage = document.getElementById('modalAdminKelolaBtn');
             if (btnAdminManage && idBuku) {
                 btnAdminManage.href = `{{ url('/buku') }}/${idBuku}/edit`;
+            }
+            const btnGuestLogin = document.getElementById('modalGuestLoginBtn');
+            if (btnGuestLogin && idBuku) {
+                btnGuestLogin.href = `{{ route('login') }}?redirect=${encodeURIComponent('/katalog/' + idBuku)}`;
             }
 
             modal.classList.add('show');
@@ -2262,6 +2266,7 @@
     @auth
         @if (auth()->user()->role === 'member')
             @include('layouts.partials.member_feedback_toasts')
+            {{-- Realtime Sirkulasi Notification Modal & Polling --}}
             @include('layouts.partials.member_realtime_notification')
         @endif
     @endauth

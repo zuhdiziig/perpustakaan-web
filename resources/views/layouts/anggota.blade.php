@@ -621,6 +621,7 @@
     @yield('scripts')
 
     @include('layouts.partials.member_feedback_toasts')
+    {{-- Realtime Sirkulasi Notification Modal & Polling --}}
     @include('layouts.partials.member_realtime_notification')
 </body>
 </html>

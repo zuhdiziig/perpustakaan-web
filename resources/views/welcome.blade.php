@@ -1511,5 +1511,8 @@
             }
         });
     </script>
+
+    {{-- Realtime Sirkulasi Notification Modal & Polling --}}
+    @include('layouts.partials.member_realtime_notification')
 </body>
 </html>

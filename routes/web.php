@@ -59,12 +59,14 @@ Route::middleware('guest')->group(function () {
     Route::get('/login', [AuthController::class, 'showLoginForm'])
         ->name('login');
 
-    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/login', [AuthController::class, 'login'])
+        ->middleware('throttle:10,1');
 
     Route::get('/register', [AuthController::class, 'showRegisterForm'])
         ->name('register');
 
-    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/register', [AuthController::class, 'register'])
+        ->middleware('throttle:10,1');
 
     Route::get('/register-success', [AuthController::class, 'registerSuccess'])
         ->name('register.success');
@@ -331,16 +333,18 @@ Route::middleware('auth')->group(function () {
             ->name('pembayaran.verifikasi');
 
         // API Scan Sirkulasi
-        Route::post('/api/scan/member', [QrController::class, 'apiScanMember'])
-            ->name('api.scan.member');
+        Route::middleware('throttle:60,1')->group(function () {
+            Route::post('/api/scan/member', [QrController::class, 'apiScanMember'])
+                ->name('api.scan.member');
 
-        Route::post('/api/scan/buku', [QrController::class, 'apiScanBuku'])
-            ->name('api.scan.buku');
+            Route::post('/api/scan/buku', [QrController::class, 'apiScanBuku'])
+                ->name('api.scan.buku');
 
-        Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
-            ->name('api.scan.pengembalian.member');
+            Route::post('/api/scan/pengembalian/member', [QrController::class, 'apiScanPengembalianMember'])
+                ->name('api.scan.pengembalian.member');
 
-        Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
-            ->name('api.scan.identifikasi');
+            Route::post('/api/scan/identifikasi', [QrController::class, 'apiIdentifikasi'])
+                ->name('api.scan.identifikasi');
+        });
     });
 });

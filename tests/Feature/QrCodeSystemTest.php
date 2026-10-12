@@ -592,4 +592,65 @@ class QrCodeSystemTest extends TestCase
             ->assertJsonPath('pengembalian.namaPetugas', $this->petugas->name)
             ->assertJsonPath('pengembalian.kondisiBuku', 'Baik');
     }
+
+    public function test_scan_identifikasi_in_pengembalian_context_detects_active_booking(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $buku = Buku::factory()->create(['judul' => 'Kecerdasan Buatan']);
+
+        $pinjam = Peminjaman::create([
+            'idUserMember' => $this->member1->id,
+            'tanggalPinjam' => today(),
+            'batasKembali' => today()->addDays(30),
+            'status' => 'Booking',
+            'kode_booking' => 'BK-TEST-BOOK-99',
+            'totalBuku' => 1,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $pinjam->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'jumlah' => 1,
+            'statusBuku' => 'Booking',
+        ]);
+
+        $response = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => $this->member1->qr_token,
+            'context' => 'pengembalian',
+        ]);
+
+        $response->assertOk()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('type', 'member_has_booking')
+            ->assertJsonPath('booking_code', 'BK-TEST-BOOK-99');
+    }
+
+    public function test_realtime_sirkulasi_notification_modal_is_rendered_across_member_pages(): void
+    {
+        // 1. Guest tidak melihat modal
+        $this->get(route('home'))
+            ->assertDontSee('globalMemberSirkulasiModal');
+        $this->get(route('katalog.index'))
+            ->assertDontSee('globalMemberSirkulasiModal');
+
+        // 2. Member yang login melihat modal di Dashboard, Riwayat, Katalog, dan Beranda
+        $this->actingAs($this->member1);
+
+        $this->get(route('dashboard'))
+            ->assertSee('globalMemberSirkulasiModal')
+            ->assertSee('api/member/status-sirkulasi-terbaru');
+
+        $this->get(route('riwayat.index'))
+            ->assertSee('globalMemberSirkulasiModal')
+            ->assertSee('api/member/status-sirkulasi-terbaru');
+
+        $this->get(route('katalog.index'))
+            ->assertSee('globalMemberSirkulasiModal')
+            ->assertSee('api/member/status-sirkulasi-terbaru');
+
+        $this->get(route('home'))
+            ->assertSee('globalMemberSirkulasiModal')
+            ->assertSee('api/member/status-sirkulasi-terbaru');
+    }
 }

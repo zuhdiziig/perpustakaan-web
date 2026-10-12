@@ -200,6 +200,14 @@
 
             <form action="{{ route('login') }}" method="POST">
                 @csrf
+
+                @php
+                    $redirectTarget = old('redirect', request('redirect', session('url.intended')));
+                @endphp
+                @if($redirectTarget)
+                    <input type="hidden" name="redirect" value="{{ $redirectTarget }}">
+                @endif
+
                 <div class="form-group">
                     <label class="form-label" for="email">Email</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" class="form-input" placeholder="Masukkan alamat email" required autofocus>
@@ -221,7 +229,7 @@
                 <button type="submit" class="btn-submit">Masuk</button>
 
                 <div class="switch-auth-text">
-                    Belum punya akun? <a href="{{ route('register') }}">Daftar</a>
+                    Belum punya akun? <a href="{{ route('register', $redirectTarget ? ['redirect' => $redirectTarget] : []) }}">Daftar</a>
                 </div>
 
                 <p class="card-notice">

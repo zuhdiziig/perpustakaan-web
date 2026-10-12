@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class PembayaranController extends Controller
 {
@@ -77,7 +78,7 @@ class PembayaranController extends Controller
         }
 
         $pengembalian = $denda->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 
@@ -101,9 +102,10 @@ class PembayaranController extends Controller
 
         $berlakuHingga = now()->addMinutes(15)->locale('id')->translatedFormat('d M Y, H.i').' WIB';
 
-        // Mock QR string & URL
+        // QRIS offline-first generation
         $qrData = 'PERPUS-QRIS-'.$pembayaran->idPembayaran.'-NOMINAL-'.$pembayaran->nominal;
-        $qrImageUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=260x260&data='.urlencode($qrData);
+        $qrSvg = (string) QrCode::size(260)->generate($qrData);
+        $qrImageUrl = 'data:image/svg+xml;base64,'.base64_encode($qrSvg);
 
         return view('pembayaran.bayar_qr', compact(
             'denda',
@@ -151,7 +153,7 @@ class PembayaranController extends Controller
 
         $denda = $pembayaran->denda;
         $pengembalian = $denda?->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda?->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 
@@ -201,7 +203,7 @@ class PembayaranController extends Controller
 
         $denda = $pembayaran->denda;
         $pengembalian = $denda?->pengembalian;
-        $peminjaman = $pengembalian?->peminjaman;
+        $peminjaman = $pengembalian?->peminjaman ?? $denda?->details->first()?->peminjaman;
         $member = $peminjaman?->member ?? auth()->user();
         $buku = $peminjaman?->details?->first()?->buku;
 
@@ -277,24 +279,47 @@ class PembayaranController extends Controller
 
     private function findOwnedDenda(int $idDenda): Denda
     {
-        return Denda::with([
+        $query = Denda::with([
             'pengembalian.peminjaman.details.buku.barcode',
             'pengembalian.peminjaman.member',
-        ])->whereHas('pengembalian.peminjaman', function (Builder $query): void {
-            $query->where('idUserMember', auth()->id());
-        })->findOrFail($idDenda);
+            'details.peminjaman.member',
+        ]);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $query->where(function (Builder $q) use ($user): void {
+                $q->whereHas('pengembalian.peminjaman', function (Builder $sq) use ($user): void {
+                    $sq->where('idUserMember', $user->id);
+                })->orWhereHas('details.peminjaman', function (Builder $sq) use ($user): void {
+                    $sq->where('idUserMember', $user->id);
+                });
+            });
+        }
+
+        return $query->findOrFail($idDenda);
     }
 
     private function findOwnedPembayaran(int $idPembayaran): Pembayaran
     {
-        return Pembayaran::with([
+        $query = Pembayaran::with([
             'denda.pengembalian.peminjaman.details.buku.barcode',
             'denda.pengembalian.peminjaman.member',
             'denda.details.buku.barcode',
             'denda.details.peminjaman.member',
-        ])->whereHas('denda.pengembalian.peminjaman', function (Builder $query): void {
-            $query->where('idUserMember', auth()->id());
-        })->findOrFail($idPembayaran);
+        ]);
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $query->where(function (Builder $q) use ($user): void {
+                $q->whereHas('denda.pengembalian.peminjaman', function (Builder $sq) use ($user): void {
+                    $sq->where('idUserMember', $user->id);
+                })->orWhereHas('denda.details.peminjaman', function (Builder $sq) use ($user): void {
+                    $sq->where('idUserMember', $user->id);
+                });
+            });
+        }
+
+        return $query->findOrFail($idPembayaran);
     }
 
     private function isPaymentConfirmed(Pembayaran $pembayaran): bool

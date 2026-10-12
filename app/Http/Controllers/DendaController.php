@@ -73,9 +73,11 @@ class DendaController extends Controller
             }
 
             if ($hariTerlambat > 0) {
-                $perhitunganText = "{$hariTerlambat} hari × Rp1.000";
+                $minggu = (int) ceil($hariTerlambat / 7);
+                $persen = min($minggu * 10, 100);
+                $perhitunganText = "{$hariTerlambat} hari ({$minggu} mgg / {$persen}%)";
             } else {
-                $perhitunganText = 'Rp '.number_format($activeDenda->jumlah, 0, ',', '.');
+                $perhitunganText = $activeDenda->jenisDenda ?: ('Rp '.number_format($activeDenda->jumlah, 0, ',', '.'));
             }
         }
 
