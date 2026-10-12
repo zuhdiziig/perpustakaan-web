@@ -888,7 +888,9 @@
 
             <nav class="topbar-nav" aria-label="Navigasi utama">
                 <a href="{{ route('home') }}" class="topbar-nav-link">Beranda</a>
-                <a href="{{ route('katalog.index') }}" class="topbar-nav-link active">Katalog</a>
+                @if(!auth()->check() || auth()->user()->role === 'member')
+                    <a href="{{ route('katalog.index') }}" class="topbar-nav-link active">Katalog</a>
+                @endif
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link">Dasbor</a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link">Tentang</a>
             </nav>

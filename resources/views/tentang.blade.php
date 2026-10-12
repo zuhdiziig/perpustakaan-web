@@ -758,9 +758,11 @@
                 <a href="{{ route('home') }}" class="topbar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                     Beranda
                 </a>
-                <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                    Katalog
-                </a>
+                @if(!auth()->check() || auth()->user()->role === 'member')
+                    <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
+                        Katalog
+                    </a>
+                @endif
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
                 </a>
@@ -771,12 +773,22 @@
 
             <!-- Top Right -->
             <div class="topbar-right">
-                <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </a>
+                @if(!auth()->check() || auth()->user()->role === 'member')
+                    <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                        </svg>
+                    </a>
+                @elseif(auth()->user()->role === 'admin')
+                    <a href="{{ route('buku.index') }}" class="topbar-icon-btn" title="Kelola Master Buku">
+                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="20" x2="18" y2="10"></line>
+                            <line x1="12" y1="20" x2="12" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="14"></line>
+                        </svg>
+                    </a>
+                @endif
 
                 @auth
                     <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil {{ auth()->user()->name ?? 'Pengguna' }}">
@@ -811,9 +823,11 @@
             <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
                 Beranda
             </a>
-            <a href="{{ route('katalog.index') }}" class="{{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                Katalog
-            </a>
+            @if(!auth()->check() || auth()->user()->role === 'member')
+                <a href="{{ route('katalog.index') }}" class="{{ request()->routeIs('katalog.*') ? 'active' : '' }}">
+                    Katalog
+                </a>
+            @endif
             <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
                 Dasbor
             </a>
@@ -853,12 +867,30 @@
                     Temukan. Baca. Berkembang.
                 </p>
 
-                <a
-                    href="{{ route('register') }}"
-                    class="about-primary-button"
-                >
-                    Jadi Anggota
-                </a>
+                @guest
+                    <a
+                        href="{{ route('register') }}"
+                        class="about-primary-button"
+                    >
+                        Jadi Anggota
+                    </a>
+                @else
+                    @if(auth()->user()->role === 'member')
+                        <a
+                            href="{{ route('katalog.index') }}"
+                            class="about-primary-button"
+                        >
+                            Jelajahi Katalog
+                        </a>
+                    @else
+                        <a
+                            href="{{ route('dashboard') }}"
+                            class="about-primary-button"
+                        >
+                            Buka Dasbor
+                        </a>
+                    @endif
+                @endguest
 
             </div>
 
