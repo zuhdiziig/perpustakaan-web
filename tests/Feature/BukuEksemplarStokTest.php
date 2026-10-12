@@ -438,4 +438,119 @@ class BukuEksemplarStokTest extends TestCase
         $this->assertEquals('Tersedia', $copy1->status);
         $this->assertEquals('Rak', $copy1->lokasi);
     }
+
+    public function test_admin_halaman_buku_tidak_ada_tombol_kopi_dan_tidak_ada_tombol_ubah_eksemplar(): void
+    {
+        $buku = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Agak Laen : Pocong Salto',
+            'penulis' => 'Zuhdi',
+            'penerbit' => 'Informatika',
+            'tahunTerbit' => 2026,
+            'harga' => 120000,
+            'stok' => 2,
+            'kondisi' => 'Baik',
+        ]);
+
+        $response = $this->actingAs($this->admin)->get(route('buku.index'));
+
+        $response->assertOk();
+        $response->assertSee('Agak Laen : Pocong Salto');
+        // Pastikan tombol '+ Tambah Eksemplar' ada di panel rincian eksemplar
+        $response->assertSee('+ Tambah Eksemplar');
+        // Pastikan tombol '+ Kopi' sudah dihilangkan
+        $response->assertDontSee('+ Kopi');
+        $response->assertDontSee('btn-action-add-copy');
+        // Pastikan tidak ada tombol 'Ubah' pada rincian eksemplar untuk admin
+        $eks = $buku->eksemplar->first();
+        $response->assertDontSee('Edit / Ubah Eksemplar #'.$eks->nomor_eksemplar);
+        // Namun tombol Label QR dan Hapus untuk eksemplar tetap ada untuk Admin
+        $response->assertSee('Label QR');
+        $response->assertSee(route('eksemplar.cetak-qr', $eks->idEksemplar));
+
+        // Pastikan dropdown kondisi awal eksemplar sudah dihilangkan dari modal tambah
+        $response->assertDontSee('Kondisi Awal Eksemplar');
+        $response->assertDontSee('selectKondisiTambah');
+        $response->assertSee('<input type="hidden" name="kondisi" value="Baik">', false);
+    }
+
+    public function test_tambah_eksemplar_tanpa_kondisi_otomatis_default_ke_kondisi_baik(): void
+    {
+        $buku = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Buku Baru Segel',
+            'penulis' => 'Zuhdi',
+            'penerbit' => 'Informatika',
+            'tahunTerbit' => 2026,
+            'harga' => 100000,
+            'stok' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        $this->actingAs($this->admin);
+        $response = $this->post(route('eksemplar.store', $buku->idBuku), [
+            'jumlah' => 2,
+            // Tidak mengirim 'kondisi' karena dropdown telah dihilangkan
+        ]);
+
+        $response->assertRedirect();
+        $response->assertSessionHas('success');
+
+        $buku->refresh();
+        $this->assertCount(3, $buku->eksemplar);
+        foreach ($buku->eksemplar as $eks) {
+            $this->assertEquals('Baik', $eks->kondisi);
+            $this->assertEquals('Tersedia', $eks->status);
+        }
+    }
+
+    public function test_petugas_restock_dan_simpan_gudang_mendukung_json_realtime(): void
+    {
+        $buku = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Realtime Buku',
+            'penulis' => 'Zuhdi',
+            'penerbit' => 'Informatika',
+            'tahunTerbit' => 2026,
+            'harga' => 150000,
+            'stok' => 3,
+            'kondisi' => 'Baik',
+        ]);
+
+        // Copy 1 & 2 di Rak, Copy 3 di Gudang
+        $copyGudang = $buku->eksemplar()->where('nomor_eksemplar', 3)->first();
+        $this->assertEquals('Gudang', $copyGudang->lokasi);
+
+        $this->actingAs($this->petugas);
+
+        // Test Restock via AJAX (Pajang ke Rak)
+        $responseRestock = $this->patchJson(route('eksemplar.restock', $copyGudang->idEksemplar));
+        $responseRestock->assertOk();
+        $responseRestock->assertJson([
+            'success' => true,
+            'lokasi' => 'Rak',
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $copyGudang->idEksemplar,
+            'copiesInRak' => 3,
+            'copiesInGudang' => 0,
+        ]);
+
+        $copyGudang->refresh();
+        $this->assertEquals('Rak', $copyGudang->lokasi);
+
+        // Test Simpan Gudang via AJAX
+        $responseSimpan = $this->patchJson(route('eksemplar.simpan-gudang', $copyGudang->idEksemplar));
+        $responseSimpan->assertOk();
+        $responseSimpan->assertJson([
+            'success' => true,
+            'lokasi' => 'Gudang',
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $copyGudang->idEksemplar,
+            'copiesInRak' => 2,
+            'copiesInGudang' => 1,
+        ]);
+
+        $copyGudang->refresh();
+        $this->assertEquals('Gudang', $copyGudang->lokasi);
+    }
 }

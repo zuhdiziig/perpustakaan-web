@@ -18,17 +18,18 @@ class BukuEksemplarController extends Controller
 
         $validated = $request->validate([
             'jumlah' => ['required', 'integer', 'min:1', 'max:50'],
-            'kondisi' => ['required', 'in:Baik,Rusak,Hilang'],
+            'kondisi' => ['nullable', 'in:Baik,Rusak,Hilang'],
             'lokasi' => ['nullable', 'in:Rak,Gudang'],
         ], [
             'jumlah.required' => 'Jumlah eksemplar wajib diisi.',
             'jumlah.min' => 'Jumlah eksemplar minimal 1 buku.',
             'jumlah.max' => 'Maksimal penambahan 50 eksemplar sekaligus.',
-            'kondisi.required' => 'Kondisi fisik eksemplar wajib dipilih.',
         ]);
 
-        $created = DB::transaction(function () use ($buku, $validated) {
-            $status = ($validated['kondisi'] === 'Hilang') ? 'Hilang' : 'Tersedia';
+        $kondisi = $validated['kondisi'] ?? 'Baik';
+
+        $created = DB::transaction(function () use ($buku, $validated, $kondisi) {
+            $status = ($kondisi === 'Hilang') ? 'Hilang' : 'Tersedia';
             $items = [];
             $maxNomor = (int) ($buku->eksemplar()->max('nomor_eksemplar') ?? 0);
             $currentInRak = $buku->eksemplarDiRak()->count();
@@ -39,7 +40,7 @@ class BukuEksemplarController extends Controller
                 $items[] = $buku->eksemplar()->create([
                     'nomor_eksemplar' => $maxNomor + $i,
                     'qr_token' => 'bk_'.bin2hex(random_bytes(16)),
-                    'kondisi' => $validated['kondisi'],
+                    'kondisi' => $kondisi,
                     'status' => $status,
                     'lokasi' => $lokasi,
                 ]);
@@ -63,12 +64,33 @@ class BukuEksemplarController extends Controller
         $eksemplar = BukuEksemplar::with('buku')->findOrFail($idEksemplar);
 
         if ($eksemplar->status !== 'Tersedia') {
-            return back()->with('error', "Eksemplar #{$eksemplar->nomor_eksemplar} tidak berstatus Tersedia (status: {$eksemplar->status}). Hanya eksemplar yang tersedia yang dapat dipajang.");
+            $msg = "Eksemplar #{$eksemplar->nomor_eksemplar} tidak berstatus Tersedia (status: {$eksemplar->status}). Hanya eksemplar yang tersedia yang dapat dipajang.";
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $eksemplar->pindahKeRak();
 
-        return back()->with('success', "Eksemplar #{$eksemplar->nomor_eksemplar} (ID: {$eksemplar->idEksemplar}) buku '{$eksemplar->buku->judul}' berhasil dipajang ke Rak Display.");
+        $successMsg = "Eksemplar #{$eksemplar->nomor_eksemplar} (ID: {$eksemplar->idEksemplar}) buku '{$eksemplar->buku->judul}' berhasil dipajang ke Rak Display.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            $buku = $eksemplar->buku;
+
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'lokasi' => 'Rak',
+                'idBuku' => $eksemplar->idBuku,
+                'idEksemplar' => $eksemplar->idEksemplar,
+                'copiesInRak' => $buku ? $buku->eksemplarDiRak()->count() : 0,
+                'copiesInGudang' => $buku ? $buku->eksemplarDiGudang()->count() : 0,
+            ]);
+        }
+
+        return back()->with('success', $successMsg);
     }
 
     /**
@@ -79,12 +101,33 @@ class BukuEksemplarController extends Controller
         $eksemplar = BukuEksemplar::with('buku')->findOrFail($idEksemplar);
 
         if ($eksemplar->isSedangDipinjam()) {
-            return back()->with('error', "Eksemplar #{$eksemplar->nomor_eksemplar} sedang {$eksemplar->status} oleh anggota dan belum dapat dipindahkan.");
+            $msg = "Eksemplar #{$eksemplar->nomor_eksemplar} sedang {$eksemplar->status} oleh anggota dan belum dapat dipindahkan.";
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $eksemplar->pindahKeGudang();
 
-        return back()->with('success', "Eksemplar #{$eksemplar->nomor_eksemplar} (ID: {$eksemplar->idEksemplar}) buku '{$eksemplar->buku->judul}' berhasil disimpan ke Gudang Cadangan.");
+        $successMsg = "Eksemplar #{$eksemplar->nomor_eksemplar} (ID: {$eksemplar->idEksemplar}) buku '{$eksemplar->buku->judul}' berhasil disimpan ke Gudang Cadangan.";
+
+        if ($request->wantsJson() || $request->ajax()) {
+            $buku = $eksemplar->buku;
+
+            return response()->json([
+                'success' => true,
+                'message' => $successMsg,
+                'lokasi' => 'Gudang',
+                'idBuku' => $eksemplar->idBuku,
+                'idEksemplar' => $eksemplar->idEksemplar,
+                'copiesInRak' => $buku ? $buku->eksemplarDiRak()->count() : 0,
+                'copiesInGudang' => $buku ? $buku->eksemplarDiGudang()->count() : 0,
+            ]);
+        }
+
+        return back()->with('success', $successMsg);
     }
 
     /**

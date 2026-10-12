@@ -845,15 +845,21 @@
             @forelse($rekomendasi as $buku)
                 <div class="rekomendasi-card">
                     <div class="rekomendasi-cover-wrap">
-                        @if($buku->cover)
-                            <img src="{{ asset('storage/' . $buku->cover) }}"
+                        @if(!empty($buku->cover_url))
+                            <img src="{{ $buku->cover_url }}"
                                  alt="{{ $buku->judul }}"
                                  class="rekomendasi-cover-img"
-                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400';">
+                                 loading="lazy"
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';">
                         @else
-                            <img src="https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400"
-                                 alt="{{ $buku->judul }}"
-                                 class="rekomendasi-cover-img">
+                            <div class="rekomendasi-cover-fallback" style="width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; background: linear-gradient(135deg, #0f766e, #14b8a6); color: #ffffff; padding: 14px; text-align: center;">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-bottom: 6px; opacity: 0.9;">
+                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                </svg>
+                                <span style="font-size: 12px; font-weight: 700; line-height: 1.3;">{{ Str::limit($buku->judul, 35) }}</span>
+                                <span style="font-size: 10.5px; opacity: 0.85; margin-top: 2px;">{{ $buku->kategori?->namaKategori ?? 'Umum' }}</span>
+                            </div>
                         @endif
                     </div>
 

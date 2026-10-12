@@ -619,8 +619,8 @@
                         @endphp
                         <div class="cart-item-row">
                             <div class="cart-item-cover">
-                                @if (! empty($b->cover))
-                                    <img src="{{ $b->cover }}" alt="{{ $b->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
+                                @if (! empty($b->cover_url))
+                                    <img src="{{ $b->cover_url }}" alt="{{ $b->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
                                 @else
                                     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b;">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>

@@ -1096,8 +1096,8 @@
                     @foreach ($bukuTerkait as $terkait)
                         <article class="related-card">
                             <a href="{{ route('katalog.show', $terkait->idBuku) }}" class="related-cover" tabindex="-1" aria-hidden="true">
-                                @if (! empty($terkait->cover))
-                                    <img src="{{ $terkait->cover }}" alt="" loading="lazy" onerror="this.onerror=null; this.src='{{ $fallbackCover }}';">
+                                @if (! empty($terkait->cover_url))
+                                    <img src="{{ $terkait->cover_url }}" alt="" loading="lazy" onerror="this.onerror=null; this.src='{{ $fallbackCover }}';">
                                 @else
                                     <div class="related-cover-fallback">
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

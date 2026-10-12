@@ -804,25 +804,6 @@
         border-color: #475569;
     }
 
-    .btn-action-add-copy {
-        background: #eff6ff;
-        color: #1d4ed8;
-        border: 1px solid #bfdbfe;
-        padding: 5px 8px;
-        border-radius: 7px;
-        font-size: 11px;
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 3px;
-        transition: all 0.15s;
-    }
-
-    .btn-action-add-copy:hover {
-        background: #dbeafe;
-    }
-
     .btn-action-edit {
         background: #fffbeb;
         color: #b45309;
@@ -1128,7 +1109,7 @@
                 </svg>
             </div>
             <div class="stat-meta">
-                <span class="stat-value">{{ $eksemplarDiRak ?? 0 }}</span>
+                <span class="stat-value" id="stat-eksemplar-rak">{{ $eksemplarDiRak ?? 0 }}</span>
                 <span class="stat-label">Di Rak (Display)</span>
             </div>
         </div>
@@ -1142,7 +1123,7 @@
                 </svg>
             </div>
             <div class="stat-meta">
-                <span class="stat-value">{{ $eksemplarDiGudang ?? 0 }}</span>
+                <span class="stat-value" id="stat-eksemplar-gudang">{{ $eksemplarDiGudang ?? 0 }}</span>
                 <span class="stat-label">Di Gudang (Cadangan)</span>
             </div>
         </div>
@@ -1343,9 +1324,9 @@
                                     </span>
                                 </div>
                                 <div class="copies-breakdown-subtext">
-                                    <span style="color: #047857; font-weight: 600;">{{ $copiesInRak }} di Rak</span>
+                                    <span id="main-rak-{{ $buku->idBuku }}" style="color: #047857; font-weight: 600;">{{ $copiesInRak }} di Rak</span>
                                     <span>&bull;</span>
-                                    <span style="color: #475569;">{{ $copiesInGudang }} di Gudang</span>
+                                    <span id="main-gudang-{{ $buku->idBuku }}" style="color: #475569;">{{ $copiesInGudang }} di Gudang</span>
                                     @if($copiesBorrowed > 0)
                                         <span>&bull;</span>
                                         <span style="color: #1d4ed8;">{{ $copiesBorrowed }} Dipinjam</span>
@@ -1393,14 +1374,6 @@
                                     </button>
 
                                     @if (auth()->user()->role === 'admin')
-                                        {{-- Tambah Eksemplar Buku Ini: Khusus Admin --}}
-                                        <button type="button"
-                                                class="btn-action-add-copy"
-                                                onclick="openModalTambahEksemplar({{ $buku->idBuku }}, '{{ addslashes($buku->judul) }}')"
-                                                title="Tambah Eksemplar Baru untuk Judul Ini">
-                                            + Kopi
-                                        </button>
-
                                         {{-- Tombol Ubah Master Judul: Khusus Admin --}}
                                         <a href="{{ route('buku.edit', $buku->idBuku) }}"
                                            class="btn-action-edit"
@@ -1445,9 +1418,9 @@
                                             <span>Rincian Eksemplar Fisik: <strong>{{ $buku->judul }}</strong></span>
                                         </div>
                                         <div class="eksemplar-panel-meta">
-                                            <span class="meta-tag">Total: {{ $totalCopies }} Unit</span>
-                                            <span class="meta-tag rak">Display Rak: {{ $copiesInRak }} Unit</span>
-                                            <span class="meta-tag gudang">Gudang Cadangan: {{ $copiesInGudang }} Unit</span>
+                                            <span class="meta-tag" id="panel-total-{{ $buku->idBuku }}">Total: {{ $totalCopies }} Unit</span>
+                                            <span class="meta-tag rak" id="panel-rak-{{ $buku->idBuku }}">Display Rak: {{ $copiesInRak }} Unit</span>
+                                            <span class="meta-tag gudang" id="panel-gudang-{{ $buku->idBuku }}">Gudang Cadangan: {{ $copiesInGudang }} Unit</span>
                                             @if (auth()->user()->role === 'admin')
                                                 <button type="button"
                                                         class="btn-panel-add-copy"
@@ -1490,7 +1463,7 @@
                                                                 </span>
                                                             </div>
                                                         </td>
-                                                        <td>
+                                                        <td id="lokasi-cell-{{ $item->idEksemplar }}">
                                                             @if ($item->lokasi === 'Rak')
                                                                 <span class="lokasi-badge rak" title="Buku sedang dipajang di rak display">
                                                                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -1560,19 +1533,7 @@
                                                         <td>
                                                             <div class="action-group">
                                                                 @if (auth()->user()->role === 'admin')
-                                                                    {{-- AKSI EKSEMPLAR UNTUK ADMIN: CRUD LENGKAP TANPA OPERASIONAL RAK PETUGAS --}}
-                                                                    {{-- Tombol Ubah / Edit Eksemplar Individual --}}
-                                                                    <button type="button"
-                                                                            class="btn-action-edit"
-                                                                            onclick="openModalEditEksemplar({{ $item->idEksemplar }}, '{{ addslashes($buku->judul) }}', {{ $item->nomor_eksemplar }}, '{{ $item->kondisi ?? 'Baik' }}', '{{ $item->status }}', {{ $item->isSedangDipinjam() ? 'true' : 'false' }}, '{{ $item->lokasi ?? 'Rak' }}')"
-                                                                            title="Edit / Ubah Eksemplar #{{ $item->nomor_eksemplar }}">
-                                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                                                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                                        </svg>
-                                                                        Ubah
-                                                                    </button>
-
+                                                                    {{-- AKSI EKSEMPLAR UNTUK ADMIN: LABEL QR & HAPUS --}}
                                                                     {{-- Tombol Label QR Eksemplar --}}
                                                                     <a href="{{ route('eksemplar.cetak-qr', $item->idEksemplar) }}"
                                                                        class="btn-action-qr-link"
@@ -1620,31 +1581,40 @@
                                                                     @endif
                                                                 @else
                                                                     {{-- AKSI EKSEMPLAR UNTUK PETUGAS: OPERASIONAL RAK & KELOLA KONDISI --}}
-                                                                    @if ($item->status === 'Tersedia' && $item->lokasi === 'Gudang')
-                                                                        <form action="{{ route('eksemplar.restock', $item->idEksemplar) }}" method="POST" style="display: inline; margin: 0;">
-                                                                            @csrf
-                                                                            @method('PATCH')
-                                                                            <button type="submit"
-                                                                                    class="btn-action-pajang"
-                                                                                    title="Pajang Eksemplar #{{ $item->nomor_eksemplar }} ke Rak Display">
-                                                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                                                                                Pajang ke Rak
-                                                                            </button>
-                                                                        </form>
-                                                                    @elseif ($item->status === 'Tersedia' && $item->lokasi === 'Rak')
-                                                                        <form action="{{ route('eksemplar.simpan-gudang', $item->idEksemplar) }}" method="POST" style="display: inline; margin: 0;">
-                                                                            @csrf
-                                                                            @method('PATCH')
-                                                                            <button type="submit"
-                                                                                    class="btn-action-simpan"
-                                                                                    title="Simpan Eksemplar #{{ $item->nomor_eksemplar }} ke Gudang Cadangan">
-                                                                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
-                                                                                Simpan Gudang
-                                                                            </button>
-                                                                        </form>
-                                                                    @endif
+                                                                    <span id="op-btn-container-{{ $item->idEksemplar }}">
+                                                                        @if ($item->status === 'Tersedia' && $item->lokasi === 'Gudang')
+                                                                            <form action="{{ route('eksemplar.restock', $item->idEksemplar) }}"
+                                                                                  method="POST"
+                                                                                  style="display: inline; margin: 0;"
+                                                                                  onsubmit="pindahkanEksemplarAjax(event, {{ $item->idEksemplar }}, '{{ route('eksemplar.restock', $item->idEksemplar) }}', 'Rak', {{ $buku->idBuku }}, {{ $item->nomor_eksemplar }}, '{{ addslashes($buku->judul) }}', '{{ $item->kondisi ?? 'Baik' }}', '{{ $item->status }}')">
+                                                                                @csrf
+                                                                                @method('PATCH')
+                                                                                <button type="submit"
+                                                                                        class="btn-action-pajang"
+                                                                                        title="Pajang Eksemplar #{{ $item->nomor_eksemplar }} ke Rak Display">
+                                                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                                                                    Pajang ke Rak
+                                                                                </button>
+                                                                            </form>
+                                                                        @elseif ($item->status === 'Tersedia' && $item->lokasi === 'Rak')
+                                                                            <form action="{{ route('eksemplar.simpan-gudang', $item->idEksemplar) }}"
+                                                                                  method="POST"
+                                                                                  style="display: inline; margin: 0;"
+                                                                                  onsubmit="pindahkanEksemplarAjax(event, {{ $item->idEksemplar }}, '{{ route('eksemplar.simpan-gudang', $item->idEksemplar) }}', 'Gudang', {{ $buku->idBuku }}, {{ $item->nomor_eksemplar }}, '{{ addslashes($buku->judul) }}', '{{ $item->kondisi ?? 'Baik' }}', '{{ $item->status }}')">
+                                                                                @csrf
+                                                                                @method('PATCH')
+                                                                                <button type="submit"
+                                                                                        class="btn-action-simpan"
+                                                                                        title="Simpan Eksemplar #{{ $item->nomor_eksemplar }} ke Gudang Cadangan">
+                                                                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
+                                                                                    Simpan Gudang
+                                                                                </button>
+                                                                            </form>
+                                                                        @endif
+                                                                    </span>
 
                                                                     <button type="button"
+                                                                            id="btn-kelola-{{ $item->idEksemplar }}"
                                                                             class="btn-action-manage"
                                                                             onclick="openModalEditEksemplar({{ $item->idEksemplar }}, '{{ addslashes($buku->judul) }}', {{ $item->nomor_eksemplar }}, '{{ $item->kondisi ?? 'Baik' }}', '{{ $item->status }}', {{ $item->isSedangDipinjam() ? 'true' : 'false' }}, '{{ $item->lokasi ?? 'Rak' }}')"
                                                                             title="Ubah Kondisi / Lokasi Eksemplar #{{ $item->nomor_eksemplar }}">
@@ -1818,7 +1788,7 @@
                 </span>
             </div>
 
-            <div style="margin-bottom: 14px;">
+            <div style="margin-bottom: 20px;">
                 <label for="selectLokasiTambah" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
                     Penempatan Fisik
                 </label>
@@ -1829,15 +1799,7 @@
                 </select>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label for="selectKondisiTambah" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
-                    Kondisi Awal Eksemplar
-                </label>
-                <select name="kondisi" id="selectKondisiTambah" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
-                    <option value="Baik">Baik (Siap Dipinjamkan)</option>
-                    <option value="Rusak">Rusak</option>
-                </select>
-            </div>
+            <input type="hidden" name="kondisi" value="Baik">
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
                 <button type="button" onclick="closeModalTambahEksemplar()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
@@ -1853,6 +1815,25 @@
 @endif
 
 <script>
+    const CSRF_TOKEN = '{{ csrf_token() }}';
+
+    function escapeQuotes(str) {
+        if (!str) return '';
+        return String(str).replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+    }
+
+    function saveOpenedRow(idBuku) {
+        try {
+            sessionStorage.setItem('open_eksemplar_' + idBuku, '1');
+        } catch(e) {}
+    }
+
+    function removeOpenedRow(idBuku) {
+        try {
+            sessionStorage.removeItem('open_eksemplar_' + idBuku);
+        } catch(e) {}
+    }
+
     function toggleEksemplarRow(idBuku) {
         const row = document.getElementById('eksemplar-row-' + idBuku);
         const btn = document.getElementById('btn-toggle-' + idBuku);
@@ -1866,11 +1847,13 @@
             if (btn) btn.classList.add('active');
             if (chevron) chevron.style.transform = 'rotate(180deg)';
             if (parentRow) parentRow.classList.add('expanded-parent');
+            saveOpenedRow(idBuku);
         } else {
             row.style.display = 'none';
             if (btn) btn.classList.remove('active');
             if (chevron) chevron.style.transform = 'rotate(0deg)';
             if (parentRow) parentRow.classList.remove('expanded-parent');
+            removeOpenedRow(idBuku);
         }
     }
 
@@ -1886,6 +1869,12 @@
             if (btn) btn.classList.toggle('active', expand);
             if (chevron) chevron.style.transform = expand ? 'rotate(180deg)' : 'rotate(0deg)';
             if (parentRow) parentRow.classList.toggle('expanded-parent', expand);
+
+            if (expand) {
+                saveOpenedRow(idBuku);
+            } else {
+                removeOpenedRow(idBuku);
+            }
         });
     }
 
@@ -1934,9 +1923,13 @@
         if (modal) modal.style.display = 'none';
     }
 
-    document.getElementById('modalEditEksemplar').addEventListener('click', function(e) {
-        if (e.target === this) closeModalEditEksemplar();
-    });
+    // Modal click listeners
+    const modalEditEl = document.getElementById('modalEditEksemplar');
+    if (modalEditEl) {
+        modalEditEl.addEventListener('click', function(e) {
+            if (e.target === this) closeModalEditEksemplar();
+        });
+    }
 
     const modalTambah = document.getElementById('modalTambahEksemplar');
     if (modalTambah) {
@@ -1944,5 +1937,207 @@
             if (e.target === this) closeModalTambahEksemplar();
         });
     }
+
+    // Floating Toast Notification
+    function showToastNotification(message, type = 'success') {
+        let container = document.getElementById('toast-container');
+        if (!container) {
+            container = document.createElement('div');
+            container.id = 'toast-container';
+            container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 99999; display: flex; flex-direction: column; gap: 10px; pointer-events: none; max-width: 420px;';
+            document.body.appendChild(container);
+        }
+
+        const toast = document.createElement('div');
+        const isSuccess = type === 'success';
+        toast.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: ${isSuccess ? '#0f766e' : '#b91c1c'};
+            color: #ffffff;
+            padding: 12px 18px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.25), 0 8px 10px -6px rgba(0, 0, 0, 0.2);
+            pointer-events: auto;
+            transform: translateX(30px);
+            opacity: 0;
+            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        `;
+
+        const iconSvg = isSuccess
+            ? `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"></polyline></svg>`
+            : `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>`;
+
+        toast.innerHTML = `${iconSvg}<span>${message}</span>`;
+        container.appendChild(toast);
+
+        requestAnimationFrame(() => {
+            toast.style.transform = 'translateX(0)';
+            toast.style.opacity = '1';
+        });
+
+        setTimeout(() => {
+            toast.style.transform = 'translateX(30px)';
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3500);
+    }
+
+    // Realtime AJAX Operasional Eksemplar (Simpan Gudang / Pajang ke Rak)
+    async function pindahkanEksemplarAjax(e, idEksemplar, url, targetLokasi, idBuku, nomorEksemplar, judulBuku, kondisi, status) {
+        if (e) e.preventDefault();
+
+        const form = e.target;
+        const btn = form.querySelector('button');
+        if (btn) {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'PATCH',
+                headers: {
+                    'X-CSRF-TOKEN': CSRF_TOKEN,
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json'
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok && data.success) {
+                // 1. Update Lokasi Badge pada cell tabel
+                const lokasiCell = document.getElementById('lokasi-cell-' + idEksemplar);
+                if (lokasiCell) {
+                    if (data.lokasi === 'Rak') {
+                        lokasiCell.innerHTML = `
+                            <span class="lokasi-badge rak" title="Buku sedang dipajang di rak display">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                Di Rak (Display)
+                            </span>
+                        `;
+                    } else {
+                        lokasiCell.innerHTML = `
+                            <span class="lokasi-badge gudang" title="Buku disimpan di gudang cadangan">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
+                                Gudang (Cadangan)
+                            </span>
+                        `;
+                    }
+                }
+
+                // 2. Toggle Tombol Aksi (Simpan Gudang <-> Pajang ke Rak)
+                const opContainer = document.getElementById('op-btn-container-' + idEksemplar);
+                if (opContainer) {
+                    const routePajang = "{{ url('/eksemplar') }}/" + idEksemplar + "/restock";
+                    const routeSimpan = "{{ url('/eksemplar') }}/" + idEksemplar + "/simpan-gudang";
+                    const safeJudul = escapeQuotes(judulBuku);
+
+                    if (data.lokasi === 'Rak') {
+                        opContainer.innerHTML = `
+                            <form action="${routeSimpan}" method="POST" style="display: inline; margin: 0;"
+                                  onsubmit="pindahkanEksemplarAjax(event, ${idEksemplar}, '${routeSimpan}', 'Gudang', ${idBuku}, ${nomorEksemplar}, '${safeJudul}', '${kondisi}', '${status}')">
+                                <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                                <input type="hidden" name="_method" value="PATCH">
+                                <button type="submit" class="btn-action-simpan" title="Simpan Eksemplar #${nomorEksemplar} ke Gudang Cadangan">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"></path></svg>
+                                    Simpan Gudang
+                                </button>
+                            </form>
+                        `;
+                    } else {
+                        opContainer.innerHTML = `
+                            <form action="${routePajang}" method="POST" style="display: inline; margin: 0;"
+                                  onsubmit="pindahkanEksemplarAjax(event, ${idEksemplar}, '${routePajang}', 'Rak', ${idBuku}, ${nomorEksemplar}, '${safeJudul}', '${kondisi}', '${status}')">
+                                <input type="hidden" name="_token" value="${CSRF_TOKEN}">
+                                <input type="hidden" name="_method" value="PATCH">
+                                <button type="submit" class="btn-action-pajang" title="Pajang Eksemplar #${nomorEksemplar} ke Rak Display">
+                                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                                    Pajang ke Rak
+                                </button>
+                            </form>
+                        `;
+                    }
+                }
+
+                // 3. Update lokasi parameter pada tombol Kelola
+                const btnKelola = document.getElementById('btn-kelola-' + idEksemplar);
+                if (btnKelola) {
+                    btnKelola.setAttribute('onclick', `openModalEditEksemplar(${idEksemplar}, '${escapeQuotes(judulBuku)}', ${nomorEksemplar}, '${kondisi}', '${status}', false, '${data.lokasi}')`);
+                }
+
+                // 4. Update Panel Meta Tags di header rincian eksemplar
+                const panelRak = document.getElementById('panel-rak-' + idBuku);
+                const panelGudang = document.getElementById('panel-gudang-' + idBuku);
+                if (panelRak && typeof data.copiesInRak !== 'undefined') {
+                    panelRak.textContent = 'Display Rak: ' + data.copiesInRak + ' Unit';
+                }
+                if (panelGudang && typeof data.copiesInGudang !== 'undefined') {
+                    panelGudang.textContent = 'Gudang Cadangan: ' + data.copiesInGudang + ' Unit';
+                }
+
+                // 5. Update Breakdown Text di baris utama tabel buku
+                const mainRak = document.getElementById('main-rak-' + idBuku);
+                const mainGudang = document.getElementById('main-gudang-' + idBuku);
+                if (mainRak && typeof data.copiesInRak !== 'undefined') {
+                    mainRak.textContent = data.copiesInRak + ' di Rak';
+                }
+                if (mainGudang && typeof data.copiesInGudang !== 'undefined') {
+                    mainGudang.textContent = data.copiesInGudang + ' di Gudang';
+                }
+
+                // 6. Update Indikator Statistik Global di atas
+                const statRak = document.getElementById('stat-eksemplar-rak');
+                const statGudang = document.getElementById('stat-eksemplar-gudang');
+                if (statRak && statGudang) {
+                    let currentRak = parseInt(statRak.textContent.trim()) || 0;
+                    let currentGudang = parseInt(statGudang.textContent.trim()) || 0;
+                    if (data.lokasi === 'Rak') {
+                        statRak.textContent = currentRak + 1;
+                        statGudang.textContent = Math.max(0, currentGudang - 1);
+                    } else {
+                        statRak.textContent = Math.max(0, currentRak - 1);
+                        statGudang.textContent = currentGudang + 1;
+                    }
+                }
+
+                // 7. Notifikasi Toast Sukses
+                showToastNotification(data.message, 'success');
+            } else {
+                showToastNotification(data.message || 'Gagal mengubah lokasi eksemplar.', 'error');
+                if (btn) {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                }
+            }
+        } catch (err) {
+            console.error(err);
+            showToastNotification('Terjadi kesalahan koneksi saat memproses pemindahan eksemplar.', 'error');
+            if (btn) {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+            }
+        }
+    }
+
+    // Pulihkan accordion eksemplar yang sedang terbuka saat halaman dimuat ulang
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.eksemplar-detail-row').forEach(function(row) {
+            const idBuku = row.id.replace('eksemplar-row-', '');
+            if (sessionStorage.getItem('open_eksemplar_' + idBuku) === '1') {
+                const btn = document.getElementById('btn-toggle-' + idBuku);
+                const chevron = document.getElementById('chevron-' + idBuku);
+                const parentRow = document.getElementById('main-row-' + idBuku);
+                row.style.display = 'table-row';
+                if (btn) btn.classList.add('active');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+                if (parentRow) parentRow.classList.add('expanded-parent');
+            }
+        });
+    });
 </script>
 @endsection

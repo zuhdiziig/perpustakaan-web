@@ -645,9 +645,9 @@
             {{-- SHOWCASE SAMPUL & IDENTITAS UTAMA --}}
             <div class="book-showcase">
                 <div class="book-cover-wrap">
-                    @if (! empty($buku->cover))
+                    @if (! empty($buku->cover_url))
                         <img
-                            src="{{ $buku->cover }}"
+                            src="{{ $buku->cover_url }}"
                             alt="{{ $buku->judul }}"
                             class="book-cover-img"
                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\'book-cover-fallback\'><svg width=\'28\' height=\'28\' viewBox=\'0 0 24 24\' fill=\'none\' stroke=\'currentColor\' stroke-width=\'2\'><path d=\'M4 19.5A2.5 2.5 0 0 1 6.5 17H20\'></path><path d=\'M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z\'></path></svg></div>';"
