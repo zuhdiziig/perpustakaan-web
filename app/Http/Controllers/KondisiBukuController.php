@@ -2,63 +2,115 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Buku;
+use App\Models\BukuEksemplar;
 use Illuminate\Http\Request;
 
 class KondisiBukuController extends Controller
 {
-    // Halaman daftar pemeriksaan kondisi buku
+    // Halaman daftar pemeriksaan kondisi eksemplar fisik buku
     public function index(Request $request)
     {
         $statusFilter = $request->query('kondisi');
-        $query = Buku::with(['kategori', 'barcode']);
+        $lokasiFilter = $request->query('lokasi');
+        $statusInventaris = $request->query('status');
+        $search = $request->query('q');
+
+        $query = BukuEksemplar::with(['buku.kategori', 'buku.barcode']);
 
         if (! empty($statusFilter)) {
             $query->where('kondisi', $statusFilter);
         }
 
-        $bukus = $query->orderBy('judul')->paginate(10)->withQueryString();
+        if (! empty($lokasiFilter)) {
+            $query->where('lokasi', $lokasiFilter);
+        }
 
-        return view('kondisi.index', compact('bukus', 'statusFilter'));
+        if (! empty($statusInventaris)) {
+            $query->where('status', $statusInventaris);
+        }
+
+        if (! empty($search)) {
+            $query->where(function ($sub) use ($search) {
+                $sub->where('qr_token', 'like', "%{$search}%")
+                    ->orWhere('kode_barcode', 'like', "%{$search}%")
+                    ->orWhere('nomor_eksemplar', 'like', "%{$search}%")
+                    ->orWhereHas('buku', function ($bukuQuery) use ($search) {
+                        $bukuQuery->where('judul', 'like', "%{$search}%")
+                            ->orWhere('penulis', 'like', "%{$search}%")
+                            ->orWhereHas('barcode', function ($barQuery) use ($search) {
+                                $barQuery->where('kodeBarcode', 'like', "%{$search}%");
+                            });
+                    });
+            });
+        }
+
+        $eksemplars = $query->orderBy('idBuku')->orderBy('nomor_eksemplar')->paginate(15)->withQueryString();
+
+        $stats = [
+            'total' => BukuEksemplar::count(),
+            'baik' => BukuEksemplar::where('kondisi', 'Baik')->count(),
+            'rusak' => BukuEksemplar::where('kondisi', 'Rusak')->count(),
+            'hilang' => BukuEksemplar::where('kondisi', 'Hilang')->count(),
+        ];
+
+        return view('kondisi.index', compact('eksemplars', 'statusFilter', 'lokasiFilter', 'statusInventaris', 'search', 'stats'));
     }
 
-    // Form input pemeriksaan kondisi fisik buku
+    // Form input pemeriksaan kondisi fisik eksemplar buku
     public function edit($id)
     {
-        $buku = Buku::with(['kategori', 'barcode'])->findOrFail($id);
+        $eksemplar = BukuEksemplar::with(['buku.kategori', 'buku.barcode'])->findOrFail($id);
 
-        return view('kondisi.edit', compact('buku'));
+        return view('kondisi.edit', compact('eksemplar'));
     }
 
-    // Terima hasil pemeriksaan -> Simpan kondisi -> Evaluasi rusak/hilang -> Tampilkan biaya
+    // Simpan hasil pemeriksaan kondisi eksemplar fisik buku
     public function update(Request $request, $id)
     {
-        $buku = Buku::findOrFail($id);
+        $eksemplar = BukuEksemplar::with('buku')->findOrFail($id);
 
         $validated = $request->validate([
             'kondisi' => ['required', 'in:Baik,Rusak,Hilang'],
+            'lokasi' => ['nullable', 'in:Rak,Gudang'],
             'catatan' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $kondisiLama = $buku->kondisi;
         $kondisiBaru = $validated['kondisi'];
+        $lokasiBaru = $validated['lokasi'] ?? $eksemplar->lokasi;
 
-        // Simpan kondisi buku
-        $buku->update([
+        // Jika kondisi Rusak, otomatis karantina ke Gudang
+        if ($kondisiBaru === 'Rusak') {
+            $lokasiBaru = 'Gudang';
+        }
+
+        $statusUpdate = $eksemplar->status;
+        if ($kondisiBaru === 'Hilang') {
+            $statusUpdate = 'Hilang';
+        } elseif ($eksemplar->status === 'Hilang' && in_array($kondisiBaru, ['Baik', 'Rusak'], true)) {
+            $statusUpdate = 'Tersedia';
+        }
+
+        $eksemplar->update([
             'kondisi' => $kondisiBaru,
+            'lokasi' => $lokasiBaru,
+            'status' => $statusUpdate,
         ]);
 
-        // Evaluasi: Kondisi rusak/hilang?
+        // Pastikan sinkronisasi stok master buku
+        $eksemplar->buku?->syncStok();
+
+        // Hitung estimasi biaya penggantian jika rusak atau hilang
         $biayaKerusakan = 0;
-        if (in_array($kondisiBaru, ['Rusak', 'Hilang'])) {
-            // Hitung biaya sesuai harga buku (100% harga buku)
-            $biayaKerusakan = (float) $buku->harga;
+        if (in_array($kondisiBaru, ['Rusak', 'Hilang'], true)) {
+            $biayaKerusakan = (float) ($eksemplar->buku?->harga ?? 0);
         }
 
         return redirect()->route('kondisi.index')->with([
-            'success' => 'Kondisi buku berhasil diperbarui.',
-            'judulBuku' => $buku->judul,
+            'success' => 'Kondisi fisik eksemplar buku berhasil diperbarui.',
+            'judulBuku' => $eksemplar->buku?->judul,
+            'nomorEksemplar' => $eksemplar->nomor_eksemplar,
             'kondisi' => $kondisiBaru,
+            'lokasi' => $lokasiBaru,
             'biayaKerusakan' => $biayaKerusakan,
         ]);
     }

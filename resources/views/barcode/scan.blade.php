@@ -876,8 +876,8 @@
                                 $isBorrowed = $selectedMember && in_array($bk->idBuku, $selectedMemberBorrowedBookIds ?? []);
                             @endphp
                             <div class="book-item-card" id="bookCard-{{ $bk->idBuku }}">
-                                @if($bk->sampul)
-                                    <img src="{{ asset('storage/' . $bk->sampul) }}" alt="Sampul" class="book-cover-thumb">
+                                @if($bk->cover_url)
+                                    <img src="{{ $bk->cover_url }}" alt="Sampul" class="book-cover-thumb">
                                 @else
                                     <div class="book-cover-thumb">📖</div>
                                 @endif

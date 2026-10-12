@@ -49,6 +49,20 @@
             </li>
 
             <li>
+                <a href="{{ route('kondisi.index') }}" class="sidebar-link {{ request()->routeIs('kondisi.*') ? 'active' : '' }}">
+                    <div class="sidebar-link-content">
+                        <span class="sidebar-link-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M9 11l3 3L22 4"></path>
+                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                            </svg>
+                        </span>
+                        <span title="Kondisi Fisik Eksemplar">Kondisi Eksemplar</span>
+                    </div>
+                </a>
+            </li>
+
+            <li>
                 <a href="{{ route('kategori.index') }}" class="sidebar-link {{ request()->routeIs('kategori.*') ? 'active' : '' }}">
                     <div class="sidebar-link-content">
                         <span class="sidebar-link-icon">

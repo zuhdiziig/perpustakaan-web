@@ -476,6 +476,8 @@ class PeminjamanController extends Controller
 
                 $eksemplar = BukuEksemplar::where('idBuku', $buku->idBuku)
                     ->where('status', 'Tersedia')
+                    ->orderByRaw("CASE WHEN kondisi = 'Baik' THEN 0 ELSE 1 END")
+                    ->orderBy('nomor_eksemplar')
                     ->lockForUpdate()
                     ->first();
 

@@ -293,7 +293,7 @@ class PengembalianController extends Controller
                         ->where('status', 'Tersedia')
                         ->where('lokasi', 'Rak')
                         ->count();
-                    $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+                    $lokasiBaru = ($validated['kondisiBuku'] === 'Rusak') ? 'Gudang' : (($currentInRak < 2) ? 'Rak' : 'Gudang');
 
                     $eksemplar->update([
                         'status' => $statusBaru,
@@ -1274,7 +1274,7 @@ class PengembalianController extends Controller
                             ->where('status', 'Tersedia')
                             ->where('lokasi', 'Rak')
                             ->count();
-                        $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+                        $lokasiBaru = ($kondisiFinal === 'Rusak') ? 'Gudang' : (($currentInRak < 2) ? 'Rak' : 'Gudang');
 
                         $eksemplar->update([
                             'status' => $statusBaru,

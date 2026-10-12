@@ -22,7 +22,7 @@ class DetailPeminjaman extends Model
 
     public function buku()
     {
-        return $this->belongsTo(Buku::class, 'idBuku', 'idBuku');
+        return $this->belongsTo(Buku::class, 'idBuku', 'idBuku')->withTrashed();
     }
 
     public function eksemplar()

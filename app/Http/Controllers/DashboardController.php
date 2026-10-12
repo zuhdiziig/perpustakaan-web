@@ -436,12 +436,12 @@ class DashboardController extends Controller
     private function ringkasDenda(Denda $denda): array
     {
         $pengembalian = $denda->pengembalian;
-        $tanggalKembali = Carbon::parse($pengembalian->tanggalKembali)->startOfDay();
-        $batasKembali = Carbon::parse($pengembalian->peminjaman->batasKembali)->startOfDay();
+        $tanggalKembali = $pengembalian?->tanggalKembali ? Carbon::parse($pengembalian->tanggalKembali)->startOfDay() : now()->startOfDay();
+        $batasKembali = $pengembalian?->peminjaman?->batasKembali ? Carbon::parse($pengembalian->peminjaman->batasKembali)->startOfDay() : now()->startOfDay();
 
         return [
             'idDenda' => $denda->idDenda,
-            'judul' => $pengembalian->peminjaman->details->first()?->buku?->judul ?? 'Buku perpustakaan',
+            'judul' => $pengembalian?->peminjaman?->details?->first()?->buku?->judul ?? 'Buku perpustakaan',
             'tanggalKembali' => $tanggalKembali,
             'hariTerlambat' => max(0, (int) $batasKembali->diffInDays($tanggalKembali, false)),
             'jumlah' => (float) $denda->jumlah,

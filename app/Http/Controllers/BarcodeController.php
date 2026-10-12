@@ -68,13 +68,17 @@ class BarcodeController extends Controller
                     if ($eksemplar && $eksemplar->buku) {
                         $buku = $eksemplar->buku;
                     } else {
-                        $memberCheck = User::where('role', 'member')
-                            ->where(function ($q) use ($kodeBarcode) {
-                                $q->where('qr_token', $kodeBarcode)
-                                    ->orWhere('kode_anggota', $kodeBarcode)
-                                    ->orWhere('nik', $kodeBarcode);
-                            })
-                            ->first();
+                        if (preg_match('/^AG-\d{4}-(\d+)$/i', $kodeBarcode, $mMember)) {
+                            $memberCheck = User::where('role', 'member')->find((int) $mMember[1]);
+                        } else {
+                            $memberCheck = User::where('role', 'member')
+                                ->where(function ($q) use ($kodeBarcode) {
+                                    $q->where('qr_token', $kodeBarcode)
+                                        ->orWhere('nik', $kodeBarcode)
+                                        ->orWhere('id', is_numeric($kodeBarcode) ? (int) $kodeBarcode : 0);
+                                })
+                                ->first();
+                        }
 
                         if ($memberCheck) {
                             $selectedMember = $memberCheck;
@@ -136,11 +140,11 @@ class BarcodeController extends Controller
         } elseif (filter_var($raw, FILTER_VALIDATE_EMAIL)) {
             $member = (clone $memberQuery)->where('email', $raw)->first();
         } else {
-            $member = (clone $memberQuery)->where('qr_token', $raw)
-                ->orWhere('kode_anggota', $raw)
-                ->orWhere('nik', $raw)
-                ->orWhere('id', is_numeric($raw) ? (int) $raw : 0)
-                ->first();
+            $member = (clone $memberQuery)->where(function ($q) use ($raw) {
+                $q->where('qr_token', $raw)
+                    ->orWhere('nik', $raw)
+                    ->orWhere('id', is_numeric($raw) ? (int) $raw : 0);
+            })->first();
 
             if (! $member) {
                 $likeOp = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
@@ -274,7 +278,7 @@ class BarcodeController extends Controller
                 'rak' => $b->rak ?? '-',
                 'stok' => $b->stok,
                 'harga' => (float) $b->harga,
-                'sampul' => $b->sampul ? asset('storage/'.$b->sampul) : null,
+                'sampul' => $b->cover_url,
                 'kodeBarcode' => $kode,
                 'idEksemplar' => $firstEksemplar?->idEksemplar,
                 'isBorrowedByMember' => in_array($b->idBuku, $borrowedBookIds),
@@ -419,7 +423,7 @@ class BarcodeController extends Controller
                             ->where('status', 'Tersedia')
                             ->where('lokasi', 'Rak')
                             ->count();
-                        $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+                        $lokasiBaru = ($kondisiFinal === 'Rusak') ? 'Gudang' : (($currentInRak < 2) ? 'Rak' : 'Gudang');
 
                         $eksemplar->update([
                             'status' => $statusBaru,

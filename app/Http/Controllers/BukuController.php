@@ -289,25 +289,26 @@ class BukuController extends Controller
         return redirect()->route('buku.index')->with('success', 'Perubahan data buku berhasil disimpan.');
     }
 
-    // Hapus data buku
+    // Hapus data buku (Soft Delete aman)
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);
 
         $hasActiveLoans = $buku->eksemplar()
-            ->whereIn('status', ['Dipinjam', 'Dibooking'])
+            ->whereIn('status', ['Dipinjam', 'Dibooking', 'Diajukan Kembali'])
             ->exists();
 
         if ($hasActiveLoans) {
             return back()->with('error', "Buku '{$buku->judul}' tidak dapat dihapus karena masih memiliki eksemplar fisik yang sedang dipinjam atau dibooking oleh anggota.");
         }
 
-        if ($buku->cover && ! Str::startsWith($buku->cover, ['http://', 'https://']) && Storage::disk('public')->exists($buku->cover)) {
-            Storage::disk('public')->delete($buku->cover);
-        }
-        $buku->delete(); // Barcode & eksemplar akan otomatis terhapus karena onDelete cascade
+        // Nonaktifkan eksemplar yang masih berstatus Tersedia agar tidak bisa disirkulasikan lagi
+        $buku->eksemplar()->where('status', 'Tersedia')->update(['status' => 'Hilang']);
 
-        return redirect()->route('buku.index')->with('success', 'Data buku berhasil dihapus.');
+        // Jalankan Soft Delete pada buku sehingga riwayat masa lalu (peminjaman, pengembalian, denda) tetap terjaga utuh
+        $buku->delete();
+
+        return redirect()->route('buku.index')->with('success', 'Data buku berhasil dihapus dari katalog aktif.');
     }
 
     /**
