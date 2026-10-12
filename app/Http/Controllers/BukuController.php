@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Barcode;
 use App\Models\Buku;
+use App\Models\BukuEksemplar;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -12,10 +13,16 @@ use Illuminate\Support\Str;
 
 class BukuController extends Controller
 {
-    // Buka menu data buku & tampilkan data terbaru
+    // Buka menu data inventaris buku & tampilkan 1 baris per judul buku dengan rincian eksemplar
     public function index(Request $request)
     {
-        $query = Buku::with(['kategori', 'barcode'])->latest('idBuku');
+        $query = Buku::with([
+            'kategori',
+            'barcode',
+            'eksemplar' => function ($q) {
+                $q->with('activeDetail.peminjaman.member')->orderBy('nomor_eksemplar');
+            },
+        ]);
 
         if ($request->filled('search')) {
             $search = trim($request->search);
@@ -23,8 +30,16 @@ class BukuController extends Controller
                 $q->where('judul', 'like', "%{$search}%")
                     ->orWhere('penulis', 'like', "%{$search}%")
                     ->orWhere('penerbit', 'like', "%{$search}%")
-                    ->orWhereHas('barcode', function ($b) use ($search) {
-                        $b->where('kodeBarcode', 'like', "%{$search}%");
+                    ->orWhereHas('barcode', function ($bar) use ($search) {
+                        $bar->where('kodeBarcode', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('eksemplar', function ($eks) use ($search) {
+                        if (is_numeric($search)) {
+                            $eks->where('idEksemplar', (int) $search)
+                                ->orWhere('nomor_eksemplar', (int) $search);
+                        }
+                        $eks->orWhere('qr_token', 'like', "%{$search}%")
+                            ->orWhere('kode_barcode', 'like', "%{$search}%");
                     });
             });
         }
@@ -34,18 +49,69 @@ class BukuController extends Controller
         }
 
         if ($request->filled('kondisi') && in_array($request->kondisi, ['Baik', 'Rusak', 'Hilang'], true)) {
-            $query->where('kondisi', $request->kondisi);
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('kondisi', $request->kondisi);
+            });
         }
 
-        $bukus = $query->paginate(10)->withQueryString();
+        if ($request->filled('status') && in_array($request->status, ['Tersedia', 'Dibooking', 'Dipinjam', 'Hilang'], true)) {
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        if ($request->filled('lokasi') && in_array($request->lokasi, ['Rak', 'Gudang'], true)) {
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('lokasi', $request->lokasi);
+            });
+        }
+
+        // Cari judul buku yang display di raknya sudah kosong tetapi masih memiliki stok cadangan di gudang
+        $bukuPerluRestockIds = Buku::whereDoesntHave('eksemplar', function ($q) {
+            $q->where('status', 'Tersedia')->where('lokasi', 'Rak');
+        })->whereHas('eksemplar', function ($q) {
+            $q->where('status', 'Tersedia')->where('lokasi', 'Gudang');
+        })->pluck('idBuku');
+
+        $jumlahPerluRestock = $bukuPerluRestockIds->count();
+
+        if ($request->boolean('perlu_restock')) {
+            $query->whereIn('idBuku', $bukuPerluRestockIds);
+        }
+
+        if ($request->filled('buku_id')) {
+            $query->where('idBuku', $request->buku_id);
+        }
+
+        $bukus = $query->latest('idBuku')->paginate(10)->withQueryString();
+        $eksemplars = $bukus; // Alias kompatibilitas
         $kategoris = Kategori::orderBy('namaKategori')->get();
 
         $totalJudul = Buku::count();
-        $totalStok = (int) Buku::sum('stok');
-        $bukuBaik = Buku::where('kondisi', 'Baik')->count();
-        $bukuRusak = Buku::whereIn('kondisi', ['Rusak', 'Hilang'])->count();
+        $totalEksemplar = BukuEksemplar::count();
+        $totalStok = (int) BukuEksemplar::where('status', 'Tersedia')->count();
+        $eksemplarTersedia = $totalStok;
+        $eksemplarDiRak = BukuEksemplar::where('status', 'Tersedia')->where('lokasi', 'Rak')->count();
+        $eksemplarDiGudang = BukuEksemplar::where('status', 'Tersedia')->where('lokasi', 'Gudang')->count();
+        $eksemplarDipinjam = BukuEksemplar::whereIn('status', ['Dipinjam', 'Dibooking'])->count();
+        $bukuBaik = BukuEksemplar::where('kondisi', 'Baik')->count();
+        $bukuRusak = BukuEksemplar::whereIn('kondisi', ['Rusak', 'Hilang'])->count();
 
-        return view('buku.index', compact('bukus', 'kategoris', 'totalJudul', 'totalStok', 'bukuBaik', 'bukuRusak'));
+        return view('buku.index', compact(
+            'eksemplars',
+            'bukus',
+            'kategoris',
+            'totalJudul',
+            'totalEksemplar',
+            'totalStok',
+            'eksemplarTersedia',
+            'eksemplarDiRak',
+            'eksemplarDiGudang',
+            'eksemplarDipinjam',
+            'bukuBaik',
+            'bukuRusak',
+            'jumlahPerluRestock'
+        ));
     }
 
     // Tampilkan form tambah buku
@@ -227,10 +293,19 @@ class BukuController extends Controller
     public function destroy($id)
     {
         $buku = Buku::findOrFail($id);
+
+        $hasActiveLoans = $buku->eksemplar()
+            ->whereIn('status', ['Dipinjam', 'Dibooking'])
+            ->exists();
+
+        if ($hasActiveLoans) {
+            return back()->with('error', "Buku '{$buku->judul}' tidak dapat dihapus karena masih memiliki eksemplar fisik yang sedang dipinjam atau dibooking oleh anggota.");
+        }
+
         if ($buku->cover && ! Str::startsWith($buku->cover, ['http://', 'https://']) && Storage::disk('public')->exists($buku->cover)) {
             Storage::disk('public')->delete($buku->cover);
         }
-        $buku->delete(); // Barcode akan otomatis terhapus karena onDelete cascade
+        $buku->delete(); // Barcode & eksemplar akan otomatis terhapus karena onDelete cascade
 
         return redirect()->route('buku.index')->with('success', 'Data buku berhasil dihapus.');
     }
