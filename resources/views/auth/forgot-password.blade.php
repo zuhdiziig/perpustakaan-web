@@ -230,12 +230,6 @@
             border: 1px solid #fecaca;
         }
 
-        .alert-success {
-            background-color: #ecfdf5;
-            color: #166534;
-            border: 1px solid #bbf7d0;
-        }
-
         .form-group {
             margin-bottom: 18px;
         }
@@ -439,41 +433,31 @@
 
         <!-- Right Section: Forgot Password Card -->
         <section class="auth-card">
-            <h1 class="card-title">{{ isset($token) ? 'Atur Password Baru' : 'Lupa Password' }}</h1>
-            <p class="card-subtitle">
-                {{ isset($token) ? 'Masukkan kata sandi baru untuk akun Anda.' : 'Masukkan email akun Anda untuk menerima tautan reset password.' }}
-            </p>
-
-            @if (session('status'))
-                <div class="alert-box alert-success">{{ session('status') }}</div>
-            @endif
+            <h1 class="card-title">Lupa Password</h1>
+            <p class="card-subtitle">Masukkan email dan nomor telepon terdaftar untuk mereset kata sandi akun Anda.</p>
 
             @if ($errors->any())
                 <div class="alert-box alert-error">
                     <svg style="width: 18px; height: 18px; flex-shrink: 0;" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
                     </svg>
-                    <span>Periksa data yang Anda masukkan di bawah.</span>
+                    <span>Periksa data verifikasi yang Anda masukkan di bawah.</span>
                 </div>
             @endif
 
-            <form action="{{ isset($token) ? route('password.update') : route('password.email') }}" method="POST">
+            <form action="{{ route('password.update') }}" method="POST">
                 @csrf
-
-                @if (isset($token))
-                    <input type="hidden" name="token" value="{{ $token }}">
-                @endif
 
                 <div class="form-group">
                     <label class="form-label" for="email">Alamat Email Terdaftar</label>
-                    <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-control"
-                        placeholder="Masukkan alamat email akun"
-                        value="{{ old('email', $email ?? '') }}"
-                        required
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email" 
+                        class="form-control" 
+                        placeholder="Masukkan alamat email akun" 
+                        value="{{ old('email') }}" 
+                        required 
                         autofocus
                     >
                     @error('email')
@@ -481,24 +465,76 @@
                     @enderror
                 </div>
 
-                @if (isset($token))
-                    <div class="form-group">
-                        <label class="form-label" for="password">Password Baru</label>
-                        <input type="password" id="password" name="password" class="form-control" placeholder="Minimal 6 karakter" required>
-                        @error('password')
-                            <div class="field-error">{{ $message }}</div>
-                        @enderror
-                    </div>
+                <div class="form-group">
+                    <label class="form-label" for="noTelepon">Nomor Telepon Akun (Verifikasi)</label>
+                    <input 
+                        type="text" 
+                        id="noTelepon" 
+                        name="noTelepon" 
+                        class="form-control" 
+                        placeholder="Contoh: 08123456789" 
+                        value="{{ old('noTelepon') }}" 
+                        required
+                    >
+                    @error('noTelepon')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                    <div class="form-group">
-                        <label class="form-label" for="password_confirmation">Konfirmasi Password Baru</label>
-                        <input type="password" id="password_confirmation" name="password_confirmation" class="form-control" placeholder="Ulangi password baru" required>
+                <div class="form-group">
+                    <label class="form-label" for="password">Password Baru</label>
+                    <div style="position: relative;">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            class="form-control" 
+                            style="padding-right: 42px;"
+                            placeholder="Minimal 6 karakter" 
+                            required
+                        >
+                        <button type="button" onclick="togglePasswordEye('password', this)" title="Lihat/Sembunyikan password" aria-label="Lihat password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                            <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
                     </div>
+                    @error('password')
+                        <div class="field-error">{{ $message }}</div>
+                    @enderror
+                </div>
 
-                    <button type="submit" class="btn-submit-masuk">Perbarui Kata Sandi</button>
-                @else
-                    <button type="submit" class="btn-submit-masuk">Kirim Tautan Reset</button>
-                @endif
+                <div class="form-group">
+                    <label class="form-label" for="password_confirmation">Konfirmasi Password Baru</label>
+                    <div style="position: relative;">
+                        <input 
+                            type="password" 
+                            id="password_confirmation" 
+                            name="password_confirmation" 
+                            class="form-control" 
+                            style="padding-right: 42px;"
+                            placeholder="Ulangi password baru" 
+                            required
+                        >
+                        <button type="button" onclick="togglePasswordEye('password_confirmation', this)" title="Lihat/Sembunyikan konfirmasi password" aria-label="Lihat konfirmasi password" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: #94a3b8; padding: 4px; display: flex; align-items: center; justify-content: center;">
+                            <svg class="eye-open" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg class="eye-closed" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;">
+                                <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit-masuk">Perbarui Kata Sandi</button>
             </form>
 
             <div class="card-switch-link">
@@ -506,7 +542,7 @@
             </div>
 
             <p class="card-bottom-notice">
-                {{ isset($token) ? 'Setelah kata sandi diperbarui, Anda dapat masuk menggunakan kata sandi baru.' : 'Jika email terdaftar, kami akan mengirimkan tautan untuk membuat kata sandi baru.' }}
+                Setelah kata sandi diperbarui, Anda dapat langsung masuk dengan kata sandi baru.
             </p>
         </section>
     </main>
@@ -517,5 +553,22 @@
     © 2026 BOOKNEST · Perpustakaan umum untuk semua
 </footer>
 
+<script>
+    function togglePasswordEye(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (!input) return;
+        const eyeOpen = btn.querySelector('.eye-open');
+        const eyeClosed = btn.querySelector('.eye-closed');
+        if (input.type === 'password') {
+            input.type = 'text';
+            if (eyeOpen) eyeOpen.style.display = 'none';
+            if (eyeClosed) eyeClosed.style.display = 'block';
+        } else {
+            input.type = 'password';
+            if (eyeOpen) eyeOpen.style.display = 'block';
+            if (eyeClosed) eyeClosed.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

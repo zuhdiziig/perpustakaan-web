@@ -197,7 +197,39 @@ class PembayaranController extends Controller
      */
     public function nota(int $idPembayaran): View
     {
-        $pembayaran = $this->findOwnedPembayaran($idPembayaran);
+        $pembayaran = Pembayaran::with([
+            'denda.pengembalian.peminjaman.details.buku.barcode',
+            'denda.pengembalian.peminjaman.member',
+            'denda.details.peminjaman.member',
+        ])->find($idPembayaran);
+
+        if (! $pembayaran) {
+            // Cek apakah $idPembayaran adalah idDenda
+            $denda = Denda::with([
+                'pengembalian.peminjaman.details.buku.barcode',
+                'pengembalian.peminjaman.member',
+                'details.peminjaman.member',
+            ])->find($idPembayaran);
+
+            if ($denda) {
+                $pembayaran = $denda->pembayaran()
+                    ->where('status', 'Sukses')
+                    ->orderByDesc('idPembayaran')
+                    ->first();
+            }
+        }
+
+        abort_unless($pembayaran, 404, 'Data nota pembayaran tidak ditemukan.');
+
+        $user = auth()->user();
+        if ($user && $user->role === 'member') {
+            $ownerId = $pembayaran->denda?->pengembalian?->peminjaman?->idUserMember
+                ?? $pembayaran->denda?->details->first()?->peminjaman?->idUserMember;
+
+            if ($ownerId && (int) $ownerId !== (int) $user->id) {
+                abort(404, 'Anda tidak memiliki hak akses melihat nota pembayaran ini.');
+            }
+        }
 
         abort_unless($this->isPaymentConfirmed($pembayaran), 404);
 

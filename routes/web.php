@@ -75,14 +75,7 @@ Route::middleware('guest')->group(function () {
         ->name('password.request');
 
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
-        ->middleware('throttle:5,1')
-        ->name('password.email');
-
-    Route::get('/reset-password/{token}', [AuthController::class, 'showResetPasswordForm'])
-        ->name('password.reset');
-
-    Route::post('/reset-password', [AuthController::class, 'resetPassword'])
-        ->middleware('throttle:10,1')
+        ->middleware('throttle:6,1')
         ->name('password.update');
 });
 
@@ -213,18 +206,6 @@ Route::middleware('auth')->group(function () {
         Route::get('/denda-saya', [DendaController::class, 'memberDenda'])
             ->name('denda.saya');
 
-        Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
-            ->name('bayar.qr');
-
-        Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
-            ->name('bayar.proses_qr');
-
-        Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
-            ->name('bayar.sukses');
-
-        Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
-            ->name('pembayaran.nota');
-
         Route::get('/kartu-saya', function () {
             return redirect()->route('member.cetak-qr', auth()->id());
         })->name('member.kartu-saya');
@@ -234,7 +215,27 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/api/member/notifikasi-peminjaman/{id}/dibaca', [QrController::class, 'markRealtimeNotificationRead'])
             ->name('api.member.notifikasi-peminjaman.dibaca');
+
+        Route::get('/api/member/universal-search', [RiwayatController::class, 'apiUniversalSearch'])
+            ->name('member.universal-search');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | PEMBAYARAN & NOTA (Bisa Diakses Member, Petugas, dan Admin)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/denda/{id}/bayar-qr', [PembayaranController::class, 'bayarQr'])
+        ->name('bayar.qr');
+
+    Route::post('/pembayaran/{id}/proses-qr', [PembayaranController::class, 'prosesBayarQr'])
+        ->name('bayar.proses_qr');
+
+    Route::get('/pembayaran/{id}/sukses', [PembayaranController::class, 'sukses'])
+        ->name('bayar.sukses');
+
+    Route::get('/pembayaran/{id}/nota', [PembayaranController::class, 'nota'])
+        ->name('pembayaran.nota');
 
     /*
     |--------------------------------------------------------------------------
@@ -273,6 +274,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/buku/{buku}', [BukuController::class, 'show'])
             ->name('buku.show');
 
+        Route::patch('/buku/{id}/update-stok', [BukuController::class, 'updateStok'])
+            ->name('buku.update-stok');
+
         Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])
             ->name('buku.cetak-qr');
 
@@ -300,9 +304,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/pengembalian/batch-selesai', [PengembalianController::class, 'petugasBatchStore'])
             ->name('pengembalian.petugas.batch-selesai');
 
-        // Barcode & Kondisi Buku
+        // Barcode & Sirkulasi Meja Langsung
         Route::get('/scan-barcode', [BarcodeController::class, 'scan'])
             ->name('barcode.scan');
+        Route::post('/sirkulasi/pengembalian-langsung', [BarcodeController::class, 'kembalikanLangsung'])
+            ->name('sirkulasi.pengembalian-langsung');
+        Route::post('/api/sirkulasi/scan-member', [BarcodeController::class, 'apiScanMemberWalkin'])
+            ->name('api.sirkulasi.scan-member');
+        Route::get('/api/sirkulasi/buku-tersedia', [BarcodeController::class, 'apiCariBuku'])
+            ->name('api.sirkulasi.buku-tersedia');
 
         Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
             ->name('kondisi.index');
@@ -325,6 +335,9 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/denda/{id}', [DendaController::class, 'show'])
             ->name('denda.show');
+
+        Route::post('/denda/{id}/bayar-tunai', [DendaController::class, 'bayarTunai'])
+            ->name('denda.bayar-tunai');
 
         Route::get('/pembayaran', [PembayaranController::class, 'index'])
             ->name('pembayaran.index');

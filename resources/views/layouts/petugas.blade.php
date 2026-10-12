@@ -552,9 +552,6 @@
                 <a href="{{ route('home') }}" class="topbar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                     Beranda
                 </a>
-                <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                    Katalog
-                </a>
                 <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
                 </a>
@@ -565,13 +562,6 @@
 
             <!-- Top Right -->
             <div class="topbar-right">
-                <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
-                    <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                </a>
-
                 <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Petugas">
                     {{ auth()->user()->inisial ?? 'DA' }}
                 </a>

@@ -3,12 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
-use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Str;
 
 class AuthController extends Controller
 {
@@ -175,93 +172,37 @@ class AuthController extends Controller
     }
 
     /**
-     * Menampilkan form untuk menyelesaikan reset password dengan token.
-     */
-    public function showResetPasswordForm(Request $request, string $token)
-    {
-        return view('auth.forgot-password', [
-            'token' => $token,
-            'email' => $request->query('email'),
-        ]);
-    }
-
-    /**
-     * Meminta tautan reset melalui Laravel Password Broker.
+     * Memproses update password baru dengan verifikasi nomor telepon terdaftar
      */
     public function forgotPassword(Request $request)
     {
-        $validated = $request->validate([
-            'email' => ['required', 'email'],
-        ]);
-
-        $statusMessage = 'Jika alamat email terdaftar, tautan reset password akan dikirim.';
-
-        if ($this->passwordResetMailIsEnabled()) {
-            try {
-                Password::sendResetLink(['email' => $validated['email']]);
-            } catch (\Throwable $exception) {
-                report($exception);
-            }
-        } else {
-            $statusMessage = 'Reset password sementara dinonaktifkan karena pengiriman email belum dikonfigurasi.';
-        }
-
-        return redirect()->route('password.request')
-            ->with('status', $statusMessage);
-    }
-
-    /**
-     * Menyimpan password baru hanya setelah broker memverifikasi token reset.
-     */
-    public function resetPassword(Request $request)
-    {
-        $validated = $request->validate([
-            'token' => ['required', 'string'],
-            'email' => ['required', 'email'],
+        $request->validate([
+            'email' => ['required', 'email', 'exists:users,email'],
+            'noTelepon' => ['required', 'string'],
             'password' => ['required', 'string', 'min:6', 'confirmed'],
+        ], [
+            'email.exists' => 'Alamat email tidak terdaftar dalam sistem.',
+            'noTelepon.required' => 'Nomor telepon akun wajib diisi untuk verifikasi.',
+            'password.confirmed' => 'Konfirmasi kata sandi baru tidak sesuai.',
         ]);
 
-        $status = Password::reset(
-            $validated,
-            function (User $user, string $password): void {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        $user = User::where('email', $request->email)->first();
 
-                event(new PasswordReset($user));
-            }
-        );
+        // Verifikasi kesesuaian nomor telepon yang tersimpan di profil
+        $inputPhone = preg_replace('/\D/', '', (string) $request->noTelepon);
+        $userPhone = preg_replace('/\D/', '', (string) ($user->noTelepon ?? ''));
 
-        if ($status === Password::PASSWORD_RESET) {
-            return redirect()->route('login')->with('success', 'Password berhasil diperbarui. Silakan masuk.');
+        if (empty($userPhone) || $inputPhone !== $userPhone) {
+            return back()->withErrors([
+                'noTelepon' => 'Nomor telepon tidak cocok dengan data akun terdaftar.',
+            ])->withInput($request->only('email', 'noTelepon'));
         }
 
-        return back()
-            ->withInput($request->only('email'))
-            ->withErrors(['email' => 'Tautan reset tidak valid atau telah kedaluwarsa.']);
-    }
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
 
-    private function passwordResetMailIsEnabled(): bool
-    {
-        $hasUnsafeMailer = function (string $mailerName) use (&$hasUnsafeMailer): bool {
-            $mailer = config("mail.mailers.{$mailerName}", []);
-            $transport = $mailer['transport'] ?? $mailerName;
-
-            if (in_array($transport, ['log', 'array'], true)) {
-                return true;
-            }
-
-            foreach ($mailer['mailers'] ?? [] as $fallbackMailer) {
-                if ($hasUnsafeMailer($fallbackMailer)) {
-                    return true;
-                }
-            }
-
-            return false;
-        };
-
-        return ! $hasUnsafeMailer(config('mail.default'));
+        return redirect()->route('login')->with('success', 'Password berhasil diperbarui. Silakan masuk.');
     }
 
     /**

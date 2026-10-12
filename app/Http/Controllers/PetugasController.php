@@ -9,11 +9,21 @@ use Illuminate\Support\Facades\Hash;
 class PetugasController extends Controller
 {
     // Buka menu petugas & tampilkan daftar petugas terbaru
-    public function index()
+    public function index(Request $request)
     {
-        $petugas = User::where('role', 'petugas')
-            ->latest('id')
-            ->paginate(10);
+        $query = User::where('role', 'petugas');
+
+        if ($request->filled('search')) {
+            $search = mb_strtolower(trim($request->search));
+            $query->where(function ($q) use ($search) {
+                $q->whereRaw('LOWER(name) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(email) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(noTelepon) LIKE ?', ["%{$search}%"])
+                    ->orWhereRaw('LOWER(alamat) LIKE ?', ["%{$search}%"]);
+            });
+        }
+
+        $petugas = $query->latest('id')->paginate(10)->withQueryString();
 
         return view('petugas.index', compact('petugas'));
     }

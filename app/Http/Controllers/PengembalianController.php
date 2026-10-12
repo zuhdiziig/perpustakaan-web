@@ -43,6 +43,7 @@ class PengembalianController extends Controller
                 'buku.kategori',
                 'buku.barcode',
                 'eksemplar',
+                'denda',
             ])
                 ->where('qr_kembali', $code)
                 ->orWhere('kode_kembali', $code)
@@ -63,6 +64,7 @@ class PengembalianController extends Controller
                         'buku.kategori',
                         'buku.barcode',
                         'eksemplar',
+                        'denda',
                     ])
                         ->where('idEksemplar', $eksemplar->idEksemplar)
                         ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
@@ -87,6 +89,7 @@ class PengembalianController extends Controller
                         'buku.kategori',
                         'buku.barcode',
                         'eksemplar',
+                        'denda',
                     ])
                         ->where('idPeminjaman', $trxId)
                         ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])

@@ -1325,10 +1325,23 @@
 
             const scanConfig = { fps: 10, qrbox: { width: 220, height: 180 } };
 
+            let isScanThrottled = false;
+            let lastScannedText = '';
+            let lastScannedTime = 0;
+
             html5Scanner.start(
                 { facingMode: 'environment' },
                 scanConfig,
                 (decodedText) => {
+                    const now = Date.now();
+                    if (isScanThrottled || (decodedText === lastScannedText && now - lastScannedTime < 3000)) {
+                        return;
+                    }
+                    isScanThrottled = true;
+                    lastScannedText = decodedText;
+                    lastScannedTime = now;
+                    setTimeout(() => { isScanThrottled = false; }, 2500);
+
                     prosesIdentifikasi(decodedText);
                 },
                 (error) => {

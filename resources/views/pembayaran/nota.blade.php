@@ -1,4 +1,4 @@
-@extends('layouts.anggota')
+@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : (auth()->user()->role === 'petugas' ? 'layouts.petugas' : 'layouts.anggota'))
 
 @section('title', 'Nota Pembayaran - BOOKNEST')
 
@@ -321,7 +321,7 @@
     <nav class="nota-breadcrumb" aria-label="Breadcrumb">
         <a href="{{ route('dashboard') }}" class="brand-crumb">BOOKNEST</a>
         <span class="divider-crumb">/</span>
-        <span class="active-crumb">Anggota</span>
+        <span class="active-crumb">{{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? 'Kelola Denda' : 'Anggota' }}</span>
     </nav>
 
     <!-- PAGE HEADER -->
@@ -335,8 +335,8 @@
         <button type="button" onclick="window.print()" class="btn-cetak-nota">
             Cetak Nota
         </button>
-        <a href="{{ route('dashboard') }}" class="btn-kembali-dasbor">
-            Kembali ke Dasbor
+        <a href="{{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? route('denda.index') : route('dashboard') }}" class="btn-kembali-dasbor">
+            {{ in_array(auth()->user()->role ?? '', ['admin', 'petugas']) ? 'Kembali ke Kelola Denda' : 'Kembali ke Dasbor' }}
         </a>
     </div>
 

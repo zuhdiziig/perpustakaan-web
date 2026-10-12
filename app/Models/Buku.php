@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class Buku extends Model
 {
@@ -69,5 +70,18 @@ class Buku extends Model
         $this->update(['stok' => $count]);
 
         return $count;
+    }
+
+    public function getCoverUrlAttribute(): ?string
+    {
+        if (empty($this->cover)) {
+            return null;
+        }
+
+        if (Str::startsWith($this->cover, ['http://', 'https://'])) {
+            return $this->cover;
+        }
+
+        return asset('storage/'.$this->cover);
     }
 }

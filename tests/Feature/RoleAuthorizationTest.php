@@ -69,6 +69,17 @@ class RoleAuthorizationTest extends TestCase
         $this->get(route('kategori.index'))->assertForbidden();
         $this->get(route('laporan.index'))->assertForbidden();
         $this->get(route('buku.create'))->assertForbidden();
+
+        // Petugas dilarang ubah atau nonaktifkan data member secara langsung (anti-fraud)
+        $this->get(route('member.edit', $this->member->id))->assertForbidden();
+        $this->put(route('member.update', $this->member->id), [
+            'name' => 'Fraud Name',
+            'email' => 'fraud@example.com',
+            'noTelepon' => '081234567890',
+            'alamat' => 'Alamat Fraud',
+            'status' => 'aktif',
+        ])->assertForbidden();
+        $this->patch(route('member.toggle-status', $this->member->id))->assertForbidden();
     }
 
     public function test_petugas_can_access_circulation_and_operational_routes(): void
@@ -104,6 +115,7 @@ class RoleAuthorizationTest extends TestCase
         $this->get(route('laporan.index'))->assertOk();
         $this->get(route('buku.create'))->assertOk();
         $this->get(route('member.index'))->assertOk();
+        $this->get(route('member.edit', $this->member->id))->assertOk();
     }
 
     public function test_admin_cannot_access_operational_desk_routes(): void

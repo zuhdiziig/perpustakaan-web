@@ -506,4 +506,183 @@ class PetugasBarcodePeminjamanTest extends TestCase
             ->assertJsonPath('data.member.name', $this->member->name)
             ->assertJsonPath('data.buku.judul', $this->buku->judul);
     }
+
+    public function test_petugas_peminjaman_langsung_walkin_tersimpan_di_akun_anggota_dan_siap_dikembalikan(): void
+    {
+        $this->actingAs($this->petugas);
+
+        // 1. Identifikasi Anggota Meja Sirkulasi
+        $scanMemberRes = $this->postJson(route('api.sirkulasi.scan-member'), [
+            'code' => $this->member->kode_anggota,
+        ]);
+
+        $scanMemberRes->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.member.id', $this->member->id);
+
+        // 2. Ambil list buku tersedia
+        $bukuRes = $this->getJson(route('api.sirkulasi.buku-tersedia', ['q' => 'Laut']));
+        $bukuRes->assertOk()
+            ->assertJsonPath('success', true);
+        $tokenBuku = $bukuRes->json('data.0.kodeBarcode');
+
+        // 3. Konfirmasi Peminjaman Langsung via form walkin
+        $pinjamRes = $this->post(route('peminjaman.store'), [
+            'source' => 'walkin_scanner',
+            'idUserMember' => $this->member->id,
+            'barcodes' => [$tokenBuku],
+            'durasiHari' => 30,
+        ]);
+
+        $pinjamRes->assertRedirect(route('barcode.scan', ['member_id' => $this->member->id]));
+
+        // 4. Pastikan transaksi peminjaman tersimpan di database untuk anggota
+        $this->assertDatabaseHas('peminjaman', [
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $this->assertDatabaseHas('detail_peminjaman', [
+            'idBuku' => $this->buku->idBuku,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        // 5. Cek dari sisi scanner sirkulasi pengembalian (riwayat pinjaman aktif muncul)
+        $scanKembaliRes = $this->postJson(route('api.sirkulasi.scan-member'), [
+            'code' => $this->member->kode_anggota,
+        ]);
+
+        $scanKembaliRes->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonCount(1, 'data.pinjamanAktif')
+            ->assertJsonPath('data.pinjamanAktif.0.judul', 'Laut Bercerita');
+
+        // 6. Cek dari sisi member (riwayat peminjaman saya)
+        $this->actingAs($this->member);
+        $memberView = $this->get(route('riwayat.index'));
+        $memberView->assertOk()
+            ->assertSee('Laut Bercerita')
+            ->assertSee('Dipinjam');
+    }
+
+    public function test_anggota_tidak_bisa_meminjam_buku_dengan_judul_yang_sama_jika_sedang_dipinjam(): void
+    {
+        $this->actingAs($this->petugas);
+
+        // Buat 2 eksemplar fisik untuk buku yang sama
+        $this->buku->update(['stok' => 2]);
+        $eksemplar2 = $this->buku->eksemplar()->create([
+            'nomor_eksemplar' => 2,
+            'qr_token' => 'eks_laut_2',
+            'kondisi' => 'Baik',
+            'status' => 'Tersedia',
+        ]);
+
+        // Peminjaman pertama berhasil
+        $pinjam1 = $this->post(route('peminjaman.store'), [
+            'source' => 'walkin_scanner',
+            'idUserMember' => $this->member->id,
+            'barcodes' => [$this->eksemplar->qr_token],
+            'durasiHari' => 30,
+        ]);
+        $pinjam1->assertRedirect();
+        $this->assertTrue($this->member->sedangMeminjamBuku($this->buku->idBuku));
+
+        // Peminjaman kedua untuk buku yang sama (eksemplar 2) harus ditolak
+        $pinjam2 = $this->post(route('peminjaman.store'), [
+            'source' => 'walkin_scanner',
+            'idUserMember' => $this->member->id,
+            'barcodes' => [$eksemplar2->qr_token],
+            'durasiHari' => 30,
+        ]);
+
+        $pinjam2->assertSessionHasErrors('barcodes');
+        $this->assertStringContainsString('saat ini masih sedang meminjam buku', session('errors')->first('barcodes'));
+
+        // Eksemplar 2 tetap berstatus Tersedia
+        $eksemplar2->refresh();
+        $this->assertSame('Tersedia', $eksemplar2->status);
+    }
+
+    public function test_peminjaman_menolak_dua_eksemplar_dari_judul_buku_yang_sama_dalam_satu_transaksi(): void
+    {
+        $this->actingAs($this->petugas);
+
+        // Buat 2 eksemplar fisik untuk buku yang sama
+        $this->buku->update(['stok' => 2]);
+        $eksemplar2 = $this->buku->eksemplar()->create([
+            'nomor_eksemplar' => 2,
+            'qr_token' => 'eks_laut_2',
+            'kondisi' => 'Baik',
+            'status' => 'Tersedia',
+        ]);
+
+        // Coba meminjam 2 copy buku yang sama sekaligus dalam 1 transaksi
+        $response = $this->post(route('peminjaman.store'), [
+            'source' => 'walkin_scanner',
+            'idUserMember' => $this->member->id,
+            'barcodes' => [$this->eksemplar->qr_token, $eksemplar2->qr_token],
+            'durasiHari' => 30,
+        ]);
+
+        $response->assertSessionHasErrors('barcodes');
+        $this->assertStringContainsString('dipilih lebih dari satu kali dalam transaksi yang sama', session('errors')->first('barcodes'));
+
+        // Tidak ada data peminjaman yang terbentuk
+        $this->assertDatabaseMissing('peminjaman', [
+            'idUserMember' => $this->member->id,
+        ]);
+    }
+
+    public function test_api_buku_tersedia_menandai_buku_yang_sedang_dipinjam_oleh_anggota(): void
+    {
+        $this->actingAs($this->petugas);
+
+        // Buat buku kedua
+        $bukuB = Buku::create([
+            'idKategori' => $this->kategori->idKategori,
+            'judul' => 'Bumi Manusia',
+            'penulis' => 'Pramoedya Ananta Toer',
+            'penerbit' => 'Hasta Mitra',
+            'tahunTerbit' => 1980,
+            'harga' => 120000,
+            'stok' => 1,
+            'kondisi' => 'Baik',
+        ]);
+
+        // Member meminjam buku pertama ($this->buku)
+        $this->post(route('peminjaman.store'), [
+            'source' => 'walkin_scanner',
+            'idUserMember' => $this->member->id,
+            'barcodes' => [$this->eksemplar->qr_token],
+            'durasiHari' => 30,
+        ]);
+
+        $this->buku->refresh();
+        $this->buku->eksemplar()->create([
+            'nomor_eksemplar' => 2,
+            'qr_token' => 'eks_laut_2',
+            'kondisi' => 'Baik',
+            'status' => 'Tersedia',
+        ]);
+        $this->buku->syncStok();
+
+        // Request API buku tersedia dengan parameter member_id
+        $response = $this->getJson(route('api.sirkulasi.buku-tersedia', ['member_id' => $this->member->id]));
+
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $data = $response->json('data');
+        $itemLaut = collect($data)->firstWhere('idBuku', $this->buku->idBuku);
+        $itemBumi = collect($data)->firstWhere('idBuku', $bukuB->idBuku);
+
+        $this->assertNotNull($itemLaut);
+        $this->assertTrue($itemLaut['isBorrowedByMember']);
+
+        $this->assertNotNull($itemBumi);
+        $this->assertFalse($itemBumi['isBorrowedByMember']);
+    }
 }

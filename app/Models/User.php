@@ -135,4 +135,36 @@ class User extends Authenticatable
     {
         return ($this->jumlahBukuSedangDipinjam() + $jumlah) <= Peminjaman::BATAS_MAKSIMAL_BUKU;
     }
+
+    /**
+     * Cek apakah member sedang meminjam atau membooking buku dengan idBuku tertentu.
+     */
+    public function sedangMeminjamBuku(int $idBuku): bool
+    {
+        return DetailPeminjaman::where('idBuku', $idBuku)
+            ->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])
+            ->whereHas('peminjaman', function ($q) {
+                $q->where('idUserMember', $this->id)
+                    ->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+            })
+            ->exists();
+    }
+
+    /**
+     * Daftar array idBuku yang sedang dipinjam atau dibooking oleh member.
+     *
+     * @return array<int>
+     */
+    public function daftarIdBukuAktif(): array
+    {
+        return DetailPeminjaman::whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])
+            ->whereHas('peminjaman', function ($q) {
+                $q->where('idUserMember', $this->id)
+                    ->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+            })
+            ->pluck('idBuku')
+            ->unique()
+            ->values()
+            ->all();
+    }
 }

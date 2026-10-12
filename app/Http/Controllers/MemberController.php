@@ -9,13 +9,31 @@ use Illuminate\Support\Facades\Hash;
 class MemberController extends Controller
 {
     // Buka menu member & tampilkan data terbaru
-    public function index()
+    public function index(Request $request)
     {
-        $members = User::where('role', 'member')
-            ->latest('id')
-            ->paginate(10);
+        $query = User::where('role', 'member')->orderBy('name', 'asc');
 
-        return view('member.index', compact('members'));
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%")
+                    ->orWhere('noTelepon', 'like', "%{$search}%")
+                    ->orWhere('alamat', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['aktif', 'nonaktif'], true)) {
+            $query->where('status', $request->status);
+        }
+
+        $members = $query->paginate(10)->withQueryString();
+
+        $totalMember = User::where('role', 'member')->count();
+        $memberAktif = User::where('role', 'member')->where('status', 'aktif')->count();
+        $memberNonaktif = $totalMember - $memberAktif;
+
+        return view('member.index', compact('members', 'totalMember', 'memberAktif', 'memberNonaktif'));
     }
 
     // Tampilkan form tambah member
@@ -59,6 +77,10 @@ class MemberController extends Controller
     // Tampilkan form ubah member
     public function edit($id)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang berwenang mengubah data anggota.');
+        }
+
         $member = User::where('role', 'member')->findOrFail($id);
 
         return view('member.edit', compact('member'));
@@ -67,6 +89,10 @@ class MemberController extends Controller
     // Validasi & simpan perubahan data member
     public function update(Request $request, $id)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang berwenang mengubah data anggota.');
+        }
+
         $member = User::where('role', 'member')->findOrFail($id);
 
         $validated = $request->validate([
@@ -102,6 +128,10 @@ class MemberController extends Controller
     // Aksi cepat toggle status: Aktifkan / Nonaktifkan member
     public function toggleStatus($id)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang berwenang mengubah status anggota.');
+        }
+
         $member = User::where('role', 'member')->findOrFail($id);
         $member->status = ($member->status === 'aktif') ? 'nonaktif' : 'aktif';
         $member->save();

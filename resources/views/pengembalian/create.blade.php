@@ -718,17 +718,31 @@
                 </div>
             </div>
 
+            @php
+                $initialDenda = $initialDetail?->denda;
+                $isInitialDendaLunas = $initialDenda && $initialDenda->status === 'Lunas';
+                $isInitialManual = $initialDetail && empty($initialDetail->kode_kembali) && empty($initialDetail->qr_kembali);
+                $isInitialLocked = $isInitialDendaLunas && ! $isInitialManual;
+            @endphp
             <!-- CARD 2: VERIFIKASI KONDISI & KALKULASI DENDA -->
             <div class="card-panel" style="margin-bottom: 20px;">
-                <h3 class="card-title-md" style="margin-bottom: 8px;">Verifikasi Kondisi & Kalkulasi Denda</h3>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+                    <h3 class="card-title-md" style="margin-bottom: 0;">Verifikasi Kondisi & Kalkulasi Denda</h3>
+                    <span id="badgeDendaLunasLock" style="display: {{ $isInitialLocked ? 'inline-flex' : 'none' }}; align-items: center; gap: 5px; font-size: 11px; font-weight: 800; background: #dcfce7; color: #166534; padding: 4px 10px; border-radius: 20px; border: 1px solid #bbf7d0;">
+                        🔒 Denda Lunas (QRIS) - Pilihan Terkunci
+                    </span>
+                </div>
                 <label for="kondisiBukuSelect" style="display: block; font-size: 12.5px; font-weight: 600; color: #475569; margin-bottom: 6px;">
                     Kondisi Fisik Buku (Pemeriksaan Petugas Meja Sirkulasi):
                 </label>
-                <select name="kondisiBuku" id="kondisiBukuSelect" class="select-kondisi" onchange="recalculateFine()">
+                <select name="kondisiBuku" id="kondisiBukuSelect" class="select-kondisi" onchange="recalculateFine()" {{ $isInitialLocked ? 'disabled' : '' }}>
                     <option value="Baik" {{ ($initialDetail->kondisi_laporan ?? 'Baik') === 'Baik' ? 'selected' : '' }}>Baik (Buku utuh, bersih & bebas denda fisik)</option>
                     <option value="Rusak" {{ ($initialDetail->kondisi_laporan ?? '') === 'Rusak' ? 'selected' : '' }}>Rusak (Denda 100% Harga Buku)</option>
                     <option value="Hilang" {{ ($initialDetail->kondisi_laporan ?? '') === 'Hilang' ? 'selected' : '' }}>Hilang (Denda 100% Harga Buku)</option>
                 </select>
+                <p id="lockNoticeKondisi" style="display: {{ $isInitialLocked ? 'block' : 'none' }}; font-size: 12px; color: #0f766e; margin-top: 6px; font-weight: 600;">
+                    ✓ Anggota telah menyelesaikan pembayaran denda secara online sebesar Rp {{ number_format($initialDenda->jumlah ?? 0, 0, ',', '.') }}. Kondisi buku terkunci sesuai verifikasi sistem.
+                </p>
 
                 <!-- Box Kalkulasi Denda Real-Time -->
                 <div class="fine-calc-box {{ ($estDendaKeterlambatan > 0) ? 'has-fine' : '' }}" id="fineCalcBox">
@@ -1160,6 +1174,15 @@
                 return;
             }
 
+            if (state.detail && state.detail.dendaLunas && !state.detail.isManualReturn) {
+                dispFineOverdue.textContent = 'Rp 0 (Lunas)';
+                dispFineCondition.textContent = 'Rp 0 (Lunas)';
+                dispFineTotal.textContent = 'Rp 0 (Lunas)';
+                fineCalcBox.classList.remove('has-fine');
+                totalFineRow.classList.remove('danger');
+                return;
+            }
+
             const overdueFine = state.detail.keterlambatan ? (state.detail.keterlambatan.estDenda || 0) : 0;
             const bookPrice = state.detail.buku ? (state.detail.buku.harga || 0) : 0;
 
@@ -1238,6 +1261,23 @@
 
             dispKondisiLaporan.textContent = d.kondisiLaporan || 'Baik';
             kondisiBukuSelect.value = d.kondisiLaporan || 'Baik';
+
+            const isDendaLunas = Boolean(d.dendaLunas && !d.isManualReturn);
+            const badgeLock = document.getElementById('badgeDendaLunasLock');
+            const noticeLock = document.getElementById('lockNoticeKondisi');
+
+            if (isDendaLunas) {
+                kondisiBukuSelect.disabled = true;
+                if (badgeLock) badgeLock.style.display = 'inline-flex';
+                if (noticeLock) {
+                    noticeLock.style.display = 'block';
+                    noticeLock.textContent = `✓ Anggota telah menyelesaikan pembayaran denda secara online sebesar ${formatRupiah(d.jumlahDendaTerbayar || d.jumlahDenda || 0)}. Pilihan kondisi buku terkunci.`;
+                }
+            } else {
+                kondisiBukuSelect.disabled = false;
+                if (badgeLock) badgeLock.style.display = 'none';
+                if (noticeLock) noticeLock.style.display = 'none';
+            }
 
             dispValidasiPetugas.textContent = `Buku fisik '${d.buku?.judul}' milik anggota ${d.member?.name} teridentifikasi. Pastikan buku diterima secara fisik sebelum konfirmasi.`;
 
@@ -1378,6 +1418,10 @@
             }
         });
 
+        let isScanThrottled = false;
+        let lastScannedText = '';
+        let lastScannedTime = 0;
+
         // Kontrol Kamera & QR Scanner
         async function startScanner() {
             try {
@@ -1392,6 +1436,15 @@
                         qrbox: { width: 180, height: 180 }
                     },
                     (decodedText) => {
+                        const now = Date.now();
+                        if (isScanThrottled || (decodedText === lastScannedText && now - lastScannedTime < 3000)) {
+                            return;
+                        }
+                        isScanThrottled = true;
+                        lastScannedText = decodedText;
+                        lastScannedTime = now;
+                        setTimeout(() => { isScanThrottled = false; }, 2500);
+
                         // Scan sukses
                         stopScanner();
                         inputManual.value = decodedText;
