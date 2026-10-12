@@ -284,7 +284,10 @@ Route::middleware('auth')->group(function () {
         Route::patch('/member/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
             ->name('member.toggle-status');
 
-        // Sirkulasi Peminjaman & Pengembalian
+        // Sirkulasi Peminjaman & Pengembalian Terpadu
+        Route::get('/sirkulasi-buku', [PeminjamanController::class, 'sirkulasiIndex'])
+            ->name('sirkulasi.index');
+
         Route::resource('peminjaman', PeminjamanController::class)
             ->only(['index', 'create', 'store', 'show']);
 

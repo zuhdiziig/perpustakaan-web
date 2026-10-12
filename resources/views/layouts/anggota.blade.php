@@ -625,5 +625,8 @@
 
     {{-- Modal Pencarian Terpadu Anggota (Buku, Pinjam, Kembali, Denda) --}}
     @include('layouts.partials.member_universal_search')
+
+    {{-- Pop Up Message Ringkas Notifikasi Booking Peminjaman & Pengembalian --}}
+    @include('layouts.partials.member_booking_popup')
 </body>
 </html>

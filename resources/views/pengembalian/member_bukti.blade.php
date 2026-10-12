@@ -307,30 +307,31 @@
             </div>
 
             {{-- 2. DETAIL BUKU --}}
-            <div class="section-label">Buku Fisik yang Dikembalikan</div>
-            @php
-                $detailBuku = $pengembalian->peminjaman->details->first();
-            @endphp
-            <div class="book-item-box">
-                <div class="book-icon-square">
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <div style="flex: 1;">
-                    <div class="book-meta-title">{{ $detailBuku->buku->judul ?? 'Buku Perpustakaan' }}</div>
-                    <div class="book-meta-detail">
-                        Penulis: {{ $detailBuku->buku->penulis ?? '-' }} • 
-                        Kategori: {{ $detailBuku->buku->kategori->namaKategori ?? 'Umum' }} • 
-                        Eksemplar: #{{ $detailBuku->eksemplar->nomor_eksemplar ?? '1' }}
+            <div class="section-label">Buku Fisik yang Dikembalikan ({{ $pengembalian->peminjaman->details->count() }} Judul Buku)</div>
+            <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 24px;">
+                @foreach($pengembalian->peminjaman->details as $detailBuku)
+                    <div class="book-item-box">
+                        <div class="book-icon-square">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                            </svg>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="book-meta-title">{{ $detailBuku->buku->judul ?? 'Buku Perpustakaan' }}</div>
+                            <div class="book-meta-detail">
+                                Penulis: {{ $detailBuku->buku->penulis ?? '-' }} • 
+                                Kategori: {{ $detailBuku->buku->kategori->namaKategori ?? 'Umum' }} • 
+                                Eksemplar: #{{ $detailBuku->eksemplar->nomor_eksemplar ?? '1' }}
+                            </div>
+                        </div>
+                        <div>
+                            <span style="font-size: 12px; font-weight: 700; color: #475569; background: #e2e8f0; padding: 5px 10px; border-radius: 8px;">
+                                Kondisi: {{ $pengembalian->kondisiBuku }}
+                            </span>
+                        </div>
                     </div>
-                </div>
-                <div>
-                    <span style="font-size: 12px; font-weight: 700; color: #475569; background: #e2e8f0; padding: 5px 10px; border-radius: 8px;">
-                        Kondisi: {{ $pengembalian->kondisiBuku }}
-                    </span>
-                </div>
+                @endforeach
             </div>
 
             {{-- 3. STATUS DENDA --}}

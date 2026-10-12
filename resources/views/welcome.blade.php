@@ -1232,15 +1232,14 @@
                 </form>
 
                 <div class="hero-buttons">
-                    <a href="{{ route('katalog.index') }}" class="btn-green">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
-                        <span>Jelajahi Katalog</span>
-                    </a>
+                    @if(!auth()->check() || auth()->user()->role === 'member')
+                        <a href="{{ route('katalog.index') }}" class="btn-green">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            <span>Jelajahi Katalog</span>
+                        </a>
+                    @endif
 
                     @guest
-                        <a href="{{ route('register') }}" class="btn-blue">
-                            <span>Daftar Anggota</span>
-                        </a>
                     @else
                         @if(auth()->user()->role === 'member')
                             <a href="{{ route('riwayat.index') }}" class="btn-blue">
@@ -1248,7 +1247,7 @@
                                 <span>Pinjaman & Booking Saya</span>
                             </a>
                         @elseif(auth()->user()->role === 'petugas')
-                            <a href="{{ route('peminjaman.create') }}" class="btn-blue">
+                            <a href="{{ route('barcode.scan') }}" class="btn-blue">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                                 <span>Meja Sirkulasi (Scan QR)</span>
                             </a>

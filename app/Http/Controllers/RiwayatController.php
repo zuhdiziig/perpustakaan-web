@@ -70,6 +70,10 @@ class RiwayatController extends Controller
         }
 
         $qLower = mb_strtolower($q);
+        $cleanId = null;
+        if (preg_match('/\d+/', $q, $m)) {
+            $cleanId = (int) $m[0];
+        }
 
         $bukuResults = [];
         if (in_array($tab, ['semua', 'buku'], true)) {
@@ -99,8 +103,11 @@ class RiwayatController extends Controller
         if (in_array($tab, ['semua', 'peminjaman'], true)) {
             $peminjamans = Peminjaman::with('details.buku')
                 ->where('idUserMember', $userId)
-                ->where(function ($query) use ($qLower) {
-                    $query->whereRaw('LOWER(COALESCE(kode_booking, \'\')) LIKE ?', ["%{$qLower}%"])
+                ->where(function ($query) use ($qLower, $cleanId) {
+                    if ($cleanId !== null) {
+                        $query->orWhere('idPeminjaman', $cleanId);
+                    }
+                    $query->orWhereRaw('LOWER(COALESCE(kode_booking, \'\')) LIKE ?', ["%{$qLower}%"])
                         ->orWhereRaw('LOWER(COALESCE(status, \'\')) LIKE ?', ["%{$qLower}%"])
                         ->orWhereHas('details.buku', function ($b) use ($qLower) {
                             $b->whereRaw('LOWER(judul) LIKE ?', ["%{$qLower}%"]);
@@ -111,9 +118,10 @@ class RiwayatController extends Controller
                 ->get();
 
             foreach ($peminjamans as $p) {
+                $trxCode = '#TRX-'.str_pad($p->idPeminjaman, 5, '0', STR_PAD_LEFT);
                 $peminjamanResults[] = [
                     'id' => $p->idPeminjaman,
-                    'kode' => $p->kode_booking ?? ('PJ-#'.$p->idPeminjaman),
+                    'kode' => $trxCode.($p->kode_booking ? ' ('.$p->kode_booking.')' : ''),
                     'buku' => $p->details->pluck('buku.judul')->filter()->join(', ') ?: 'Peminjaman Buku',
                     'status' => $p->status,
                     'batas_kembali' => $p->batasKembali ? Carbon::parse($p->batasKembali)->translatedFormat('d M Y') : null,
@@ -126,8 +134,12 @@ class RiwayatController extends Controller
         if (in_array($tab, ['semua', 'pengembalian'], true)) {
             $pengembalians = Pengembalian::with('peminjaman.details.buku')
                 ->whereHas('peminjaman', fn ($p) => $p->where('idUserMember', $userId))
-                ->where(function ($query) use ($qLower) {
-                    $query->whereRaw('LOWER(COALESCE("kondisiBuku", \'\')) LIKE ?', ["%{$qLower}%"])
+                ->where(function ($query) use ($qLower, $cleanId) {
+                    if ($cleanId !== null) {
+                        $query->orWhere('idPengembalian', $cleanId)
+                            ->orWhere('idPeminjaman', $cleanId);
+                    }
+                    $query->orWhereRaw('LOWER(COALESCE(kondisiBuku, \'\')) LIKE ?', ["%{$qLower}%"])
                         ->orWhereHas('peminjaman.details.buku', function ($b) use ($qLower) {
                             $b->whereRaw('LOWER(judul) LIKE ?', ["%{$qLower}%"]);
                         });
@@ -137,12 +149,15 @@ class RiwayatController extends Controller
                 ->get();
 
             foreach ($pengembalians as $ret) {
+                $retCode = '#RET-'.str_pad($ret->idPengembalian, 5, '0', STR_PAD_LEFT);
+                $refTrx = '#TRX-'.str_pad($ret->idPeminjaman, 5, '0', STR_PAD_LEFT);
                 $pengembalianResults[] = [
                     'id' => $ret->idPengembalian,
+                    'kode' => $retCode.' (Ref: '.$refTrx.')',
                     'tanggal' => Carbon::parse($ret->tanggalKembali)->translatedFormat('d M Y'),
                     'buku' => $ret->peminjaman?->details?->pluck('buku.judul')->filter()->join(', ') ?: 'Buku',
                     'kondisi' => $ret->kondisiBuku ?? 'Baik',
-                    'url' => route('pengembalian.member'),
+                    'url' => route('pengembalian.member.bukti', $ret->idPengembalian),
                 ];
             }
         }
@@ -154,9 +169,16 @@ class RiwayatController extends Controller
                     $query->whereHas('pengembalian.peminjaman', fn ($p) => $p->where('idUserMember', $userId))
                         ->orWhereHas('details.peminjaman', fn ($p) => $p->where('idUserMember', $userId));
                 })
-                ->where(function ($query) use ($qLower) {
-                    $query->whereRaw('LOWER(COALESCE("jenisDenda", \'\')) LIKE ?', ["%{$qLower}%"])
-                        ->orWhereRaw('LOWER(COALESCE(status, \'\')) LIKE ?', ["%{$qLower}%"]);
+                ->where(function ($query) use ($qLower, $cleanId) {
+                    if ($cleanId !== null) {
+                        $query->orWhere('idDenda', $cleanId)
+                            ->orWhereHas('pengembalian', fn ($ret) => $ret->where('idPeminjaman', $cleanId))
+                            ->orWhereHas('details', fn ($det) => $det->where('idPeminjaman', $cleanId));
+                    }
+                    $query->orWhereRaw('LOWER(COALESCE(jenisDenda, \'\')) LIKE ?', ["%{$qLower}%"])
+                        ->orWhereRaw('LOWER(COALESCE(status, \'\')) LIKE ?', ["%{$qLower}%"])
+                        ->orWhereHas('pengembalian.peminjaman.details.buku', fn ($b) => $b->whereRaw('LOWER(judul) LIKE ?', ["%{$qLower}%"]))
+                        ->orWhereHas('details.peminjaman.details.buku', fn ($b) => $b->whereRaw('LOWER(judul) LIKE ?', ["%{$qLower}%"]));
                 })
                 ->latest('idDenda')
                 ->limit(5)
@@ -166,8 +188,11 @@ class RiwayatController extends Controller
                 $bukuJudul = $d->pengembalian?->peminjaman?->details?->first()?->buku?->judul
                     ?? $d->details->first()?->peminjaman?->details?->first()?->buku?->judul ?? 'Denda Sirkulasi';
 
+                $dendaCode = '#DND-'.str_pad($d->idDenda, 5, '0', STR_PAD_LEFT);
+
                 $dendaResults[] = [
                     'id' => $d->idDenda,
+                    'kode' => $dendaCode,
                     'jenis' => $d->jenisDenda,
                     'nominal' => 'Rp '.number_format($d->jumlah, 0, ',', '.'),
                     'buku' => $bukuJudul,

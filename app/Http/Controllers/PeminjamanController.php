@@ -7,6 +7,7 @@ use App\Models\Buku;
 use App\Models\BukuEksemplar;
 use App\Models\DetailPeminjaman;
 use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -18,7 +19,7 @@ class PeminjamanController extends Controller
     // Halaman daftar & riwayat peminjaman
     public function index(Request $request)
     {
-        // Role petugas diarahkan ke halaman operasional Barcode Peminjaman
+        // Role petugas diarahkan ke halaman operasional Barcode Peminjaman jika bukan riwayat
         if (auth()->check() && auth()->user()->role === 'petugas' && ! $request->has('riwayat')) {
             return redirect()->route('peminjaman.create');
         }
@@ -28,6 +29,66 @@ class PeminjamanController extends Controller
             ->paginate(10);
 
         return view('peminjaman.index', compact('peminjamans'));
+    }
+
+    /**
+     * Halaman Daftar & Riwayat Sirkulasi Buku (Peminjaman & Pengembalian) untuk Petugas & Admin.
+     */
+    public function sirkulasiIndex(Request $request)
+    {
+        $tab = $request->query('tab', 'peminjaman');
+        $q = trim((string) $request->query('q', ''));
+        $status = $request->query('status');
+
+        $totalPinjamAktif = Peminjaman::where('status', 'Dipinjam')->count();
+        $totalPinjamHariIni = Peminjaman::whereDate('created_at', Carbon::today())->count();
+        $totalKembaliHariIni = Pengembalian::whereDate('created_at', Carbon::today())->count();
+        $totalAntreanBooking = Peminjaman::whereIn('status', ['Booking', 'Siap Diambil'])->count();
+
+        $peminjamans = Peminjaman::with(['member', 'petugas', 'details.buku', 'details.eksemplar'])
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $cleanNum = preg_replace('/[^0-9]/', '', $q);
+                    if (! empty($cleanNum)) {
+                        $sub->orWhere('idPeminjaman', (int) $cleanNum);
+                    }
+                    $sub->orWhere('kode_booking', 'like', "%{$q}%")
+                        ->orWhereHas('member', fn ($m) => $m->where('name', 'like', "%{$q}%"))
+                        ->orWhereHas('details.buku', fn ($b) => $b->where('judul', 'like', "%{$q}%"));
+                });
+            })
+            ->when($status, fn ($query) => $query->where('status', $status))
+            ->latest('idPeminjaman')
+            ->paginate(10, ['*'], 'page_pinjam')
+            ->withQueryString();
+
+        $pengembalians = Pengembalian::with(['peminjaman.member', 'petugas', 'denda', 'peminjaman.details.buku'])
+            ->when($q, function ($query) use ($q) {
+                $query->where(function ($sub) use ($q) {
+                    $cleanNum = preg_replace('/[^0-9]/', '', $q);
+                    if (! empty($cleanNum)) {
+                        $sub->orWhere('idPengembalian', (int) $cleanNum)
+                            ->orWhere('idPeminjaman', (int) $cleanNum);
+                    }
+                    $sub->orWhereHas('peminjaman.member', fn ($m) => $m->where('name', 'like', "%{$q}%"))
+                        ->orWhereHas('peminjaman.details.buku', fn ($b) => $b->where('judul', 'like', "%{$q}%"));
+                });
+            })
+            ->latest('idPengembalian')
+            ->paginate(10, ['*'], 'page_kembali')
+            ->withQueryString();
+
+        return view('sirkulasi.index', compact(
+            'tab',
+            'q',
+            'status',
+            'peminjamans',
+            'pengembalians',
+            'totalPinjamAktif',
+            'totalPinjamHariIni',
+            'totalKembaliHariIni',
+            'totalAntreanBooking'
+        ));
     }
 
     // Tampilkan form peminjaman (Scan barcode & input member)
@@ -362,7 +423,12 @@ class PeminjamanController extends Controller
         $user = auth()->user();
 
         if ($user->status !== 'aktif') {
-            return back()->with('error', 'Status keanggotaan Anda saat ini tidak aktif. Silakan hubungi petugas perpustakaan.');
+            $msg = 'Status keanggotaan Anda saat ini tidak aktif. Silakan hubungi petugas perpustakaan.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $request->validate([
@@ -373,12 +439,22 @@ class PeminjamanController extends Controller
 
         $bukuSedangDipinjam = $user->jumlahBukuSedangDipinjam();
         if ($bukuSedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku dengan status dipinjam. Anda harus melakukan pengembalian terlebih dahulu untuk meminjam atau membooking buku baru.');
+            $msg = 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku dengan status dipinjam. Anda harus melakukan pengembalian terlebih dahulu untuk meminjam atau membooking buku baru.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $bukuAktif = $user->jumlahBukuAktif();
         if ($bukuAktif >= Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku aktif (booking/pinjaman). Harap kembalikan buku terlebih dahulu.');
+            $msg = 'Gagal booking: Anda telah mencapai batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku aktif (booking/pinjaman). Harap kembalikan buku terlebih dahulu.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $sedangPinjamBukuIni = DetailPeminjaman::whereHas('peminjaman', function ($q) use ($user) {
@@ -386,7 +462,12 @@ class PeminjamanController extends Controller
         })->where('idBuku', $id)->whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])->exists();
 
         if ($sedangPinjamBukuIni) {
-            return back()->with('error', 'Anda sudah memiliki booking atau pinjaman aktif untuk judul buku ini.');
+            $msg = 'Anda sudah memiliki booking atau pinjaman aktif untuk judul buku ini.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         try {
@@ -443,11 +524,31 @@ class PeminjamanController extends Controller
                 return $peminjaman;
             });
 
+            $pesanSukses = 'booking peminjaman berhasil, silahkan scan QR saat pengambilan.';
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $pesanSukses,
+                    'idPeminjaman' => $peminjaman->idPeminjaman,
+                    'kode_booking' => $peminjaman->kode_booking,
+                ]);
+            }
+
             return redirect()->route('dashboard')
-                ->with('success', 'Booking buku berhasil diajukan! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.');
+                ->with('success', 'Booking buku berhasil diajukan! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.')
+                ->with('booking_popup_message', $pesanSukses);
         } catch (\DomainException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memproses booking: '.$e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Terjadi kesalahan sistem saat memproses booking: '.$e->getMessage());
         }
     }

@@ -126,8 +126,8 @@
                                         <div>• {{ $d->buku->judul ?? '-' }}</div>
                                     @endforeach
                                 </td>
-                                <td>{{ $p->tanggalPinjam }}</td>
-                                <td>{{ $p->batasKembali }}</td>
+                                <td>{{ $p->tanggal_pinjam_realtime }}</td>
+                                <td>{{ $p->batas_kembali_realtime }}</td>
                                 <td>
                                     <span class="badge {{ $p->status === 'Dipinjam' ? 'badge-warning' : 'badge-success' }}">
                                         {{ $p->status }}

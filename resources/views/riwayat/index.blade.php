@@ -762,41 +762,39 @@
                                                 Tunjukkan ke Petugas
                                             </span>
                                         </div>
-                                    @elseif ($item->pengembalians->isNotEmpty())
-                                        <div style="display: flex; flex-direction: column; gap: 4px;">
-                                            @foreach ($item->pengembalians as $ret)
-                                                <span style="font-weight: 700; font-size: 12.5px; color: var(--text-heading);">
-                                                    Dikembalikan: {{ \Carbon\Carbon::parse($ret->tanggalKembali)->translatedFormat('d M Y') }}
+                                    @elseif ($item->pengembalians->isNotEmpty() || $item->status === 'Selesai')
+                                        @php
+                                            $latestRet = $item->pengembalians->sortByDesc('idPengembalian')->first();
+                                            $unpaidFine = $item->pengembalians->first(fn($r) => $r->denda && $r->denda->status === 'Belum Dibayar')?->denda;
+                                        @endphp
+                                        <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
+                                            <span style="font-weight: 700; font-size: 12.5px; color: var(--text-heading);">
+                                                Dikembalikan: {{ $latestRet ? \Carbon\Carbon::parse($latestRet->tanggalKembali)->translatedFormat('d M Y') : \Carbon\Carbon::parse($item->updated_at)->translatedFormat('d M Y') }}
+                                            </span>
+
+                                            @if ($unpaidFine)
+                                                <div style="margin-top: 2px;">
+                                                    <a href="{{ route('bayar.qr', $unpaidFine->idDenda) }}" class="action-pay-qr">
+                                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                                        </svg>
+                                                        <span>Bayar Denda (Rp {{ number_format($unpaidFine->jumlah, 0, ',', '.') }})</span>
+                                                    </a>
+                                                </div>
+                                            @else
+                                                <span style="font-size: 11.5px; color: #16a34a; font-weight: 700;">
+                                                    ✓ Selesai Dikembalikan
                                                 </span>
+                                            @endif
 
-                                                @if ($ret->denda)
-                                                    @if ($ret->denda->status === 'Belum Dibayar')
-                                                        <div style="margin-top: 4px;">
-                                                            <a href="{{ route('bayar.qr', $ret->denda->idDenda) }}" class="action-pay-qr">
-                                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                                    <rect x="3" y="3" width="7" height="7"></rect>
-                                                                    <rect x="14" y="3" width="7" height="7"></rect>
-                                                                    <rect x="14" y="14" width="7" height="7"></rect>
-                                                                    <rect x="3" y="14" width="7" height="7"></rect>
-                                                                </svg>
-                                                                <span>Bayar Denda</span>
-                                                            </a>
-                                                        </div>
-                                                    @else
-                                                        <span style="font-size: 11.5px; color: #16a34a; font-weight: 700;">
-                                                            ✓ Denda Lunas
-                                                        </span>
-                                                    @endif
-                                                @else
-                                                    <span style="font-size: 11.5px; color: #64748b;">
-                                                        Kondisi: {{ $ret->kondisiBuku ?? 'Baik' }}
-                                                    </span>
-                                                @endif
-
-                                                <a href="{{ route('pengembalian.member.bukti', $ret->idPengembalian) }}" style="font-size: 11.5px; color: #0f766e; font-weight: 700; text-decoration: underline; margin-top: 2px;">
+                                            @if ($latestRet)
+                                                <a href="{{ route('pengembalian.member.bukti', $latestRet->idPengembalian) }}" style="font-size: 12px; color: #0f766e; font-weight: 700; text-decoration: underline; margin-top: 2px;">
                                                     Lihat Resi &rarr;
                                                 </a>
-                                            @endforeach
+                                            @endif
                                         </div>
                                     @elseif ($item->status === 'Dibatalkan')
                                         <span style="font-size: 12px; color: #94a3b8; font-style: italic;">

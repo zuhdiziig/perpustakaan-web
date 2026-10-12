@@ -414,30 +414,37 @@ class PengembalianController extends Controller
             return $item;
         });
 
-        // 2. Ambil riwayat pengembalian yang sudah tuntas
-        $riwayatPengembalian = Pengembalian::with([
-            'peminjaman.member',
-            'peminjaman.details.buku',
-            'peminjaman.details.eksemplar',
+        // 2. Ambil riwayat pengembalian yang sudah tuntas (satu booking satu riwayat/resi)
+        $riwayatPengembalian = Peminjaman::with([
+            'member',
+            'details.buku',
+            'details.eksemplar',
+            'pengembalians.petugas',
+            'pengembalians.denda',
             'petugas',
-            'denda',
         ])
-            ->whereHas('peminjaman', function ($q) use ($userId) {
-                $q->where('idUserMember', $userId);
+            ->where('idUserMember', $userId)
+            ->where(function ($q) {
+                $q->where('status', 'Selesai')
+                    ->orWhereHas('pengembalians');
             })
-            ->latest('idPengembalian')
+            ->latest('idPeminjaman')
             ->paginate(10)
             ->withQueryString();
 
         // 3. Statistik ringkasan untuk member
         $totalPerluKembali = $pinjamanAktif->count();
-        $totalSudahKembali = Pengembalian::whereHas('peminjaman', function ($q) use ($userId) {
-            $q->where('idUserMember', $userId);
-        })->count();
+        $totalSudahKembali = Peminjaman::where('idUserMember', $userId)
+            ->where(function ($q) {
+                $q->where('status', 'Selesai')->orWhereHas('pengembalians');
+            })->count();
 
-        $totalTepatWaktu = Pengembalian::whereHas('peminjaman', function ($q) use ($userId) {
-            $q->where('idUserMember', $userId);
-        })->whereDoesntHave('denda')->count();
+        $totalTepatWaktu = Peminjaman::where('idUserMember', $userId)
+            ->where(function ($q) {
+                $q->where('status', 'Selesai')->orWhereHas('pengembalians');
+            })
+            ->whereDoesntHave('pengembalians.denda')
+            ->count();
 
         $totalDendaAktif = Denda::whereHas('pengembalian.peminjaman', function ($q) use ($userId) {
             $q->where('idUserMember', $userId);
@@ -599,6 +606,26 @@ class PengembalianController extends Controller
             $totalDenda = $result['totalDenda'];
             $denda = $result['denda'];
 
+            if ($request->wantsJson() || $request->ajax()) {
+                if ($denda && $denda->status === 'Belum Dibayar') {
+                    return response()->json([
+                        'success' => true,
+                        'has_denda' => true,
+                        'redirect' => route('bayar.qr', $denda->idDenda),
+                        'message' => 'Buku yang dikembalikan memiliki tagihan denda sebesar Rp '.number_format($totalDenda, 0, ',', '.').'. Sesuai ketentuan, denda wajib dibayar melalui QRIS terlebih dahulu.',
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'has_denda' => false,
+                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                    'idDetail' => $detail->id,
+                    'kode_kembali' => $detail->kode_kembali,
+                    'qr_kembali' => $detail->qr_kembali,
+                ]);
+            }
+
             // Jika ada denda dan belum dibayar, redirect terlebih dahulu ke pembayaran QRIS
             if ($denda && $denda->status === 'Belum Dibayar') {
                 return redirect()->route('bayar.qr', $denda->idDenda)
@@ -606,10 +633,19 @@ class PengembalianController extends Controller
             }
 
             return redirect()->route('pengembalian.member')
-                ->with('success', 'Pengajuan pengembalian berhasil dicatat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.');
+                ->with('success', 'Pengajuan pengembalian berhasil dicatat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.')
+                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.');
         } catch (\DomainException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memproses pengajuan pengembalian: '.$e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengajuan pengembalian: '.$e->getMessage());
         }
     }
@@ -791,16 +827,43 @@ class PengembalianController extends Controller
             $totalBatchDenda = $result['totalBatchDenda'];
             $denda = $result['denda'];
 
+            if ($request->wantsJson() || $request->ajax()) {
+                if ($denda && $denda->status === 'Belum Dibayar') {
+                    return response()->json([
+                        'success' => true,
+                        'has_denda' => true,
+                        'redirect' => route('bayar.qr', $denda->idDenda),
+                        'message' => 'Terdapat denda pengembalian sekaligus sebesar Rp '.number_format($totalBatchDenda, 0, ',', '.').'. Sesuai ketentuan, denda wajib dibayar melalui QRIS terlebih dahulu.',
+                    ]);
+                }
+
+                return response()->json([
+                    'success' => true,
+                    'has_denda' => false,
+                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                    'batchCode' => $batchCode,
+                ]);
+            }
+
             if ($denda && $denda->status === 'Belum Dibayar') {
                 return redirect()->route('bayar.qr', $denda->idDenda)
                     ->with('info', 'Terdapat denda pengembalian sekaligus sebesar Rp '.number_format($totalBatchDenda, 0, ',', '.').'. Sesuai ketentuan, denda wajib dibayar melalui QRIS terlebih dahulu sebelum tiket batch diterbitkan.');
             }
 
             return redirect()->route('pengembalian.member')
-                ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda ke petugas meja sirkulasi.');
+                ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda ke petugas meja sirkulasi.')
+                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.');
         } catch (\DomainException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memproses pengembalian sekaligus: '.$e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Terjadi kesalahan sistem saat memproses pengembalian sekaligus: '.$e->getMessage());
         }
     }
