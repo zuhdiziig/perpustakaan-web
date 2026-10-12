@@ -289,9 +289,16 @@ class PengembalianController extends Controller
                 // Update status eksemplar fisik jika tercatat
                 if ($eksemplar) {
                     $statusBaru = ($validated['kondisiBuku'] === 'Hilang') ? 'Hilang' : 'Tersedia';
+                    $currentInRak = BukuEksemplar::where('idBuku', $eksemplar->idBuku)
+                        ->where('status', 'Tersedia')
+                        ->where('lokasi', 'Rak')
+                        ->count();
+                    $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+
                     $eksemplar->update([
                         'status' => $statusBaru,
                         'kondisi' => $validated['kondisiBuku'],
+                        'lokasi' => ($statusBaru === 'Tersedia') ? $lokasiBaru : $eksemplar->lokasi,
                     ]);
                 }
 
@@ -1263,9 +1270,16 @@ class PengembalianController extends Controller
 
                     if ($eksemplar) {
                         $statusBaru = ($kondisiFinal === 'Hilang') ? 'Hilang' : 'Tersedia';
+                        $currentInRak = BukuEksemplar::where('idBuku', $eksemplar->idBuku)
+                            ->where('status', 'Tersedia')
+                            ->where('lokasi', 'Rak')
+                            ->count();
+                        $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+
                         $eksemplar->update([
                             'status' => $statusBaru,
                             'kondisi' => $kondisiFinal,
+                            'lokasi' => ($statusBaru === 'Tersedia') ? $lokasiBaru : $eksemplar->lokasi,
                         ]);
                     }
 
