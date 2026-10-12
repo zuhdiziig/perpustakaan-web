@@ -518,6 +518,81 @@
                 padding: 12px 10px;
             }
         }
+
+        /* --- GLOBAL PAGINATION STYLES --- */
+        .custom-pagination-controls,
+        .pagination-controls {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+            padding: 2px 0;
+            margin: 0;
+        }
+
+        .custom-page-btn,
+        .page-btn {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #334155;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            line-height: 1;
+            transition: all 0.15s ease-in-out;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active),
+        .page-btn:hover:not(.disabled):not(:disabled):not(.active) {
+            background: #f8fafc;
+            border-color: #cbd5e1;
+            color: #0f172a;
+            transform: translateY(-1px);
+        }
+
+        .custom-page-btn.active,
+        .page-btn.active {
+            background: #0f766e;
+            color: #ffffff;
+            border-color: #0f766e;
+            font-weight: 800;
+            cursor: default;
+        }
+
+        .custom-page-btn.disabled,
+        .custom-page-btn:disabled,
+        .page-btn.disabled,
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            color: #94a3b8;
+            background: #ffffff;
+            border-color: #e2e8f0;
+            box-shadow: none;
+        }
+
+        .custom-page-dots,
+        .page-dots {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 20px;
+            height: 36px;
+            padding: 0 4px;
+            color: #94a3b8;
+            font-size: 13.5px;
+            font-weight: 800;
+        }
     </style>
 
     @yield('styles')

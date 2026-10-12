@@ -254,6 +254,17 @@
         border-bottom: none;
     }
 
+    .pagination-footer {
+        padding: 16px 20px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
     /* TRX BADGE */
     .trx-code-badge {
         display: inline-flex;
@@ -827,7 +838,12 @@
 
             @if ($riwayats->hasPages())
                 <div class="pagination-footer">
-                    {{ $riwayats->links() }}
+                    <div style="font-size: 13px; color: #64748b;">
+                        Menampilkan <strong>{{ $riwayats->firstItem() ?? 0 }}</strong> - <strong>{{ $riwayats->lastItem() ?? 0 }}</strong> dari <strong>{{ $riwayats->total() }}</strong> transaksi
+                    </div>
+                    <div>
+                        {{ $riwayats->links() }}
+                    </div>
                 </div>
             @endif
         @else

@@ -250,6 +250,17 @@
         overflow-x: auto;
     }
 
+    .pagination-footer {
+        padding: 16px 20px;
+        background: #ffffff;
+        border-top: 1px solid #e2e8f0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
     .sirkulasi-table {
         width: 100%;
         border-collapse: collapse;
@@ -593,7 +604,12 @@
 
             @if($peminjamans->hasPages())
                 <div class="pagination-footer">
-                    {{ $peminjamans->links() }}
+                    <div style="font-size: 13px; color: #64748b;">
+                        Menampilkan <strong>{{ $peminjamans->firstItem() ?? 0 }}</strong> - <strong>{{ $peminjamans->lastItem() ?? 0 }}</strong> dari <strong>{{ $peminjamans->total() }}</strong> transaksi
+                    </div>
+                    <div>
+                        {{ $peminjamans->links() }}
+                    </div>
                 </div>
             @endif
         </div>
@@ -684,7 +700,12 @@
 
             @if($pengembalians->hasPages())
                 <div class="pagination-footer">
-                    {{ $pengembalians->links() }}
+                    <div style="font-size: 13px; color: #64748b;">
+                        Menampilkan <strong>{{ $pengembalians->firstItem() ?? 0 }}</strong> - <strong>{{ $pengembalians->lastItem() ?? 0 }}</strong> dari <strong>{{ $pengembalians->total() }}</strong> transaksi
+                    </div>
+                    <div>
+                        {{ $pengembalians->links() }}
+                    </div>
                 </div>
             @endif
         </div>
