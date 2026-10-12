@@ -1069,6 +1069,21 @@
             tabContentKembali.style.display = 'block';
             tabContentPinjam.style.display = 'none';
         }
+    // Audio Feedback Beep saat scan berhasil
+    function playScanBeep() {
+        try {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContext) return;
+            const audioCtx = new AudioContext();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = 920;
+            gain.gain.value = 0.15;
+            osc.start();
+            setTimeout(() => { osc.stop(); audioCtx.close(); }, 140);
+        } catch (e) {}
     }
 
     // Toggle Camera Scanner
@@ -1157,6 +1172,7 @@
             if (matchedRow) {
                 const cb = matchedRow.querySelector('.checkbox-return-item');
                 if (cb) {
+                    playScanBeep();
                     cb.checked = true;
                     updateReturnSelectionUI();
                     matchedRow.classList.add('highlight-loan-row');
@@ -1196,6 +1212,7 @@
                     alert(`Buku "${matched.judul}" sedang dipinjam oleh ${activeMember.name}. Anggota tidak diperbolehkan meminjam buku dengan judul yang sama.`);
                     return;
                 }
+                playScanBeep();
                 togglePickBook({ idBuku: matched.idBuku, judul: matched.judul, kodeBarcode: matched.kodeBarcode });
             } else {
                 alert(`Buku dengan barcode/token "${code}" tidak ditemukan atau stok sedang habis.`);
@@ -1228,6 +1245,7 @@
 
             const data = await res.json();
             if (data.success && data.data) {
+                playScanBeep();
                 renderMemberProfile(data.data.member, data.data.pinjamanAktif);
             } else {
                 alert(data.message || 'Anggota tidak ditemukan.');

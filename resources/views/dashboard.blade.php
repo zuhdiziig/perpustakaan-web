@@ -922,7 +922,7 @@
                     'Teknologi',
                     'Agama',
                     'Anak',
-                    'Umum'
+                    'Horror'
                 ] as $defaultKat)
 
                     <a

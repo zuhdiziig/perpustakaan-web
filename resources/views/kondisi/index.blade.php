@@ -1,4 +1,4 @@
-@extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas')
+@extends('layouts.petugas')
 
 @section('title', 'Pemeriksaan Kondisi Eksemplar Fisik - BOOKNEST')
 

@@ -337,14 +337,17 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/sirkulasi/buku-tersedia', [BarcodeController::class, 'apiCariBuku'])
             ->name('api.sirkulasi.buku-tersedia');
 
-        Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
-            ->name('kondisi.index');
+        // Pemeriksaan & Kontrol Kondisi Fisik Eksemplar (Eksklusif Petugas Operasional)
+        Route::middleware('role:petugas')->group(function () {
+            Route::get('/kondisi-buku', [KondisiBukuController::class, 'index'])
+                ->name('kondisi.index');
 
-        Route::get('/kondisi-buku/{id}/edit', [KondisiBukuController::class, 'edit'])
-            ->name('kondisi.edit');
+            Route::get('/kondisi-buku/{id}/edit', [KondisiBukuController::class, 'edit'])
+                ->name('kondisi.edit');
 
-        Route::put('/kondisi-buku/{id}', [KondisiBukuController::class, 'update'])
-            ->name('kondisi.update');
+            Route::put('/kondisi-buku/{id}', [KondisiBukuController::class, 'update'])
+                ->name('kondisi.update');
+        });
 
         // Kelola Denda & Pembayaran
         Route::get('/denda', [DendaController::class, 'index'])

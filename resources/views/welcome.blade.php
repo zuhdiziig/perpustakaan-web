@@ -1345,11 +1345,15 @@
                     <span class="cat-name">Anak</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Umum']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Horror']) }}" class="cat-card">
                     <div class="cat-icon">
-                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="4" y1="12" x2="20" y2="12"></line><line x1="4" y1="18" x2="20" y2="18"></line></svg>
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 10h.01"></path>
+                            <path d="M15 10h.01"></path>
+                            <path d="M12 2a8 8 0 0 0-8 8v12l3-3 2.5 2.5L12 19l2.5 2.5L17 19l3 3V10a8 8 0 0 0-8-8z"></path>
+                        </svg>
                     </div>
-                    <span class="cat-name">Umum</span>
+                    <span class="cat-name">Horror</span>
                 </a>
             </div>
         </section>

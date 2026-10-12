@@ -1,6 +1,6 @@
 @extends(auth()->user()->role === 'admin' ? 'layouts.admin' : 'layouts.petugas')
 
-@section('title', 'Koleksi & Inventaris Buku - BOOKNEST')
+@section('title', auth()->user()->role === 'admin' ? 'Kelola Master Data Buku - BOOKNEST' : 'Inventory Buku - BOOKNEST')
 
 @section('styles')
 <style>
@@ -979,7 +979,7 @@
                 @if (auth()->user()->role === 'admin')
                     Kelola Master Data Buku
                 @else
-                    Koleksi & Inventaris Buku
+                    Inventory Buku
                 @endif
             </h1>
             <p class="page-subtitle">

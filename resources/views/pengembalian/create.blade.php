@@ -1154,6 +1154,23 @@
             }, 3200);
         }
 
+        // Feedback Audio Beep saat scan berhasil
+        function playScanBeep() {
+            try {
+                const AudioContext = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContext) return;
+                const audioCtx = new AudioContext();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.frequency.value = 920;
+                gain.gain.value = 0.15;
+                osc.start();
+                setTimeout(() => { osc.stop(); audioCtx.close(); }, 140);
+            } catch (e) {}
+        }
+
         // Format Angka ke Rupiah
         function formatRupiah(number) {
             return 'Rp ' + Number(number).toLocaleString('id-ID');
@@ -1379,11 +1396,13 @@
                 const res = await response.json();
 
                 if (res.success && res.type === 'pengembalian_batch') {
+                    playScanBeep();
                     state.batch = res.data;
                     state.detail = null;
                     renderBatchState();
                     showToast(res.message || 'Data pengembalian sekaligus berhasil diidentifikasi!', true);
                 } else if (res.success && res.type === 'pengembalian') {
+                    playScanBeep();
                     state.detail = res.data;
                     state.batch = null;
                     renderState();

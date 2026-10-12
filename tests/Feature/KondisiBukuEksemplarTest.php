@@ -54,15 +54,16 @@ class KondisiBukuEksemplarTest extends TestCase
         ]);
     }
 
-    public function test_petugas_dan_admin_dapat_melihat_daftar_kondisi_eksemplar(): void
+    public function test_hanya_petugas_yang_dapat_mengakses_modul_kondisi_eksemplar(): void
     {
         $response = $this->actingAs($this->petugas)->get(route('kondisi.index'));
         $response->assertStatus(200);
         $response->assertSee('Pemeriksaan Kondisi Eksemplar Fisik');
         $response->assertSee('Sistem Inventaris Modern');
 
+        // Admin dibatasi karena modul operasional fisik khusus petugas
         $responseAdmin = $this->actingAs($this->admin)->get(route('kondisi.index'));
-        $responseAdmin->assertStatus(200);
+        $responseAdmin->assertStatus(403);
     }
 
     public function test_filter_kondisi_dan_lokasi_berfungsi(): void
