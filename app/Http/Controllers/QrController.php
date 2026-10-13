@@ -14,6 +14,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use SimpleSoftwareIO\QrCode\Facades\QrCode;
 
 class QrController extends Controller
@@ -1056,19 +1057,19 @@ class QrController extends Controller
         }
 
         $now = Carbon::now();
-        // Cek peminjaman yang baru saja diserahkan/berstatus Dipinjam dalam 3 menit terakhir
+        // Cek peminjaman yang baru saja diserahkan/berstatus Dipinjam dalam 10 menit terakhir
         $latestPeminjaman = Peminjaman::with(['petugas', 'details.buku'])
             ->where('idUserMember', $user->id)
             ->where('status', 'Dipinjam')
-            ->where('updated_at', '>=', $now->copy()->subMinutes(3))
+            ->where('updated_at', '>=', $now->copy()->subMinutes(10))
             ->latest('updated_at')
             ->first();
 
-        // Cek pengembalian yang baru saja diselesaikan petugas dalam 3 menit terakhir
+        // Cek pengembalian yang baru saja diselesaikan petugas dalam 10 menit terakhir
         $latestPengembalian = Pengembalian::with(['petugas', 'peminjaman.details.buku'])
             ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $user->id))
             ->whereNotNull('idUserPetugas')
-            ->where('updated_at', '>=', $now->copy()->subMinutes(3))
+            ->where('updated_at', '>=', $now->copy()->subMinutes(10))
             ->latest('updated_at')
             ->first();
 
@@ -1088,7 +1089,9 @@ class QrController extends Controller
 
         $pengembalianEvent = null;
         if ($latestPengembalian) {
-            $details = $latestPengembalian->peminjaman?->details ?? collect();
+            $allDetails = $latestPengembalian->peminjaman?->details ?? collect();
+            $returnedDetails = $allDetails->where('statusBuku', 'Kembali');
+            $details = $returnedDetails->isNotEmpty() ? $returnedDetails : $allDetails;
             $pengembalianEvent = [
                 'id' => $latestPengembalian->idPengembalian,
                 'idPeminjaman' => $latestPengembalian->idPeminjaman,
@@ -1101,24 +1104,33 @@ class QrController extends Controller
             ];
         }
 
+        $unreadNotifications = collect();
+        if (Schema::hasTable('notifications')) {
+            try {
+                $unreadNotifications = $user->notifications()
+                    ->whereNull('read_at')
+                    ->where('type', BookingReadyNotification::class)
+                    ->oldest()
+                    ->limit(5)
+                    ->get()
+                    ->map(fn ($notification): array => [
+                        'id' => $notification->id,
+                        'title' => $notification->data['title'] ?? 'Peminjaman diperbarui',
+                        'status' => $notification->data['status'] ?? 'Siap Diambil',
+                        'booking_code' => $notification->data['kode_booking'] ?? '',
+                        'books' => $notification->data['books'] ?? [],
+                    ])
+                    ->values();
+            } catch (\Throwable) {
+                $unreadNotifications = collect();
+            }
+        }
+
         return response()->json([
             'success' => true,
             'peminjaman' => $peminjamanEvent,
             'pengembalian' => $pengembalianEvent,
-            'notifications' => $user->notifications()
-                ->whereNull('read_at')
-                ->where('type', BookingReadyNotification::class)
-                ->oldest()
-                ->limit(5)
-                ->get()
-                ->map(fn ($notification): array => [
-                    'id' => $notification->id,
-                    'title' => $notification->data['title'] ?? 'Peminjaman diperbarui',
-                    'status' => $notification->data['status'] ?? 'Siap Diambil',
-                    'booking_code' => $notification->data['kode_booking'] ?? '',
-                    'books' => $notification->data['books'] ?? [],
-                ])
-                ->values(),
+            'notifications' => $unreadNotifications,
         ]);
     }
 

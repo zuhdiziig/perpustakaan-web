@@ -720,6 +720,7 @@
         display: flex;
         align-items: center;
         gap: 10px;
+        min-width: 0;
     }
 
     .bulk-badge-count {
@@ -727,17 +728,27 @@
         color: #ffffff;
         font-weight: 800;
         font-size: 13px;
-        width: 26px;
-        height: 26px;
+        width: 28px;
+        min-width: 28px;
+        max-width: 28px;
+        height: 28px;
+        min-height: 28px;
+        max-height: 28px;
+        aspect-ratio: 1 / 1;
+        flex-shrink: 0;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
+        line-height: 1;
+        text-align: center;
+        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.4);
     }
 
     .bulk-bar-text {
         font-size: 13.5px;
         color: #cbd5e1;
+        line-height: 1.3;
     }
 
     .bulk-bar-text strong {
@@ -747,31 +758,24 @@
     .bulk-bar-right {
         display: flex;
         align-items: center;
-        gap: 10px;
-    }
-
-    .btn-bulk-cancel {
-        background: none;
-        border: none;
-        color: #94a3b8;
-        font-size: 12.5px;
-        font-weight: 600;
-        cursor: pointer;
-        padding: 6px 10px;
-        transition: color 0.15s;
-    }
-
-    .btn-bulk-cancel:hover {
-        color: #ffffff;
+        flex-shrink: 0;
     }
 
     .btn-bulk-submit {
         background: #0f766e;
         color: #ffffff;
         border: none;
-        border-radius: 9px;
-        padding: 8px 16px;
-        font-size: 13px;
+        border-radius: 10px;
+        padding: 9px 18px;
+        font-size: 13.5px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        transition: all 0.15s;
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
+    }
         font-weight: 700;
         cursor: pointer;
         display: inline-flex;
@@ -876,10 +880,35 @@
         }
 
         .bulk-action-bar {
-            width: calc(100% - 24px);
-            max-width: 100%;
+            width: calc(100% - 20px);
+            max-width: calc(100% - 20px);
             bottom: 12px;
-            padding: 8px 12px;
+            padding: 9px 12px;
+            border-radius: 14px;
+        }
+
+        .bulk-bar-content {
+            gap: 10px;
+        }
+
+        .bulk-bar-left {
+            gap: 8px;
+            flex: 1;
+        }
+
+        .bulk-bar-text {
+            font-size: 12px;
+            line-height: 1.25;
+        }
+
+        .bulk-bar-right {
+            flex-shrink: 0;
+        }
+
+        .btn-bulk-submit {
+            padding: 9px 15px;
+            font-size: 12.5px;
+            white-space: nowrap;
         }
 
         .condition-selector-group {
@@ -1513,9 +1542,6 @@
             </div>
         </div>
         <div class="bulk-bar-right">
-            <button type="button" class="btn-bulk-cancel" onclick="clearAllSelections()">
-                Batal Pilihan
-            </button>
             <button type="button" class="btn-bulk-submit" onclick="openBatchReturnModalFromSelection()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
                     <polyline points="9 11 12 14 22 4"></polyline>
