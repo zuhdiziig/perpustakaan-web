@@ -167,4 +167,20 @@ class User extends Authenticatable
             ->values()
             ->all();
     }
+
+    /**
+     * Map idBuku => status (Booking, Siap Diambil, atau Dipinjam) untuk member ini.
+     *
+     * @return array<int, string>
+     */
+    public function daftarStatusBukuAktifMap(): array
+    {
+        return DetailPeminjaman::whereIn('statusBuku', ['Booking', 'Siap Diambil', 'Dipinjam'])
+            ->whereHas('peminjaman', function ($q) {
+                $q->where('idUserMember', $this->id)
+                    ->whereIn('status', ['Booking', 'Siap Diambil', 'Dipinjam']);
+            })
+            ->pluck('statusBuku', 'idBuku')
+            ->all();
+    }
 }

@@ -221,4 +221,36 @@ class MemberManagementAndBukuAccessTest extends TestCase
         $responseShow->assertSee('Lihat Stok di Koleksi Buku');
         $responseShow->assertDontSee('id="btnPinjamBuku"', false);
     }
+
+    public function test_admin_and_petugas_can_view_member_create_page(): void
+    {
+        $responseAdmin = $this->actingAs($this->admin)->get(route('member.create'));
+        $responseAdmin->assertOk();
+        $responseAdmin->assertSee('Tambah Akun Member');
+        $responseAdmin->assertSee('Simpan Member');
+
+        $responsePetugas = $this->actingAs($this->petugas)->get(route('member.create'));
+        $responsePetugas->assertOk();
+        $responsePetugas->assertSee('Tambah Akun Member');
+        $responsePetugas->assertSee('Simpan Member');
+    }
+
+    public function test_can_store_new_member_successfully(): void
+    {
+        $response = $this->actingAs($this->admin)->post(route('member.store'), [
+            'name' => 'Member Baru Sukses',
+            'email' => 'memberbaru@example.com',
+            'password' => 'secret123',
+            'noTelepon' => '081234567890',
+            'alamat' => 'Jl. Merdeka No. 45',
+        ]);
+
+        $response->assertRedirect(route('member.index'));
+        $this->assertDatabaseHas('users', [
+            'name' => 'Member Baru Sukses',
+            'email' => 'memberbaru@example.com',
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+    }
 }

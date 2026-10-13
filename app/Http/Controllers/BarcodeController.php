@@ -115,9 +115,10 @@ class BarcodeController extends Controller
             }
         }
 
-        $selectedMemberBorrowedBookIds = $selectedMember ? $selectedMember->daftarIdBukuAktif() : [];
+        $selectedMemberBorrowedBookMap = $selectedMember ? $selectedMember->daftarStatusBukuAktifMap() : [];
+        $selectedMemberBorrowedBookIds = array_keys($selectedMemberBorrowedBookMap);
 
-        return view('barcode.scan', compact('selectedMember', 'activeLoans', 'availableBooks', 'kodeBarcode', 'buku', 'booking', 'error', 'selectedMemberBorrowedBookIds'));
+        return view('barcode.scan', compact('selectedMember', 'activeLoans', 'availableBooks', 'kodeBarcode', 'buku', 'booking', 'error', 'selectedMemberBorrowedBookIds', 'selectedMemberBorrowedBookMap'));
     }
 
     /**
@@ -218,6 +219,7 @@ class BarcodeController extends Controller
                     'sisaKuota' => $sisaKuota,
                     'kuotaPenuh' => $sedangDipinjam >= Peminjaman::BATAS_MAKSIMAL_BUKU,
                     'borrowedBookIds' => $member->daftarIdBukuAktif(),
+                    'borrowedBookMap' => $member->daftarStatusBukuAktifMap(),
                 ],
                 'pinjamanAktif' => $activeLoans,
             ],
@@ -232,11 +234,11 @@ class BarcodeController extends Controller
     {
         $q = trim((string) $request->input('q', ''));
         $memberId = $request->input('member_id');
-        $borrowedBookIds = [];
+        $borrowedBookMap = [];
         if ($memberId) {
             $mem = User::find($memberId);
             if ($mem) {
-                $borrowedBookIds = $mem->daftarIdBukuAktif();
+                $borrowedBookMap = $mem->daftarStatusBukuAktifMap();
             }
         }
 
@@ -257,7 +259,7 @@ class BarcodeController extends Controller
 
         $bukus = $query->latest('idBuku')->limit(16)->get();
 
-        $results = $bukus->map(function ($b) use ($borrowedBookIds) {
+        $results = $bukus->map(function ($b) use ($borrowedBookMap) {
             $firstEksemplar = $b->eksemplar->first();
             if (! $firstEksemplar && $b->stok > 0) {
                 $nextNo = ($b->eksemplar()->max('nomor_eksemplar') ?? 0) + 1;
@@ -269,6 +271,7 @@ class BarcodeController extends Controller
                 ]);
             }
             $kode = $firstEksemplar?->qr_token ?? $firstEksemplar?->kode_barcode ?? $b->barcode?->kodeBarcode ?? ('BK-'.$b->idBuku);
+            $statusBook = $borrowedBookMap[$b->idBuku] ?? null;
 
             return [
                 'idBuku' => $b->idBuku,
@@ -281,7 +284,8 @@ class BarcodeController extends Controller
                 'sampul' => $b->cover_url,
                 'kodeBarcode' => $kode,
                 'idEksemplar' => $firstEksemplar?->idEksemplar,
-                'isBorrowedByMember' => in_array($b->idBuku, $borrowedBookIds),
+                'isBorrowedByMember' => ! empty($statusBook),
+                'borrowStatusLabel' => $statusBook ? (($statusBook === 'Dipinjam') ? 'Sedang Dipinjam' : 'Sedang Dibooking') : null,
             ];
         });
 

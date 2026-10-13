@@ -354,6 +354,8 @@
         display: flex;
         gap: 6px;
         font-size: 11px;
+        flex-wrap: wrap;
+        align-items: center;
     }
 
     .tag-stok {
@@ -362,6 +364,7 @@
         font-weight: 700;
         padding: 2px 6px;
         border-radius: 4px;
+        white-space: nowrap;
     }
 
     .tag-rak {
@@ -369,6 +372,7 @@
         color: #475569;
         padding: 2px 6px;
         border-radius: 4px;
+        white-space: nowrap;
     }
 
     .btn-pick-book {
@@ -382,9 +386,21 @@
         cursor: pointer;
         transition: all 0.15s;
         white-space: nowrap;
+        flex-shrink: 0;
     }
 
-    .btn-pick-book:hover {
+    .btn-pick-book:disabled,
+    .btn-pick-book.btn-book-disabled {
+        opacity: 0.9;
+        cursor: not-allowed;
+        background: #fef2f2;
+        color: #dc2626;
+        border-color: #fca5a5;
+        font-size: 11.5px;
+        padding: 6px 10px;
+    }
+
+    .btn-pick-book:hover:not(:disabled) {
         background: #0f766e;
         color: #ffffff;
     }
@@ -873,7 +889,9 @@
                             @php
                                 $firstEks = $bk->eksemplar->where('status', 'Tersedia')->first() ?? $bk->eksemplar->first();
                                 $kode = $firstEks?->qr_token ?? $firstEks?->kode_barcode ?? $bk->barcode?->kodeBarcode ?? ('BK-'.$bk->idBuku);
-                                $isBorrowed = $selectedMember && in_array($bk->idBuku, $selectedMemberBorrowedBookIds ?? []);
+                                $statusPinjam = $selectedMemberBorrowedBookMap[$bk->idBuku] ?? (in_array($bk->idBuku, $selectedMemberBorrowedBookIds ?? []) ? 'Dipinjam' : null);
+                                $isBorrowed = ! empty($statusPinjam);
+                                $labelPinjam = ($statusPinjam === 'Dipinjam') ? 'Sedang Dipinjam' : 'Sedang Dibooking';
                             @endphp
                             <div class="book-item-card" id="bookCard-{{ $bk->idBuku }}">
                                 @if($bk->cover_url)
@@ -887,14 +905,11 @@
                                     <div class="book-item-tags">
                                         <span class="tag-stok">Stok: {{ $bk->stok }}</span>
                                         <span class="tag-rak">Rak: {{ $bk->rak ?? '-' }}</span>
-                                        @if($isBorrowed)
-                                            <span style="background: #fef2f2; color: #dc2626; font-size: 10.5px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Sedang Dipinjam</span>
-                                        @endif
                                     </div>
                                 </div>
                                 @if($isBorrowed)
-                                    <button type="button" class="btn-pick-book" disabled style="opacity: 0.55; cursor: not-allowed; background: #fee2e2; color: #dc2626; border-color: #fca5a5;" title="Buku ini sedang dipinjam oleh anggota">
-                                        Sedang Dipinjam
+                                    <button type="button" class="btn-pick-book btn-book-disabled" disabled title="Buku ini {{ strtolower($labelPinjam) }} oleh anggota">
+                                        {{ $labelPinjam }}
                                     </button>
                                 @else
                                     <button type="button" class="btn-pick-book" onclick="togglePickBook({{ json_encode(['idBuku' => $bk->idBuku, 'judul' => $bk->judul, 'kodeBarcode' => $kode]) }})">
@@ -1026,9 +1041,11 @@
         'sedangDipinjam' => $activeLoans->count(),
         'sisaKuota' => max(0, 3 - $activeLoans->count()),
         'borrowedBookIds' => $selectedMemberBorrowedBookIds ?? [],
+        'borrowedBookMap' => $selectedMemberBorrowedBookMap ?? [],
     ]) : 'null' !!};
 
     let activeMemberBorrowedBookIds = @json($selectedMemberBorrowedBookIds ?? []);
+    let activeMemberBorrowedBookMap = @json($selectedMemberBorrowedBookMap ?? []);
 
     let selectedTrayBooks = [];
     let html5QrScanner = null;
@@ -1210,8 +1227,10 @@
             const data = await res.json();
             if (data.success && data.data && data.data.length > 0) {
                 const matched = data.data[0];
-                if (matched.isBorrowedByMember || activeMemberBorrowedBookIds.includes(matched.idBuku)) {
-                    alert(`Buku "${matched.judul}" sedang dipinjam oleh ${activeMember.name}. Anggota tidak diperbolehkan meminjam buku dengan judul yang sama.`);
+                const statusPinjam = activeMemberBorrowedBookMap[matched.idBuku] || (matched.isBorrowedByMember ? (matched.borrowStatusLabel || 'Sedang Dipinjam') : null);
+                if (statusPinjam || activeMemberBorrowedBookIds.includes(matched.idBuku)) {
+                    const actionWord = (statusPinjam === 'Dipinjam') ? 'sedang dipinjam' : 'sudah dibooking';
+                    alert(`Buku "${matched.judul}" ${actionWord} oleh ${activeMember.name}. Anggota tidak diperbolehkan meminjam buku dengan judul yang sama.`);
                     return;
                 }
                 playScanBeep();
@@ -1260,6 +1279,7 @@
     function renderMemberProfile(m, activeLoans) {
         activeMember = m;
         activeMemberBorrowedBookIds = m.borrowedBookIds || [];
+        activeMemberBorrowedBookMap = m.borrowedBookMap || {};
         document.getElementById('dispMemberName').textContent = m.name;
         document.getElementById('dispMemberCode').textContent = m.kodeAnggota;
         document.getElementById('dispMemberAvatar').textContent = m.inisial;
@@ -1294,6 +1314,7 @@
     function resetMemberSelection() {
         activeMember = null;
         activeMemberBorrowedBookIds = [];
+        activeMemberBorrowedBookMap = {};
         selectedTrayBooks = [];
         document.getElementById('memberProfileCard').style.display = 'none';
         document.getElementById('unselectedMemberNotice').style.display = 'block';
@@ -1469,9 +1490,11 @@
             return;
         }
 
-        // Cek apakah anggota sedang meminjam buku dengan judul/idBuku yang sama
-        if (activeMemberBorrowedBookIds.includes(book.idBuku)) {
-            alert(`Anggota "${activeMember.name}" saat ini sedang meminjam buku "${book.judul}". Anggota tidak diperbolehkan meminjam buku dengan judul yang sama sebelum buku tersebut dikembalikan.`);
+        // Cek apakah anggota sedang meminjam atau membooking buku dengan judul/idBuku yang sama
+        const statusPinjam = activeMemberBorrowedBookMap[book.idBuku] || (activeMemberBorrowedBookIds.includes(book.idBuku) ? 'Dipinjam' : null);
+        if (statusPinjam) {
+            const actionWord = (statusPinjam === 'Dipinjam') ? 'sedang meminjam' : 'sudah membooking';
+            alert(`Anggota "${activeMember.name}" saat ini ${actionWord} buku "${book.judul}". Anggota tidak diperbolehkan meminjam buku dengan judul yang sama sebelum transaksi sebelumnya selesai.`);
             return;
         }
 
@@ -1586,7 +1609,9 @@
         let html = '';
         books.forEach(b => {
             const isPicked = selectedTrayBooks.some(tb => tb.idBuku === b.idBuku);
-            const isBorrowed = Boolean(b.isBorrowedByMember || activeMemberBorrowedBookIds.includes(b.idBuku));
+            const statusPinjam = activeMemberBorrowedBookMap[b.idBuku] || (b.isBorrowedByMember ? (b.borrowStatusLabel || 'Sedang Dipinjam') : null);
+            const isBorrowed = Boolean(statusPinjam);
+            const labelPinjam = statusPinjam === 'Dipinjam' ? 'Sedang Dipinjam' : (statusPinjam || 'Sedang Dibooking');
             const coverHtml = b.sampul 
                 ? `<img src="${b.sampul}" alt="Sampul" class="book-cover-thumb">`
                 : `<div class="book-cover-thumb">📖</div>`;
@@ -1594,8 +1619,8 @@
             let actionBtnHtml = '';
             if (isBorrowed) {
                 actionBtnHtml = `
-                    <button type="button" class="btn-pick-book" disabled style="opacity: 0.55; cursor: not-allowed; background: #fee2e2; color: #dc2626; border-color: #fca5a5;" title="Buku ini sedang dipinjam oleh anggota">
-                        Sedang Dipinjam
+                    <button type="button" class="btn-pick-book btn-book-disabled" disabled title="Buku ini ${labelPinjam.toLowerCase()} oleh anggota">
+                        ${labelPinjam}
                     </button>
                 `;
             } else {
@@ -1616,7 +1641,6 @@
                         <div class="book-item-tags">
                             <span class="tag-stok">Stok: ${b.stok}</span>
                             <span class="tag-rak">Rak: ${b.rak}</span>
-                            ${isBorrowed ? '<span style="background: #fef2f2; color: #dc2626; font-size: 10.5px; font-weight: 700; padding: 2px 6px; border-radius: 4px;">Sedang Dipinjam</span>' : ''}
                         </div>
                     </div>
                     ${actionBtnHtml}
