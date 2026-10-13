@@ -1048,15 +1048,6 @@
             </a>
 
             <div class="nav-links">
-                @if(!auth()->check() || auth()->user()->role === 'member')
-                    <a href="{{ route('katalog.index') }}" class="nav-link-item">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                        </svg>
-                        <span>Katalog</span>
-                    </a>
-                @endif
 
                 @guest
                     <a href="{{ route('login') }}" class="btn-nav-login">Masuk</a>
@@ -1218,20 +1209,6 @@
                     Setiap buku membuka dunia baru. Jelajahi ribuan koleksi, pinjam dengan mudah, dan tumbuh bersama perpustakaan umum BOOKNEST.
                 </p>
 
-                <!-- Search Input Form -->
-                <form action="{{ route('katalog.index') }}" method="GET" class="search-form-wrap">
-                    <label class="search-label" for="heroCatalogSearch">Cari koleksi buku</label>
-                    <div class="search-box">
-                        <div class="search-input-wrap">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <circle cx="11" cy="11" r="8"></circle>
-                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                            </svg>
-                            <input type="text" id="heroCatalogSearch" name="q" placeholder="Cari judul, penulis, atau kategori...">
-                        </div>
-                        <button type="submit" class="btn-search">Cari</button>
-                    </div>
-                </form>
 
                 <div class="hero-buttons">
                     @if(!auth()->check() || auth()->user()->role === 'member')

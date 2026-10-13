@@ -758,20 +758,6 @@
         Tunjukkan QR Code tiket pengembalian sekaligus ini kepada petugas di meja layanan sirkulasi perpustakaan BOOKNEST.
     </p>
 
-    {{-- ALERT BANNER SUCCESS --}}
-    @if(session('success'))
-        <div class="ticket-alert-success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <div>
-                <strong>Pengajuan Pengembalian Sekaligus Berhasil Dibuat!</strong><br>
-                {{ session('success') }}
-            </div>
-        </div>
-    @endif
-
     {{-- 2-COLUMN GRID PASS --}}
     <div class="ticket-grid">
         {{-- KOLOM KIRI: QR CODE CARD --}}
@@ -936,7 +922,7 @@
                         <span class="spec-val" style="color: #166534;">
                             @if($batchDenda->status === 'Lunas')
                                 <span style="display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">
-                                    ✓ Lunas via QRIS (Rp {{ number_format($batchDenda->jumlah, 0, ',', '.') }})
+                                    ✓ Tercatat lunas · belum diverifikasi (Rp {{ number_format($batchDenda->jumlah, 0, ',', '.') }})
                                 </span>
                             @else
                                 <span style="display: inline-flex; align-items: center; gap: 6px; background: #fee2e2; color: #dc2626; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">
@@ -962,7 +948,7 @@
                     <li>Bawa buku fisik yang berstatus <strong>Baik</strong> atau <strong>Rusak</strong> ke Meja Sirkulasi BOOKNEST.</li>
                     <li>Tunjukkan QR Code tiket pengembalian kolektif ini kepada petugas perpustakaan.</li>
                     <li>Petugas akan memverifikasi fisik seluruh buku secara bersamaan dan menyelesaikan transaksi.</li>
-                    <li>Denda pengembalian (jika ada) telah dilunasi via QRIS sebelum penerbitan tiket ini.</li>
+                    <li>Status denda pengembalian (jika ada) tercatat lunas sebelum penerbitan tiket ini; penerimaan dana belum diverifikasi gateway.</li>
                 </ol>
             </div>
 

@@ -72,7 +72,7 @@
                                 <button type="submit" class="btn btn-check">Verifikasi Status</button>
                             </form>
                         @else
-                            <span>Terverifikasi</span>
+                            <span>Tercatat sukses · belum diverifikasi gateway</span>
                         @endif
                     </td>
                 </tr>

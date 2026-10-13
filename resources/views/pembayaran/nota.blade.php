@@ -354,7 +354,7 @@
 
             <div class="receipt-status-badge">
                 <span class="badge-status-pill badge-lunas">
-                    <span class="badge-dot">●</span> LUNAS
+                    <span class="badge-dot">●</span> TERCATAT SUKSES · BELUM DIVERIFIKASI
                 </span>
             </div>
         </div>
@@ -426,7 +426,7 @@
 
             <div class="receipt-row">
                 <span class="r-label">Metode pembayaran</span>
-                <span class="r-val">{{ $pembayaran->metode ?? 'QRIS' }}</span>
+                <span class="r-val">{{ $pembayaran->metode ?? 'Tidak tersedia' }}</span>
             </div>
         </div>
 
@@ -435,19 +435,19 @@
         <!-- TOTALS -->
         <div class="receipt-summary">
             <div class="receipt-row total-row">
-                <span class="r-label total-label">TOTAL DIBAYAR</span>
+                <span class="r-label total-label">NOMINAL PEMBAYARAN TERCATAT</span>
                 <span class="r-val total-val">Rp{{ number_format($pembayaran->nominal, 0, ',', '.') }}</span>
             </div>
 
             <div class="receipt-row total-row">
-                <span class="r-label total-label">SISA TAGIHAN</span>
+                <span class="r-label total-label">SISA TAGIHAN MENURUT STATUS TERCATAT</span>
                 <span class="r-val total-val">Rp0</span>
             </div>
         </div>
 
         <!-- FOOTER TEXT -->
         <div class="receipt-footer-notes">
-            <p>Pembayaran telah diterima dan tercatat oleh BOOKNEST.</p>
+            <p>Status pembayaran tercatat sukses oleh BOOKNEST, tetapi penerimaan dana belum diverifikasi oleh gateway.</p>
             <p>Terima kasih telah menjaga koleksi dan mendukung budaya membaca.</p>
         </div>
 

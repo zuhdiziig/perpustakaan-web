@@ -37,6 +37,8 @@ class KatalogTest extends TestCase
         $response->assertSee('Leila S. Chudori');
         $response->assertSee('Rak F-12');
         $response->assertSee('Tersedia');
+        $response->assertDontSee('id="member-feedback-toasts"', false);
+        $response->assertDontSee('id="globalMemberSirkulasiModal"', false);
     }
 
     public function test_user_can_search_katalog_by_keyword(): void
@@ -156,6 +158,8 @@ class KatalogTest extends TestCase
         $response->assertSee('Koleksi Buku');
         $response->assertSee('Kategori Buku');
         $response->assertSee('Laporan');
+        $response->assertDontSee('id="member-feedback-toasts"', false);
+        $response->assertDontSee('id="globalMemberSirkulasiModal"', false);
     }
 
     public function test_authenticated_petugas_sees_petugas_sidebar_on_katalog(): void
@@ -171,6 +175,8 @@ class KatalogTest extends TestCase
         $response->assertSee('Peminjaman');
         $response->assertSee('Pengembalian');
         $response->assertSee('Kelola Denda');
+        $response->assertDontSee('id="member-feedback-toasts"', false);
+        $response->assertDontSee('id="globalMemberSirkulasiModal"', false);
     }
 
     public function test_authenticated_member_sees_anggota_sidebar_on_katalog(): void
@@ -185,6 +191,8 @@ class KatalogTest extends TestCase
         $response->assertSee('Katalog Buku');
         $response->assertSee('Riwayat');
         $response->assertSee('Denda');
+        $this->assertSame(1, substr_count($response->getContent(), 'id="member-feedback-toasts"'));
+        $this->assertSame(1, substr_count($response->getContent(), 'id="globalMemberSirkulasiModal"'));
     }
 
     public function test_authenticated_actors_see_sidebar_on_katalog_detail(): void
