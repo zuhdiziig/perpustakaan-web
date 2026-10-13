@@ -69,9 +69,9 @@
         }
 
         .topbar-container {
-            max-width: 1240px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 14px 24px;
+            padding: 14px 28px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -86,6 +86,7 @@
             font-weight: 800;
             letter-spacing: -0.5px;
             color: var(--text-heading);
+            text-decoration: none;
         }
 
         .topbar-brand-icon {
@@ -102,32 +103,81 @@
         .topbar-nav {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .topbar-nav-link {
+            padding: 8px 18px;
+            border-radius: 20px;
             font-size: 13.5px;
             font-weight: 600;
-            color: #64748b;
-            padding: 6px 14px;
-            border-radius: 8px;
-            transition: all 0.15s;
+            color: #475569;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .topbar-nav-link:hover {
-            color: #0f766e;
+            color: var(--text-heading);
+            background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .topbar-nav-link.active {
-            background: #ccfbf1;
+            background: var(--brand-primary-light);
             color: #0f766e;
             font-weight: 700;
+            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);
         }
 
-        .topbar-actions {
+        .topbar-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+        }
+
+        .topbar-icon-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .topbar-icon-btn:hover {
+            background: #f1f5f9;
+            color: var(--text-heading);
+            border-color: #cbd5e1;
+            transform: translateY(-1px);
+        }
+
+        .topbar-user-badge {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #ccfbf1;
+            color: #0f766e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            border: 1px solid #99f6e4;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+
+        .topbar-user-badge:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.15);
         }
 
         .btn-auth-login {
@@ -135,16 +185,20 @@
             align-items: center;
             justify-content: center;
             padding: 8px 18px;
-            background: #2563eb;
-            color: #ffffff;
-            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            color: #0f766e;
+            border-radius: 9px;
             font-size: 13.5px;
             font-weight: 700;
-            transition: all 0.15s;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-auth-login:hover {
-            background: #1d4ed8;
+            border-color: #0f766e;
+            background: #f0fdfa;
+            transform: translateY(-1px);
         }
 
         .btn-auth-register {
@@ -154,51 +208,24 @@
             padding: 8px 18px;
             background: #0f766e;
             color: #ffffff;
-            border-radius: 8px;
+            border-radius: 9px;
             font-size: 13.5px;
             font-weight: 700;
-            transition: all 0.15s;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .btn-auth-register:hover {
             background: #115e59;
-        }
-
-        .btn-user-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
-            background: #f1f5f9;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 700;
-            color: #0f172a;
-        }
-
-        .btn-user-badge:hover {
-            background: #e2e8f0;
-        }
-
-        .user-initials {
-            width: 24px;
-            height: 24px;
-            border-radius: 6px;
-            background: #0f766e;
-            color: #ffffff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: 800;
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+            transform: translateY(-1px);
         }
 
         /* --- MAIN WRAPPER --- */
         .catalog-container {
-            max-width: 1240px;
+            max-width: 1400px;
             margin: 0 auto;
-            padding: 32px 24px 70px;
+            padding: 24px 28px 70px;
         }
 
         /* --- BREADCRUMB & HEADER --- */
@@ -1364,33 +1391,58 @@
             </nav>
 
             <!-- Actions (Guest / Auth) -->
-            <div class="topbar-actions">
+            <div class="topbar-right">
                 @auth
                     @if(auth()->user()->role === 'member')
                         @php
                             $jumlahKeranjang = count(session('keranjang_booking', []));
                         @endphp
-                        <a href="{{ route('keranjang.index') }}" id="topbarCartBtn" class="btn-user-badge" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="padding: 7px 12px; gap: 6px; position: relative; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0f766e; text-decoration: none; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
-                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <a href="{{ route('keranjang.index') }}" id="topbarCartBtn" class="topbar-icon-btn" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="position: relative;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="9" cy="21" r="1"></circle>
                                 <circle cx="20" cy="21" r="1"></circle>
                                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                             </svg>
-                            <span style="font-size: 13px; font-weight: 700;">Keranjang</span>
-                            <span id="topbarCartBadge" style="background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 9999px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); {{ $jumlahKeranjang > 0 ? 'display: inline-block;' : 'display: none;' }}">{{ $jumlahKeranjang }}</span>
+                            <span id="topbarCartBadge" style="position: absolute; top: -4px; right: -4px; background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: {{ $jumlahKeranjang > 0 ? 'flex' : 'none' }}; align-items: center; justify-content: center; border: 2px solid #ffffff;">
+                                {{ $jumlahKeranjang }}
+                            </span>
+                        </a>
+
+                        <button type="button" class="topbar-icon-btn" onclick="openUniversalSearchModal()" title="Pencarian Cepat (Buku, Pinjam, Denda)" aria-label="Buka Pencarian Cepat">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </button>
+                    @elseif(auth()->user()->role === 'admin')
+                        <a href="{{ route('buku.index') }}" class="topbar-icon-btn" title="Kelola Master Buku">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </a>
+                    @elseif(auth()->user()->role === 'petugas')
+                        <a href="{{ route('barcode.scan') }}" class="topbar-icon-btn" title="Scan Barcode & Sirkulasi">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
                         </a>
                     @endif
-                    <a href="{{ route('dashboard') }}" class="btn-user-badge" title="Buka Dasbor Saya">
-                        <div class="user-initials">{{ auth()->user()->inisial ?? 'US' }}</div>
-                        <span>Dasbor</span>
+
+                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil {{ auth()->user()->name ?? 'Pengguna' }}">
+                        @if(auth()->user()->foto ?? false)
+                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        @else
+                            {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
+                        @endif
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="btn-auth-login">
-                        Masuk
-                    </a>
-                    <a href="{{ route('register') }}" class="btn-auth-register">
-                        Daftar
-                    </a>
+                    <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>
+                    <a href="{{ route('register') }}" class="btn-auth-register">Daftar</a>
                 @endauth
             </div>
         </div>
@@ -2390,6 +2442,10 @@
             @include('layouts.partials.member_feedback_toasts')
             {{-- Realtime Sirkulasi Notification Modal & Polling --}}
             @include('layouts.partials.member_realtime_notification')
+            {{-- Modal Pencarian Terpadu Anggota (Buku, Pinjam, Kembali, Denda) --}}
+            @include('layouts.partials.member_universal_search')
+            {{-- Pop Up Message Ringkas Notifikasi Booking Peminjaman & Pengembalian --}}
+            @include('layouts.partials.member_booking_popup')
         @endif
     @endauth
 </body>

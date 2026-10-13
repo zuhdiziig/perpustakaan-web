@@ -341,4 +341,55 @@
             display: block;
         }
     }
+
+    /* --- PAGE TRANSITION ANIMATION & INDICATOR --- */
+    @keyframes pageFadeSlideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .content-area,
+    .page-wrapper > main,
+    .catalog-container,
+    .about-page {
+        animation: pageFadeSlideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
+    }
+
+    /* Smooth Nav Links & Button Micro-Interactions */
+    .topbar-nav-link,
+    .topbar-icon-btn,
+    .topbar-user-badge,
+    .btn-auth-login,
+    .btn-auth-register,
+    .sidebar-link {
+        transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .topbar-nav-link:hover,
+    .topbar-icon-btn:hover,
+    .topbar-user-badge:hover,
+    .btn-auth-login:hover,
+    .btn-auth-register:hover {
+        transform: translateY(-1px);
+    }
+
+    /* Top Page Navigation Progress Indicator */
+    #pageProgressIndicator {
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 3px;
+        width: 0%;
+        background: linear-gradient(90deg, #0f766e, #14b8a6, #2dd4bf);
+        z-index: 99999;
+        pointer-events: none;
+        transition: width 0.2s ease-out, opacity 0.2s ease-out;
+    }
 </style>
