@@ -570,7 +570,8 @@
                 <div class="avatar-wrapper">
                     <div class="avatar-large" id="avatarPreviewBox">
                         @if($user->foto)
-                            <img src="{{ asset('storage/' . $user->foto) }}" alt="Avatar {{ $user->name }}" id="avatarImg">
+                            <img src="{{ asset('storage/' . $user->foto) }}" alt="Avatar {{ $user->name }}" id="avatarImg" onerror="this.style.display='none'; document.getElementById('avatarInitialsFallback').style.display='flex';">
+                            <span id="avatarInitialsFallback" style="display: none; width: 100%; height: 100%; align-items: center; justify-content: center;">{{ $user->inisial }}</span>
                         @else
                             <span id="avatarInitialsText">{{ $user->inisial }}</span>
                         @endif

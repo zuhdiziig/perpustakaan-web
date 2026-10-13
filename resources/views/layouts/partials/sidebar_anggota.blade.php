@@ -157,7 +157,7 @@
         <div class="sidebar-user-left">
             <div class="sidebar-avatar">
                 @if(auth()->user()->foto ?? false)
-                    <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar">
+                    <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" onerror="this.style.display='none'; this.parentElement.innerText='{{ auth()->user()->inisial ?? 'RP' }}'">
                 @else
                     {{ auth()->user()->inisial ?? 'RP' }}
                 @endif
