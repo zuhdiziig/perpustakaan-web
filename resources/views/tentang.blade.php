@@ -810,9 +810,11 @@
                 <a href="{{ route('home') }}" class="topbar-nav-link {{ request()->routeIs('home') ? 'active' : '' }}">
                     Beranda
                 </a>
-                <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                    Katalog
-                </a>
+                @if(!auth()->check() || auth()->user()->role === 'member')
+                    <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
+                        Katalog
+                    </a>
+                @endif
                 @auth
                     <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                         Dasbor
@@ -943,7 +945,13 @@
                             href="{{ route('dashboard') }}"
                             class="about-primary-button"
                         >
-                            Buka Dasbor
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Buka Dasbor</span>
                         </a>
                     @endif
                 @endguest

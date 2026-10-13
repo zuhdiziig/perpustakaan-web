@@ -32,7 +32,20 @@ class LaporanController extends Controller
         ];
 
         // Olah data sesuai jenis laporan yang dipilih
-        if ($jenisLaporan === 'peminjaman') {
+        if ($jenisLaporan === 'semua') {
+            $dataPeminjaman = Peminjaman::with(['member', 'petugas', 'details.buku'])
+                ->whereBetween('tanggalPinjam', [$tglMulai, $tglSelesai])
+                ->latest('idPeminjaman')
+                ->get();
+            $dataPengembalian = Pengembalian::with(['peminjaman.member', 'petugas', 'denda'])
+                ->whereBetween('tanggalKembali', [$tglMulai, $tglSelesai])
+                ->latest('idPengembalian')
+                ->get();
+            $dataDenda = Denda::with(['pengembalian.peminjaman.member', 'details.peminjaman.member', 'pembayaran'])
+                ->whereBetween('created_at', [$tglMulai.' 00:00:00', $tglSelesai.' 23:59:59'])
+                ->latest('idDenda')
+                ->get();
+        } elseif ($jenisLaporan === 'peminjaman') {
             $dataPeminjaman = Peminjaman::with(['member', 'petugas', 'details.buku'])
                 ->whereBetween('tanggalPinjam', [$tglMulai, $tglSelesai])
                 ->latest('idPeminjaman')
