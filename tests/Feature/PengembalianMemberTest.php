@@ -963,7 +963,7 @@ class PengembalianMemberTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'has_denda' => false,
-                'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                'message' => 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.',
                 'idDetail' => $detail->id,
             ]);
 
@@ -1017,7 +1017,7 @@ class PengembalianMemberTest extends TestCase
             ->assertJson([
                 'success' => true,
                 'has_denda' => false,
-                'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                'message' => 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.',
             ]);
 
         $detail1->refresh();

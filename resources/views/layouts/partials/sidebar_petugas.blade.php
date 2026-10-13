@@ -149,7 +149,7 @@
                                 <line x1="6" y1="20" x2="6" y2="14"></line>
                             </svg>
                         </span>
-                        <span>Koleksi Buku</span>
+                        <span>Inventory Buku</span>
                     </div>
                 </a>
             </li>
@@ -181,7 +181,7 @@
         <div class="sidebar-user-left">
             <div class="sidebar-avatar">
                 @if(auth()->user()->foto ?? false)
-                    <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar">
+                    <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" onerror="this.style.display='none'; this.parentElement.innerText='{{ auth()->user()->inisial ?? 'PT' }}'">
                 @else
                     {{ auth()->user()->inisial ?? 'PT' }}
                 @endif

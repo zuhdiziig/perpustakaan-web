@@ -16,7 +16,7 @@ class KatalogBukuSeeder extends Seeder
     {
         $kategoriList = [
             'Fiksi' => 'Koleksi novel, sastra, dan cerita rekaan',
-            'Umum' => 'Buku pengembangan diri, filsafat, dan pengetahuan populer',
+            'Horror' => 'Koleksi novel misteri, cerita horor, supranatural, dan thriller',
             'Sejarah' => 'Arsip sejarah dunia dan nusantara',
             'Teknologi' => 'Buku sains komputer, rekayasa, dan teknologi informasi',
             'Pendidikan' => 'Buku metode belajar, psikologi edukasi, dan kurikulum',
@@ -75,7 +75,7 @@ class KatalogBukuSeeder extends Seeder
                 'jumlahHalaman' => 346,
                 'rak' => 'Rak U-03',
                 'cover' => 'https://images.unsplash.com/photo-1532012164546-f432f2e3777f?q=80&w=800&auto=format&fit=crop',
-                'kategori' => 'Umum',
+                'kategori' => 'Horror',
                 'barcode' => 'BK-UMM-001',
                 'isbn' => '978-602-412-518-9',
                 'sinopsis' => "Filosofi Teras memperkenalkan filsafat Stoa (Stoisisme) dengan bahasa yang ringan dan relevan dengan kehidupan sehari-hari. Henry Manampiring membahas cara mengelola emosi negatif, kekhawatiran, dan hal-hal yang berada di luar kendali kita.\n\nCocok untuk pembaca yang ingin hidup lebih tenang dan tangguh menghadapi tekanan.",

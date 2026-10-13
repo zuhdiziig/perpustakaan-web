@@ -685,4 +685,60 @@ class PetugasBarcodePeminjamanTest extends TestCase
         $this->assertNotNull($itemBumi);
         $this->assertFalse($itemBumi['isBorrowedByMember']);
     }
+
+    public function test_api_scan_member_walkin_identifies_member_by_various_identifiers(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $memberWithNik = User::create([
+            'name' => 'Budi Santoso',
+            'nik' => '3201123456789001',
+            'email' => 'budi.santoso@perpus.test',
+            'password' => bcrypt('password123'),
+            'role' => 'member',
+            'status' => 'aktif',
+            'qr_token' => 'usr_budi_token_123',
+        ]);
+
+        // 1. Scan via usr_ token
+        $res1 = $this->postJson(route('api.sirkulasi.scan-member'), ['code' => 'usr_budi_token_123']);
+        $res1->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.member.id', $memberWithNik->id);
+
+        // 2. Scan via AG format
+        $kodeAg = sprintf('AG-%s-%05d', date('Y'), $memberWithNik->id);
+        $res2 = $this->postJson(route('api.sirkulasi.scan-member'), ['code' => $kodeAg]);
+        $res2->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.member.id', $memberWithNik->id);
+
+        // 3. Scan via NIK (sebelumnya memicu Unknown column 'kode_anggota')
+        $res3 = $this->postJson(route('api.sirkulasi.scan-member'), ['code' => '3201123456789001']);
+        $res3->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.member.id', $memberWithNik->id);
+
+        // 4. Scan via email
+        $res4 = $this->postJson(route('api.sirkulasi.scan-member'), ['code' => 'budi.santoso@perpus.test']);
+        $res4->assertOk()
+            ->assertJsonPath('success', true)
+            ->assertJsonPath('data.member.id', $memberWithNik->id);
+    }
+
+    public function test_api_cari_buku_returns_cover_url_not_broken_sampul(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $this->buku->update(['cover' => 'covers/test_laut.jpg']);
+
+        $response = $this->getJson(route('api.sirkulasi.buku-tersedia', ['q' => 'Laut']));
+        $response->assertOk()
+            ->assertJsonPath('success', true);
+
+        $data = $response->json('data');
+        $item = collect($data)->firstWhere('idBuku', $this->buku->idBuku);
+        $this->assertNotNull($item);
+        $this->assertStringContainsString('covers/test_laut.jpg', (string) $item['sampul']);
+    }
 }

@@ -151,7 +151,7 @@ class MemberManagementAndBukuAccessTest extends TestCase
         $response = $this->actingAs($this->petugas)->get(route('dashboard'));
 
         $response->assertOk();
-        $response->assertSee('Koleksi Buku');
+        $response->assertSee('Inventory Buku');
         $response->assertDontSee('Katalog Buku');
     }
 
@@ -160,7 +160,7 @@ class MemberManagementAndBukuAccessTest extends TestCase
         $response = $this->actingAs($this->petugas)->get(route('buku.index'));
 
         $response->assertOk();
-        $response->assertSee('Koleksi & Inventaris Buku');
+        $response->assertSee('Inventory Buku');
         $response->assertSee('Pemrograman Web Modern');
         $response->assertDontSee('Cetak QR');
         $response->assertDontSee('<th>Barcode</th>', false);

@@ -293,7 +293,7 @@ class PengembalianController extends Controller
                         ->where('status', 'Tersedia')
                         ->where('lokasi', 'Rak')
                         ->count();
-                    $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+                    $lokasiBaru = ($validated['kondisiBuku'] === 'Rusak') ? 'Gudang' : (($currentInRak < 2) ? 'Rak' : 'Gudang');
 
                     $eksemplar->update([
                         'status' => $statusBaru,
@@ -626,7 +626,7 @@ class PengembalianController extends Controller
                 return response()->json([
                     'success' => true,
                     'has_denda' => false,
-                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.',
                     'idDetail' => $detail->id,
                     'kode_kembali' => $detail->kode_kembali,
                     'qr_kembali' => $detail->qr_kembali,
@@ -641,7 +641,7 @@ class PengembalianController extends Controller
 
             return redirect()->route('pengembalian.member')
                 ->with('success', 'Pengajuan pengembalian berhasil dicatat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.')
-                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.');
+                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.');
         } catch (\DomainException $e) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
@@ -847,7 +847,7 @@ class PengembalianController extends Controller
                 return response()->json([
                     'success' => true,
                     'has_denda' => false,
-                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                    'message' => 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.',
                     'batchCode' => $batchCode,
                 ]);
             }
@@ -859,7 +859,7 @@ class PengembalianController extends Controller
 
             return redirect()->route('pengembalian.member')
                 ->with('success', 'Pengajuan pengembalian sekaligus berhasil dibuat! Silakan bawa buku ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda ke petugas meja sirkulasi.')
-                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.');
+                ->with('booking_popup_message', 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.');
         } catch (\DomainException $e) {
             if ($request->wantsJson() || $request->ajax()) {
                 return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
@@ -1274,7 +1274,7 @@ class PengembalianController extends Controller
                             ->where('status', 'Tersedia')
                             ->where('lokasi', 'Rak')
                             ->count();
-                        $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+                        $lokasiBaru = ($kondisiFinal === 'Rusak') ? 'Gudang' : (($currentInRak < 2) ? 'Rak' : 'Gudang');
 
                         $eksemplar->update([
                             'status' => $statusBaru,
