@@ -703,20 +703,6 @@
         Tunjukkan QR Code tiket ini kepada petugas perpustakaan di meja layanan sirkulasi saat mengembalikan buku fisik.
     </p>
 
-    {{-- ALERT BANNER SUCCESS --}}
-    @if(session('success'))
-        <div class="ticket-alert-success">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0; margin-top: 1px;">
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-            </svg>
-            <div>
-                <strong>Pengajuan Pengembalian Berhasil Dibuat!</strong><br>
-                {{ session('success') }}
-            </div>
-        </div>
-    @endif
-
     @if($detail->kode_batch_kembali)
         <div style="background: #f0fdfa; border: 1.5px solid #99f6e4; border-radius: 12px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
             <div style="display: flex; align-items: center; gap: 10px;">
@@ -873,10 +859,10 @@
                         <span class="spec-val" style="color: #166534;">
                             @if($detail->denda->status === 'Lunas')
                                 <span style="display: inline-flex; align-items: center; gap: 6px; background: #dcfce7; color: #15803d; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">
-                                    ✓ Lunas (Rp {{ number_format($detail->denda->jumlah, 0, ',', '.') }})
+                                    ✓ Tercatat lunas · belum diverifikasi (Rp {{ number_format($detail->denda->jumlah, 0, ',', '.') }})
                                 </span>
                                 <span style="font-size: 11.5px; color: #15803d; display: block; margin-top: 3px;">
-                                    {{ $detail->denda->jenisDenda }} (Telah dibayar via QRIS)
+                                    {{ $detail->denda->jenisDenda }} (status pembayaran tercatat, belum diverifikasi gateway)
                                 </span>
                             @else
                                 <span style="display: inline-flex; align-items: center; gap: 6px; background: #fee2e2; color: #dc2626; padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 800;">

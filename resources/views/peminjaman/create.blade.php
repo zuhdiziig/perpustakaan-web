@@ -881,12 +881,21 @@
                 : (Array.isArray(state.daftarBuku) && state.daftarBuku.length > 0 ? state.daftarBuku : null);
 
             if (daftarBukuModal && daftarBukuModal.length > 1) {
-                modalBuku.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 3px;">
-                        <span style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">${daftarBukuModal.length} Buku:</span>
-                        ${daftarBukuModal.map(b => `<div style="line-height: 1.4;">- ${b.judul}</div>`).join('')}
-                    </div>
-                `;
+                const list = document.createElement('div');
+                list.style.display = 'flex';
+                list.style.flexDirection = 'column';
+                list.style.gap = '3px';
+                const listHeading = document.createElement('span');
+                listHeading.style.cssText = 'font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;';
+                listHeading.textContent = `${daftarBukuModal.length} Buku:`;
+                list.appendChild(listHeading);
+                daftarBukuModal.forEach(buku => {
+                    const item = document.createElement('div');
+                    item.style.lineHeight = '1.4';
+                    item.textContent = `- ${buku.judul}`;
+                    list.appendChild(item);
+                });
+                modalBuku.replaceChildren(list);
             } else {
                 modalBuku.textContent = `${state.buku.judul} · ${state.buku.kodeBuku}`;
             }
@@ -899,6 +908,28 @@
         // Tutup Modal Konfirmasi Barcode
         function closeConfirmModal() {
             modalOverlay.style.display = 'none';
+        }
+
+        function renderValidationMessage(parts) {
+            const nodes = parts.map(part => {
+                if (typeof part === 'string') {
+                    return document.createTextNode(part);
+                }
+
+                if (part.tag === 'br') {
+                    return document.createElement('br');
+                }
+
+                const element = document.createElement(part.tag);
+                element.textContent = part.text;
+                if (part.style) {
+                    Object.assign(element.style, part.style);
+                }
+
+                return element;
+            });
+
+            dispValidasiPetugas.replaceChildren(...nodes);
         }
 
         // Render Seluruh Rincian & Form Hidden Sesuai State
@@ -919,9 +950,15 @@
                     const sisaKuota = state.member.sisaKuota ?? Math.max(0, 7 - sedangDipinjam);
                     const kuotaPenuh = state.member.kuotaPenuh || (sedangDipinjam >= 7);
                     if (kuotaPenuh) {
-                        dispKuotaAnggota.innerHTML = `<span style="color: #b91c1c; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 9999px;">7/7 Buku (Penuh)</span>`;
+                        const quotaBadge = document.createElement('span');
+                        quotaBadge.style.cssText = 'color: #b91c1c; font-weight: 700; background: #fee2e2; padding: 2px 8px; border-radius: 9999px;';
+                        quotaBadge.textContent = '7/7 Buku (Penuh)';
+                        dispKuotaAnggota.replaceChildren(quotaBadge);
                     } else {
-                        dispKuotaAnggota.innerHTML = `<span style="color: #166534; font-weight: 600;">${sedangDipinjam}/7 Buku (Sisa: ${sisaKuota})</span>`;
+                        const quotaText = document.createElement('span');
+                        quotaText.style.cssText = 'color: #166534; font-weight: 600;';
+                        quotaText.textContent = `${sedangDipinjam}/7 Buku (Sisa: ${sisaKuota})`;
+                        dispKuotaAnggota.replaceChildren(quotaText);
                     }
                 }
             } else {
@@ -938,11 +975,18 @@
                 : (Array.isArray(state.daftarBuku) && state.daftarBuku.length > 0 ? state.daftarBuku : null);
 
             if (daftarBuku && daftarBuku.length > 1) {
-                dispBuku.innerHTML = `
-                    <div style="display: flex; flex-direction: column; gap: 4px; text-align: right;">
-                        ${daftarBuku.map(b => `<div style="line-height: 1.45;">- ${b.judul}</div>`).join('')}
-                    </div>
-                `;
+                const list = document.createElement('div');
+                list.style.display = 'flex';
+                list.style.flexDirection = 'column';
+                list.style.gap = '4px';
+                list.style.textAlign = 'right';
+                daftarBuku.forEach(buku => {
+                    const item = document.createElement('div');
+                    item.style.lineHeight = '1.45';
+                    item.textContent = `- ${buku.judul}`;
+                    list.appendChild(item);
+                });
+                dispBuku.replaceChildren(list);
                 formBarcodeBuku.value = state.buku ? (state.buku.qr_token || state.buku.kodeBuku) : '';
             } else if (daftarBuku && daftarBuku.length === 1) {
                 const single = daftarBuku[0];
@@ -966,13 +1010,17 @@
             // Perbarui Pesan Validasi Petugas
             if (state.booking) {
                 if (isMemberPenuh) {
-                    dispValidasiPetugas.innerHTML = `
-                        <strong style="color: #b91c1c;">⛔ Serah Terima Ditahan: Kuota Pinjaman Penuh!</strong><br>
-                        Anggota <b>${state.booking.member.name}</b> saat ini telah meminjam <b>${state.booking.member.sedangDipinjam ?? 7} buku</b> (Batas maksimal 7 buku).<br>
-                        <span style="display:inline-block; margin-top: 5px; font-size: 12px; color: #b91c1c; font-weight: 600;">
-                            Sesuai aturan perpustakaan, member wajib mengembalikan minimal 1 buku yang sedang dipinjam terlebih dahulu sebelum mengambil buku baru.
-                        </span>
-                    `;
+                    renderValidationMessage([
+                        { tag: 'strong', text: '⛔ Serah Terima Ditahan: Kuota Pinjaman Penuh!', style: { color: '#b91c1c' } },
+                        { tag: 'br' },
+                        'Anggota ',
+                        { tag: 'b', text: state.booking.member.name },
+                        ' saat ini telah meminjam ',
+                        { tag: 'b', text: `${state.booking.member.sedangDipinjam ?? 7} buku` },
+                        ' (Batas maksimal 7 buku).',
+                        { tag: 'br' },
+                        { tag: 'span', text: 'Sesuai aturan perpustakaan, member wajib mengembalikan minimal 1 buku yang sedang dipinjam terlebih dahulu sebelum mengambil buku baru.', style: { display: 'inline-block', marginTop: '5px', fontSize: '12px', color: '#b91c1c', fontWeight: '600' } },
+                    ]);
                     badgeContainer.style.display = 'block';
                     badgeContainer.style.borderColor = '#fca5a5';
                     badgeContainer.style.background = '#fef2f2';
@@ -983,15 +1031,28 @@
                     btnKonfirmasi.style.background = '#9ca3af';
                 } else {
                     const totalBukuBooking = state.booking.totalBuku ?? 1;
-                    dispValidasiPetugas.innerHTML = `
-                        <strong>Tiket Booking Online Teridentifikasi!</strong><br>
-                        Kode: <b>${state.booking.kodeBooking}</b> &middot; Anggota: <b>${state.booking.member.name}</b> (${state.booking.member.kodeAnggota})<br>
-                        Buku (${totalBukuBooking} item): <b>${state.booking.buku.judul}</b> (📍 Rak: <b>${state.booking.buku.rak}</b>)<br>
-                        Metode Ambil: <b>${state.booking.opsiPengambilan === 'siapkan_petugas' ? '📦 Disiapkan Petugas di Meja' : '🚶 Ambil Mandiri dari Rak'}</b> &middot; Status: <b><span style="color: ${state.booking.status === 'Siap Diambil' ? '#166534' : '#b45309'}">${state.booking.status}</span></b><br>
-                        <span style="display:inline-block; margin-top: 5px; font-size: 12px; color: #0f766e; font-weight: 600;">
-                            Tekan tombol konfirmasi di bawah untuk menyelesaikan serah terima buku secara instan (30 hari aktif).
-                        </span>
-                    `;
+                    renderValidationMessage([
+                        { tag: 'strong', text: 'Tiket Booking Online Teridentifikasi!' },
+                        { tag: 'br' },
+                        'Kode: ',
+                        { tag: 'b', text: state.booking.kodeBooking },
+                        ' · Anggota: ',
+                        { tag: 'b', text: state.booking.member.name },
+                        ` (${state.booking.member.kodeAnggota})`,
+                        { tag: 'br' },
+                        `Buku (${totalBukuBooking} item): `,
+                        { tag: 'b', text: state.booking.buku.judul },
+                        ' (📍 Rak: ',
+                        { tag: 'b', text: state.booking.buku.rak },
+                        ')',
+                        { tag: 'br' },
+                        'Metode Ambil: ',
+                        { tag: 'b', text: state.booking.opsiPengambilan === 'siapkan_petugas' ? '📦 Disiapkan Petugas di Meja' : '🚶 Ambil Mandiri dari Rak' },
+                        ' · Status: ',
+                        { tag: 'span', text: state.booking.status, style: { color: state.booking.status === 'Siap Diambil' ? '#166534' : '#b45309' } },
+                        { tag: 'br' },
+                        { tag: 'span', text: 'Tekan tombol konfirmasi di bawah untuk menyelesaikan serah terima buku secara instan (30 hari aktif).', style: { display: 'inline-block', marginTop: '5px', fontSize: '12px', color: '#0f766e', fontWeight: '600' } },
+                    ]);
                     badgeContainer.style.display = 'block';
                     badgeContainer.style.borderColor = '';
                     badgeContainer.style.background = '';
@@ -1005,13 +1066,17 @@
             } else if (state.member && state.buku) {
                 formPeminjaman.action = '{{ route("peminjaman.store") }}';
                 if (isMemberPenuh) {
-                    dispValidasiPetugas.innerHTML = `
-                        <strong style="color: #b91c1c;">⛔ Transaksi Ditolak: Batas Maksimal 7 Buku Tercapai!</strong><br>
-                        Anggota <b>${state.member.name}</b> telah meminjam <b>${state.member.sedangDipinjam ?? 7} buku</b>.<br>
-                        <span style="display:inline-block; margin-top: 5px; font-size: 12px; color: #b91c1c; font-weight: 600;">
-                            Satu member hanya diperbolehkan meminjam maksimal 7 buku dengan status dipinjam. Member harus mengembalikan buku terlebih dahulu.
-                        </span>
-                    `;
+                    renderValidationMessage([
+                        { tag: 'strong', text: '⛔ Transaksi Ditolak: Batas Maksimal 7 Buku Tercapai!', style: { color: '#b91c1c' } },
+                        { tag: 'br' },
+                        'Anggota ',
+                        { tag: 'b', text: state.member.name },
+                        ' telah meminjam ',
+                        { tag: 'b', text: `${state.member.sedangDipinjam ?? 7} buku` },
+                        '.',
+                        { tag: 'br' },
+                        { tag: 'span', text: 'Satu member hanya diperbolehkan meminjam maksimal 7 buku dengan status dipinjam. Member harus mengembalikan buku terlebih dahulu.', style: { display: 'inline-block', marginTop: '5px', fontSize: '12px', color: '#b91c1c', fontWeight: '600' } },
+                    ]);
                     badgeContainer.style.display = 'block';
                     badgeContainer.style.borderColor = '#fca5a5';
                     badgeContainer.style.background = '#fef2f2';
@@ -1039,10 +1104,15 @@
                 badgeContainer.style.background = '';
                 badgeText.style.color = '';
                 if (isMemberPenuh) {
-                    dispValidasiPetugas.innerHTML = `
-                        <strong style="color: #b91c1c;">⛔ Kuota Peminjaman Penuh!</strong><br>
-                        Anggota <b>${state.member.name}</b> telah meminjam <b>${state.member.sedangDipinjam ?? 7} buku</b> (Batas maksimal 7 buku). Member harus mengembalikan buku terlebih dahulu.
-                    `;
+                    renderValidationMessage([
+                        { tag: 'strong', text: '⛔ Kuota Peminjaman Penuh!', style: { color: '#b91c1c' } },
+                        { tag: 'br' },
+                        'Anggota ',
+                        { tag: 'b', text: state.member.name },
+                        ' telah meminjam ',
+                        { tag: 'b', text: `${state.member.sedangDipinjam ?? 7} buku` },
+                        ' (Batas maksimal 7 buku). Member harus mengembalikan buku terlebih dahulu.',
+                    ]);
                     badgeContainer.style.display = 'block';
                     badgeContainer.style.borderColor = '#fca5a5';
                     badgeContainer.style.background = '#fef2f2';
@@ -1134,12 +1204,18 @@
                     }
 
                     if (booking.daftarBuku && booking.daftarBuku.length > 1) {
-                        modalBuku.innerHTML = `
-                            <div style="display: flex; flex-direction: column; gap: 3px;">
-                                <span style="font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;">${booking.daftarBuku.length} Buku:</span>
-                                ${booking.daftarBuku.map(b => `<div>- ${b.judul}</div>`).join('')}
-                            </div>
-                        `;
+                        const list = document.createElement('div');
+                        list.style.cssText = 'display: flex; flex-direction: column; gap: 3px;';
+                        const heading = document.createElement('span');
+                        heading.style.cssText = 'font-size: 12px; color: #64748b; font-weight: 600; margin-bottom: 2px;';
+                        heading.textContent = `${booking.daftarBuku.length} Buku:`;
+                        list.appendChild(heading);
+                        booking.daftarBuku.forEach(buku => {
+                            const item = document.createElement('div');
+                            item.textContent = `- ${buku.judul}`;
+                            list.appendChild(item);
+                        });
+                        modalBuku.replaceChildren(list);
                     } else {
                         modalBuku.textContent = `${booking.buku.judul} · ${booking.buku.kodeBuku} (📍 ${booking.buku.rak})`;
                     }

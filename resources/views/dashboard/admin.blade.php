@@ -522,7 +522,7 @@
                         <line x1="1" y1="10" x2="23" y2="10"></line>
                     </svg>
                 </div>
-                <div class="stat-label">Denda terkumpul</div>
+                <div class="stat-label">Pembayaran tercatat sukses</div>
                 <div class="stat-value">Rp{{ number_format($statistik['dendaTerkumpulBulanIni'], 0, ',', '.') }}</div>
             </div>
             <div class="stat-caption">{{ \Carbon\Carbon::now()->translatedFormat('F Y') }} · {{ $statistik['transaksiDendaBulanIni'] }} transaksi</div>

@@ -76,7 +76,7 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Koleksi buku');
         $response->assertSee('Anggota aktif');
         $response->assertSee('Petugas aktif');
-        $response->assertSee('Denda terkumpul');
+        $response->assertSee('Pembayaran tercatat sukses');
     }
 
     public function test_admin_dashboard_search_filters_transactions(): void

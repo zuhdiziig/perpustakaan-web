@@ -656,6 +656,7 @@
 </div>
 
 {{-- Realtime Sirkulasi Notification Modal & Polling --}}
+@include('layouts.partials.member_feedback_toasts')
 @include('layouts.partials.member_realtime_notification')
 
 </body>

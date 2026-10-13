@@ -180,46 +180,159 @@ class WebDendaTest extends TestCase
         $response->assertSee('Rincian pembayaran');
         $response->assertSee('Cara membayar');
         $response->assertSee('Kembali ke Denda');
+        $response->assertDontSee('simulasi_status');
     }
 
-    public function test_member_can_process_qris_payment_and_view_success_and_nota(): void
+    public function test_client_simulated_success_does_not_change_payment_or_fine_status(): void
     {
-        $member = User::factory()->create([
-            'role' => 'member',
-            'status' => 'aktif',
-            'name' => 'Rizky Pratama',
-        ]);
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member);
+        $pembayaran = $this->createPembayaran($denda);
 
-        $kategori = Kategori::create([
-            'namaKategori' => 'Umum',
-            'deskripsi' => 'Pengembangan diri',
-        ]);
+        $response = $this->actingAs($member)
+            ->from(route('bayar.qr', $denda->idDenda))
+            ->post(route('bayar.proses_qr', $pembayaran->idPembayaran), [
+                'simulasi_status' => 'berhasil',
+            ]);
 
-        $buku = Buku::create([
-            'idKategori' => $kategori->idKategori,
-            'judul' => 'Filosofi Teras',
-            'penulis' => 'Henry Manampiring',
-            'penerbit' => 'Kompas',
-            'tahunTerbit' => 2019,
-            'harga' => 98000,
-            'stok' => 5,
-            'kondisi' => 'Baik',
-        ]);
+        $response->assertRedirect(route('bayar.qr', $denda->idDenda));
+        $response->assertSessionHas('error', 'Pembayaran belum dapat diverifikasi karena integrasi payment gateway belum tersedia. Status pembayaran tidak diubah.');
+        $this->assertSame('Pending', $pembayaran->fresh()->status);
+        $this->assertSame('Belum Dibayar', $denda->fresh()->status);
+    }
 
+    public function test_missing_status_parameter_does_not_confirm_payment(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member);
+        $pembayaran = $this->createPembayaran($denda);
+
+        $response = $this->actingAs($member)
+            ->from(route('bayar.qr', $denda->idDenda))
+            ->post(route('bayar.proses_qr', $pembayaran->idPembayaran));
+
+        $response->assertRedirect(route('bayar.qr', $denda->idDenda));
+        $this->assertSame('Pending', $pembayaran->fresh()->status);
+        $this->assertSame('Belum Dibayar', $denda->fresh()->status);
+    }
+
+    public function test_member_cannot_access_another_members_fine_or_payment_endpoints(): void
+    {
+        $owner = User::factory()->create(['role' => 'member']);
+        $otherMember = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($owner);
+        $pembayaran = $this->createPembayaran($denda);
+
+        $this->actingAs($otherMember)->get(route('bayar.qr', $denda->idDenda))->assertNotFound();
+        $this->post(route('bayar.proses_qr', $pembayaran->idPembayaran), ['simulasi_status' => 'berhasil'])->assertNotFound();
+        $this->get(route('bayar.sukses', $pembayaran->idPembayaran))->assertNotFound();
+        $this->get(route('pembayaran.nota', $pembayaran->idPembayaran))->assertNotFound();
+
+        $this->assertSame('Pending', $pembayaran->fresh()->status);
+        $this->assertSame('Belum Dibayar', $denda->fresh()->status);
+        $this->assertDatabaseCount('pembayaran', 1);
+    }
+
+    public function test_pending_payment_cannot_render_success_or_nota(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member);
+        $pembayaran = $this->createPembayaran($denda);
+
+        $this->actingAs($member)->get(route('bayar.sukses', $pembayaran->idPembayaran))->assertNotFound();
+        $this->get(route('pembayaran.nota', $pembayaran->idPembayaran))->assertNotFound();
+    }
+
+    public function test_processing_a_confirmed_payment_is_idempotent(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member, 'Lunas');
+        $pembayaran = $this->createPembayaran($denda, 'Sukses');
+        $tanggalBayar = (string) $pembayaran->tanggalBayar;
+
+        $response = $this->actingAs($member)
+            ->post(route('bayar.proses_qr', $pembayaran->idPembayaran), ['simulasi_status' => 'berhasil']);
+
+        $response->assertRedirect(route('bayar.sukses', $pembayaran->idPembayaran));
+        $this->assertSame('Sukses', $pembayaran->fresh()->status);
+        $this->assertSame('Lunas', $denda->fresh()->status);
+        $this->assertSame($tanggalBayar, (string) $pembayaran->fresh()->tanggalBayar);
+    }
+
+    public function test_opening_paid_fine_does_not_create_another_pending_payment(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member, 'Lunas');
+        $pembayaran = $this->createPembayaran($denda, 'Sukses');
+
+        $response = $this->actingAs($member)->get(route('bayar.qr', $denda->idDenda));
+
+        $response->assertRedirect(route('bayar.sukses', $pembayaran->idPembayaran));
+        $this->assertDatabaseCount('pembayaran', 1);
+    }
+
+    public function test_amount_mismatch_cannot_be_processed_or_rendered_as_paid(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $denda = $this->createDendaForMember($member);
+        $pembayaran = $this->createPembayaran($denda, 'Pending', '4000.00');
+
+        $response = $this->actingAs($member)
+            ->from(route('bayar.qr', $denda->idDenda))
+            ->post(route('bayar.proses_qr', $pembayaran->idPembayaran));
+
+        $response->assertRedirect(route('bayar.qr', $denda->idDenda));
+        $response->assertSessionHas('error', 'Status atau nominal transaksi tidak valid. Pembayaran tidak diubah.');
+        $this->actingAs($member)->get(route('bayar.sukses', $pembayaran->idPembayaran))->assertNotFound();
+        $this->assertSame('Pending', $pembayaran->fresh()->status);
+        $this->assertSame('Belum Dibayar', $denda->fresh()->status);
+    }
+
+    public function test_staff_verification_does_not_use_mock_gateway_success(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $staff = User::factory()->create(['role' => 'petugas']);
+        $denda = $this->createDendaForMember($member);
+        $pembayaran = $this->createPembayaran($denda);
+
+        $response = $this->actingAs($staff)
+            ->from(route('pembayaran.index'))
+            ->post(route('pembayaran.verifikasi', $pembayaran->idPembayaran));
+
+        $response->assertRedirect(route('pembayaran.index'));
+        $response->assertSessionHas('error', 'Pembayaran belum dapat diverifikasi karena integrasi payment gateway belum tersedia. Status pembayaran tidak diubah.');
+        $this->assertSame('Pending', $pembayaran->fresh()->status);
+        $this->assertSame('Belum Dibayar', $denda->fresh()->status);
+    }
+
+    public function test_member_can_view_success_and_receipt_for_confirmed_payment(): void
+    {
+        $member = User::factory()->create(['role' => 'member', 'name' => 'Rizky Pratama']);
+        $denda = $this->createDendaForMember($member, 'Lunas');
+        $pembayaran = $this->createPembayaran($denda, 'Sukses');
+
+        $successResponse = $this->actingAs($member)->get(route('bayar.sukses', $pembayaran->idPembayaran));
+        $successResponse->assertOk();
+        $successResponse->assertSee('Status Pembayaran');
+        $successResponse->assertSee('TERCATAT SUKSES');
+        $successResponse->assertSee('belum diverifikasi oleh gateway');
+        $successResponse->assertDontSee('berhasil diterima melalui QRIS');
+
+        $notaResponse = $this->get(route('pembayaran.nota', $pembayaran->idPembayaran));
+        $notaResponse->assertOk();
+        $notaResponse->assertSee('Nota Pembayaran');
+        $notaResponse->assertSee('TERCATAT SUKSES');
+        $notaResponse->assertSee('penerimaan dana belum diverifikasi oleh gateway');
+    }
+
+    private function createDendaForMember(User $member, string $status = 'Belum Dibayar', string $jumlah = '5000.00'): Denda
+    {
         $peminjaman = Peminjaman::create([
             'idUserMember' => $member->id,
             'tanggalPinjam' => '2026-09-14',
             'batasKembali' => '2026-09-28',
             'status' => 'Kembali',
             'totalBuku' => 1,
-        ]);
-
-        DetailPeminjaman::create([
-            'idPeminjaman' => $peminjaman->idPeminjaman,
-            'idBuku' => $buku->idBuku,
-            'idEksemplar' => $buku->eksemplar->first()->idEksemplar,
-            'jumlah' => 1,
-            'statusBuku' => 'Kembali',
         ]);
 
         $pengembalian = Pengembalian::create([
@@ -229,49 +342,21 @@ class WebDendaTest extends TestCase
             'kondisiBuku' => 'Baik',
         ]);
 
-        $denda = Denda::create([
+        return Denda::create([
             'idPengembalian' => $pengembalian->idPengembalian,
             'jenisDenda' => 'Keterlambatan',
-            'jumlah' => 5000,
-            'status' => 'Belum Dibayar',
+            'jumlah' => $jumlah,
+            'status' => $status,
         ]);
+    }
 
-        // 1. Visit QRIS page to create pending payment
-        $this->actingAs($member)->get(route('bayar.qr', $denda->idDenda));
-        $pembayaran = Pembayaran::where('idDenda', $denda->idDenda)->first();
-        $this->assertNotNull($pembayaran);
-
-        // 2. Process QRIS simulation
-        $processResponse = $this->actingAs($member)->post(route('bayar.proses_qr', $pembayaran->idPembayaran), [
-            'simulasi_status' => 'berhasil',
+    private function createPembayaran(Denda $denda, string $status = 'Pending', ?string $nominal = null): Pembayaran
+    {
+        return $denda->pembayaran()->create([
+            'tanggalBayar' => now(),
+            'metode' => 'QRIS',
+            'nominal' => $nominal ?? (string) $denda->jumlah,
+            'status' => $status,
         ]);
-        $processResponse->assertRedirect(route('bayar.sukses', $pembayaran->idPembayaran));
-
-        $pembayaran->refresh();
-        $denda->refresh();
-        $this->assertEquals('Sukses', $pembayaran->status);
-        $this->assertEquals('Lunas', $denda->status);
-
-        // 3. View Success Page (Screen 19)
-        $suksesResponse = $this->actingAs($member)->get(route('bayar.sukses', $pembayaran->idPembayaran));
-        $suksesResponse->assertOk();
-        $suksesResponse->assertViewIs('pembayaran.sukses');
-        $suksesResponse->assertSee('Pembayaran Berhasil');
-        $suksesResponse->assertSee('Terima kasih, Rizky!');
-        $suksesResponse->assertSee('LUNAS');
-        $suksesResponse->assertSee('Lihat Nota');
-        $suksesResponse->assertSee('Kembali ke Dasbor');
-
-        // 4. View Official Nota Page (Screen 20)
-        $notaResponse = $this->actingAs($member)->get(route('pembayaran.nota', $pembayaran->idPembayaran));
-        $notaResponse->assertOk();
-        $notaResponse->assertViewIs('pembayaran.nota');
-        $notaResponse->assertSee('Nota Pembayaran');
-        $notaResponse->assertSee('Cetak Nota');
-        $notaResponse->assertSee('Kembali ke Dasbor');
-        $notaResponse->assertSee('Nota Denda Peminjaman');
-        $notaResponse->assertSee('TOTAL DIBAYAR');
-        $notaResponse->assertSee('SISA TAGIHAN');
-        $notaResponse->assertSee('Rp5.000');
     }
 }

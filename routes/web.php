@@ -214,6 +214,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/api/member/status-sirkulasi-terbaru', [QrController::class, 'apiCheckRealtimeSirkulasi'])
             ->name('api.member.status-sirkulasi-terbaru');
 
+        Route::post('/api/member/notifikasi-peminjaman/{id}/dibaca', [QrController::class, 'markRealtimeNotificationRead'])
+            ->name('api.member.notifikasi-peminjaman.dibaca');
+
         Route::get('/api/member/universal-search', [RiwayatController::class, 'apiUniversalSearch'])
             ->name('member.universal-search');
     });

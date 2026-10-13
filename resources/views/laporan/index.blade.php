@@ -69,8 +69,9 @@
             <h3 style="color: #d97706;">Rp {{ number_format($ringkasan['total_denda'], 0, ',', '.') }}</h3>
         </div>
         <div class="stat-card" style="border-left-color: #16a34a;">
-            <span>Realisasi Denda Lunas</span>
+            <span>Pembayaran berstatus sukses (belum diverifikasi gateway)</span>
             <h3 style="color: #16a34a;">Rp {{ number_format($ringkasan['denda_lunas'], 0, ',', '.') }}</h3>
+            <small>Nominal pembayaran berstatus sukses; belum diverifikasi gateway.</small>
         </div>
     </div>
 
