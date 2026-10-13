@@ -550,8 +550,6 @@
                             // The unread notification will be retried on the next poll.
                         }
                     });
-
-                return;
             }
 
             // 1. Cek Peminjaman Baru

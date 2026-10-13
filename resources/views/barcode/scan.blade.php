@@ -1069,6 +1069,8 @@
             tabContentKembali.style.display = 'block';
             tabContentPinjam.style.display = 'none';
         }
+    }
+
     // Audio Feedback Beep saat scan berhasil
     function playScanBeep() {
         try {

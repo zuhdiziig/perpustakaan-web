@@ -421,4 +421,46 @@ class PetugasBarcodePengembalianTest extends TestCase
         $this->assertSame('Tersedia', $this->eksemplar->status);
         $this->assertSame('Rusak', $this->eksemplar->kondisi);
     }
+
+    public function test_petugas_dapat_menyelesaikan_pengembalian_batch_dengan_kode_kb_member(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(2)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(5)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KB-20261013-0999',
+        ]);
+
+        $kodeBatchMember = 'KB-MEMBER-'.Carbon::now()->format('Ymd').'-'.str_pad($this->member->id, 5, '0', STR_PAD_LEFT);
+
+        // Petugas submit batch selesai menggunakan kode KB-MEMBER
+        $response = $this->post(route('pengembalian.petugas.batch-selesai'), [
+            'kodeBatch' => $kodeBatchMember,
+            'kondisi' => [
+                $detail->id => 'Baik',
+            ],
+        ]);
+
+        $response->assertSessionHasNoErrors();
+        $response->assertSessionHas('success');
+
+        $detail->refresh();
+        $this->assertSame('Kembali', $detail->statusBuku);
+
+        $peminjaman->refresh();
+        $this->assertSame('Selesai', $peminjaman->status);
+    }
 }
