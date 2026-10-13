@@ -585,6 +585,10 @@
         }
 
         .btn-green {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             background: #2e625a;
             color: white;
             padding: 11px 22px;
@@ -592,14 +596,39 @@
             font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.2s;
+            line-height: 1;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(46, 98, 90, 0.2);
         }
 
         .btn-green:hover {
             background: #234c46;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(46, 98, 90, 0.3);
+        }
+
+        .btn-green svg {
+            flex-shrink: 0;
+            display: block;
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-green:hover svg {
+            transform: scale(1.08);
+        }
+
+        .btn-green span {
+            display: inline-block;
+            line-height: 1;
         }
 
         .btn-blue {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
             background: #4361ee;
             color: white;
             padding: 11px 22px;
@@ -607,11 +636,32 @@
             font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.2s;
+            line-height: 1;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.25);
         }
 
         .btn-blue:hover {
             background: #3651d4;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.35);
+        }
+
+        .btn-blue svg {
+            flex-shrink: 0;
+            display: block;
+            width: 16px;
+            height: 16px;
+            transition: transform 0.2s ease;
+        }
+
+        .btn-blue:hover svg {
+            transform: scale(1.08);
+        }
+
+        .btn-blue span {
+            display: inline-block;
+            line-height: 1;
         }
 
         .hero-note {
@@ -1215,7 +1265,7 @@
                 <div class="hero-buttons">
                     @if(!auth()->check() || auth()->user()->role === 'member')
                         <a href="{{ route('katalog.index') }}" class="btn-green">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                             <span>Jelajahi Katalog</span>
                         </a>
                     @endif
@@ -1224,17 +1274,17 @@
                     @else
                         @if(auth()->user()->role === 'member')
                             <a href="{{ route('riwayat.index') }}" class="btn-blue">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 <span>Pinjaman & Booking Saya</span>
                             </a>
                         @elseif(auth()->user()->role === 'petugas')
                             <a href="{{ route('barcode.scan') }}" class="btn-blue">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                                 <span>Meja Sirkulasi (Scan QR)</span>
                             </a>
                         @else
                             <a href="{{ route('dashboard') }}" class="btn-blue">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                                 <span>Panel Dasbor Admin</span>
                             </a>
                         @endif
