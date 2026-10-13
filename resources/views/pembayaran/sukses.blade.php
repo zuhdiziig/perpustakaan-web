@@ -377,28 +377,32 @@
                         ?? \App\Models\DetailPeminjaman::where('id_denda', $denda?->idDenda)->first()
                         ?? ($pengembalian?->idPeminjaman ? \App\Models\DetailPeminjaman::where('idPeminjaman', $pengembalian->idPeminjaman)->whereIn('statusBuku', ['Diajukan Kembali', 'Dipinjam'])->first() : null);
                     $kodeBatch = $detailKembali?->kode_batch_kembali;
+                    $isMember = (auth()->check() && auth()->user()->role === 'member');
                 @endphp
 
-                @if($kodeBatch)
-                    <a href="{{ route('pengembalian.member.batch-tiket', $kodeBatch) }}" class="btn-tiket-kembali">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        <span>Buka Tiket Pengembalian Fisik</span>
-                    </a>
-                @elseif($detailKembali)
-                    <a href="{{ route('pengembalian.member.tiket', $detailKembali->id) }}" class="btn-tiket-kembali">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="3" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="3" width="7" height="7"></rect>
-                            <rect x="14" y="14" width="7" height="7"></rect>
-                            <rect x="3" y="14" width="7" height="7"></rect>
-                        </svg>
-                        <span>Buka Tiket Pengembalian Fisik</span>
-                    </a>
+                {{-- Tombol Buka Tiket Pengembalian Fisik hanya untuk Aktor Anggota/Member --}}
+                @if($isMember)
+                    @if($kodeBatch)
+                        <a href="{{ route('pengembalian.member.batch-tiket', $kodeBatch) }}" class="btn-tiket-kembali">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Buka Tiket Pengembalian Fisik</span>
+                        </a>
+                    @elseif($detailKembali)
+                        <a href="{{ route('pengembalian.member.tiket', $detailKembali->id) }}" class="btn-tiket-kembali">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Buka Tiket Pengembalian Fisik</span>
+                        </a>
+                    @endif
                 @endif
 
                 <a href="{{ route('pembayaran.nota', $pembayaran->idPembayaran) }}" class="btn-lihat-nota">
@@ -413,7 +417,14 @@
                 </a>
 
                 @if($detailKembali)
-                    <a href="{{ route('pengembalian.member') }}" class="btn-kembali-dasbor" style="background: #f8fafc;">
+                    @php
+                        $targetKembali = match(auth()->user()->role ?? '') {
+                            'petugas' => route('pengembalian.create'),
+                            'admin' => route('pengembalian.index'),
+                            default => route('pengembalian.member'),
+                        };
+                    @endphp
+                    <a href="{{ $targetKembali }}" class="btn-kembali-dasbor" style="background: #f8fafc;">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="19" y1="12" x2="5" y2="12"></line>
                             <polyline points="12 19 5 12 12 5"></polyline>

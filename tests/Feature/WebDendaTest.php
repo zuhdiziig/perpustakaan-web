@@ -273,5 +273,12 @@ class WebDendaTest extends TestCase
         $notaResponse->assertSee('TOTAL DIBAYAR');
         $notaResponse->assertSee('SISA TAGIHAN');
         $notaResponse->assertSee('Rp5.000');
+
+        // 5. Petugas views success page - should not see "Buka Tiket Pengembalian Fisik"
+        $petugas = User::factory()->create(['role' => 'petugas', 'status' => 'aktif']);
+        $suksesPetugasResponse = $this->actingAs($petugas)->get(route('bayar.sukses', $pembayaran->idPembayaran));
+        $suksesPetugasResponse->assertOk();
+        $suksesPetugasResponse->assertDontSee('Buka Tiket Pengembalian Fisik');
+        $suksesPetugasResponse->assertSee('Lihat Nota');
     }
 }
