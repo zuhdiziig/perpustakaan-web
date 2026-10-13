@@ -659,6 +659,8 @@ class QrController extends Controller
             $member = (clone $memberQuery)->where('qr_token', $raw)->first();
         } elseif (preg_match('/^AG-\d{4}-(\d+)$/i', $raw, $m)) {
             $member = (clone $memberQuery)->where('id', (int) $m[1])->first();
+        } elseif (preg_match('/^KB-MEMBER-\d{8}-(\d+)$/i', $raw, $m)) {
+            $member = (clone $memberQuery)->where('id', (int) $m[1])->first();
         } elseif (filter_var($raw, FILTER_VALIDATE_EMAIL)) {
             $member = (clone $memberQuery)->where('email', $raw)->first();
         } else {
@@ -807,9 +809,6 @@ class QrController extends Controller
                     $b = $d->buku;
                     $e = $d->eksemplar;
                     $kodeBuku = $e?->kode_barcode ?? $b?->barcode?->kodeBarcode ?? sprintf('BK-%05d', $b?->idBuku ?? 0);
-
-                    // Jangan mutasi state database saat sekadar lookup/preview scan
-                    $statusPreview = $d->statusBuku === 'Dipinjam' ? 'Dipinjam' : $d->statusBuku;
 
                     $batasKembali = Carbon::parse($d->peminjaman->batasKembali);
                     $isOverdue = $today->greaterThan($batasKembali);

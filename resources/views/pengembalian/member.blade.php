@@ -1187,12 +1187,26 @@
                                                         </svg>
                                                         <span>Bayar Denda (Rp {{ number_format($item->denda->jumlah, 0, ',', '.') }})</span>
                                                     </a>
-                                                </div>
-                                            @else
+                                                                                 @else
                                                 <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                                    @if($item->kode_kembali)
+                                                        <a href="{{ route('pengembalian.member.tiket', $item->id) }}" 
+                                                           class="btn-ticket-action" 
+                                                           target="_blank"
+                                                           title="Buka Lembar Tiket Pengembalian">
+                                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                                                <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"></path>
+                                                                <path d="M13 5v2"></path>
+                                                                <path d="M13 17v2"></path>
+                                                                <path d="M13 11v2"></path>
+                                                            </svg>
+                                                            <span>Lihat Tiket</span>
+                                                        </a>
+                                                    @endif
                                                     <a href="{{ route('member.kartu-saya') }}" 
                                                        class="btn-ticket-action" 
                                                        target="_blank"
+                                                       style="{{ $item->kode_kembali ? 'background: #f8fafc; color: #475569; border-color: #cbd5e1;' : '' }}"
                                                        title="Tunjukkan Kartu / QR Anggota Anda ke Petugas Meja Sirkulasi">
                                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                                                             <rect x="3" y="3" width="7" height="7"></rect>
@@ -1200,7 +1214,7 @@
                                                             <rect x="14" y="14" width="7" height="7"></rect>
                                                             <rect x="3" y="14" width="7" height="7"></rect>
                                                         </svg>
-                                                        <span>Tunjukkan QR Anggota</span>
+                                                        <span>{{ $item->kode_kembali ? 'QR Anggota' : 'Tunjukkan QR Anggota' }}</span>
                                                     </a>
                                                 </div>
                                             @endif

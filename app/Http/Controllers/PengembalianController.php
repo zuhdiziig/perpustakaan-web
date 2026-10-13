@@ -37,20 +37,74 @@ class PengembalianController extends Controller
         $selectedDetail = null;
 
         if (! empty($code)) {
+            // 0. Cek kode tiket batch anggota (KB-MEMBER-Ymd-ID)
+            if (preg_match('/^KB-MEMBER-\d{8}-(\d+)$/i', $code, $m)) {
+                $memberId = (int) $m[1];
+                $activeMemberDetails = DetailPeminjaman::with([
+                    'peminjaman.member',
+                    'buku.kategori',
+                    'buku.barcode',
+                    'eksemplar',
+                    'denda',
+                ])
+                    ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $memberId))
+                    ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                    ->get();
+
+                if ($activeMemberDetails->isNotEmpty()) {
+                    $selectedDetail = $activeMemberDetails->first();
+                    if ($activeMemberDetails->count() > 1) {
+                        $batchDetails = $activeMemberDetails;
+                    }
+                }
+            }
+
             // 1. Cek kode kembali / qr token pengembalian
-            $selectedDetail = DetailPeminjaman::with([
-                'peminjaman.member',
-                'buku.kategori',
-                'buku.barcode',
-                'eksemplar',
-                'denda',
-            ])
-                ->where('qr_kembali', $code)
-                ->orWhere('kode_kembali', $code)
-                ->orWhere('kode_kembali', strtoupper($code))
-                ->orWhere('kode_batch_kembali', $code)
-                ->orWhere('kode_batch_kembali', strtoupper($code))
-                ->first();
+            if (! $selectedDetail) {
+                $selectedDetail = DetailPeminjaman::with([
+                    'peminjaman.member',
+                    'buku.kategori',
+                    'buku.barcode',
+                    'eksemplar',
+                    'denda',
+                ])
+                    ->where('qr_kembali', $code)
+                    ->orWhere('kode_kembali', $code)
+                    ->orWhere('kode_kembali', strtoupper($code))
+                    ->orWhere('kode_batch_kembali', $code)
+                    ->orWhere('kode_batch_kembali', strtoupper($code))
+                    ->first();
+            }
+
+            // 1.5 Cek identitas anggota (AG-YYYY-ID atau usr_...)
+            if (! $selectedDetail) {
+                $matchedMember = null;
+                if (preg_match('/^AG-\d{4}-(\d+)$/i', $code, $m)) {
+                    $matchedMember = User::where('role', 'member')->where('id', (int) $m[1])->first();
+                } elseif (str_starts_with($code, 'usr_')) {
+                    $matchedMember = User::where('role', 'member')->where('qr_token', $code)->first();
+                }
+
+                if ($matchedMember) {
+                    $activeMemberDetails = DetailPeminjaman::with([
+                        'peminjaman.member',
+                        'buku.kategori',
+                        'buku.barcode',
+                        'eksemplar',
+                        'denda',
+                    ])
+                        ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $matchedMember->id))
+                        ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                        ->get();
+
+                    if ($activeMemberDetails->isNotEmpty()) {
+                        $selectedDetail = $activeMemberDetails->first();
+                        if ($activeMemberDetails->count() > 1) {
+                            $batchDetails = $activeMemberDetails;
+                        }
+                    }
+                }
+            }
 
             // 2. Cek token / barcode eksemplar fisik buku
             if (! $selectedDetail) {
@@ -1190,11 +1244,20 @@ class PengembalianController extends Controller
 
         try {
             $result = DB::transaction(function () use ($kodeBatch, $kondisiMap) {
-                $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
-                    ->where('kode_batch_kembali', $kodeBatch)
-                    ->orWhere('kode_kembali', $kodeBatch)
-                    ->lockForUpdate()
-                    ->get();
+                if (preg_match('/^KB-MEMBER-\d{8}-(\d+)$/i', $kodeBatch, $m)) {
+                    $memberId = (int) $m[1];
+                    $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
+                        ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $memberId))
+                        ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                        ->lockForUpdate()
+                        ->get();
+                } else {
+                    $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
+                        ->where('kode_batch_kembali', $kodeBatch)
+                        ->orWhere('kode_kembali', $kodeBatch)
+                        ->lockForUpdate()
+                        ->get();
+                }
 
                 if ($details->isEmpty()) {
                     throw new \DomainException("Data tiket pengembalian sekaligus '{$kodeBatch}' tidak ditemukan.");
