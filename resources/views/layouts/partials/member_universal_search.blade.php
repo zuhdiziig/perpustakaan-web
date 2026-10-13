@@ -529,7 +529,7 @@
                         ${data.pengembalian.map(r => `
                             <a href="${r.url}" class="search-item-link">
                                 <div class="search-item-main">
-                                    <div class="search-item-title">${escapeHtml(r.buku)}</div>
+                                    <div class="search-item-title">${escapeHtml(r.kode ? r.kode + ' — ' : '')}${escapeHtml(r.buku)}</div>
                                     <div class="search-item-sub">Kembali: ${escapeHtml(r.tanggal)} · Kondisi: ${escapeHtml(r.kondisi)}</div>
                                 </div>
                                 <span class="search-item-badge badge-teal">Dikembalikan</span>
@@ -548,7 +548,7 @@
                         ${data.denda.map(d => `
                             <a href="${d.url}" class="search-item-link">
                                 <div class="search-item-main">
-                                    <div class="search-item-title">${escapeHtml(d.buku)}</div>
+                                    <div class="search-item-title">${escapeHtml(d.kode ? d.kode + ' — ' : '')}${escapeHtml(d.buku)}</div>
                                     <div class="search-item-sub">${escapeHtml(d.jenis)} · ${escapeHtml(d.nominal)}</div>
                                 </div>
                                 <span class="search-item-badge ${d.status === 'Lunas' ? 'badge-teal' : 'badge-rose'}">

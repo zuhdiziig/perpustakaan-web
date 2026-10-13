@@ -33,8 +33,9 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Kelola Kategori');
         $response->assertSee('Kelola Anggota');
         $response->assertSee('Kelola Petugas');
-        $response->assertSee('Kelola Transaksi');
-        $response->assertSee('Kelola Denda');
+        $response->assertDontSee('Kelola Transaksi');
+        $response->assertDontSee('Kelola Denda');
+        $response->assertDontSee('Transaksi terbaru');
         $response->assertSee('Lihat Laporan');
         $response->assertSee('Laporan bulanan');
         $response->assertSee('Unduh Laporan');
@@ -76,7 +77,6 @@ class AdminDashboardTest extends TestCase
         $response->assertSee('Anggota aktif');
         $response->assertSee('Petugas aktif');
         $response->assertSee('Pembayaran tercatat sukses');
-        $response->assertSee('Laut Bercerita');
     }
 
     public function test_admin_dashboard_search_filters_transactions(): void
@@ -119,7 +119,6 @@ class AdminDashboardTest extends TestCase
         // Cari 'Laut'
         $response = $this->actingAs($admin)->get('/dashboard?q=Laut');
         $response->assertStatus(200);
-        $response->assertSee('Laut Bercerita');
         $response->assertViewHas('transaksi', fn ($transaksi) => $transaksi->contains('judul', 'Laut Bercerita') &&
             ! $transaksi->contains('judul', 'Bumi Manusia')
         );
@@ -127,7 +126,6 @@ class AdminDashboardTest extends TestCase
         // Cari 'Aisyah'
         $response2 = $this->actingAs($admin)->get('/dashboard?q=Aisyah');
         $response2->assertStatus(200);
-        $response2->assertSee('Bumi Manusia');
         $response2->assertViewHas('transaksi', fn ($transaksi) => $transaksi->contains('judul', 'Bumi Manusia') &&
             ! $transaksi->contains('judul', 'Laut Bercerita')
         );

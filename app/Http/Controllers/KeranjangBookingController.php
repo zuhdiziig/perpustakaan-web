@@ -242,7 +242,7 @@ class KeranjangBookingController extends Controller
     /**
      * Checkout dan ajukan booking seluruh buku di keranjang secara bersamaan (Simultan).
      */
-    public function checkout(Request $request): RedirectResponse
+    public function checkout(Request $request): JsonResponse|RedirectResponse
     {
         if ($redirect = $this->ensureMemberOnly()) {
             return $redirect;
@@ -251,12 +251,22 @@ class KeranjangBookingController extends Controller
         $user = auth()->user();
 
         if ($user->status !== 'aktif') {
-            return back()->with('error', 'Status keanggotaan Anda tidak aktif.');
+            $msg = 'Status keanggotaan Anda tidak aktif.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 403);
+            }
+
+            return back()->with('error', $msg);
         }
 
         $cart = session()->get('keranjang_booking', []);
         if (empty($cart)) {
-            return redirect()->route('katalog.index')->with('error', 'Keranjang booking Anda masih kosong. Silakan pilih buku dari katalog terlebih dahulu.');
+            $msg = 'Keranjang booking Anda masih kosong. Silakan pilih buku dari katalog terlebih dahulu.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return redirect()->route('katalog.index')->with('error', $msg);
         }
 
         $request->validate([
@@ -269,7 +279,12 @@ class KeranjangBookingController extends Controller
         // Cek Kuota 7 buku aktif (Booking + Siap Diambil + Dipinjam)
         $bukuAktif = $user->jumlahBukuAktif();
         if (($bukuAktif + $totalBukuBooking) > Peminjaman::BATAS_MAKSIMAL_BUKU) {
-            return back()->with('error', 'Gagal booking: Total pinjaman dan booking aktif Anda akan menjadi '.($bukuAktif + $totalBukuBooking).' buku (batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Harap kurangi buku di keranjang atau selesaikan sirkulasi buku terlebih dahulu.');
+            $msg = 'Gagal booking: Total pinjaman dan booking aktif Anda akan menjadi '.($bukuAktif + $totalBukuBooking).' buku (batas maksimal '.Peminjaman::BATAS_MAKSIMAL_BUKU.' buku). Harap kurangi buku di keranjang atau selesaikan sirkulasi buku terlebih dahulu.';
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $msg], 422);
+            }
+
+            return back()->with('error', $msg);
         }
 
         try {
@@ -337,11 +352,31 @@ class KeranjangBookingController extends Controller
             // Kosongkan keranjang setelah berhasil checkout
             session()->forget('keranjang_booking');
 
+            $pesanSukses = 'booking peminjaman berhasil, silahkan scan QR saat pengambilan.';
+
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $pesanSukses,
+                    'idPeminjaman' => $peminjaman->idPeminjaman,
+                    'totalBuku' => $peminjaman->totalBuku,
+                ]);
+            }
+
             return redirect()->route('dashboard')
-                ->with('success', "Booking untuk {$peminjaman->totalBuku} buku sekaligus berhasil dibuat! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.");
+                ->with('success', "Booking untuk {$peminjaman->totalBuku} buku sekaligus berhasil dibuat! Silakan datang ke perpustakaan dan tunjukkan Kartu / QR Anggota Anda kepada petugas di meja sirkulasi.")
+                ->with('booking_popup_message', $pesanSukses);
         } catch (\DomainException $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => $e->getMessage()], 422);
+            }
+
             return back()->with('error', $e->getMessage());
         } catch (\Throwable $e) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json(['success' => false, 'message' => 'Terjadi kesalahan sistem saat memproses booking sekaligus: '.$e->getMessage()], 500);
+            }
+
             return back()->with('error', 'Terjadi kesalahan sistem saat memproses booking sekaligus: '.$e->getMessage());
         }
     }

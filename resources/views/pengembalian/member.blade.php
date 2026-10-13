@@ -1046,9 +1046,9 @@
                         </thead>
                         <tbody>
                             @foreach($pinjamanAktif as $item)
-                                <tr class="{{ (int)$highlightId === (int)$item->idPeminjaman ? 'highlighted' : '' }}">
+                                <tr id="rowDetailLoan-{{ $item->id }}" class="{{ (int)$highlightId === (int)$item->idPeminjaman ? 'highlighted' : '' }}">
                                     {{-- CHECKBOX PILIHAN --}}
-                                    <td style="text-align: center;">
+                                    <td id="colCheckLoan-{{ $item->id }}" style="text-align: center;">
                                         @if($item->statusBuku === 'Dipinjam')
                                             <input type="checkbox" class="book-row-check" 
                                                    value="{{ $item->id }}" 
@@ -1109,7 +1109,7 @@
                                     </td>
 
                                     {{-- STATUS KETERLAMBATAN & PENGAJUAN --}}
-                                    <td>
+                                    <td id="colStatusLoan-{{ $item->id }}">
                                         @if($item->statusBuku === 'Diajukan Kembali')
                                             @if($item->denda && $item->denda->status === 'Belum Dibayar')
                                                 <span class="badge-status-waiting" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca;">
@@ -1151,7 +1151,7 @@
                                     </td>
 
                                     {{-- AKSI PENGEMBALIAN --}}
-                                    <td style="text-align: right;">
+                                    <td id="colActionLoan-{{ $item->id }}" style="text-align: right;">
                                         @if($item->statusBuku === 'Diajukan Kembali')
                                             @if($item->denda && $item->denda->status === 'Belum Dibayar')
                                                 <div style="display: inline-flex; align-items: center; gap: 8px;">
@@ -1245,79 +1245,88 @@
                     <table class="data-table">
                         <thead>
                             <tr>
-                                <th style="width: 130px;">No. Return</th>
-                                <th>Detail Buku yang Dikembalikan</th>
-                                <th style="width: 140px;">Tgl Dikembalikan</th>
+                                <th style="width: 140px;">No. Transaksi</th>
+                                <th>Detail Seluruh Buku yang Dikembalikan</th>
+                                <th style="width: 150px;">Tgl Dikembalikan</th>
                                 <th style="width: 130px;">Kondisi Buku</th>
                                 <th style="width: 160px;">Status Denda</th>
                                 <th style="width: 160px; text-align: right;">Bukti Pengembalian</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach($riwayatPengembalian as $ret)
+                            @foreach($riwayatPengembalian as $itemTrx)
+                                @php
+                                    $retLatest = $itemTrx->pengembalians->sortByDesc('idPengembalian')->first();
+                                    $unpaidFine = $itemTrx->pengembalians->first(fn($r) => $r->denda && $r->denda->status === 'Belum Dibayar')?->denda;
+                                    $allBooks = $itemTrx->details ?? collect();
+                                @endphp
                                 <tr>
-                                    {{-- NO RETURN --}}
+                                    {{-- NO TRANSAKSI --}}
                                     <td>
                                         <span class="trx-badge">
-                                            #RET-{{ str_pad($ret->idPengembalian, 5, '0', STR_PAD_LEFT) }}
+                                            #TRX-{{ str_pad($itemTrx->idPeminjaman, 5, '0', STR_PAD_LEFT) }}
                                         </span>
+                                        @if($itemTrx->kode_booking)
+                                            <div style="font-size: 11px; color: #64748b; margin-top: 3px;">
+                                                {{ $itemTrx->kode_booking }}
+                                            </div>
+                                        @endif
                                     </td>
 
                                     {{-- DETAIL BUKU --}}
                                     <td>
-                                        <div class="book-item-row">
-                                            <div class="book-icon-box" style="background: #dcfce7; color: #15803d;">
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                    <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                                                    <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                @php
-                                                    $firstDetail = $ret->peminjaman->details->first();
-                                                @endphp
-                                                <span class="book-title-name">{{ $firstDetail->buku->judul ?? 'Buku Perpustakaan' }}</span>
-                                                <span class="book-meta-sub">
-                                                    Penerima: {{ $ret->petugas->name ?? 'Petugas Perpustakaan' }} • 
-                                                    Ref: #TRX-{{ str_pad($ret->idPeminjaman, 5, '0', STR_PAD_LEFT) }}
-                                                </span>
-                                            </div>
+                                        <div style="display: flex; flex-direction: column; gap: 6px;">
+                                            @foreach($allBooks as $d)
+                                                <div class="book-item-row" style="margin-bottom: 0;">
+                                                    <div class="book-icon-box" style="background: #dcfce7; color: #15803d; width: 30px; height: 30px;">
+                                                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                                                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                                                        </svg>
+                                                    </div>
+                                                    <div>
+                                                        <span class="book-title-name" style="font-size: 13px;">{{ $d->buku->judul ?? 'Buku Perpustakaan' }}</span>
+                                                        <span class="book-meta-sub">
+                                                            Eksemplar: #{{ $d->eksemplar->nomor_eksemplar ?? '1' }} • Rak: {{ $d->buku->rak ?? '-' }}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            @endforeach
                                         </div>
                                     </td>
 
                                     {{-- TGL KEMBALI --}}
                                     <td>
                                         <span style="font-weight: 700; color: #0f766e;">
-                                            {{ \Carbon\Carbon::parse($ret->tanggalKembali)->translatedFormat('d M Y') }}
+                                            {{ $retLatest ? \Carbon\Carbon::parse($retLatest->tanggalKembali)->translatedFormat('d M Y') : \Carbon\Carbon::parse($itemTrx->updated_at)->translatedFormat('d M Y') }}
                                         </span>
+                                        <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
+                                            Penerima: {{ $retLatest->petugas->name ?? $itemTrx->petugas->name ?? 'Petugas Perpustakaan' }}
+                                        </div>
                                     </td>
 
                                     {{-- KONDISI BUKU --}}
                                     <td>
-                                        @if($ret->kondisiBuku === 'Baik')
-                                            <span class="badge-status ontime">✓ Kondisi Baik</span>
-                                        @elseif($ret->kondisiBuku === 'Rusak')
+                                        @if($retLatest && $retLatest->kondisiBuku === 'Rusak')
                                             <span class="badge-status overdue">⚠️ Kondisi Rusak</span>
-                                        @else
+                                        @elseif($retLatest && $retLatest->kondisiBuku === 'Hilang')
                                             <span class="badge-status overdue">✕ Buku Hilang</span>
+                                        @else
+                                            <span class="badge-status ontime">✓ Kondisi Baik</span>
                                         @endif
                                     </td>
 
                                     {{-- STATUS DENDA --}}
                                     <td>
-                                        @if($ret->denda)
-                                            @if($ret->denda->status === 'Belum Dibayar')
-                                                <div style="display: flex; flex-direction: column; gap: 4px;">
-                                                    <span style="font-size: 12px; font-weight: 800; color: #dc2626;">
-                                                        Rp {{ number_format($ret->denda->jumlah, 0, ',', '.') }}
-                                                    </span>
-                                                    <a href="{{ route('bayar.qr', $ret->denda->idDenda) }}" style="font-size: 11px; font-weight: 700; color: #0f766e; text-decoration: underline;">
-                                                        Bayar QR Denda &rarr;
-                                                    </a>
-                                                </div>
-                                            @else
-                                                <span class="badge-status ontime">✓ Denda tercatat lunas · belum diverifikasi</span>
-                                            @endif
+                                        @if($unpaidFine)
+                                            <div style="display: flex; flex-direction: column; gap: 4px;">
+                                                <span style="font-size: 12px; font-weight: 800; color: #dc2626;">
+                                                    Rp {{ number_format($unpaidFine->jumlah, 0, ',', '.') }}
+                                                </span>
+                                                <a href="{{ route('bayar.qr', $unpaidFine->idDenda) }}" style="font-size: 11px; font-weight: 700; color: #0f766e; text-decoration: underline;">
+                                                    Bayar QR Denda &rarr;
+                                                </a>
+                                            </div>
                                         @else
                                             <span class="badge-status ontime">✓ Bebas Denda</span>
                                         @endif
@@ -1325,15 +1334,19 @@
 
                                     {{-- BUKTI PENGEMBALIAN --}}
                                     <td style="text-align: right;">
-                                        <a href="{{ route('pengembalian.member.bukti', $ret->idPengembalian) }}" class="btn-view-receipt">
-                                            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                                <polyline points="14 2 14 8 20 8"></polyline>
-                                                <line x1="16" y1="13" x2="8" y2="13"></line>
-                                                <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            </svg>
-                                            <span>Lihat Resi</span>
-                                        </a>
+                                        @if($retLatest)
+                                            <a href="{{ route('pengembalian.member.bukti', $retLatest->idPengembalian) }}" class="btn-view-receipt">
+                                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                                    <polyline points="14 2 14 8 20 8"></polyline>
+                                                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                                                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                                                </svg>
+                                                <span>Lihat Resi</span>
+                                            </a>
+                                        @else
+                                            <span style="font-size: 11.5px; color: #64748b;">-</span>
+                                        @endif
                                     </td>
                                 </tr>
                             @endforeach
@@ -1863,7 +1876,10 @@
     let currentModalBookPrice = 0;
     let currentModalOverdueFine = 0;
 
+    let currentActiveReturnDetailId = null;
+
     function openReturnModal(detailId, judul, eksemplar, dendaFormatted, bookPrice = 0, overdueFine = 0) {
+        currentActiveReturnDetailId = detailId;
         const form = document.getElementById('formReturn');
         form.action = `/pengembalian-saya/${detailId}/proses`;
 
@@ -1955,6 +1971,223 @@
         document.getElementById('modalQr').classList.remove('show');
     }
 
+    // Intercept submit Form Pengembalian Satuan via AJAX (Tanpa Ganti Halaman)
+    const formReturnEl = document.getElementById('formReturn');
+    if (formReturnEl) {
+        formReturnEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('modalSubmitBtn');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spinReturn 1s linear infinite;">
+                        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                        <path d="M12 2a10 10 0 0 1 10 10"></path>
+                    </svg>
+                    <span>Memproses Pengembalian...</span>
+                `;
+            }
+
+            const formData = new FormData(formReturnEl);
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+            fetch(formReturnEl.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(({ status, body }) => {
+                if (status >= 200 && status < 300 && body.success) {
+                    closeReturnModal();
+
+                    if (body.has_denda && body.redirect) {
+                        window.location.href = body.redirect;
+                        return;
+                    }
+
+                    // Perbarui status baris buku di DOM in-place tanpa reload
+                    const detailId = currentActiveReturnDetailId || body.idDetail;
+                    if (detailId) {
+                        const colCheck = document.getElementById('colCheckLoan-' + detailId);
+                        const colStatus = document.getElementById('colStatusLoan-' + detailId);
+                        const colAction = document.getElementById('colActionLoan-' + detailId);
+
+                        if (colCheck) {
+                            colCheck.innerHTML = '<span title="Buku sedang menunggu scan petugas di meja layanan" style="color: #cbd5e1; font-size: 16px;">—</span>';
+                        }
+                        if (colStatus) {
+                            const kode = body.kode_kembali || '-';
+                            colStatus.innerHTML = `
+                                <span class="badge-status-waiting">
+                                    ⏳ Menunggu Scan Petugas
+                                </span>
+                                <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-top: 3px;">
+                                    Tiket: ${kode}
+                                </div>
+                            `;
+                        }
+                        if (colAction) {
+                            colAction.innerHTML = `
+                                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <a href="{{ route('member.kartu-saya') }}" 
+                                       class="btn-ticket-action" 
+                                       target="_blank"
+                                       title="Tunjukkan Kartu / QR Anggota Anda ke Petugas Meja Sirkulasi">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                        <span>Tunjukkan QR Anggota</span>
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    }
+
+                    // Tampilkan Pop Up Message
+                    const popupMsg = body.message || 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.';
+                    if (typeof window.showBookingPopup === 'function') {
+                        window.showBookingPopup(popupMsg, {
+                            title: 'Booking Berhasil'
+                        });
+                    } else {
+                        alert(popupMsg);
+                    }
+                } else {
+                    alert(body.message || 'Gagal memproses pengembalian buku.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kendala jaringan atau sistem.');
+            })
+            .finally(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+            });
+        });
+    }
+
+    // Intercept submit Form Pengembalian Sekaligus via AJAX (Tanpa Ganti Halaman)
+    const formBatchReturnEl = document.getElementById('formBatchReturn');
+    if (formBatchReturnEl) {
+        formBatchReturnEl.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('btnSubmitBatch');
+            const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = `
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spinReturn 1s linear infinite;">
+                        <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                        <path d="M12 2a10 10 0 0 1 10 10"></path>
+                    </svg>
+                    <span>Memproses Pengembalian Sekaligus...</span>
+                `;
+            }
+
+            const formData = new FormData(formBatchReturnEl);
+            const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+            const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+            fetch(formBatchReturnEl.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(({ status, body }) => {
+                if (status >= 200 && status < 300 && body.success) {
+                    closeBatchReturnModal();
+
+                    if (body.has_denda && body.redirect) {
+                        window.location.href = body.redirect;
+                        return;
+                    }
+
+                    // Perbarui status seluruh buku yang dipilih di DOM in-place tanpa reload
+                    const batchCode = body.batchCode || 'KB-BATCH';
+                    selectedBatchBooks.forEach(item => {
+                        const colCheck = document.getElementById('colCheckLoan-' + item.id);
+                        const colStatus = document.getElementById('colStatusLoan-' + item.id);
+                        const colAction = document.getElementById('colActionLoan-' + item.id);
+
+                        if (colCheck) {
+                            colCheck.innerHTML = '<span title="Buku sedang menunggu scan petugas di meja layanan" style="color: #cbd5e1; font-size: 16px;">—</span>';
+                        }
+                        if (colStatus) {
+                            colStatus.innerHTML = `
+                                <span class="badge-status-waiting">
+                                    ⏳ Menunggu Scan Petugas
+                                </span>
+                                <div style="font-size: 11px; color: #b45309; font-weight: 700; margin-top: 3px;">
+                                    Tiket: ${batchCode}
+                                </div>
+                            `;
+                        }
+                        if (colAction) {
+                            colAction.innerHTML = `
+                                <div style="display: inline-flex; align-items: center; gap: 8px;">
+                                    <a href="{{ route('member.kartu-saya') }}" 
+                                       class="btn-ticket-action" 
+                                       target="_blank"
+                                       title="Tunjukkan Kartu / QR Anggota Anda ke Petugas Meja Sirkulasi">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                            <rect x="3" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="3" width="7" height="7"></rect>
+                                            <rect x="14" y="14" width="7" height="7"></rect>
+                                            <rect x="3" y="14" width="7" height="7"></rect>
+                                        </svg>
+                                        <span>Tunjukkan QR Anggota</span>
+                                    </a>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    clearAllSelections();
+
+                    // Tampilkan Pop Up Message
+                    const popupMsg = body.message || 'booking pengembalian berhasil, silahkan scan QR saat penyerahan.';
+                    if (typeof window.showBookingPopup === 'function') {
+                        window.showBookingPopup(popupMsg, {
+                            title: 'Booking Berhasil'
+                        });
+                    } else {
+                        alert(popupMsg);
+                    }
+                } else {
+                    alert(body.message || 'Gagal memproses pengembalian sekaligus.');
+                }
+            })
+            .catch(err => {
+                console.error(err);
+                alert('Terjadi kendala jaringan atau sistem.');
+            })
+            .finally(() => {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+            });
+        });
+    }
+
     // Tutup modal jika klik di luar kartu
     window.addEventListener('click', function(e) {
         const modalReturn = document.getElementById('modalReturn');
@@ -1965,4 +2198,10 @@
         if (e.target === modalBatchReturn) closeBatchReturnModal();
     });
 </script>
+<style>
+    @keyframes spinReturn {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 @endsection

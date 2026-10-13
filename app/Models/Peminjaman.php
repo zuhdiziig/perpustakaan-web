@@ -63,6 +63,31 @@ class Peminjaman extends Model
         return $this->hasMany(Pengembalian::class, 'idPeminjaman', 'idPeminjaman');
     }
 
+    public function getTanggalPinjamRealtimeAttribute(): string
+    {
+        if ($this->created_at) {
+            return $this->created_at->format('Y-m-d H:i:s');
+        }
+
+        $baseDate = $this->attributes['tanggalPinjam'] ?? now()->toDateString();
+
+        return Carbon::parse($baseDate)->format('Y-m-d H:i:s');
+    }
+
+    public function getBatasKembaliRealtimeAttribute(): string
+    {
+        if ($this->created_at) {
+            $jam = $this->created_at->format('H:i:s');
+            $dateKembali = $this->attributes['batasKembali'] ?? $this->created_at->copy()->addDays(self::MASA_PINJAM_HARI)->toDateString();
+
+            return Carbon::parse($dateKembali)->format('Y-m-d').' '.$jam;
+        }
+
+        $baseDate = $this->attributes['batasKembali'] ?? now()->addDays(self::MASA_PINJAM_HARI)->toDateString();
+
+        return Carbon::parse($baseDate)->format('Y-m-d H:i:s');
+    }
+
     public function isBooking(): bool
     {
         return $this->status === 'Booking';

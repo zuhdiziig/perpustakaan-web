@@ -33,6 +33,7 @@ class Buku extends Model
                         'qr_token' => 'bk_'.bin2hex(random_bytes(16)),
                         'kondisi' => $buku->kondisi ?? 'Baik',
                         'status' => 'Tersedia',
+                        'lokasi' => $i <= 2 ? 'Rak' : 'Gudang',
                     ]);
                 }
             }
@@ -64,12 +65,64 @@ class Buku extends Model
         return $this->hasMany(BukuEksemplar::class, 'idBuku', 'idBuku')->where('status', 'Tersedia');
     }
 
+    public function eksemplarDiRak()
+    {
+        return $this->hasMany(BukuEksemplar::class, 'idBuku', 'idBuku')->where('status', 'Tersedia')->where('lokasi', 'Rak');
+    }
+
+    public function eksemplarDiGudang()
+    {
+        return $this->hasMany(BukuEksemplar::class, 'idBuku', 'idBuku')->where('status', 'Tersedia')->where('lokasi', 'Gudang');
+    }
+
+    public function perluRestock(): bool
+    {
+        return $this->eksemplarDiRak()->count() === 0 && $this->eksemplarDiGudang()->count() > 0;
+    }
+
+    public function restockKeRak(int $jumlah = 1): int
+    {
+        $copies = $this->eksemplarDiGudang()->take($jumlah)->get();
+        foreach ($copies as $copy) {
+            $copy->update(['lokasi' => 'Rak']);
+        }
+
+        return $copies->count();
+    }
+
     public function syncStok(): int
     {
         $count = $this->eksemplar()->where('status', 'Tersedia')->count();
-        $this->update(['stok' => $count]);
+        $this->updateQuietly(['stok' => $count]);
 
         return $count;
+    }
+
+    /**
+     * Tambah sejumlah eksemplar fisik baru untuk judul buku ini.
+     *
+     * @return array<int, BukuEksemplar>
+     */
+    public function tambahEksemplar(int $jumlah = 1, string $kondisi = 'Baik', ?string $lokasi = null): array
+    {
+        $created = [];
+        $maxNomor = (int) ($this->eksemplar()->max('nomor_eksemplar') ?? 0);
+        $currentInRak = $this->eksemplarDiRak()->count();
+
+        for ($i = 1; $i <= $jumlah; $i++) {
+            $lokasiFinal = $lokasi ?: (($currentInRak + $i <= 2) ? 'Rak' : 'Gudang');
+
+            $created[] = $this->eksemplar()->create([
+                'nomor_eksemplar' => $maxNomor + $i,
+                'qr_token' => 'bk_'.bin2hex(random_bytes(16)),
+                'kondisi' => $kondisi,
+                'status' => 'Tersedia',
+                'lokasi' => $lokasiFinal,
+            ]);
+        }
+        $this->syncStok();
+
+        return $created;
     }
 
     public function getCoverUrlAttribute(): ?string

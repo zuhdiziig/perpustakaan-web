@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\BarcodeController;
 use App\Http\Controllers\BukuController;
+use App\Http\Controllers\BukuEksemplarController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DendaController;
 use App\Http\Controllers\KatalogController;
@@ -280,6 +281,28 @@ Route::middleware('auth')->group(function () {
         Route::get('/buku/{id}/cetak-qr', [QrController::class, 'cetakBuku'])
             ->name('buku.cetak-qr');
 
+        // Pengelolaan Eksemplar Buku Fisik Individual
+        Route::post('/eksemplar/tambah/{idBuku}', [BukuEksemplarController::class, 'store'])
+            ->name('eksemplar.store');
+
+        Route::patch('/eksemplar/{idEksemplar}/kondisi', [BukuEksemplarController::class, 'updateKondisi'])
+            ->name('eksemplar.update-kondisi');
+
+        Route::patch('/eksemplar/{idEksemplar}/restock', [BukuEksemplarController::class, 'restock'])
+            ->name('eksemplar.restock');
+
+        Route::patch('/eksemplar/{idEksemplar}/simpan-gudang', [BukuEksemplarController::class, 'simpanKeGudang'])
+            ->name('eksemplar.simpan-gudang');
+
+        Route::post('/buku/{idBuku}/restock-rak', [BukuEksemplarController::class, 'restockBuku'])
+            ->name('buku.restock-rak');
+
+        Route::delete('/eksemplar/{idEksemplar}', [BukuEksemplarController::class, 'destroy'])
+            ->name('eksemplar.destroy');
+
+        Route::get('/eksemplar/{id}/cetak-qr', [QrController::class, 'cetakEksemplar'])
+            ->name('eksemplar.cetak-qr');
+
         // Kelola Data Member
         Route::resource('member', MemberController::class)
             ->except(['show', 'destroy']);
@@ -287,7 +310,10 @@ Route::middleware('auth')->group(function () {
         Route::patch('/member/{id}/toggle-status', [MemberController::class, 'toggleStatus'])
             ->name('member.toggle-status');
 
-        // Sirkulasi Peminjaman & Pengembalian
+        // Sirkulasi Peminjaman & Pengembalian Terpadu
+        Route::get('/sirkulasi-buku', [PeminjamanController::class, 'sirkulasiIndex'])
+            ->name('sirkulasi.index');
+
         Route::resource('peminjaman', PeminjamanController::class)
             ->only(['index', 'create', 'store', 'show']);
 

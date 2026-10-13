@@ -586,8 +586,8 @@
                         @endphp
                         <div class="cart-item-row">
                             <div class="cart-item-cover">
-                                @if (! empty($b->cover))
-                                    <img src="{{ $b->cover }}" alt="{{ $b->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
+                                @if (! empty($b->cover_url))
+                                    <img src="{{ $b->cover_url }}" alt="{{ $b->judul }}" onerror="this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=400&auto=format&fit=crop';">
                                 @else
                                     <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #e2e8f0; color: #64748b;">
                                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
@@ -681,7 +681,7 @@
                 @endif
 
                 <!-- Form Checkout -->
-                <form action="{{ route('keranjang.checkout') }}" method="POST">
+                <form id="formCheckoutKeranjang" action="{{ route('keranjang.checkout') }}" method="POST">
                     @csrf
 
                     <!-- Ringkasan Rincian -->
@@ -722,6 +722,7 @@
                     <!-- Tombol Konfirmasi Booking -->
                     <button
                         type="submit"
+                        id="btnCheckoutKeranjang"
                         class="btn-checkout-booking"
                         @disabled($kuotaMelebihiBatas)
                     >
@@ -731,7 +732,7 @@
                             <rect x="14" y="14" width="7" height="7"></rect>
                             <rect x="3" y="14" width="7" height="7"></rect>
                         </svg>
-                        Booking Sekaligus ({{ $totalItemKeranjang }} Buku)
+                        <span>Booking Sekaligus ({{ $totalItemKeranjang }} Buku)</span>
                     </button>
                 </form>
             </div>
@@ -760,4 +761,106 @@
     @endif
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('formCheckoutKeranjang');
+        const submitBtn = document.getElementById('btnCheckoutKeranjang');
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                if (submitBtn) {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = `
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation: spinCart 1s linear infinite;">
+                            <circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle>
+                            <path d="M12 2a10 10 0 0 1 10 10"></path>
+                        </svg>
+                        <span>Memproses Booking Sekaligus...</span>
+                    `;
+                }
+
+                const formData = new FormData(form);
+                const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+                const csrfToken = csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken,
+                        'Accept': 'application/json',
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    body: formData
+                })
+                .then(response => response.json().then(data => ({ status: response.status, body: data })))
+                .then(({ status, body }) => {
+                    if (status >= 200 && status < 300 && body.success) {
+                        if (submitBtn) {
+                            submitBtn.disabled = true;
+                            submitBtn.style.background = '#0f766e';
+                            submitBtn.style.opacity = '0.92';
+                            submitBtn.innerHTML = `
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                    <polyline points="20 6 9 17 4 12"></polyline>
+                                </svg>
+                                <span>Booking Berhasil Diajukan</span>
+                            `;
+                        }
+
+                        // Tampilkan Notifikasi Pop Up Message (Tanpa Ganti Halaman)
+                        const popupMsg = body.message || 'booking peminjaman berhasil, silahkan scan QR saat pengambilan.';
+                        if (typeof window.showBookingPopup === 'function') {
+                            window.showBookingPopup(popupMsg, {
+                                title: 'Booking Berhasil'
+                            });
+                        } else {
+                            alert(popupMsg);
+                        }
+                    } else {
+                        alert(body.message || 'Gagal memproses booking keranjang.');
+                        if (submitBtn) {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = `
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                    <rect x="3" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="3" width="7" height="7"></rect>
+                                    <rect x="14" y="14" width="7" height="7"></rect>
+                                    <rect x="3" y="14" width="7" height="7"></rect>
+                                </svg>
+                                <span>Booking Sekaligus ({{ $totalItemKeranjang }} Buku)</span>
+                            `;
+                        }
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    alert('Terjadi kendala koneksi atau sistem.');
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = `
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Booking Sekaligus ({{ $totalItemKeranjang }} Buku)</span>
+                        `;
+                    }
+                });
+            });
+        }
+    });
+</script>
+<style>
+    @keyframes spinCart {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+</style>
 @endsection

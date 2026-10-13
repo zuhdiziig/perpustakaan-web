@@ -598,40 +598,7 @@
                 <a href="{{ route('petugas.index') }}" class="btn-manage">Kelola Petugas</a>
             </div>
 
-            <!-- 5. Transaksi -->
-            <div class="manage-card">
-                <div>
-                    <div class="manage-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <polyline points="16 3 21 3 21 8"></polyline>
-                            <line x1="4" y1="20" x2="21" y2="3"></line>
-                            <polyline points="21 16 21 21 16 21"></polyline>
-                            <line x1="15" y1="15" x2="21" y2="21"></line>
-                            <line x1="4" y1="4" x2="9" y2="9"></line>
-                        </svg>
-                    </div>
-                    <h3 class="manage-title">Transaksi</h3>
-                    <p class="manage-subtitle">{{ $manajemen['transaksi']['aktif'] }} aktif · {{ $manajemen['transaksi']['pinjamHariIni'] }} pinjam hari ini</p>
-                </div>
-                <a href="{{ route('peminjaman.index') }}" class="btn-manage">Kelola Transaksi</a>
-            </div>
-
-            <!-- 6. Denda -->
-            <div class="manage-card">
-                <div>
-                    <div class="manage-icon">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect>
-                            <line x1="1" y1="10" x2="23" y2="10"></line>
-                        </svg>
-                    </div>
-                    <h3 class="manage-title">Denda</h3>
-                    <p class="manage-subtitle">{{ $manajemen['denda']['belumLunasCount'] }} belum lunas · Rp{{ number_format($manajemen['denda']['belumLunasNominal'], 0, ',', '.') }}</p>
-                </div>
-                <a href="{{ route('denda.index') }}" class="btn-manage">Kelola Denda</a>
-            </div>
-
-            <!-- 7. Laporan -->
+            <!-- 5. Laporan -->
             <div class="manage-card">
                 <div>
                     <div class="manage-icon">
@@ -646,76 +613,6 @@
                 </div>
                 <a href="{{ route('laporan.index') }}" class="btn-manage">Lihat Laporan</a>
             </div>
-        </div>
-    </div>
-
-    <!-- 4. TABLE SECTION: TRANSAKSI TERBARU -->
-    <div class="section-container">
-        <div class="section-header-row">
-            <div>
-                <h3 class="section-title">Transaksi terbaru</h3>
-                <div class="section-subtitle">
-                    Data layanan Perpustakaan Pusat
-                </div>
-            </div>
-
-            <form action="{{ route('dashboard') }}" method="GET" class="table-search-form">
-                <span class="table-search-label">Cari Transaksi :</span>
-                <div class="table-search-input-wrap">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="11" cy="11" r="8"></circle>
-                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                    </svg>
-                    <input type="text" name="q" value="{{ $kataKunci }}" placeholder="Cari buku atau anggota...">
-                </div>
-                <button type="submit" class="btn-table-search">Cari</button>
-            </form>
-        </div>
-
-        <div class="table-card">
-            <table class="custom-table">
-                <thead>
-                    <tr>
-                        <th style="width: 32%;">Judul Buku</th>
-                        <th style="width: 15%;">Kode</th>
-                        <th style="width: 22%;">Anggota</th>
-                        <th style="width: 16%;">Jatuh Tempo</th>
-                        <th style="width: 15%;">Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($transaksi as $trx)
-                        <tr>
-                            <td class="td-judul-buku">{{ $trx['judul'] }}</td>
-                            <td class="td-kode">{{ $trx['kode'] }}</td>
-                            <td style="font-weight: 600;">{{ $trx['anggota'] }}</td>
-                            <td>{{ $trx['jatuhTempo']->translatedFormat('d M Y') }}</td>
-                            <td>
-                                @if($trx['status'] === 'Dipinjam')
-                                    <span class="badge-status-pill dipinjam">
-                                        <span class="dot"></span> Dipinjam
-                                    </span>
-                                @else
-                                    <span class="badge-status-pill terlambat">
-                                        <span class="dot"></span> Terlambat
-                                    </span>
-                                @endif
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 36px 20px; color: #94a3b8;">
-                                @if($kataKunci !== '')
-                                    Tidak ditemukan transaksi dengan kata kunci "{{ $kataKunci }}".
-                                    <br><a href="{{ route('dashboard') }}" style="color: #0f766e; font-weight: 700; margin-top: 6px; display: inline-block;">Reset Pencarian</a>
-                                @else
-                                    Saat ini belum ada transaksi peminjaman aktif.
-                                @endif
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 

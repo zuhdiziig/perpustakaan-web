@@ -297,4 +297,28 @@ class KeranjangBookingTest extends TestCase
         $this->assertEquals(2, $this->member->jumlahBukuSedangDipinjam());
         $this->assertEquals(5, $this->member->sisaKuotaPinjam());
     }
+
+    public function test_member_checkout_keranjang_via_ajax_returns_popup_message(): void
+    {
+        $buku1 = $this->createBuku('Data Science');
+        $buku2 = $this->createBuku('Machine Learning');
+
+        $this->actingAs($this->member);
+
+        $this->post(route('keranjang.tambah', $buku1->idBuku));
+        $this->post(route('keranjang.tambah', $buku2->idBuku));
+
+        $response = $this->postJson(route('keranjang.checkout'), [
+            'opsi_pengambilan' => 'ambil_mandiri',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'message' => 'booking peminjaman berhasil, silahkan scan QR saat pengambilan.',
+                'totalBuku' => 2,
+            ]);
+
+        $this->assertEmpty(session('keranjang_booking', []));
+    }
 }

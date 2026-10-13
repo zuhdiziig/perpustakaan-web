@@ -499,9 +499,16 @@
             </table>
         </div>
 
-        <div style="margin-top: 18px;">
-            {{ $kategoris->links() }}
-        </div>
+        @if ($kategoris->hasPages())
+            <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="font-size: 13px; color: #64748b;">
+                    Menampilkan <strong>{{ $kategoris->firstItem() ?? 0 }}</strong> - <strong>{{ $kategoris->lastItem() ?? 0 }}</strong> dari <strong>{{ $kategoris->total() }}</strong> kategori
+                </div>
+                <div>
+                    {{ $kategoris->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

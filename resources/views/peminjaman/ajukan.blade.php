@@ -602,8 +602,8 @@
             <!-- COVER CARD -->
             <div class="book-preview-card">
                 <div class="book-cover-wrapper">
-                    @if(!empty($buku->cover))
-                        <img src="{{ $buku->cover }}" alt="{{ $buku->judul }}" class="book-cover-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';">
+                    @if(!empty($buku->cover_url))
+                        <img src="{{ $buku->cover_url }}" alt="{{ $buku->judul }}" class="book-cover-img" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1544947950-fa07a98d237f?q=80&w=800&auto=format&fit=crop';">
                     @else
                         <div class="book-cover-fallback">
                             <svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">

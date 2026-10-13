@@ -415,9 +415,16 @@ class BarcodeController extends Controller
                     // 6. Update Eksemplar Fisik & Sinkronkan Stok Buku
                     if ($eksemplar) {
                         $statusBaru = ($kondisiFinal === 'Hilang') ? 'Hilang' : 'Tersedia';
+                        $currentInRak = BukuEksemplar::where('idBuku', $eksemplar->idBuku)
+                            ->where('status', 'Tersedia')
+                            ->where('lokasi', 'Rak')
+                            ->count();
+                        $lokasiBaru = ($currentInRak < 2) ? 'Rak' : 'Gudang';
+
                         $eksemplar->update([
                             'status' => $statusBaru,
                             'kondisi' => $kondisiFinal,
+                            'lokasi' => ($statusBaru === 'Tersedia') ? $lokasiBaru : $eksemplar->lokasi,
                         ]);
                     }
 

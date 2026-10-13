@@ -459,9 +459,16 @@
             </table>
         </div>
 
-        <div style="margin-top: 18px;">
-            {{ $petugas->links() }}
-        </div>
+        @if ($petugas->hasPages())
+            <div style="padding: 16px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #ffffff; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                <div style="font-size: 13px; color: #64748b;">
+                    Menampilkan <strong>{{ $petugas->firstItem() ?? 0 }}</strong> - <strong>{{ $petugas->lastItem() ?? 0 }}</strong> dari <strong>{{ $petugas->total() }}</strong> petugas
+                </div>
+                <div>
+                    {{ $petugas->links() }}
+                </div>
+            </div>
+        @endif
     </div>
 </div>
 @endsection

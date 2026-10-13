@@ -239,4 +239,25 @@ class MemberPeminjamanTest extends TestCase
                 'namaPetugas' => 'Petugas Sirkulasi',
             ]);
     }
+
+    public function test_member_ajax_booking_returns_popup_message(): void
+    {
+        $member = User::factory()->create(['role' => 'member', 'status' => 'aktif']);
+        $buku = Buku::factory()->create(['stok' => 2]);
+
+        $response = $this->actingAs($member)->postJson(route('peminjaman.ajukan', $buku->idBuku), [
+            'opsi_pengambilan' => 'ambil_mandiri',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'message' => 'booking peminjaman berhasil, silahkan scan QR saat pengambilan.',
+            ]);
+
+        $this->assertDatabaseHas('peminjaman', [
+            'idUserMember' => $member->id,
+            'status' => 'Booking',
+        ]);
+    }
 }

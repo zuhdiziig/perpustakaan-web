@@ -930,4 +930,99 @@ class PengembalianMemberTest extends TestCase
                 'kodeTiket' => $batchCode,
             ]);
     }
+
+    public function test_member_ajax_single_return_returns_popup_message(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $buku = Buku::factory()->create(['harga' => 50000]);
+        $eksemplar = $buku->eksemplar()->first();
+        $eksemplar->update(['status' => 'Dipinjam']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'idUserPetugas' => null,
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(5)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku->idBuku,
+            'idEksemplar' => $eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->actingAs($member)->postJson(route('pengembalian.member.store', $detail->id), [
+            'kondisiBuku' => 'Baik',
+            'konfirmasi' => 'on',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'has_denda' => false,
+                'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+                'idDetail' => $detail->id,
+            ]);
+
+        $detail->refresh();
+        $this->assertEquals('Diajukan Kembali', $detail->statusBuku);
+    }
+
+    public function test_member_ajax_batch_return_returns_popup_message(): void
+    {
+        $member = User::factory()->create(['role' => 'member']);
+        $buku1 = Buku::factory()->create(['harga' => 50000]);
+        $buku2 = Buku::factory()->create(['harga' => 60000]);
+        $eks1 = $buku1->eksemplar()->first();
+        $eks2 = $buku2->eksemplar()->first();
+        $eks1->update(['status' => 'Dipinjam']);
+        $eks2->update(['status' => 'Dipinjam']);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $member->id,
+            'idUserPetugas' => null,
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(5)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 2,
+        ]);
+        $detail1 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku1->idBuku,
+            'idEksemplar' => $eks1->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+        $detail2 = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $buku2->idBuku,
+            'idEksemplar' => $eks2->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->actingAs($member)->postJson(route('pengembalian.member.batch-store'), [
+            'detail_ids' => [$detail1->id, $detail2->id],
+            'kondisi' => [
+                $detail1->id => 'Baik',
+                $detail2->id => 'Baik',
+            ],
+            'konfirmasi' => 'on',
+        ]);
+
+        $response->assertOk()
+            ->assertJson([
+                'success' => true,
+                'has_denda' => false,
+                'message' => 'booking pengembalian berhasil, silahkan scan QR saat pengambilan.',
+            ]);
+
+        $detail1->refresh();
+        $detail2->refresh();
+        $this->assertEquals('Diajukan Kembali', $detail1->statusBuku);
+        $this->assertEquals('Diajukan Kembali', $detail2->statusBuku);
+    }
 }
