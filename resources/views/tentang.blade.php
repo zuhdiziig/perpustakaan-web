@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <title>Tentang BOOKNEST</title>
 
@@ -16,6 +17,8 @@
     >
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+
+    @include('layouts.partials.sidebar_styles')
 
     <style>
         :root {
@@ -62,7 +65,7 @@
         }
 
         /* ========================================
-           TOPBAR HEADER
+           TOPBAR HEADER (STANDAR 1400PX KONSISTEN)
         ======================================== */
 
         .topbar {
@@ -118,18 +121,20 @@
             font-weight: 600;
             color: #475569;
             text-decoration: none;
-            transition: all 0.15s ease;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .topbar-nav-link:hover {
             color: var(--text-heading);
             background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .topbar-nav-link.active {
             background: var(--brand-primary-light);
             color: #0f766e;
             font-weight: 700;
+            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);
         }
 
         .topbar-right {
@@ -147,13 +152,14 @@
             justify-content: center;
             color: #64748b;
             border: 1px solid var(--border-color);
-            transition: background 0.15s;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
         }
 
         .topbar-icon-btn:hover {
             background: #f1f5f9;
             color: var(--text-heading);
+            transform: translateY(-1px);
         }
 
         .topbar-user-badge {
@@ -169,29 +175,71 @@
             font-weight: 800;
             letter-spacing: 0.5px;
             text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .mobile-menu-button {
+        .topbar-user-badge:hover {
+            transform: translateY(-1px);
+        }
+
+        .mobile-toggle-btn {
             display: none;
             width: 38px;
             height: 38px;
-            border: 1px solid var(--border-color);
-            border-radius: 9px;
-            color: #475569;
-            background: #ffffff;
+            border-radius: 8px;
             align-items: center;
             justify-content: center;
+            color: #475569;
+            border: 1px solid var(--border-color);
+            background: #ffffff;
             cursor: pointer;
-            transition: background 0.15s, color 0.15s;
+            transition: background 0.15s;
         }
 
-        .mobile-menu-button:hover {
+        .mobile-toggle-btn:hover {
             background: #f1f5f9;
             color: var(--text-heading);
         }
 
-        .mobile-nav {
-            display: none;
+        .btn-auth-login {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            color: #0f766e;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-auth-login:hover {
+            border-color: #0f766e;
+            background: #f0fdfa;
+            transform: translateY(-1px);
+        }
+
+        .btn-auth-register {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            background: #0f766e;
+            color: #ffffff;
+            border-radius: 9px;
+            font-size: 13.5px;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .btn-auth-register:hover {
+            background: #115e59;
+            box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+            transform: translateY(-1px);
         }
 
         /* ========================================
@@ -600,6 +648,36 @@
             }
         }
 
+        @media (max-width: 992px) {
+            .mobile-toggle-btn {
+                display: flex !important;
+            }
+
+            .topbar-nav {
+                display: none;
+            }
+        }
+
+        @guest
+            @media (max-width: 992px) {
+                .topbar-nav {
+                    display: flex !important;
+                    overflow-x: auto;
+                    -webkit-overflow-scrolling: touch;
+                    scrollbar-width: none;
+                    gap: 4px;
+                }
+                .topbar-nav::-webkit-scrollbar {
+                    display: none;
+                }
+                .topbar-nav-link {
+                    padding: 6px 12px;
+                    font-size: 12.5px;
+                    white-space: nowrap;
+                }
+            }
+        @endguest
+
         @media (max-width: 760px) {
             .topbar-container {
                 padding: 12px 18px;
@@ -612,44 +690,6 @@
             .topbar-brand-icon {
                 width: 34px;
                 height: 34px;
-            }
-
-            .topbar-nav {
-                display: none;
-            }
-
-            .mobile-menu-button {
-                display: inline-flex;
-            }
-
-            .mobile-nav {
-                display: none;
-
-                padding: 8px 18px 16px;
-
-                background: #ffffff;
-                border-top: 1px solid #f1f5f9;
-            }
-
-            .mobile-nav.open {
-                display: grid;
-                gap: 4px;
-            }
-
-            .mobile-nav a {
-                padding: 10px 12px;
-
-                color: #475569;
-
-                border-radius: 9px;
-
-                font-size: 13px;
-                font-weight: 600;
-            }
-
-            .mobile-nav a.active {
-                background: var(--brand-primary-light);
-                color: var(--brand-primary);
             }
 
             .about-page {
@@ -738,20 +778,32 @@
 <body>
 
     {{-- ========================================
-         TOPBAR HEADER (KONSISTEN DENGAN DASHBOARD)
+         TOPBAR HEADER (KONSISTEN DENGAN DASHBOARD & KATALOG)
     ======================================== --}}
     <header class="topbar">
         <div class="topbar-container">
-            <!-- Brand -->
-            <a href="{{ route('home') }}" class="topbar-brand">
-                <div class="topbar-brand-icon">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-                    </svg>
-                </div>
-                <span>BOOKNEST</span>
-            </a>
+            <!-- Brand & Mobile Toggle -->
+            <div style="display: flex; align-items: center; gap: 12px;">
+                @auth
+                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Toggle Menu">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                @endauth
+
+                <a href="{{ route('home') }}" class="topbar-brand">
+                    <div class="topbar-brand-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                        </svg>
+                    </div>
+                    <span>BOOKNEST</span>
+                </a>
+            </div>
 
             <!-- Top Nav Links -->
             <nav class="topbar-nav">
@@ -763,85 +815,91 @@
                         Katalog
                     </a>
                 @endif
-                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                    Dasbor
-                </a>
-                <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
+                @auth
+                    <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
+                        Dasbor
+                    </a>
+                @else
+                    <a href="{{ route('login') }}" class="topbar-nav-link">
+                        Dasbor
+                    </a>
+                @endauth
+                <a href="{{ route('tentang') }}" class="topbar-nav-link active">
                     Tentang
                 </a>
             </nav>
 
-            <!-- Top Right -->
+            <!-- Topbar Right Actions -->
             <div class="topbar-right">
-                @if(!auth()->check() || auth()->user()->role === 'member')
-                    <a href="{{ route('katalog.index') }}" class="topbar-icon-btn" title="Cari Katalog">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <circle cx="11" cy="11" r="8"></circle>
-                            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                        </svg>
-                    </a>
-                @elseif(auth()->user()->role === 'admin')
-                    <a href="{{ route('buku.index') }}" class="topbar-icon-btn" title="Kelola Master Buku">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="18" y1="20" x2="18" y2="10"></line>
-                            <line x1="12" y1="20" x2="12" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="14"></line>
-                        </svg>
-                    </a>
-                @endif
-
                 @auth
-                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil {{ auth()->user()->name ?? 'Pengguna' }}">
-                        {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
+                    @if(auth()->user()->role === 'member')
+                        @php
+                            $jumlahKeranjang = count(session('keranjang_booking', []));
+                        @endphp
+                        <a href="{{ route('keranjang.index') }}" class="topbar-icon-btn" id="topbarCartBtn" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="position: relative;">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="9" cy="21" r="1"></circle>
+                                <circle cx="20" cy="21" r="1"></circle>
+                                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                            </svg>
+                            <span id="topbarCartBadge" style="position: absolute; top: -4px; right: -4px; background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; width: 18px; height: 18px; border-radius: 50%; display: {{ $jumlahKeranjang > 0 ? 'flex' : 'none' }}; align-items: center; justify-content: center; border: 2px solid #ffffff;">
+                                {{ $jumlahKeranjang }}
+                            </span>
+                        </a>
+
+                        <button type="button" class="topbar-icon-btn" onclick="openUniversalSearchModal()" title="Pencarian Cepat" aria-label="Buka Pencarian Cepat" style="background: none; cursor: pointer;">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </button>
+                    @elseif(auth()->user()->role === 'admin')
+                        <a href="{{ route('buku.index') }}" class="topbar-icon-btn" title="Kelola Master Buku">
+                            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="20" x2="18" y2="10"></line>
+                                <line x1="12" y1="20" x2="12" y2="4"></line>
+                                <line x1="6" y1="20" x2="6" y2="14"></line>
+                            </svg>
+                        </a>
+                    @endif
+
+                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Pengguna">
+                        @if(auth()->user()->foto ?? false)
+                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                        @else
+                            {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
+                        @endif
                     </a>
                 @else
-                    <a href="{{ route('login') }}" class="topbar-user-badge" title="Masuk" style="color: #64748b; background: #f1f5f9;">
-                        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="12" cy="7" r="4"></circle>
-                        </svg>
-                    </a>
+                    <div class="guest-nav-actions" style="display: flex; align-items: center; gap: 8px;">
+                        <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>
+                        <a href="{{ route('register') }}" class="btn-auth-register">Daftar</a>
+                    </div>
                 @endauth
-
-                <button
-                    type="button"
-                    class="mobile-menu-button"
-                    id="mobileMenuButton"
-                    aria-label="Buka menu"
-                    aria-expanded="false"
-                >
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
             </div>
         </div>
-
-        <nav class="mobile-nav" id="mobileNav">
-            <a href="{{ route('home') }}" class="{{ request()->routeIs('home') ? 'active' : '' }}">
-                Beranda
-            </a>
-            @if(!auth()->check() || auth()->user()->role === 'member')
-                <a href="{{ route('katalog.index') }}" class="{{ request()->routeIs('katalog.*') ? 'active' : '' }}">
-                    Katalog
-                </a>
-            @endif
-            <a href="{{ route('dashboard') }}" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">
-                Dasbor
-            </a>
-            <a href="{{ route('tentang') }}" class="{{ request()->routeIs('tentang') ? 'active' : '' }}">
-                Tentang
-            </a>
-        </nav>
     </header>
 
+    @auth
+        <!-- MOBILE BACKDROP -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 
-    {{-- ========================================
-         MAIN
-    ======================================== --}}
-    <main class="about-page">
+        <!-- PAGE WRAPPER (LAYOUT KONSISTEN DENGAN DASBOR & KATALOG) -->
+        <div class="page-wrapper">
+            @if(auth()->user()->role === 'admin')
+                @include('layouts.partials.sidebar_admin')
+            @elseif(auth()->user()->role === 'petugas')
+                @include('layouts.partials.sidebar_petugas')
+            @else
+                @include('layouts.partials.sidebar_anggota')
+            @endif
+
+            <!-- MAIN CONTENT AREA -->
+            <main class="content-area">
+                <div class="about-page" style="max-width: 100%; margin: 0; padding: 0 0 30px 0;">
+    @else
+        <main class="about-page">
+    @endauth
 
         {{-- HERO --}}
         <section class="about-hero">
@@ -887,7 +945,13 @@
                             href="{{ route('dashboard') }}"
                             class="about-primary-button"
                         >
-                            Buka Dasbor
+                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                            </svg>
+                            <span>Buka Dasbor</span>
                         </a>
                     @endif
                 @endguest
@@ -1158,8 +1222,12 @@
 
         </section>
 
-    </main>
-
+        @auth
+            </div>
+            {{-- End .about-page inside .content-area --}}
+        @else
+            </main>
+        @endauth
 
     {{-- ========================================
          FOOTER
@@ -1242,24 +1310,25 @@
 
     </footer>
 
+    @auth
+            </main>
+            <!-- END CONTENT AREA -->
+        </div>
+        <!-- END PAGE WRAPPER -->
+    @endauth
 
-    <script>
-        const mobileMenuButton = document.getElementById('mobileMenuButton');
-        const mobileNav = document.getElementById('mobileNav');
+    @include('layouts.partials.sidebar_scripts')
 
-        if (mobileMenuButton && mobileNav) {
-            mobileMenuButton.addEventListener('click', () => {
-                const isOpen = mobileNav.classList.toggle('open');
-
-                mobileMenuButton.setAttribute(
-                    'aria-expanded',
-                    isOpen ? 'true' : 'false'
-                );
-            });
-        }
-    </script>
-
-    {{-- Realtime Sirkulasi Notification Modal & Polling --}}
-    @include('layouts.partials.member_realtime_notification')
+    @auth
+        @if(auth()->user()->role === 'member')
+            @include('layouts.partials.member_feedback_toasts')
+            {{-- Realtime Sirkulasi Notification Modal & Polling --}}
+            @include('layouts.partials.member_realtime_notification')
+            {{-- Modal Pencarian Terpadu Anggota (Buku, Pinjam, Kembali, Denda) --}}
+            @include('layouts.partials.member_universal_search')
+            {{-- Pop Up Message Ringkas Notifikasi Booking Peminjaman & Pengembalian --}}
+            @include('layouts.partials.member_booking_popup')
+        @endif
+    @endauth
 </body>
 </html>

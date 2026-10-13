@@ -112,18 +112,21 @@
             font-size: 13.5px;
             font-weight: 600;
             color: #475569;
-            transition: all 0.15s ease;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         .topbar-nav-link:hover {
             color: var(--text-heading);
             background: #f1f5f9;
+            transform: translateY(-1px);
         }
 
         .topbar-nav-link.active {
             background: var(--brand-primary-light);
             color: #0f766e;
             font-weight: 700;
+            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);
         }
 
         .topbar-right {
@@ -141,12 +144,14 @@
             justify-content: center;
             color: #64748b;
             border: 1px solid var(--border-color);
-            transition: background 0.15s;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            text-decoration: none;
         }
 
         .topbar-icon-btn:hover {
             background: #f1f5f9;
             color: var(--text-heading);
+            transform: translateY(-1px);
         }
 
         .topbar-user-badge {
@@ -158,6 +163,16 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            text-decoration: none;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .topbar-user-badge:hover {
+            transform: translateY(-1px);
+        }
             font-size: 13px;
             font-weight: 800;
             letter-spacing: 0.5px;
@@ -596,6 +611,7 @@
     </style>
 
     @yield('styles')
+    @include('layouts.partials.sidebar_styles')
 </head>
 <body>
 
