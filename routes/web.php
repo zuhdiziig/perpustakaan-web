@@ -272,6 +272,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/buku', [BukuController::class, 'index'])
             ->name('buku.index');
 
+        Route::get('/buku/export-excel', [BukuController::class, 'exportExcel'])
+            ->name('buku.export-excel');
+
         Route::get('/buku/{buku}', [BukuController::class, 'show'])
             ->name('buku.show');
 

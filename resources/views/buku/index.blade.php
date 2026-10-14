@@ -989,6 +989,39 @@
         gap: 12px;
     }
 
+    .table-footer-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+    }
+
+    .btn-export-excel {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        padding: 8px 14px;
+        background: #0f766e;
+        color: #ffffff;
+        border-radius: 9px;
+        font-size: 12.5px;
+        font-weight: 700;
+        text-decoration: none;
+        box-shadow: 0 2px 4px rgba(15, 118, 110, 0.18);
+        transition: all 0.15s ease-in-out;
+    }
+
+    .btn-export-excel:hover {
+        background: #115e59;
+        color: #ffffff;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(15, 118, 110, 0.25);
+    }
+
+    .btn-export-excel:active {
+        transform: translateY(0);
+    }
+
     @media (max-width: 1100px) {
         .stats-grid {
             grid-template-columns: repeat(3, 1fr);
@@ -1228,7 +1261,7 @@
 
     <!-- FILTER & SEARCH BAR -->
     <div class="filter-card">
-        <form action="{{ route('buku.index') }}" method="GET" class="filter-form" id="bukuFilterForm">
+        <form action="{{ route('buku.index', [], false) }}" method="GET" class="filter-form" id="bukuFilterForm">
             @if(request()->boolean('perlu_restock'))
                 <input type="hidden" name="perlu_restock" value="1">
             @endif
@@ -1286,7 +1319,7 @@
             </select>
 
             <div id="bukuResetWrapper" style="{{ (request()->filled('search') || request()->filled('kategori') || request()->filled('status') || request()->filled('kondisi') || request()->filled('lokasi') || request()->boolean('perlu_restock')) ? 'display: inline-flex;' : 'display: none;' }}">
-                <a href="{{ route('buku.index') }}" id="bukuResetBtn" class="btn-filter-reset">
+                <a href="{{ route('buku.index', [], false) }}" id="bukuResetBtn" class="btn-filter-reset">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -1745,7 +1778,7 @@
                                         @endif
                                     </div>
                                     @if(request()->filled('search') || request()->filled('kategori') || request()->filled('status') || request()->filled('kondisi') || request()->filled('lokasi') || request()->boolean('perlu_restock'))
-                                        <a href="{{ route('buku.index') }}" class="btn-filter-reset" style="margin-top: 6px;">
+                                        <a href="{{ route('buku.index', [], false) }}" class="btn-filter-reset" style="margin-top: 6px;">
                                             Reset Filter Pencarian
                                         </a>
                                     @endif
@@ -1761,8 +1794,20 @@
             <div style="font-size: 13px; color: #64748b;">
                 Menampilkan <strong>{{ $bukus->firstItem() ?? 0 }}</strong> - <strong>{{ $bukus->lastItem() ?? 0 }}</strong> dari <strong>{{ $bukus->total() }}</strong> judul buku (Total <strong>{{ $totalEksemplar }}</strong> eksemplar fisik)
             </div>
-            <div>
-                {{ $bukus->links() }}
+            <div class="table-footer-right">
+                <a href="{{ route('buku.export-excel', request()->query()) }}" class="btn-export-excel" id="btnExportExcel" title="Unduh format Excel untuk Stok Opname Buku">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="3" y1="9" x2="21" y2="9"></line>
+                        <line x1="3" y1="15" x2="21" y2="15"></line>
+                        <line x1="9" y1="3" x2="9" y2="21"></line>
+                        <line x1="15" y1="3" x2="15" y2="21"></line>
+                    </svg>
+                    <span>Cetak Excel (Stok Opname)</span>
+                </a>
+                <div>
+                    {{ $bukus->links() }}
+                </div>
             </div>
         </div>
     </div>
@@ -2272,16 +2317,37 @@
     let bukuSearchDebounceTimer = null;
     let bukuAbortController = null;
 
+    function normalizeToCurrentOrigin(rawUrl) {
+        if (!rawUrl) return window.location.href;
+        try {
+            const parsed = new URL(rawUrl, window.location.origin);
+            return new URL(parsed.pathname + parsed.search, window.location.origin).toString();
+        } catch (e) {
+            return rawUrl;
+        }
+    }
+
     function buildBukuFilterUrl() {
         const form = document.getElementById('bukuFilterForm');
-        if (!form) return window.location.href;
-        const url = new URL(form.action, window.location.origin);
+        let targetPath = window.location.pathname;
+        if (form) {
+            const actionAttr = form.getAttribute('action');
+            if (actionAttr) {
+                try {
+                    const parsed = new URL(actionAttr, window.location.origin);
+                    targetPath = parsed.pathname;
+                } catch (e) {
+                    targetPath = actionAttr.startsWith('/') ? actionAttr : window.location.pathname;
+                }
+            }
+        }
+        const url = new URL(targetPath, window.location.origin);
         const searchVal = document.getElementById('bukuSearchInput')?.value.trim() || '';
         const lokasiVal = document.getElementById('bukuLokasiSelect')?.value || '';
         const kategoriVal = document.getElementById('bukuKategoriSelect')?.value || '';
         const statusVal = document.getElementById('bukuStatusSelect')?.value || '';
         const kondisiVal = document.getElementById('bukuKondisiSelect')?.value || '';
-        const restockInput = form.querySelector('input[name="perlu_restock"]');
+        const restockInput = form ? form.querySelector('input[name="perlu_restock"]') : null;
 
         if (searchVal) url.searchParams.set('search', searchVal);
         if (lokasiVal) url.searchParams.set('lokasi', lokasiVal);
@@ -2308,6 +2374,8 @@
     }
 
     function fetchBukuData(url) {
+        url = normalizeToCurrentOrigin(url);
+
         if (bukuAbortController) {
             bukuAbortController.abort();
         }
@@ -2358,7 +2426,10 @@
             if (err.name === 'AbortError') return;
             console.warn('AJAX refresh gagal, memuat via submit form biasa:', err);
             const form = document.getElementById('bukuFilterForm');
-            if (form) form.submit();
+            if (form) {
+                form.action = url;
+                form.submit();
+            }
         })
         .finally(() => {
             if (tableCard) {
@@ -2374,7 +2445,7 @@
     function bindBukuPaginationLinks() {
         const tableCard = document.getElementById('bukuTableCard');
         if (!tableCard) return;
-        const paginationLinks = tableCard.querySelectorAll('.pagination a, .table-footer a');
+        const paginationLinks = tableCard.querySelectorAll('.pagination a, .table-footer a:not(.btn-export-excel)');
         paginationLinks.forEach(link => {
             link.addEventListener('click', function(e) {
                 const href = link.getAttribute('href');
@@ -2394,15 +2465,25 @@
 
         const form = document.getElementById('bukuFilterForm');
         const searchInput = document.getElementById('bukuSearchInput');
+        const searchBtn = document.getElementById('bukuSearchBtn');
 
-        // Live search otomatis refresh tabel (debounce 350ms)
+        // Live search otomatis refresh tabel (debounce 300ms)
         if (searchInput) {
             searchInput.addEventListener('input', function() {
                 clearTimeout(bukuSearchDebounceTimer);
                 updateBukuResetButtonVisibility();
                 bukuSearchDebounceTimer = setTimeout(() => {
                     fetchBukuData(buildBukuFilterUrl());
-                }, 350);
+                }, 300);
+            });
+
+            // Enter key press langsung memicu pencarian tanpa jeda debounce
+            searchInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    clearTimeout(bukuSearchDebounceTimer);
+                    fetchBukuData(buildBukuFilterUrl());
+                }
             });
         }
 
@@ -2418,9 +2499,17 @@
             }
         });
 
-        // Form submit / klik tombol icon search / tekan Enter
+        // Form submit / klik tombol icon search
         if (form) {
             form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(bukuSearchDebounceTimer);
+                fetchBukuData(buildBukuFilterUrl());
+            });
+        }
+
+        if (searchBtn) {
+            searchBtn.addEventListener('click', function(e) {
                 e.preventDefault();
                 clearTimeout(bukuSearchDebounceTimer);
                 fetchBukuData(buildBukuFilterUrl());

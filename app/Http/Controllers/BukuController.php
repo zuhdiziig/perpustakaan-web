@@ -6,6 +6,7 @@ use App\Models\Barcode;
 use App\Models\Buku;
 use App\Models\BukuEksemplar;
 use App\Models\Kategori;
+use App\Services\BukuExportExcelService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -30,16 +31,23 @@ class BukuController extends Controller
                 $q->where('judul', 'like', "%{$search}%")
                     ->orWhere('penulis', 'like', "%{$search}%")
                     ->orWhere('penerbit', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%")
+                    ->orWhere('rak', 'like', "%{$search}%")
+                    ->orWhereHas('kategori', function ($kat) use ($search) {
+                        $kat->where('namaKategori', 'like', "%{$search}%");
+                    })
                     ->orWhereHas('barcode', function ($bar) use ($search) {
                         $bar->where('kodeBarcode', 'like', "%{$search}%");
                     })
                     ->orWhereHas('eksemplar', function ($eks) use ($search) {
-                        if (is_numeric($search)) {
-                            $eks->where('idEksemplar', (int) $search)
-                                ->orWhere('nomor_eksemplar', (int) $search);
-                        }
-                        $eks->orWhere('qr_token', 'like', "%{$search}%")
-                            ->orWhere('kode_barcode', 'like', "%{$search}%");
+                        $eks->where(function ($sub) use ($search) {
+                            if (is_numeric($search)) {
+                                $sub->where('idEksemplar', (int) $search)
+                                    ->orWhere('nomor_eksemplar', (int) $search);
+                            }
+                            $sub->orWhere('qr_token', 'like', "%{$search}%")
+                                ->orWhere('kode_barcode', 'like', "%{$search}%");
+                        });
                     });
             });
         }
@@ -112,6 +120,93 @@ class BukuController extends Controller
             'bukuRusak',
             'jumlahPerluRestock'
         ));
+    }
+
+    /**
+     * Ekspor lembar kerja Stok Opname Buku & Eksemplar dalam format Excel (.xlsx).
+     */
+    public function exportExcel(Request $request, BukuExportExcelService $exportService)
+    {
+        $query = Buku::with([
+            'kategori',
+            'barcode',
+            'eksemplar' => function ($q) {
+                $q->with('activeDetail.peminjaman.member')->orderBy('nomor_eksemplar');
+            },
+        ]);
+
+        if ($request->filled('search')) {
+            $search = trim($request->search);
+            $query->where(function ($q) use ($search) {
+                $q->where('judul', 'like', "%{$search}%")
+                    ->orWhere('penulis', 'like', "%{$search}%")
+                    ->orWhere('penerbit', 'like', "%{$search}%")
+                    ->orWhere('isbn', 'like', "%{$search}%")
+                    ->orWhere('rak', 'like', "%{$search}%")
+                    ->orWhereHas('kategori', function ($kat) use ($search) {
+                        $kat->where('namaKategori', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('barcode', function ($bar) use ($search) {
+                        $bar->where('kodeBarcode', 'like', "%{$search}%");
+                    })
+                    ->orWhereHas('eksemplar', function ($eks) use ($search) {
+                        $eks->where(function ($sub) use ($search) {
+                            if (is_numeric($search)) {
+                                $sub->where('idEksemplar', (int) $search)
+                                    ->orWhere('nomor_eksemplar', (int) $search);
+                            }
+                            $sub->orWhere('qr_token', 'like', "%{$search}%")
+                                ->orWhere('kode_barcode', 'like', "%{$search}%");
+                        });
+                    });
+            });
+        }
+
+        if ($request->filled('kategori')) {
+            $query->where('idKategori', $request->kategori);
+        }
+
+        if ($request->filled('kondisi') && in_array($request->kondisi, ['Baik', 'Rusak', 'Hilang'], true)) {
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('kondisi', $request->kondisi);
+            });
+        }
+
+        if ($request->filled('status') && in_array($request->status, ['Tersedia', 'Dibooking', 'Dipinjam', 'Hilang'], true)) {
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        if ($request->filled('lokasi') && in_array($request->lokasi, ['Rak', 'Gudang'], true)) {
+            $query->whereHas('eksemplar', function ($q) use ($request) {
+                $q->where('lokasi', $request->lokasi);
+            });
+        }
+
+        if ($request->boolean('perlu_restock')) {
+            $bukuPerluRestockIds = Buku::whereDoesntHave('eksemplar', function ($q) {
+                $q->where('status', 'Tersedia')->where('lokasi', 'Rak');
+            })->whereHas('eksemplar', function ($q) {
+                $q->where('status', 'Tersedia')->where('lokasi', 'Gudang');
+            })->pluck('idBuku');
+
+            $query->whereIn('idBuku', $bukuPerluRestockIds);
+        }
+
+        if ($request->filled('buku_id')) {
+            $query->where('idBuku', $request->buku_id);
+        }
+
+        $bukus = $query->orderBy('judul', 'asc')->get();
+
+        $filePath = $exportService->generate($bukus, auth()->user(), $request->all());
+        $filename = $exportService->getDownloadFilename($request->all());
+
+        return response()->download($filePath, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+        ])->deleteFileAfterSend(true);
     }
 
     // Tampilkan form tambah buku
