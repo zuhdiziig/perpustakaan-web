@@ -4,9 +4,23 @@
 
 @section('styles')
 <style>
+    /* --- ANIMATION KEYFRAMES --- */
+    @keyframes profileContentFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     /* --- BREADCRUMB & HEADER --- */
     .profile-header {
         margin-bottom: 24px;
+        animation: profileContentFadeIn 0.52s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
     .profile-breadcrumb {
@@ -61,7 +75,7 @@
         margin-bottom: 22px;
         font-size: 13.5px;
         line-height: 1.5;
-        animation: fadeIn 0.25s ease;
+        animation: profileContentFadeIn 0.3s ease both;
     }
 
     .profile-alert.success {
@@ -100,6 +114,8 @@
         flex-direction: column;
         align-items: center;
         text-align: center;
+        animation: profileContentFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+        will-change: transform, opacity;
     }
 
     .avatar-wrapper {
@@ -275,6 +291,8 @@
         padding: 24px 28px 26px;
         box-shadow: 0 1px 3px rgba(15, 23, 42, 0.03);
         margin-bottom: 20px;
+        animation: profileContentFadeIn 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.14s both;
+        will-change: transform, opacity;
     }
 
     .section-header-title {
@@ -317,7 +335,9 @@
         color: var(--text-heading);
         background: #ffffff;
         outline: none;
-        transition: all 0.15s ease;
+        transition: border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
         font-family: inherit;
     }
 
@@ -327,7 +347,7 @@
 
     .form-control:focus {
         border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14);
     }
 
     .form-control.is-readonly {
@@ -342,6 +362,18 @@
         color: #dc2626;
         margin-top: 4px;
         font-weight: 600;
+        animation: validationMessageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes validationMessageFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(-3px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
 
     .btn-save-primary {
@@ -354,15 +386,17 @@
         border-radius: 10px;
         border: none;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
         box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
         margin-top: 6px;
     }
 
     .btn-save-primary:hover {
         background: #115e59;
-        transform: translateY(-1px);
-        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(15, 118, 110, 0.28);
     }
 
     .btn-save-primary:active {
@@ -378,14 +412,16 @@
         border-radius: 10px;
         border: none;
         cursor: pointer;
-        transition: all 0.15s ease;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
         box-shadow: 0 3px 10px rgba(37, 99, 235, 0.2);
     }
 
     .btn-save-blue:hover {
         background: #1d4ed8;
-        transform: translateY(-1px);
-        box-shadow: 0 5px 14px rgba(37, 99, 235, 0.28);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 18px rgba(37, 99, 235, 0.28);
     }
 
     .btn-save-blue:active {
@@ -533,6 +569,29 @@
         @endif
     </div>
 
+    @if(session('success'))
+        <div class="profile-alert success">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            </svg>
+            <div>{{ session('success') }}</div>
+        </div>
+    @endif
+
+    @if(session('error') || $errors->any())
+        <div class="profile-alert error">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <div>
+                {{ session('error') ?? $errors->first() }}
+            </div>
+        </div>
+    @endif
+
     <!-- MAIN GRID -->
     <div class="profile-grid">
 
@@ -592,6 +651,9 @@
                         </svg>
                         <span>Ubah Foto</span>
                     </button>
+                    @error('foto')
+                        <span class="form-error-msg" style="text-align: center; display: block; margin-top: 6px;">{{ $message }}</span>
+                    @enderror
                 </form>
 
                 @if($user->foto)
@@ -819,9 +881,19 @@
             const reader = new FileReader();
             reader.onload = function(e) {
                 const box = document.getElementById('avatarPreviewBox');
-                box.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width:100%; height:100%; object-fit:cover;">`;
+                if (box) {
+                    box.innerHTML = `<img src="${e.target.result}" alt="Preview" style="width:100%; height:100%; object-fit:cover;">`;
+                }
             };
             reader.readAsDataURL(file);
+
+            const btn = document.querySelector('.btn-ubah-foto');
+            if (btn) {
+                btn.style.opacity = '0.7';
+                btn.style.pointerEvents = 'none';
+                const textSpan = btn.querySelector('span');
+                if (textSpan) textSpan.textContent = 'Mengunggah...';
+            }
 
             // Submit form
             document.getElementById('formUploadFoto').submit();

@@ -11,6 +11,12 @@
             <h3>BOOKNEST</h3>
             <span>Panel Anggota</span>
         </div>
+        <button type="button" class="sidebar-close-mobile-btn" onclick="closeSidebarMobile(event)" aria-label="Tutup menu navigasi">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+        </button>
     </div>
 
     <!-- MENU UTAMA -->

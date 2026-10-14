@@ -188,52 +188,104 @@
         flex-wrap: wrap;
     }
 
-    .search-input-wrap {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        background: #f8fafc;
-        border: 1px solid #cbd5e1;
-        padding: 8px 14px;
-        border-radius: 10px;
+    .search-input-wrapper {
+        position: relative;
+        flex: 0 0 260px;
+        width: 260px;
+        min-width: 260px;
+        max-width: 260px;
     }
 
-    .search-input-wrap input {
-        border: none;
-        background: transparent;
-        outline: none;
+    .search-input {
+        width: 100%;
+        height: 38px;
+        padding: 0 36px 0 12px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
         font-size: 13px;
+        font-family: inherit;
+        background: #ffffff;
         color: #0f172a;
-        width: 220px;
+        outline: none;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
+    }
+
+    .search-input:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .search-icon-btn {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        color: #0f766e;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+
+    .search-icon-btn:hover {
+        background: #f0fdfa;
+        color: #115e59;
+        transform: translateY(-50%) scale(1.08);
+    }
+
+    .search-icon-btn:active {
+        transform: translateY(-50%) scale(0.95);
     }
 
     .filter-select {
-        border: 1px solid #cbd5e1;
-        background: #f8fafc;
-        padding: 8px 12px;
-        border-radius: 10px;
+        height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--border-color, #e2e8f0);
+        border-radius: 8px;
         font-size: 13px;
         font-weight: 600;
+        font-family: inherit;
+        background: #ffffff;
         color: #334155;
         outline: none;
-    }
-
-    .btn-search {
-        padding: 8px 16px;
-        border-radius: 10px;
-        background: #0f766e;
-        color: #ffffff;
-        border: none;
-        font-size: 13px;
-        font-weight: 700;
         cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
     }
 
-    .btn-reset-filter {
+    .filter-select:focus {
+        border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    }
+
+    .btn-filter-reset {
+        height: 38px;
+        padding: 0 14px;
+        background: #f1f5f9;
+        color: #475569;
+        border-radius: 8px;
         font-size: 12.5px;
         font-weight: 600;
-        color: #64748b;
-        text-decoration: underline;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
+    }
+
+    .btn-filter-reset:hover {
+        background: #e2e8f0;
+        color: #1e293b;
     }
 
     /* Table Card */
@@ -376,10 +428,42 @@
 
     @media (max-width: 992px) {
         .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        .filter-card {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 14px;
+        }
+        .search-filter-form {
+            width: 100%;
+        }
+        .search-input-wrapper {
+            flex: 1 1 240px;
+            width: auto;
+            min-width: 200px;
+            max-width: 100%;
+        }
     }
-    @media (max-width: 576px) {
+    @media (max-width: 640px) {
         .stats-grid { grid-template-columns: 1fr; }
         .sirkulasi-header { flex-direction: column; align-items: flex-start; }
+        .search-input-wrapper {
+            flex: 1 1 100%;
+            width: 100%;
+            min-width: 100%;
+            max-width: 100%;
+        }
+        .filter-select {
+            flex: 1 1 100%;
+            width: 100%;
+        }
+        .nav-pills-sirkulasi {
+            flex-direction: column;
+            width: 100%;
+        }
+        .nav-pill-btn {
+            width: 100%;
+            justify-content: space-between;
+        }
     }
 </style>
 @endsection
@@ -488,19 +572,31 @@
             </a>
         </div>
 
-        <form action="{{ route('sirkulasi.index') }}" method="GET" class="search-filter-form">
-            <input type="hidden" name="tab" value="{{ $tab }}">
+        <form action="{{ route('sirkulasi.index') }}" method="GET" class="search-filter-form" id="sirkulasiFilterForm">
+            <input type="hidden" name="tab" id="sirkulasiTabInput" value="{{ $tab }}">
 
-            <div class="search-input-wrap">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
-                <input type="text" name="q" value="{{ $q }}" placeholder="Cari #TRX, nama, judul buku...">
+            <div class="search-input-wrapper">
+                <input type="text"
+                       name="q"
+                       id="sirkulasiSearchInput"
+                       class="search-input"
+                       value="{{ $q }}"
+                       placeholder="Cari #TRX, nama, judul buku..."
+                       autocomplete="off">
+                <button type="submit"
+                        id="sirkulasiSearchBtn"
+                        class="search-icon-btn"
+                        title="Cari transaksi sirkulasi"
+                        aria-label="Cari transaksi sirkulasi">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
             </div>
 
             @if($tab === 'peminjaman')
-                <select name="status" class="filter-select" onchange="this.form.submit()">
+                <select name="status" id="sirkulasiStatusSelect" class="filter-select">
                     <option value="">Semua Status</option>
                     <option value="Dipinjam" {{ $status === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                     <option value="Selesai" {{ $status === 'Selesai' ? 'selected' : '' }}>Selesai</option>
@@ -509,14 +605,19 @@
                 </select>
             @endif
 
-            <button type="submit" class="btn-search">Cari</button>
-
-            @if($q || $status)
-                <a href="{{ route('sirkulasi.index', ['tab' => $tab]) }}" class="btn-reset-filter">Reset</a>
-            @endif
+            <div id="sirkulasiResetWrapper" style="{{ ($q || $status) ? 'display: inline-flex;' : 'display: none;' }}">
+                <a href="{{ route('sirkulasi.index', ['tab' => $tab]) }}" id="sirkulasiResetBtn" class="btn-filter-reset">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                    Reset
+                </a>
+            </div>
         </form>
     </div>
 
+    <div id="sirkulasiTableCard" style="transition: opacity 0.2s ease;">
     {{-- TAB 1: TABEL PEMINJAMAN --}}
     @if($tab === 'peminjaman')
         <div class="table-card">
@@ -710,6 +811,153 @@
             @endif
         </div>
     @endif
+    </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    let sirkulasiSearchDebounceTimer = null;
+    let sirkulasiAbortController = null;
+
+    function buildSirkulasiFilterUrl() {
+        const form = document.getElementById('sirkulasiFilterForm');
+        if (!form) return window.location.href;
+        const formData = new FormData(form);
+        const params = new URLSearchParams();
+
+        for (const [key, value] of formData.entries()) {
+            if (value !== '' && value !== null) {
+                params.set(key, value);
+            }
+        }
+        return `${form.getAttribute('action')}?${params.toString()}`;
+    }
+
+    function updateSirkulasiResetVisibility() {
+        const searchInput = document.getElementById('sirkulasiSearchInput');
+        const statusSelect = document.getElementById('sirkulasiStatusSelect');
+        const resetWrapper = document.getElementById('sirkulasiResetWrapper');
+        if (!resetWrapper) return;
+
+        const hasSearch = searchInput && searchInput.value.trim() !== '';
+        const hasStatus = statusSelect && statusSelect.value !== '';
+        resetWrapper.style.display = (hasSearch || hasStatus) ? 'inline-flex' : 'none';
+    }
+
+    function fetchSirkulasiData(url) {
+        if (sirkulasiAbortController) {
+            sirkulasiAbortController.abort();
+        }
+        sirkulasiAbortController = new AbortController();
+
+        const tableCard = document.getElementById('sirkulasiTableCard');
+        if (tableCard) {
+            tableCard.style.opacity = '0.35';
+            tableCard.style.pointerEvents = 'none';
+        }
+
+        fetch(url, {
+            signal: sirkulasiAbortController.signal,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error: ' + response.status);
+            return response.text();
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTableCard = doc.getElementById('sirkulasiTableCard');
+            if (newTableCard && tableCard) {
+                tableCard.innerHTML = newTableCard.innerHTML;
+            }
+
+            updateSirkulasiResetVisibility();
+            window.history.pushState({ path: url }, '', url);
+            bindSirkulasiPaginationLinks();
+        })
+        .catch(err => {
+            if (err.name === 'AbortError') return;
+            console.warn('AJAX sirkulasi gagal, reload biasa:', err);
+            const form = document.getElementById('sirkulasiFilterForm');
+            if (form) form.submit();
+        })
+        .finally(() => {
+            if (tableCard) {
+                tableCard.style.opacity = '1';
+                tableCard.style.pointerEvents = 'auto';
+            }
+        });
+    }
+
+    function bindSirkulasiPaginationLinks() {
+        const tableCard = document.getElementById('sirkulasiTableCard');
+        if (!tableCard) return;
+        const links = tableCard.querySelectorAll('.pagination a, .pagination-footer a');
+        links.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = link.getAttribute('href');
+                if (href && !href.startsWith('#')) {
+                    e.preventDefault();
+                    fetchSirkulasiData(href);
+                }
+            });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        bindSirkulasiPaginationLinks();
+        updateSirkulasiResetVisibility();
+
+        const form = document.getElementById('sirkulasiFilterForm');
+        const searchInput = document.getElementById('sirkulasiSearchInput');
+        const statusSelect = document.getElementById('sirkulasiStatusSelect');
+
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                clearTimeout(sirkulasiSearchDebounceTimer);
+                updateSirkulasiResetVisibility();
+                fetchSirkulasiData(buildSirkulasiFilterUrl());
+            });
+        }
+
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(sirkulasiSearchDebounceTimer);
+                updateSirkulasiResetVisibility();
+                sirkulasiSearchDebounceTimer = setTimeout(() => {
+                    fetchSirkulasiData(buildSirkulasiFilterUrl());
+                }, 350);
+            });
+        }
+
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(sirkulasiSearchDebounceTimer);
+                fetchSirkulasiData(buildSirkulasiFilterUrl());
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            const resetBtn = e.target.closest('#sirkulasiResetBtn');
+            if (resetBtn && resetBtn.getAttribute('href')) {
+                e.preventDefault();
+                if (searchInput) searchInput.value = '';
+                if (statusSelect) statusSelect.value = '';
+                updateSirkulasiResetVisibility();
+                fetchSirkulasiData(resetBtn.getAttribute('href'));
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            window.location.reload();
+        });
+    });
+</script>
 @endsection

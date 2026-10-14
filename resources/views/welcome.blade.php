@@ -8,6 +8,12 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        document.documentElement.classList.add('js-ready');
+        if ('scrollRestoration' in history) {
+            history.scrollRestoration = 'manual';
+        }
+    </script>
 
     <style>
         * {
@@ -17,16 +23,36 @@
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        html, body {
-            overflow-x: hidden;
-            width: 100%;
-            max-width: 100%;
+        html {
+            overflow-x: clip;
+            overflow-y: scroll;
+            scrollbar-width: none; /* Hilangkan scrollbar Firefox */
+            -ms-overflow-style: none; /* Hilangkan scrollbar IE & Edge */
         }
 
         body {
             background-color: #ffffff;
             color: #0f172a;
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            min-height: 100vh;
+        }
+
+        /* Hilangkan scrollbar di sebelah kanan untuk WebKit (Chrome, Safari, Edge, Opera) */
+        html::-webkit-scrollbar,
+        body::-webkit-scrollbar,
+        *::-webkit-scrollbar {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+
+        * {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
         .container {
@@ -37,11 +63,30 @@
         }
 
         /* --- TOP NAVBAR --- */
+        header.container {
+            position: relative;
+            z-index: 100;
+        }
+
         .navbar {
+            position: relative;
+            z-index: 100;
             padding: 24px 0 10px;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        /* --- SMOOTH NAVBAR ENTRANCE FADE-IN ON LOAD (0.85s ease-out) --- */
+        @keyframes navFadeInDown {
+            0% {
+                opacity: 0;
+                transform: translateY(-12px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .logo-area {
@@ -49,6 +94,7 @@
             align-items: center;
             gap: 10px;
             text-decoration: none;
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0s both;
         }
 
         .logo-icon {
@@ -101,12 +147,24 @@
             font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
         }
 
         .btn-nav-login:hover {
             border-color: #2e625a;
+            color: #234c46;
             background: #f0fdf4;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 4px 14px rgba(46, 98, 90, 0.15);
+        }
+
+        .btn-nav-login:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 4px rgba(46, 98, 90, 0.1);
         }
 
         .btn-nav-register {
@@ -117,11 +175,23 @@
             font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.2s;
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.25);
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
         }
 
         .btn-nav-register:hover {
             background-color: #3651d4;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 18px rgba(67, 97, 238, 0.38);
+        }
+
+        .btn-nav-register:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 6px rgba(67, 97, 238, 0.2);
         }
 
         /* --- AUTH NAVIGATION & USER DROPDOWN --- */
@@ -134,6 +204,7 @@
             padding: 5px 11px;
             border-radius: 9999px;
             letter-spacing: 0.2px;
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.1s both;
         }
 
         .role-badge-dot {
@@ -186,26 +257,34 @@
             font-size: 13.5px;
             font-weight: 700;
             text-decoration: none;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
             box-shadow: 0 2px 8px rgba(46, 98, 90, 0.2);
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
         }
 
         .btn-nav-dashboard:hover {
             background: #234c46;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(46, 98, 90, 0.3);
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 16px rgba(46, 98, 90, 0.32);
+        }
+
+        .btn-nav-dashboard:active {
+            transform: translateY(0) scale(0.97) !important;
+            box-shadow: 0 2px 6px rgba(46, 98, 90, 0.2);
         }
 
         .btn-nav-dashboard svg {
-            transition: transform 0.2s ease;
+            transition: transform 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .btn-nav-dashboard:hover svg {
-            transform: scale(1.1);
+            transform: scale(1.15);
         }
 
         .user-menu-wrap {
             position: relative;
+            z-index: 110;
+            animation: navFadeInDown 1.15s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
         }
 
         .user-menu-btn {
@@ -217,14 +296,19 @@
             padding: 4px 12px 4px 5px;
             border-radius: 9999px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .user-menu-btn:hover,
         .user-menu-btn.active {
-            border-color: #cbd5e1;
+            border-color: #2e625a;
             background: #f8fafc;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .user-menu-btn:active {
+            transform: translateY(0) scale(0.98) !important;
         }
 
         .user-avatar-mini {
@@ -486,6 +570,11 @@
         }
 
         /* --- HERO SECTION --- */
+        main.container {
+            position: relative;
+            z-index: 1;
+        }
+
         .hero {
             padding: 40px 0 50px;
             display: grid;
@@ -570,11 +659,19 @@
             font-size: 13.5px;
             font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.24s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 2px 8px rgba(46, 98, 90, 0.2);
         }
 
         .btn-search:hover {
             background: #234c46;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 98, 90, 0.32);
+        }
+
+        .btn-search:active {
+            transform: translateY(0) scale(0.97);
+            box-shadow: 0 2px 6px rgba(46, 98, 90, 0.2);
         }
 
         .hero-buttons {
@@ -597,14 +694,20 @@
             font-weight: 700;
             text-decoration: none;
             line-height: 1;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(46, 98, 90, 0.2);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 3px 10px rgba(46, 98, 90, 0.22);
+            cursor: pointer;
         }
 
         .btn-green:hover {
             background: #234c46;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(46, 98, 90, 0.3);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 22px rgba(46, 98, 90, 0.35);
+        }
+
+        .btn-green:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 6px rgba(46, 98, 90, 0.2);
         }
 
         .btn-green svg {
@@ -612,11 +715,11 @@
             display: block;
             width: 16px;
             height: 16px;
-            transition: transform 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .btn-green:hover svg {
-            transform: scale(1.08);
+            transform: scale(1.18) rotate(-4deg);
         }
 
         .btn-green span {
@@ -637,14 +740,20 @@
             font-weight: 700;
             text-decoration: none;
             line-height: 1;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 2px 8px rgba(67, 97, 238, 0.25);
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 3px 10px rgba(67, 97, 238, 0.25);
+            cursor: pointer;
         }
 
         .btn-blue:hover {
             background: #3651d4;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.35);
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 22px rgba(67, 97, 238, 0.38);
+        }
+
+        .btn-blue:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 6px rgba(67, 97, 238, 0.2);
         }
 
         .btn-blue svg {
@@ -652,11 +761,11 @@
             display: block;
             width: 16px;
             height: 16px;
-            transition: transform 0.2s ease;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
         .btn-blue:hover svg {
-            transform: scale(1.08);
+            transform: scale(1.18) rotate(4deg);
         }
 
         .btn-blue span {
@@ -678,14 +787,87 @@
             height: 340px;
             border-radius: 18px;
             overflow: hidden;
-            background: #f1f5f9;
+            background: #183d37;
+            position: relative;
+            box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.14), 0 6px 14px -4px rgba(15, 23, 42, 0.06);
         }
 
+        /* 1. Dramatic Wipe Curtain Overlay */
+        .hero-img-container::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, #183d37 0%, #2e625a 100%);
+            z-index: 2;
+            transform: translateX(0%);
+            animation: heroWipeCurtain 1.6s cubic-bezier(0.77, 0, 0.175, 1) 0.85s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes heroWipeCurtain {
+            0% {
+                transform: translateX(0%);
+            }
+            100% {
+                transform: translateX(101%);
+                visibility: hidden;
+            }
+        }
+
+        /* 2. Light Sheen Beam Wipe Sweep */
+        .hero-img-container::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -150%;
+            width: 75%;
+            height: 100%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.5) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            transform: skewX(-25deg);
+            z-index: 3;
+            animation: sheenWipe 1.85s cubic-bezier(0.25, 1, 0.5, 1) 1.55s forwards;
+            pointer-events: none;
+        }
+
+        @keyframes sheenWipe {
+            0% {
+                left: -150%;
+            }
+            100% {
+                left: 220%;
+            }
+        }
+
+        /* 3. Smooth Ken Burns Zoom In on Image */
         .hero-img-container img {
             width: 100%;
             height: 100%;
             object-fit: cover;
             display: block;
+            transform: scale(1.22);
+            animation: imageZoomInAnim 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.85s forwards;
+            transition: transform 0.85s cubic-bezier(0.34, 1.56, 0.64, 1);
+            will-change: transform;
+        }
+
+        @keyframes imageZoomInAnim {
+            0% {
+                transform: scale(1.22);
+                filter: brightness(0.9);
+            }
+            100% {
+                transform: scale(1);
+                filter: brightness(1);
+            }
+        }
+
+        .hero-img-container:hover img {
+            transform: scale(1.06);
         }
 
         .hero-img-caption {
@@ -707,11 +889,37 @@
             gap: 30px;
         }
 
+        @keyframes statFadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .stat-item {
+            animation: statFadeInUp 1.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .stat-item:nth-child(1) { animation-delay: 0.32s; }
+        .stat-item:nth-child(2) { animation-delay: 0.48s; }
+        .stat-item:nth-child(3) { animation-delay: 0.64s; }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+        }
+
         .stat-item h3 {
             font-size: 28px;
             font-weight: 800;
             color: #0f172a;
             letter-spacing: -0.5px;
+            font-variant-numeric: tabular-nums;
+            display: inline-block;
         }
 
         .stat-item p {
@@ -727,6 +935,23 @@
             color: #0f172a;
             letter-spacing: -0.5px;
             margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #2e625a 0%, #4361ee 100%);
+            border-radius: 9999px;
+            margin-top: 6px;
+            transition: width 1.3s cubic-bezier(0.16, 1, 0.3, 1) 0.25s;
+        }
+
+        .section-title.is-revealed::after {
+            width: 42px;
         }
 
         /* --- CATEGORIES GRID --- */
@@ -749,18 +974,28 @@
             flex-direction: column;
             align-items: center;
             gap: 10px;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            cursor: pointer;
         }
 
         .cat-card:hover {
             border-color: #2e625a;
             background: #ffffff;
-            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
-            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+            transform: translateY(-4px) scale(1.02);
+        }
+
+        .cat-card:active {
+            transform: translateY(-1px) scale(0.98);
         }
 
         .cat-icon {
             color: #2e625a;
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .cat-card:hover .cat-icon {
+            transform: scale(1.18);
         }
 
         .cat-name {
@@ -802,6 +1037,13 @@
             border: 1px solid #e2e8f0;
             border-radius: 14px;
             padding: 28px 24px;
+            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover {
+            border-color: #cbd5e1;
+            transform: translateY(-4px);
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
         }
 
         .feature-icon-box {
@@ -815,6 +1057,13 @@
             justify-content: center;
             color: #2e625a;
             margin-bottom: 18px;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .feature-card:hover .feature-icon-box {
+            background: #f0fdf4;
+            border-color: #a7f3d0;
+            transform: scale(1.1);
         }
 
         .feature-title {
@@ -832,13 +1081,38 @@
 
         /* --- CTA BANNER --- */
         .cta-banner {
-            background: #e6f7f4;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, #e6f7f4 0%, #f0fdf9 100%);
+            border: 1px solid #cceee8;
             border-radius: 16px;
             padding: 32px 40px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             margin-bottom: 70px;
+            transition: all 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .cta-banner::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 60%;
+            height: 100%;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0) 100%);
+            transform: skewX(-25deg);
+            pointer-events: none;
+        }
+
+        .cta-banner.is-revealed::before {
+            animation: ctaWipeSheen 1.85s cubic-bezier(0.22, 1, 0.36, 1) 0.45s forwards;
+        }
+
+        @keyframes ctaWipeSheen {
+            0% { left: -120%; }
+            100% { left: 220%; }
         }
 
         .cta-text h3 {
@@ -856,17 +1130,266 @@
         .btn-cta {
             background: #2e625a;
             color: white;
-            padding: 11px 24px;
+            padding: 12px 26px;
             border-radius: 9px;
-            font-size: 13.5px;
+            font-size: 14px;
             font-weight: 700;
             text-decoration: none;
             white-space: nowrap;
-            transition: all 0.2s;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 3px 10px rgba(46, 98, 90, 0.25);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            cursor: pointer;
         }
 
         .btn-cta:hover {
             background: #234c46;
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(46, 98, 90, 0.38);
+        }
+
+        .btn-cta:active {
+            transform: translateY(0) scale(0.98);
+            box-shadow: 0 2px 6px rgba(46, 98, 90, 0.2);
+        }
+
+        .btn-cta svg {
+            transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .btn-cta:hover svg {
+            transform: scale(1.15);
+        }
+
+        /* =========================================================
+           1. INTRO ANIMATION & CINEMATIC CURTAIN WIPE
+           ========================================================= */
+        .intro-curtain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999999;
+            background: linear-gradient(145deg, #183d37 0%, #0d2320 60%, #091715 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            transform: translateY(0%);
+            animation: introCurtainWipe 1.15s cubic-bezier(0.77, 0, 0.175, 1) 0.85s forwards;
+            will-change: transform;
+        }
+
+        @keyframes introCurtainWipe {
+            0% {
+                transform: translateY(0%);
+            }
+            100% {
+                transform: translateY(-100%);
+                visibility: hidden;
+            }
+        }
+
+        .intro-curtain-inner {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 14px;
+            animation: introContentZoomFade 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            will-change: transform, opacity;
+        }
+
+        @keyframes introContentZoomFade {
+            0% {
+                opacity: 0;
+                transform: scale(0.88) translateY(14px);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.08) translateY(-14px);
+            }
+        }
+
+        .intro-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .intro-logo-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(10px);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 20px rgba(46, 98, 90, 0.5);
+        }
+
+        .intro-logo-text {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .intro-wipe-track {
+            width: 140px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 9999px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .intro-wipe-bar {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #38bdf8);
+            transform: translateX(-100%);
+            animation: introWipeBarAnim 0.85s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes introWipeBarAnim {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(0); }
+        }
+
+        .intro-tagline {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.7);
+            letter-spacing: 0.3px;
+            font-weight: 500;
+        }
+
+        /* =========================================================
+           2. CINEMATIC REVEAL & SLIDE IN HERO ANIMATIONS
+           ========================================================= */
+        .cinematic-reveal-title {
+            opacity: 0;
+            clip-path: inset(0 0 100% 0);
+            transform: translateY(34px);
+            filter: blur(8px);
+            animation: cinematicTitleReveal 1.65s cubic-bezier(0.16, 1, 0.3, 1) 1.05s both;
+            will-change: clip-path, transform, filter, opacity;
+        }
+
+        @keyframes cinematicTitleReveal {
+            0% {
+                opacity: 0;
+                clip-path: inset(0 0 100% 0);
+                transform: translateY(34px);
+                filter: blur(8px);
+            }
+            45% {
+                filter: blur(2px);
+            }
+            100% {
+                opacity: 1;
+                clip-path: inset(0 0 0 0);
+                transform: translateY(0);
+                filter: blur(0);
+            }
+        }
+
+        /* Directional Slide In Left */
+        .slide-in-left {
+            opacity: 0;
+            transform: translateX(-36px);
+            animation: slideInLeftAnim 1.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: transform, opacity;
+        }
+
+        @keyframes slideInLeftAnim {
+            0% {
+                opacity: 0;
+                transform: translateX(-36px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Stagger Delays for Hero Left (Coordinated with Curtain Lift) */
+        .hero-item-tag { animation-delay: 0.85s; }
+        .hero-item-desc { animation-delay: 1.25s; }
+        .hero-item-note { animation-delay: 1.75s; }
+
+        /* Staggered Entrance for Hero Buttons */
+        .stagger-btn-1 {
+            animation: btnStaggerIn 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 1.45s both;
+            will-change: transform, opacity;
+        }
+
+        .stagger-btn-2 {
+            animation: btnStaggerIn 1.15s cubic-bezier(0.34, 1.56, 0.64, 1) 1.62s both;
+            will-change: transform, opacity;
+        }
+
+        @keyframes btnStaggerIn {
+            0% {
+                opacity: 0;
+                transform: translateY(22px) scale(0.92);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* =========================================================
+           3. STAGGERED ENTRANCE & ZOOM IN SCROLL REVEAL
+           ========================================================= */
+        .scroll-reveal {
+            opacity: 1;
+            transform: none;
+        }
+
+        .js-ready .scroll-reveal {
+            opacity: 0;
+            transform: translateY(26px) scale(0.95);
+            transition: opacity 1.35s cubic-bezier(0.16, 1, 0.3, 1), 
+                        transform 1.35s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: opacity, transform;
+        }
+
+        .js-ready .scroll-reveal.is-revealed {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* Cascade Stagger Delays */
+        .reveal-delay-1 { transition-delay: 0.10s; }
+        .reveal-delay-2 { transition-delay: 0.18s; }
+        .reveal-delay-3 { transition-delay: 0.26s; }
+        .reveal-delay-4 { transition-delay: 0.34s; }
+        .reveal-delay-5 { transition-delay: 0.42s; }
+        .reveal-delay-6 { transition-delay: 0.50s; }
+        .reveal-delay-7 { transition-delay: 0.58s; }
+
+        @media (prefers-reduced-motion: reduce) {
+            /* Keep animations gentle and smooth without breaking */
+            .js-ready .scroll-reveal {
+                transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+            }
         }
 
         /* --- FOOTER --- */
@@ -927,21 +1450,54 @@
             padding-top: 20px;
         }
 
-        @media (max-width: 992px) {
+        /* --- RESPONSIVE OPTIMIZATIONS --- */
+        @media (max-width: 1024px) {
             .hero {
                 grid-template-columns: 1fr;
-                gap: 36px;
+                gap: 32px;
+                padding: 32px 0 40px;
+            }
+            .hero-img-container {
+                height: 300px;
             }
             .categories-grid {
-                grid-template-columns: repeat(4, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+                gap: 12px;
             }
-            .features-grid, .footer-grid {
-                grid-template-columns: 1fr;
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 18px;
+            }
+            .footer-grid {
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 30px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 20px;
+            }
+            .navbar {
+                padding: 18px 0 10px;
+            }
+            .hero-title {
+                font-size: 32px;
+                letter-spacing: -0.6px;
+            }
+            .stats-grid {
+                padding: 24px 0 36px;
+                gap: 16px;
+            }
+            .stat-item h3 {
+                font-size: 24px;
             }
             .cta-banner {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 18px;
+                padding: 26px 28px;
+                margin-bottom: 50px;
             }
         }
 
@@ -950,7 +1506,7 @@
                 padding: 0 16px;
             }
             .navbar {
-                padding: 16px 0 10px;
+                padding: 14px 0 10px;
                 gap: 8px;
             }
             .logo-text {
@@ -969,11 +1525,11 @@
                 gap: 4px;
             }
             .hero {
-                padding: 24px 0 36px;
-                gap: 24px;
+                padding: 20px 0 32px;
+                gap: 22px;
             }
             .hero-title {
-                font-size: 28px;
+                font-size: 27px;
                 line-height: 1.22;
                 letter-spacing: -0.5px;
                 margin-bottom: 12px;
@@ -995,7 +1551,7 @@
                 flex-direction: column;
                 width: 100%;
                 gap: 10px;
-                margin-bottom: 16px;
+                margin-bottom: 14px;
             }
             .btn-green,
             .btn-blue {
@@ -1007,41 +1563,43 @@
                 font-size: 14px;
                 display: flex;
                 align-items: center;
-            }
-            .search-box {
-                width: 100%;
-                gap: 8px;
-            }
-            .search-input-wrap {
-                min-width: 0;
-                flex: 1;
-            }
-            .search-input-wrap input {
-                font-size: 13px;
-                width: 100%;
-            }
-            .btn-search {
-                padding: 10px 16px;
-                flex-shrink: 0;
+                touch-action: manipulation;
             }
             .hero-img-container {
                 height: 220px;
             }
             .categories-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(auto-fill, minmax(95px, 1fr));
                 gap: 10px;
                 margin-bottom: 40px;
             }
             .cat-card {
                 padding: 16px 8px;
+                touch-action: manipulation;
             }
             .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 10px;
+                padding: 18px 0 28px;
+            }
+            .stat-item h3 {
+                font-size: 21px;
+            }
+            .stat-item p {
+                font-size: 11.5px;
+            }
+            .features-section {
+                padding: 36px 0 44px;
+            }
+            .features-grid {
                 grid-template-columns: 1fr;
-                gap: 16px;
-                padding: 20px 0 32px;
+                gap: 14px;
+            }
+            .feature-card {
+                padding: 22px 18px;
             }
             .cta-banner {
-                padding: 20px 16px;
+                padding: 22px 18px;
                 border-radius: 14px;
                 margin-bottom: 40px;
             }
@@ -1051,6 +1609,7 @@
                 justify-content: center;
                 display: flex;
                 box-sizing: border-box;
+                touch-action: manipulation;
             }
             .role-badge {
                 display: none;
@@ -1063,19 +1622,23 @@
             }
             .btn-nav-dashboard {
                 padding: 7px 10px;
+                touch-action: manipulation;
             }
             .btn-nav-login {
                 padding: 7px 12px;
                 font-size: 12.5px;
+                touch-action: manipulation;
             }
             .btn-nav-register {
                 padding: 7px 12px;
                 font-size: 12.5px;
+                touch-action: manipulation;
             }
             .footer {
                 padding: 36px 0 24px;
             }
             .footer-grid {
+                grid-template-columns: 1fr;
                 gap: 24px;
                 margin-bottom: 24px;
             }
@@ -1083,6 +1646,27 @@
     </style>
 </head>
 <body>
+
+    <!-- ====================================================
+         INTRO ANIMATION & CINEMATIC SPLASH CURTAIN (WIPE)
+         ==================================================== -->
+    <div id="introCurtain" class="intro-curtain" aria-hidden="true">
+        <div class="intro-curtain-inner">
+            <div class="intro-brand">
+                <div class="intro-logo-icon">
+                    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                </div>
+                <span class="intro-logo-text">BOOKNEST</span>
+            </div>
+            <div class="intro-wipe-track">
+                <div class="intro-wipe-bar"></div>
+            </div>
+            <p class="intro-tagline">Ruang Pengetahuan Terbuka</p>
+        </div>
+    </div>
 
     <!-- NAVBAR ATAS -->
     <header class="container">
@@ -1248,23 +1832,23 @@
         <section class="hero">
             <div class="hero-left">
                 @auth
-                    <div class="welcome-chip">
+                    <div class="welcome-chip slide-in-left hero-item-tag">
                         <span class="welcome-chip-pulse"></span>
                         <span>Halo, <strong>{{ auth()->user()->name }}</strong> ({{ ucfirst(auth()->user()->role) }}) 👋</span>
                     </div>
                 @else
-                    <span class="hero-tag">Temukan. Baca. Berkembang.</span>
+                    <span class="hero-tag slide-in-left hero-item-tag">Temukan. Baca. Berkembang.</span>
                 @endauth
 
-                <h1 class="hero-title">Temukan Buku Favoritmu</h1>
-                <p class="hero-desc">
+                <h1 class="hero-title cinematic-reveal-title">Temukan Buku Favoritmu</h1>
+                <p class="hero-desc slide-in-left hero-item-desc">
                     Setiap buku membuka dunia baru. Jelajahi ribuan koleksi, pinjam dengan mudah, dan tumbuh bersama perpustakaan umum BOOKNEST.
                 </p>
 
 
                 <div class="hero-buttons">
                     @if(!auth()->check() || auth()->user()->role === 'member')
-                        <a href="{{ route('katalog.index') }}" class="btn-green">
+                        <a href="{{ route('katalog.index') }}" class="btn-green stagger-btn-1">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                             <span>Jelajahi Katalog</span>
                         </a>
@@ -1273,17 +1857,17 @@
                     @guest
                     @else
                         @if(auth()->user()->role === 'member')
-                            <a href="{{ route('riwayat.index') }}" class="btn-blue">
+                            <a href="{{ route('riwayat.index') }}" class="btn-blue stagger-btn-2">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
                                 <span>Pinjaman & Booking Saya</span>
                             </a>
                         @elseif(auth()->user()->role === 'petugas')
-                            <a href="{{ route('barcode.scan') }}" class="btn-blue">
+                            <a href="{{ route('barcode.scan') }}" class="btn-blue stagger-btn-2">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
                                 <span>Meja Sirkulasi (Scan QR)</span>
                             </a>
                         @else
-                            <a href="{{ route('dashboard') }}" class="btn-blue">
+                            <a href="{{ route('dashboard') }}" class="btn-blue stagger-btn-2">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
                                 <span>Panel Dasbor Admin</span>
                             </a>
@@ -1292,9 +1876,9 @@
                 </div>
 
                 @guest
-                    <p class="hero-note">Gratis menjadi anggota · Peminjaman hingga 30 hari</p>
+                    <p class="hero-note slide-in-left hero-item-note">Gratis menjadi anggota · Peminjaman hingga 30 hari</p>
                 @else
-                    <p class="hero-note">
+                    <p class="hero-note slide-in-left hero-item-note">
                         Status akun: <strong>Aktif</strong> · Akses layanan cepat langsung dari beranda
                     </p>
                 @endauth
@@ -1304,9 +1888,12 @@
             <div class="hero-img-box">
                 <div class="hero-img-container">
                     <img src="https://images.unsplash.com/photo-1521587760476-6c12a4b040da?q=80&w=1200&auto=format&fit=crop" 
-                         alt="Perpustakaan BOOKNEST">
+                         alt="Perpustakaan BOOKNEST"
+                         loading="eager"
+                         fetchpriority="high"
+                         decoding="async">
                 </div>
-                <div class="hero-img-caption">
+                <div class="hero-img-caption slide-in-left hero-item-note">
                     <strong>12.480+</strong> <span>buku menunggu untuk kamu temukan</span>
                 </div>
             </div>
@@ -1315,66 +1902,66 @@
         <!-- 2. STATS SECTION -->
         <section class="stats-grid">
             <div class="stat-item">
-                <h3>12.480</h3>
+                <h3 class="counter-number" data-target="12480" data-format="dot">0</h3>
                 <p>Koleksi buku</p>
             </div>
             <div class="stat-item">
-                <h3>3.240</h3>
+                <h3 class="counter-number" data-target="3240" data-format="dot">0</h3>
                 <p>Anggota aktif</p>
             </div>
             <div class="stat-item">
-                <h3>7</h3>
+                <h3 class="counter-number" data-target="7">0</h3>
                 <p>Kategori pilihan</p>
             </div>
         </section>
 
         <!-- 3. KATEGORI BUKU -->
         <section>
-            <h2 class="section-title">Apa yang ingin kamu baca?</h2>
+            <h2 class="section-title scroll-reveal">Apa yang ingin kamu baca?</h2>
             <div class="categories-grid">
-                <a href="{{ route('katalog.index', ['q' => 'Fiksi']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Fiksi']) }}" class="cat-card scroll-reveal reveal-delay-1">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
                     </div>
                     <span class="cat-name">Fiksi</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Pendidikan']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Pendidikan']) }}" class="cat-card scroll-reveal reveal-delay-2">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c3 3 9 3 12 0v-5"></path></svg>
                     </div>
                     <span class="cat-name">Pendidikan</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Sejarah']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Sejarah']) }}" class="cat-card scroll-reveal reveal-delay-3">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="21" x2="21" y2="21"></line><line x1="6" y1="18" x2="6" y2="7"></line><line x1="10" y1="18" x2="10" y2="7"></line><line x1="14" y1="18" x2="14" y2="7"></line><line x1="18" y1="18" x2="18" y2="7"></line><polygon points="12 2 20 7 4 7"></polygon></svg>
                     </div>
                     <span class="cat-name">Sejarah</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Teknologi']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Teknologi']) }}" class="cat-card scroll-reveal reveal-delay-4">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
                     </div>
                     <span class="cat-name">Teknologi</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Agama']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Agama']) }}" class="cat-card scroll-reveal reveal-delay-5">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M12 22V12"></path></svg>
                     </div>
                     <span class="cat-name">Agama</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Anak']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Anak']) }}" class="cat-card scroll-reveal reveal-delay-6">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                     </div>
                     <span class="cat-name">Anak</span>
                 </a>
 
-                <a href="{{ route('katalog.index', ['q' => 'Horror']) }}" class="cat-card">
+                <a href="{{ route('katalog.index', ['q' => 'Horror']) }}" class="cat-card scroll-reveal reveal-delay-7">
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <path d="M9 10h.01"></path>
@@ -1391,13 +1978,13 @@
 
         <!-- 4. KEUNGGULAN / FITUR -->
         <section class="features-section">
-            <div class="features-header">
+            <div class="features-header scroll-reveal">
                 <h2>Perpustakaan, kini lebih dekat</h2>
                 <p>Semua kebutuhan membaca dalam satu tempat yang mudah digunakan.</p>
             </div>
 
             <div class="features-grid">
-                <div class="feature-card">
+                <div class="feature-card scroll-reveal reveal-delay-1">
                     <div class="feature-icon-box">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <circle cx="11" cy="11" r="8"></circle>
@@ -1410,7 +1997,7 @@
                     </p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card scroll-reveal reveal-delay-2">
                     <div class="feature-icon-box">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="3" y="3" width="18" height="18" rx="2"></rect>
@@ -1426,7 +2013,7 @@
                     </p>
                 </div>
 
-                <div class="feature-card">
+                <div class="feature-card scroll-reveal reveal-delay-3">
                     <div class="feature-icon-box">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <rect x="2" y="4" width="20" height="16" rx="2"></rect>
@@ -1442,7 +2029,7 @@
         </section>
 
         <!-- 5. CTA BANNER -->
-        <section class="cta-banner">
+        <section class="cta-banner scroll-reveal">
             @guest
                 <div class="cta-text">
                     <h3>Mulai perjalanan membacamu hari ini</h3>
@@ -1468,7 +2055,7 @@
     </main>
 
     <!-- 6. FOOTER -->
-    <footer class="footer">
+    <footer class="footer scroll-reveal">
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
@@ -1546,6 +2133,205 @@
                 }
             }
         });
+
+        // --- Smooth Fade-In on Scroll & Count-Up Animations ---
+        (function () {
+            function animateCountUp(el) {
+                if (!el || el.dataset.counted === 'true') return;
+                el.dataset.counted = 'true';
+
+                const target = parseInt(el.getAttribute('data-target'), 10);
+                if (isNaN(target)) return;
+
+                const isDotFormat = el.getAttribute('data-format') === 'dot' || target >= 1000;
+                const duration = 2800;
+                let startTime = null;
+
+                function easeOutCubic(x) {
+                    return 1 - Math.pow(1 - x, 3);
+                }
+
+                function formatNumber(num) {
+                    if (!isDotFormat) return num.toString();
+                    return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                }
+
+                el.textContent = '0';
+
+                function step(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased = easeOutCubic(progress);
+                    const currentCount = Math.floor(eased * target);
+
+                    el.textContent = formatNumber(currentCount);
+
+                    if (progress < 1) {
+                        requestAnimationFrame(step);
+                    } else {
+                        el.textContent = formatNumber(target);
+                    }
+                }
+
+                requestAnimationFrame(step);
+            }
+
+            function triggerCountUpAll() {
+                document.querySelectorAll('.counter-number').forEach(function (el) {
+                    animateCountUp(el);
+                });
+            }
+
+            function handleScrollRevealFallback() {
+                const triggerPoint = window.innerHeight * 0.92;
+                const revealElements = document.querySelectorAll('.scroll-reveal:not(.is-revealed)');
+
+                revealElements.forEach(function (el) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= triggerPoint && rect.bottom >= 0) {
+                        el.classList.add('is-revealed');
+                        const counters = el.querySelectorAll('.counter-number');
+                        counters.forEach(function (c) { animateCountUp(c); });
+                    }
+                });
+            }
+
+            function init() {
+                // Jalankan animasi hitung angka secara harmonis
+                triggerCountUpAll();
+
+                if ('IntersectionObserver' in window) {
+                    const observerOptions = {
+                        root: null,
+                        rootMargin: '60px 0px 60px 0px',
+                        threshold: 0.02
+                    };
+
+                    const observer = new IntersectionObserver(function (entries, obs) {
+                        entries.forEach(function (entry) {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('is-revealed');
+                                obs.unobserve(entry.target);
+                            }
+                        });
+                    }, observerOptions);
+
+                    document.querySelectorAll('.scroll-reveal').forEach(function (el) {
+                        observer.observe(el);
+                    });
+                } else {
+                    window.addEventListener('scroll', handleScrollRevealFallback, { passive: true });
+                    window.addEventListener('resize', handleScrollRevealFallback, { passive: true });
+                    handleScrollRevealFallback();
+                }
+            }
+
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', init);
+            } else {
+                init();
+            }
+        })();
+
+        // --- Smooth & Gentle Mouse Wheel Scrolling Engine ---
+        (function () {
+            if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                return;
+            }
+
+            let currentY = window.pageYOffset || document.documentElement.scrollTop;
+            let targetY = currentY;
+            let isRunning = false;
+
+            // Sinkronkan target scroll saat user melakukan scroll via touch, panah keyboard, atau navigasi lain
+            function syncScrollPos() {
+                if (!isRunning) {
+                    currentY = window.pageYOffset || document.documentElement.scrollTop;
+                    targetY = currentY;
+                }
+            }
+
+            window.addEventListener('scroll', syncScrollPos, { passive: true });
+
+            window.addEventListener('wheel', function (e) {
+                // Abaikan jika user menahan Ctrl (pinch/zoom) atau Shift (horizontal)
+                if (e.ctrlKey || e.shiftKey) return;
+
+                // Abaikan jika kursor berada dalam dropdown atau elemen modal dengan scrollbar sendiri
+                let el = e.target;
+                while (el && el !== document.body && el !== document.documentElement) {
+                    if (el.scrollHeight > el.clientHeight && el.clientHeight > 0) {
+                        const style = window.getComputedStyle(el);
+                        if (style.overflowY === 'auto' || style.overflowY === 'scroll') {
+                            return; // Biarkan kontainer lokal scroll secara alami
+                        }
+                    }
+                    el = el.parentElement;
+                }
+
+                // Cegah scroll bawaan yang tersendat atau membutuhkan gerakan kursor di Windows
+                e.preventDefault();
+
+                const maxScroll = Math.max(0, document.documentElement.scrollHeight - window.innerHeight);
+
+                // Normalisasi delta mouse wheel (dukung line mode dan pixel mode)
+                let delta = e.deltaY;
+                if (e.deltaMode === 1) {
+                    delta *= 28;
+                } else if (e.deltaMode === 2) {
+                    delta *= window.innerHeight;
+                }
+
+                // Rasio kecepatan putaran roda mouse yang perlahan, stabil, dan nyaman
+                const step = Math.sign(delta) * Math.min(Math.abs(delta) * 0.95, 110);
+                targetY = Math.min(Math.max(0, targetY + step), maxScroll);
+
+                if (!isRunning) {
+                    isRunning = true;
+                    currentY = window.pageYOffset || document.documentElement.scrollTop;
+                    requestAnimationFrame(updateSmoothScroll);
+                }
+            }, { passive: false });
+
+            function updateSmoothScroll() {
+                if (!isRunning) return;
+
+                const diff = targetY - currentY;
+                // Easing factor 0.085: meluncur secara perlahan, sangat lembut, dan responsif
+                currentY += diff * 0.085;
+
+                if (Math.abs(diff) < 0.5) {
+                    currentY = targetY;
+                    window.scrollTo(0, Math.round(currentY));
+                    isRunning = false;
+                } else {
+                    window.scrollTo(0, Math.round(currentY));
+                    requestAnimationFrame(updateSmoothScroll);
+                }
+            }
+        })();
+
+        // --- Clean up Intro Curtain after Animation Finishes ---
+        (function () {
+            const curtain = document.getElementById('introCurtain');
+            if (!curtain) return;
+
+            function removeCurtain() {
+                if (curtain && curtain.parentNode) {
+                    curtain.parentNode.removeChild(curtain);
+                }
+            }
+
+            curtain.addEventListener('animationend', function (e) {
+                if (e.animationName === 'introCurtainWipe') {
+                    removeCurtain();
+                }
+            });
+
+            // Fallback safety timer
+            setTimeout(removeCurtain, 2800);
+        })();
     </script>
 
     {{-- Realtime Sirkulasi Notification Modal & Polling --}}

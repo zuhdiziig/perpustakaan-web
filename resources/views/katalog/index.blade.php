@@ -418,7 +418,18 @@
             font-family: inherit;
         }
 
-        /* --- BOOK GRID (4 COLUMNS) --- */
+        /* --- BOOK GRID (4 COLUMNS) WITH STAGGER FADE IN UP --- */
+        @keyframes bookCardFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         .book-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -433,13 +444,37 @@
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                        border-color 0.2s ease;
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+            animation: bookCardFadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: transform, opacity;
         }
 
+        /* Staggered entrance for up to 16 cards */
+        .book-grid > .book-card:nth-child(1)  { animation-delay: 0.04s; }
+        .book-grid > .book-card:nth-child(2)  { animation-delay: 0.08s; }
+        .book-grid > .book-card:nth-child(3)  { animation-delay: 0.12s; }
+        .book-grid > .book-card:nth-child(4)  { animation-delay: 0.16s; }
+        .book-grid > .book-card:nth-child(5)  { animation-delay: 0.20s; }
+        .book-grid > .book-card:nth-child(6)  { animation-delay: 0.24s; }
+        .book-grid > .book-card:nth-child(7)  { animation-delay: 0.28s; }
+        .book-grid > .book-card:nth-child(8)  { animation-delay: 0.32s; }
+        .book-grid > .book-card:nth-child(9)  { animation-delay: 0.36s; }
+        .book-grid > .book-card:nth-child(10) { animation-delay: 0.40s; }
+        .book-grid > .book-card:nth-child(11) { animation-delay: 0.44s; }
+        .book-grid > .book-card:nth-child(12) { animation-delay: 0.48s; }
+        .book-grid > .book-card:nth-child(13) { animation-delay: 0.52s; }
+        .book-grid > .book-card:nth-child(14) { animation-delay: 0.56s; }
+        .book-grid > .book-card:nth-child(15) { animation-delay: 0.60s; }
+        .book-grid > .book-card:nth-child(16) { animation-delay: 0.64s; }
+
+        /* Hover Lift */
         .book-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.07);
+            transform: translateY(-6px);
+            box-shadow: 0 16px 32px -6px rgba(15, 23, 42, 0.1), 0 4px 12px -2px rgba(15, 118, 110, 0.08);
+            border-color: #cbd5e1;
         }
 
         /* Book Cover Visual */
@@ -454,15 +489,17 @@
             justify-content: center;
         }
 
+        /* Image Zoom on hover */
         .book-cover-img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: transform 0.3s ease;
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            will-change: transform;
         }
 
         .book-card:hover .book-cover-img {
-            transform: scale(1.03);
+            transform: scale(1.05);
         }
 
         .book-cover-fallback {
@@ -1352,7 +1389,7 @@
             <!-- Brand -->
             <div style="display: flex; align-items: center; gap: 14px;">
                 @auth
-                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi">
+                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi" aria-controls="sidebarPanel" aria-expanded="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="3" y1="12" x2="21" y2="12"></line>
                             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -1493,9 +1530,11 @@
                     </svg>
                     <input type="text"
                            name="q"
+                           id="catalogSearchInput"
                            value="{{ $keyword }}"
                            placeholder="Cari judul, penulis, atau kategori..."
-                           class="search-input">
+                           class="search-input"
+                           autocomplete="off">
                 </div>
                 <button type="submit" class="btn-search">
                     Cari
@@ -1556,7 +1595,7 @@
             <input type="hidden" name="sort" value="{{ $sort }}">
         </form>
 
-        <div id="catalogResultsArea">
+        <div id="catalogResultsArea" style="transition: opacity 0.26s cubic-bezier(0.16, 1, 0.3, 1), transform 0.26s cubic-bezier(0.16, 1, 0.3, 1); will-change: opacity, transform;">
         <!-- RESULTS INFO BAR -->
         <div class="results-bar">
             <div class="results-count-text">
@@ -1984,7 +2023,8 @@
             }
             catalogFilterAbortController = new AbortController();
 
-            resultsArea.style.opacity = '0.5';
+            resultsArea.style.opacity = '0.45';
+            resultsArea.style.transform = 'translateY(6px)';
             resultsArea.style.pointerEvents = 'none';
 
             try {
@@ -2013,6 +2053,7 @@
                 }
             } finally {
                 resultsArea.style.opacity = '1';
+                resultsArea.style.transform = 'translateY(0)';
                 resultsArea.style.pointerEvents = '';
             }
         }
@@ -2025,10 +2066,27 @@
             }
         });
 
+        let catalogSearchDebounceTimer = null;
+        const catalogSearchInputEl = document.getElementById('catalogSearchInput');
+        if (catalogSearchInputEl) {
+            catalogSearchInputEl.addEventListener('input', function() {
+                // Pastikan urutan abjad (A-Z) tetap aktif saat melakukan pencarian
+                const sortInput = document.querySelector('#catalogFilterForm input[name="sort"]');
+                if (sortInput && (!sortInput.value || (sortInput.value !== 'judul_asc' && sortInput.value !== 'judul_desc'))) {
+                    sortInput.value = 'judul_asc';
+                }
+                clearTimeout(catalogSearchDebounceTimer);
+                catalogSearchDebounceTimer = setTimeout(() => {
+                    applyRealtimeCatalogFilter();
+                }, 200);
+            });
+        }
+
         const catalogFilterFormEl = document.getElementById('catalogFilterForm');
         if (catalogFilterFormEl) {
             catalogFilterFormEl.addEventListener('submit', function(e) {
                 e.preventDefault();
+                clearTimeout(catalogSearchDebounceTimer);
                 applyRealtimeCatalogFilter();
             });
         }

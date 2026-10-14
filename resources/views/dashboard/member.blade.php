@@ -4,9 +4,23 @@
 
 @section('styles')
 <style>
-    /* --- BREADCRUMB & HEADER --- */
+    /* --- ANIMATION KEYFRAMES --- */
+    @keyframes memberFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* --- BREADCRUMB & HEADER (FADE IN UP RINGAN) --- */
     .dashboard-header {
         margin-bottom: 22px;
+        animation: memberFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
     .breadcrumb {
@@ -32,7 +46,7 @@
         color: var(--text-muted);
     }
 
-    /* --- WELCOME BANNER --- */
+    /* --- WELCOME BANNER (FADE IN UP RINGAN) --- */
     .welcome-banner {
         background: #ccfbf1;
         border: 1px solid #99f6e4;
@@ -43,6 +57,13 @@
         justify-content: space-between;
         gap: 20px;
         margin-bottom: 22px;
+        animation: memberFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+        will-change: transform, opacity;
+        transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .welcome-banner:hover {
+        box-shadow: 0 8px 24px -4px rgba(15, 118, 110, 0.12);
     }
 
     .welcome-title {
@@ -65,6 +86,7 @@
         color: #115e59;
     }
 
+    /* Hover Lift for CTA */
     .btn-cari-buku {
         padding: 10px 22px;
         background: #0f766e;
@@ -73,18 +95,20 @@
         font-weight: 700;
         border-radius: 10px;
         white-space: nowrap;
-        transition: all 0.15s ease;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
         display: inline-block;
         flex-shrink: 0;
     }
 
     .btn-cari-buku:hover {
         background: #115e59;
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
     }
 
-    /* --- STATS GRID (4 COLS) --- */
+    /* --- STATS GRID (4 COLS) WITH STAGGER --- */
     .stats-grid-4 {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -101,12 +125,24 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.15s, box-shadow 0.15s;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease;
+        animation: memberFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
+    /* Staggered entrance for stats */
+    .stats-grid-4 > .stat-box:nth-child(1) { animation-delay: 0.12s; }
+    .stats-grid-4 > .stat-box:nth-child(2) { animation-delay: 0.18s; }
+    .stats-grid-4 > .stat-box:nth-child(3) { animation-delay: 0.24s; }
+    .stats-grid-4 > .stat-box:nth-child(4) { animation-delay: 0.30s; }
+
+    /* Hover Lift */
     .stat-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px rgba(15, 118, 110, 0.05);
+        border-color: #cbd5e1;
     }
 
     .stat-icon {
@@ -417,12 +453,15 @@
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
         display: flex;
         flex-direction: column;
-        transition: transform 0.2s, box-shadow 0.2s;
+        transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease;
     }
 
     .rekomendasi-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 22px rgba(15, 23, 42, 0.06);
+        transform: translateY(-5px);
+        box-shadow: 0 14px 28px -4px rgba(15, 23, 42, 0.08), 0 4px 12px -2px rgba(15, 118, 110, 0.06);
+        border-color: #cbd5e1;
     }
 
     .rekomendasi-cover-wrap {
@@ -440,6 +479,12 @@
         height: 100%;
         object-fit: cover;
         display: block;
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        will-change: transform;
+    }
+
+    .rekomendasi-card:hover .rekomendasi-cover-img {
+        transform: scale(1.05);
     }
 
     .rekomendasi-badges {
@@ -521,12 +566,15 @@
         border-radius: 9px;
         text-align: center;
         display: block;
-        transition: all 0.15s;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
     }
 
     .btn-pinjam-buku:hover {
         background: #115e59;
-        box-shadow: 0 4px 10px rgba(15, 118, 110, 0.2);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28);
     }
 
     /* --- RESPONSIVE --- */

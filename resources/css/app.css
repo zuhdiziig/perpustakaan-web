@@ -7,3 +7,516 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* ==========================================================================
+   BOOKNEST DESIGN SYSTEM - MODERN SMOOTH ANIMATIONS & MICRO-INTERACTIONS
+   ========================================================================== */
+
+/* --- 1. REUSABLE HOVER INTERACTIONS ON BUTTONS (200-300ms) --- */
+.btn,
+.btn-primary,
+.btn-secondary,
+.btn-danger,
+.btn-success,
+.btn-search,
+.btn-action,
+.action-btn,
+.btn-katalog,
+.btn-qr,
+.cat-btn,
+.btn-pinjam-buku,
+.topbar-nav-link,
+.topbar-icon-btn,
+.topbar-user-badge,
+.sidebar-link,
+.custom-page-btn,
+.page-btn,
+.btn-auth-login,
+.btn-auth-register,
+.btn-manage,
+.btn-cari-buku,
+.btn-lihat-denda,
+.btn-action-primary,
+.btn-action-secondary,
+.btn-action-outline,
+.btn-action-scan,
+.btn-action-dashboard,
+.btn-action-manage,
+.btn-action-pajang,
+.btn-action-simpan,
+.btn-action-edit,
+.btn-action-delete,
+.btn-action-qr,
+.btn-action-qr-link,
+.btn-action-cash,
+.btn-action-qris,
+.btn-action-nota,
+.btn-modal-primary,
+.btn-modal-secondary,
+.btn-modal-cancel,
+.btn-add-cart,
+.card-btn-action,
+.member-realtime-btn-primary,
+.dropdown-item {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.18s ease,
+                border-color 0.18s ease,
+                color 0.18s ease;
+}
+
+.btn:hover:not(:disabled),
+.btn-primary:hover:not(:disabled),
+.btn-secondary:hover:not(:disabled),
+.btn-success:hover:not(:disabled),
+.btn-search:hover:not(:disabled),
+.btn-danger:hover:not(:disabled),
+.btn-action:hover:not(:disabled),
+.action-btn:hover:not(:disabled),
+.btn-katalog:hover,
+.btn-qr:hover,
+.btn-pinjam-buku:hover,
+.btn-auth-login:hover,
+.btn-auth-register:hover,
+.btn-manage:hover,
+.btn-cari-buku:hover,
+.btn-lihat-denda:hover,
+.btn-action-primary:hover,
+.btn-action-secondary:hover,
+.btn-action-outline:hover,
+.btn-action-scan:hover,
+.btn-action-dashboard:hover,
+.btn-action-manage:hover,
+.btn-action-pajang:hover,
+.btn-action-simpan:hover,
+.btn-action-edit:hover,
+.btn-action-delete:hover,
+.btn-action-qr:hover,
+.btn-action-qr-link:hover,
+.btn-action-cash:hover,
+.btn-action-qris:hover,
+.btn-action-nota:hover,
+.btn-modal-primary:hover,
+.btn-modal-secondary:hover,
+.btn-modal-cancel:hover,
+.btn-add-cart:hover,
+.card-btn-action:hover,
+.member-realtime-btn-primary:hover,
+.dropdown-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(15, 118, 110, 0.14);
+}
+
+.btn:active:not(:disabled),
+.btn-primary:active:not(:disabled),
+.btn-secondary:active:not(:disabled),
+.btn-danger:active:not(:disabled),
+.btn-success:active:not(:disabled),
+.btn-search:active:not(:disabled),
+.btn-action:active:not(:disabled),
+.action-btn:active:not(:disabled),
+.btn-katalog:active,
+.btn-qr:active,
+.cat-btn:active,
+.btn-pinjam-buku:active,
+.custom-page-btn:active:not(:disabled),
+.page-btn:active:not(:disabled) {
+    transform: translateY(0) scale(0.98);
+}
+
+.stat-box,
+.stat-card-member,
+.manage-card,
+.book-card,
+.filter-card,
+.welcome-banner,
+.kpi-card,
+.card-hover,
+.dashboard-card,
+.card-status-berhasil,
+.card-rincian,
+[class*="card-"] {
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease;
+}
+
+.stat-box:hover,
+.stat-card-member:hover,
+.manage-card:hover,
+.kpi-card:hover,
+.card-hover:hover,
+.card-status-berhasil:hover,
+.card-rincian:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px -4px rgba(15, 23, 42, 0.08);
+}
+
+.book-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 14px 28px -6px rgba(15, 23, 42, 0.1);
+}
+
+/* Book Cover subtle zoom on hover */
+.book-card .book-cover img,
+.book-card .book-cover-img,
+.book-cover img,
+.book-cover-img {
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: transform;
+}
+
+.book-card:hover .book-cover img,
+.book-card:hover .book-cover-img {
+    transform: scale(1.04);
+}
+
+/* Category pills / buttons */
+.cat-btn,
+.cat-card,
+.category-pill {
+    transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 0.2s ease,
+                background-color 0.2s ease;
+}
+
+.cat-btn:hover,
+.cat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
+}
+
+/* Interactive tables: clean hover highlight without jumping or heavy layout shift */
+.table-hover tbody tr,
+.custom-table tbody tr,
+.data-table tbody tr,
+.table tbody tr {
+    transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.table-hover tbody tr:hover,
+.custom-table tbody tr:hover,
+.data-table tbody tr:hover,
+.table tbody tr:hover {
+    background-color: rgba(15, 118, 110, 0.042) !important;
+}
+
+.table-hover tbody tr:hover td,
+.custom-table tbody tr:hover td,
+.data-table tbody tr:hover td,
+.table tbody tr:hover td {
+    background-color: transparent !important;
+}
+
+/* --- 2B. FORM INPUT FOCUS TRANSITIONS & VALIDATION --- */
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="file"]),
+select,
+textarea,
+.form-control,
+.search-input,
+.table-search-input-wrap {
+    transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.18s ease;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="file"]):focus,
+select:focus,
+textarea:focus,
+.form-control:focus,
+.search-input:focus {
+    border-color: #0f766e !important;
+    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.14) !important;
+    outline: none;
+}
+
+.form-error-msg,
+.text-danger,
+.invalid-feedback {
+    animation: validationMessageFadeIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes validationMessageFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-3px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* --- 2C. CONFIRMATION MODALS (FADE + LIGHT SCALE) --- */
+@keyframes modalCardFadeScale {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}
+
+@keyframes modalOverlayFadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.modal-overlay,
+.modal-backdrop {
+    animation: modalOverlayFadeIn 0.22s ease both;
+}
+
+.modal-card,
+.modal-dialog,
+.dialog-content,
+.borrow-dialog[open] {
+    animation: modalCardFadeScale 0.26s cubic-bezier(0.16, 1, 0.3, 1) both;
+    will-change: transform, opacity;
+}
+
+/* --- 2D. TOAST NOTIFICATIONS (SLIDE IN FROM RIGHT) --- */
+@keyframes toastSlideInRight {
+    from {
+        opacity: 0;
+        transform: translateX(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.cart-toast,
+.feedback-toast,
+.member-feedback-toast {
+    animation: toastSlideInRight 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* --- 2E. AVAILABILITY STATUS BADGE SUBTLE BREATHING --- */
+@keyframes subtleBadgePulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.025);
+    }
+}
+
+.badge-status.tersedia,
+.badge-tersedia {
+    animation: subtleBadgePulse 3.2s ease-in-out infinite;
+}
+
+/* --- 3. SMOOTH DROPDOWNS & POPOVERS --- */
+.user-dropdown,
+.dropdown-menu-animated {
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(6px) scale(0.96);
+    transform-origin: top right;
+    transition: opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.user-dropdown.show,
+.dropdown-menu-animated.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+    pointer-events: auto;
+}
+
+/* --- 4. REUSABLE SCROLL-REVEAL & FADE-IN SYSTEM --- */
+/*
+ * Content is visible by default (no JS / fallback). app.js adds
+ * `html.js-reveal-active` and tags elements with `.reveal-on-scroll`; once the
+ * reveal finishes the tags are removed so hover styles take over naturally.
+ * Stagger delay is set inline by app.js and cleared after the reveal.
+ */
+html.js-reveal-active .reveal-on-scroll {
+    transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+}
+
+html.js-reveal-active .reveal-on-scroll:not(.is-revealed) {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+html.js-reveal-active .reveal-on-scroll.is-revealed {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Lightweight, fast reveal for interactive tables, forms & transaction panels (0.6-0.7s, subtle 8px) */
+html.js-reveal-active .table-card.reveal-on-scroll,
+html.js-reveal-active .table-responsive-card.reveal-on-scroll,
+html.js-reveal-active .form-card.reveal-on-scroll,
+html.js-reveal-active .card-status-berhasil.reveal-on-scroll,
+html.js-reveal-active .card-rincian.reveal-on-scroll,
+html.js-reveal-active .card-panel.reveal-on-scroll {
+    transition: opacity 0.65s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.65s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+html.js-reveal-active .table-card.reveal-on-scroll:not(.is-revealed),
+html.js-reveal-active .table-responsive-card.reveal-on-scroll:not(.is-revealed),
+html.js-reveal-active .form-card.reveal-on-scroll:not(.is-revealed),
+html.js-reveal-active .card-status-berhasil.reveal-on-scroll:not(.is-revealed),
+html.js-reveal-active .card-rincian.reveal-on-scroll:not(.is-revealed),
+html.js-reveal-active .card-panel.reveal-on-scroll:not(.is-revealed) {
+    transform: translateY(8px);
+}
+
+/* --- 5. TOPBAR & MEMBER HEADER (CLEAN & PERSISTENT CHROME) --- */
+@keyframes topbarFadeIn {
+    from {
+        opacity: 0.8;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* Brand area (logo & title) */
+.topbar-brand,
+.member-brand,
+.mobile-toggle-btn {
+    animation: topbarFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Nav links in topbar / member header */
+.topbar-nav,
+.member-nav {
+    animation: topbarFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Right side actions, search, cart, user profile badge & button */
+.topbar-right,
+.topbar-actions,
+.member-account-wrapper {
+    animation: topbarFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Preserve hover elevations on interactive topbar elements */
+.topbar-user-badge:hover {
+    transform: scale(1.05) !important;
+}
+
+.topbar-icon-btn:hover {
+    transform: translateY(-1px) !important;
+}
+
+.member-account:hover {
+    transform: translateY(-1px) !important;
+}
+
+.btn-auth-login:hover,
+.btn-auth-register:hover {
+    transform: translateY(-1px) !important;
+}
+
+/* --- 6. PAGE TITLES & MAIN CONTENT HEADERS (0.6-0.8s ease-out) --- */
+@keyframes pageHeaderFadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Brief Fade In Up (0.45s) for main transaction content & cards (Peminjaman, Booking, Pengembalian, Denda) */
+@keyframes mainContentFadeInUpBrief {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-header,
+.profile-header,
+.detail-header,
+.header-hero,
+.hero-header,
+.dashboard-header,
+.member-welcome,
+.welcome-banner,
+.about-hero,
+.katalog-header,
+.catalog-header,
+.pengembalian-header,
+.denda-header,
+.booking-header {
+    animation: pageHeaderFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.04s both;
+    will-change: opacity, transform;
+}
+
+.pengembalian-page,
+.peminjaman-page,
+.denda-page,
+.sirkulasi-page,
+.keranjang-container,
+.booking-container,
+.tiket-card,
+.nota-card,
+.card-rincian,
+.card-status-berhasil {
+    animation: mainContentFadeInUpBrief 0.45s cubic-bezier(0.16, 1, 0.3, 1) 0.06s both;
+    will-change: opacity, transform;
+}
+
+/* --- 7. ACCESSIBILITY: REDUCED MOTION --- */
+@media (prefers-reduced-motion: reduce) {
+    .topbar-brand,
+    .topbar-nav,
+    .topbar-right,
+    .topbar-actions,
+    .member-brand,
+    .member-nav,
+    .member-account-wrapper,
+    .mobile-toggle-btn,
+    .page-header,
+    .profile-header,
+    .detail-header,
+    .header-hero,
+    .hero-header,
+    .dashboard-header,
+    .member-welcome,
+    .welcome-banner,
+    .about-hero,
+    .katalog-header,
+    .catalog-header,
+    .sidebar {
+        animation-duration: 0.45s !important;
+        animation-delay: 0s !important;
+        transform: none !important;
+    }
+
+    html.js-reveal-active .reveal-on-scroll {
+        transform: translateY(3px);
+        transition: opacity 0.45s ease-out, transform 0.45s ease-out;
+    }
+
+    html.js-reveal-active .reveal-on-scroll.is-revealed {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}

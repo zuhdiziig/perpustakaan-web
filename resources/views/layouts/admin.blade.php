@@ -168,14 +168,11 @@
             letter-spacing: 0.5px;
             text-decoration: none;
             transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
         }
 
         .topbar-user-badge:hover {
             transform: translateY(-1px);
-        }
-            font-size: 13px;
-            font-weight: 800;
-            letter-spacing: 0.5px;
         }
 
         .mobile-toggle-btn {
@@ -199,129 +196,7 @@
             align-items: flex-start;
         }
 
-        /* --- SIDEBAR PANEL ADMIN --- */
-        .sidebar {
-            width: var(--sidebar-width);
-            flex-shrink: 0;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: sticky;
-            top: 86px;
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .sidebar-header-icon {
-            width: 36px;
-            height: 36px;
-            background: #0f766e;
-            color: #ffffff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar-header-text h3 {
-            font-size: 13.5px;
-            font-weight: 800;
-            color: var(--text-heading);
-            line-height: 1.2;
-            letter-spacing: -0.2px;
-        }
-
-        .sidebar-header-text span {
-            font-size: 11.5px;
-            color: var(--text-muted);
-        }
-
-        .sidebar-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #94a3b8;
-            padding: 0 10px;
-            margin-bottom: 6px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            font-weight: 600;
-            color: #475569;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-
-        .sidebar-link-content {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-        }
-
-        .sidebar-link-icon {
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-        }
-
-        .sidebar-link:hover {
-            background: #f8fafc;
-            color: var(--text-heading);
-        }
-
-        .sidebar-link:hover .sidebar-link-icon {
-            color: var(--brand-primary);
-        }
-
-        .sidebar-link.active {
-            background: #ccfbf1;
-            color: #0f766e;
-            font-weight: 700;
-        }
-
-        .sidebar-link.active .sidebar-link-icon {
-            color: #0f766e;
-        }
-
-        .sidebar-link.active::after {
-            content: '';
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 18px;
-            background: #0f766e;
-            border-radius: 2px;
-        }
+        /* Sidebar styles are managed via layouts.partials.sidebar_styles */
 
         /* --- USER CARD AT SIDEBAR BOTTOM --- */
         .sidebar-user {
@@ -619,7 +494,7 @@
     <header class="topbar">
         <div class="topbar-container">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi">
+                <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi" aria-controls="sidebarPanel" aria-expanded="false">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -662,7 +537,11 @@
                 </a>
 
                 <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Admin">
-                    {{ auth()->user()->inisial ?? 'AD' }}
+                    @if(auth()->user()->foto ?? false)
+                        <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
+                    @else
+                        {{ auth()->user()->inisial ?? 'AD' }}
+                    @endif
                 </a>
             </div>
         </div>

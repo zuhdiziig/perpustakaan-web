@@ -206,13 +206,44 @@
 
         .breadcrumb [aria-current="page"] { color: var(--text-heading); font-weight: 600; }
 
+        /* --- ANIMATIONS FOR DETAIL PAGE --- */
+        @keyframes detailCoverFadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes detailContentFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes statusBadgeBreathing {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.03);
+            }
+        }
+
         /* --- DETAIL GRID --- */
         .detail-grid {
             display: grid;
             grid-template-columns: minmax(260px, 340px) 1fr;
             gap: 28px;
             align-items: start;
-            animation: fadeUp 0.45s ease both;
         }
 
         .cover-card {
@@ -223,6 +254,8 @@
             background: linear-gradient(135deg, #e7e5e4 0%, #d6d3d1 100%);
             border: 1px solid var(--border-color);
             box-shadow: var(--shadow-soft);
+            animation: detailCoverFadeInLeft 0.65s cubic-bezier(0.16, 1, 0.3, 1) both;
+            will-change: transform, opacity;
         }
 
         .cover-card img {
@@ -233,6 +266,11 @@
         }
 
         .cover-card:hover img { transform: scale(1.04); }
+
+        .detail-info-col {
+            animation: detailContentFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+            will-change: transform, opacity;
+        }
 
         .cover-fallback {
             width: 100%;
@@ -257,6 +295,8 @@
             border: 1px solid #99f6e4;
             border-radius: var(--radius-lg);
             padding: 18px 20px;
+            animation: detailContentFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.16s both;
+            will-change: transform, opacity;
         }
 
         .location-card h3 {
@@ -286,9 +326,14 @@
             font-weight: 600;
             padding: 4px 11px;
             border-radius: 999px;
+            transition: transform 0.2s ease;
         }
 
-        .badge-status.tersedia { background: #dcfce7; color: #15803d; }
+        .badge-status.tersedia {
+            background: #dcfce7;
+            color: #15803d;
+            animation: statusBadgeBreathing 3.2s ease-in-out infinite;
+        }
         .badge-status.habis { background: #fee2e2; color: #b91c1c; }
 
         .badge-dot {
@@ -347,8 +392,11 @@
             margin-top: 14px;
         }
 
+        /* Hover Lift on action buttons */
         .btn-pinjam,
-        .btn-kembali {
+        .btn-kembali,
+        .btn-add-cart,
+        .btn-cart-added {
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -358,7 +406,9 @@
             font-size: 13.5px;
             font-weight: 700;
             color: #ffffff;
-            transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+            transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                        box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                        background-color 0.18s ease;
         }
 
         .btn-pinjam {
@@ -367,8 +417,12 @@
             box-shadow: 0 6px 16px -6px rgba(15, 118, 110, 0.55);
         }
 
-        .btn-pinjam:hover { background: var(--brand-primary-dark); transform: translateY(-1px); }
-        .btn-pinjam:active { transform: translateY(0); }
+        .btn-pinjam:hover:not(:disabled) {
+            background: var(--brand-primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px -4px rgba(15, 118, 110, 0.35);
+        }
+        .btn-pinjam:active:not(:disabled) { transform: translateY(0); }
 
         .btn-pinjam:disabled {
             background: #cbd5e1;
@@ -379,7 +433,17 @@
         }
 
         .btn-kembali { min-width: 96px; background: var(--brand-blue); }
-        .btn-kembali:hover { background: var(--brand-blue-dark); transform: translateY(-1px); }
+        .btn-kembali:hover {
+            background: var(--brand-blue-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.28);
+        }
+
+        .btn-add-cart:hover {
+            background: #f0fdfa !important;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(15, 118, 110, 0.2);
+        }
 
         .loan-note {
             margin-top: 12px;
@@ -395,7 +459,8 @@
             border-radius: var(--radius-lg);
             padding: 24px 26px;
             box-shadow: var(--shadow-soft);
-            animation: fadeUp 0.45s 0.08s ease both;
+            animation: detailContentFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both;
+            will-change: transform, opacity;
         }
 
         .about-card h2 {
@@ -414,7 +479,11 @@
         .about-card p + p { margin-top: 12px; }
 
         /* --- RELATED --- */
-        .section-related { margin-top: 36px; animation: fadeUp 0.45s 0.16s ease both; }
+        .section-related {
+            margin-top: 36px;
+            animation: detailContentFadeInUp 0.65s cubic-bezier(0.16, 1, 0.3, 1) 0.28s both;
+            will-change: transform, opacity;
+        }
 
         .section-title {
             font-size: 19px;
@@ -693,7 +762,15 @@
         }
 
         @media (prefers-reduced-motion: reduce) {
-            *, *::before, *::after { animation: none !important; transition: none !important; }
+            .cover-card,
+            .detail-info-col,
+            .location-card,
+            .about-card,
+            .section-related {
+                animation-duration: 0.35s !important;
+                animation-delay: 0s !important;
+                transform: none !important;
+            }
         }
 
         /* --- RESPONSIVE --- */
@@ -866,7 +943,7 @@
         <div class="topbar-container">
             <div style="display: flex; align-items: center; gap: 14px;">
                 @auth
-                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi">
+                    <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi" aria-controls="sidebarPanel" aria-expanded="false">
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="3" y1="12" x2="21" y2="12"></line>
                             <line x1="3" y1="6" x2="21" y2="6"></line>
@@ -989,7 +1066,7 @@
             </div>
 
             <!-- Kolom kanan: informasi -->
-            <div>
+            <div class="detail-info-col">
                 @if ($isTersedia)
                     <span class="badge-status tersedia"><span class="badge-dot"></span>Tersedia</span>
                 @else

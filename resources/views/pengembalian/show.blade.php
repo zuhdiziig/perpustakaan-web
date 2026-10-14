@@ -50,6 +50,12 @@
         border-radius: 16px;
         padding: 28px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-status-berhasil:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
     }
 
     .success-icon-box {
@@ -62,6 +68,11 @@
         align-items: center;
         justify-content: center;
         margin-bottom: 18px;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .card-status-berhasil:hover .success-icon-box {
+        transform: scale(1.08);
     }
 
     .status-heading {
@@ -149,13 +160,19 @@
         font-weight: 600;
         text-align: center;
         text-decoration: none;
-        transition: background 0.15s ease;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
         display: inline-block;
     }
 
     .btn-action-scan:hover {
         background: #115e59;
         color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+    }
+
+    .btn-action-scan:active {
+        transform: translateY(0) scale(0.98);
     }
 
     .btn-action-dashboard {
@@ -168,13 +185,19 @@
         font-weight: 600;
         text-align: center;
         text-decoration: none;
-        transition: background 0.15s ease;
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), background 0.15s ease;
         display: inline-block;
     }
 
     .btn-action-dashboard:hover {
         background: #3250df;
         color: #ffffff;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(67, 97, 238, 0.25);
+    }
+
+    .btn-action-dashboard:active {
+        transform: translateY(0) scale(0.98);
     }
 
     /* Card Rincian (Kanan) */
@@ -185,6 +208,12 @@
         border-radius: 16px;
         padding: 28px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .card-rincian:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 22px rgba(15, 23, 42, 0.06);
     }
 
     .rincian-title {
