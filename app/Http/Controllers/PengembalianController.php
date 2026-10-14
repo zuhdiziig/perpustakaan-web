@@ -48,7 +48,7 @@ class PengembalianController extends Controller
                     'denda',
                 ])
                     ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $memberId))
-                    ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                    ->where('statusBuku', 'Diajukan Kembali')
                     ->get();
 
                 if ($activeMemberDetails->isNotEmpty()) {
@@ -86,7 +86,7 @@ class PengembalianController extends Controller
                 }
 
                 if ($matchedMember) {
-                    $activeMemberDetails = DetailPeminjaman::with([
+                    $allMemberLoans = DetailPeminjaman::with([
                         'peminjaman.member',
                         'buku.kategori',
                         'buku.barcode',
@@ -97,7 +97,15 @@ class PengembalianController extends Controller
                         ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
                         ->get();
 
-                    if ($activeMemberDetails->isNotEmpty()) {
+                    if ($allMemberLoans->isNotEmpty()) {
+                        $diajukanLoans = $allMemberLoans->where('statusBuku', 'Diajukan Kembali');
+
+                        if ($diajukanLoans->isEmpty()) {
+                            return redirect()->route('pengembalian.create')
+                                ->with('error', "Anggota '{$matchedMember->name}' ({$matchedMember->kode_anggota}) memiliki buku yang sedang dipinjam, namun belum melakukan proses booking pengembalian. Anggota wajib mengajukan proses booking pengembalian terlebih dahulu melalui akunnya sebelum pengembalian dapat diproses oleh petugas.");
+                        }
+
+                        $activeMemberDetails = $diajukanLoans;
                         $selectedDetail = $activeMemberDetails->first();
                         if ($activeMemberDetails->count() > 1) {
                             $batchDetails = $activeMemberDetails;
@@ -113,7 +121,7 @@ class PengembalianController extends Controller
                     ->first();
 
                 if ($eksemplar) {
-                    $selectedDetail = DetailPeminjaman::with([
+                    $checkDetail = DetailPeminjaman::with([
                         'peminjaman.member',
                         'buku.kategori',
                         'buku.barcode',
@@ -123,6 +131,14 @@ class PengembalianController extends Controller
                         ->where('idEksemplar', $eksemplar->idEksemplar)
                         ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
                         ->first();
+
+                    if ($checkDetail) {
+                        if ($checkDetail->statusBuku !== 'Diajukan Kembali') {
+                            return redirect()->route('pengembalian.create')
+                                ->with('error', "Buku fisik '{$checkDetail->buku?->judul}' sedang dipinjam tetapi belum diajukan booking pengembalian oleh anggota {$checkDetail->peminjaman?->member?->name}. Anggota wajib mengajukan proses booking pengembalian terlebih dahulu melalui akunnya.");
+                        }
+                        $selectedDetail = $checkDetail;
+                    }
                 }
             }
 
@@ -138,7 +154,7 @@ class PengembalianController extends Controller
                 }
 
                 if ($trxId) {
-                    $selectedDetail = DetailPeminjaman::with([
+                    $checkDetail = DetailPeminjaman::with([
                         'peminjaman.member',
                         'buku.kategori',
                         'buku.barcode',
@@ -148,6 +164,14 @@ class PengembalianController extends Controller
                         ->where('idPeminjaman', $trxId)
                         ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
                         ->first();
+
+                    if ($checkDetail) {
+                        if ($checkDetail->statusBuku !== 'Diajukan Kembali') {
+                            return redirect()->route('pengembalian.create')
+                                ->with('error', "Buku pada transaksi tersebut belum diajukan booking pengembalian oleh anggota {$checkDetail->peminjaman?->member?->name}. Anggota wajib mengajukan proses booking pengembalian terlebih dahulu melalui akunnya.");
+                        }
+                        $selectedDetail = $checkDetail;
+                    }
                 }
             }
         }
@@ -255,6 +279,11 @@ class PengembalianController extends Controller
                 $tanggalKembali = Carbon::now();
                 $batasKembali = Carbon::parse($peminjaman->batasKembali);
                 $hargaBuku = (float) $buku->harga;
+
+                // 4. Validasi aturan: Anggota wajib sudah mengajukan booking pengembalian
+                if ($detail->statusBuku !== 'Diajukan Kembali') {
+                    throw new \DomainException("Buku fisik '{$buku->judul}' belum diajukan booking pengembalian oleh anggota. Anggota wajib mengajukan proses booking pengembalian terlebih dahulu melalui akunnya.");
+                }
 
                 // 1. Hitung Denda Keterlambatan (10% per minggu, maks 100% di minggu ke-10)
                 $dendaKeterlambatan = 0;
@@ -1248,19 +1277,22 @@ class PengembalianController extends Controller
                     $memberId = (int) $m[1];
                     $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
                         ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $memberId))
-                        ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                        ->where('statusBuku', 'Diajukan Kembali')
                         ->lockForUpdate()
                         ->get();
                 } else {
                     $details = DetailPeminjaman::with(['peminjaman', 'buku', 'eksemplar', 'denda'])
-                        ->where('kode_batch_kembali', $kodeBatch)
-                        ->orWhere('kode_kembali', $kodeBatch)
+                        ->where(function ($q) use ($kodeBatch) {
+                            $q->where('kode_batch_kembali', $kodeBatch)
+                                ->orWhere('kode_kembali', $kodeBatch);
+                        })
+                        ->where('statusBuku', 'Diajukan Kembali')
                         ->lockForUpdate()
                         ->get();
                 }
 
                 if ($details->isEmpty()) {
-                    throw new \DomainException("Data tiket pengembalian sekaligus '{$kodeBatch}' tidak ditemukan.");
+                    throw new \DomainException("Tidak ada buku yang berstatus 'Diajukan Kembali' untuk tiket/anggota '{$kodeBatch}'. Anggota wajib melakukan booking pengembalian terlebih dahulu melalui akunnya.");
                 }
 
                 $pendingDetails = $details->where('statusBuku', '!=', 'Kembali');

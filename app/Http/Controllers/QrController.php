@@ -763,7 +763,7 @@ class QrController extends Controller
 
             // KASUS B: Petugas scan di menu PENGEMBALIAN (context === 'pengembalian')
             if ($context === 'pengembalian') {
-                $activeDetails = DetailPeminjaman::with([
+                $allMemberLoans = DetailPeminjaman::with([
                     'peminjaman',
                     'buku.kategori',
                     'buku.barcode',
@@ -774,7 +774,7 @@ class QrController extends Controller
                     ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
                     ->get();
 
-                if ($activeDetails->isEmpty()) {
+                if ($allMemberLoans->isEmpty()) {
                     $activeBooking = Peminjaman::with('details.buku')
                         ->where('idUserMember', $member->id)
                         ->whereIn('status', ['Booking', 'Siap Diambil'])
@@ -798,6 +798,19 @@ class QrController extends Controller
                         'type' => 'member_no_loan',
                         'message' => "Anggota '{$member->name}' ({$member->kode_anggota}) saat ini tidak memiliki pinjaman buku aktif yang perlu dikembalikan.",
                     ], 404);
+                }
+
+                // VALIDASI ATURAN SIRKULASI: Anggota wajib sudah mengajukan booking pengembalian terlebih dahulu
+                $activeDetails = $allMemberLoans->where('statusBuku', 'Diajukan Kembali');
+
+                if ($activeDetails->isEmpty()) {
+                    $totalDipinjam = $allMemberLoans->where('statusBuku', 'Dipinjam')->count();
+
+                    return response()->json([
+                        'success' => false,
+                        'type' => 'member_belum_booking_pengembalian',
+                        'message' => "Anggota '{$member->name}' ({$member->kode_anggota}) memiliki {$totalDipinjam} buku yang sedang dipinjam, tetapi belum melakukan proses booking pengembalian. Anggota wajib mengajukan booking pengembalian terlebih dahulu melalui akunnya sebelum pengembalian dapat diproses oleh petugas.",
+                    ], 200);
                 }
 
                 $firstWithBatch = $activeDetails->first(fn ($d) => ! empty($d->kode_batch_kembali));
@@ -868,9 +881,9 @@ class QrController extends Controller
                             'status' => $member->status,
                         ],
                         'waktuPengajuan' => Carbon::now()->translatedFormat('d M Y, H:i'),
-                        'validasiPesan' => "Ditemukan {$totalBuku} buku pinjaman aktif atas nama {$member->name} ({$member->kode_anggota}).",
+                        'validasiPesan' => "Ditemukan {$totalBuku} buku dengan status 'Diajukan Kembali' atas nama {$member->name} ({$member->kode_anggota}).",
                     ],
-                    'message' => "QR Anggota '{$member->name}' teridentifikasi. Menampilkan {$totalBuku} buku pinjaman aktif yang siap dikembalikan.",
+                    'message' => "QR Anggota '{$member->name}' teridentifikasi. Menampilkan {$totalBuku} buku yang telah diajukan booking pengembalian dan siap dikembalikan.",
                 ]);
             }
 
@@ -956,6 +969,14 @@ class QrController extends Controller
                 if ($activeDetail) {
                     $peminjaman = $activeDetail->peminjaman;
                     $member = $peminjaman?->member;
+
+                    if ($activeDetail->statusBuku !== 'Diajukan Kembali') {
+                        return response()->json([
+                            'success' => false,
+                            'type' => 'belum_booking_pengembalian',
+                            'message' => "Buku '{$buku->judul}' sedang dipinjam oleh {$member?->name}, tetapi belum diajukan proses booking pengembalian. Anggota wajib mengajukan proses booking pengembalian terlebih dahulu melalui akunnya.",
+                        ], 200);
+                    }
 
                     $today = Carbon::now();
                     $batasKembali = Carbon::parse($peminjaman->batasKembali);

@@ -231,7 +231,7 @@ class PetugasBarcodePengembalianTest extends TestCase
             'totalBuku' => 1,
         ]);
 
-        DetailPeminjaman::create([
+        $detail = DetailPeminjaman::create([
             'idPeminjaman' => $peminjaman->idPeminjaman,
             'idBuku' => $this->buku->idBuku,
             'idEksemplar' => $this->eksemplar->idEksemplar,
@@ -239,18 +239,78 @@ class PetugasBarcodePengembalianTest extends TestCase
             'statusBuku' => 'Dipinjam',
         ]);
 
-        // Petugas scan QR Anggota di menu pengembalian
+        // 1. Saat anggota belum booking pengembalian, scan QR anggota ditolak
         $response = $this->postJson(route('api.scan.identifikasi'), [
             'code' => 'usr_member_ret_test_456',
             'context' => 'pengembalian',
         ]);
 
         $response->assertOk()
+            ->assertJsonPath('success', false)
+            ->assertJsonPath('type', 'member_belum_booking_pengembalian')
+            ->assertJsonPath('message', 'Anggota \''.$this->member->name.'\' ('.$this->member->kode_anggota.') memiliki 1 buku yang sedang dipinjam, tetapi belum melakukan proses booking pengembalian. Anggota wajib mengajukan booking pengembalian terlebih dahulu melalui akunnya sebelum pengembalian dapat diproses oleh petugas.');
+
+        // 2. Setelah anggota melakukan booking pengembalian (status 'Diajukan Kembali'), petugas dapat scan
+        $detail->update([
+            'statusBuku' => 'Diajukan Kembali',
+            'kode_kembali' => 'KB-20261014-001',
+            'qr_kembali' => 'ret_testqr123',
+            'waktu_pengajuan_kembali' => Carbon::now(),
+        ]);
+
+        $response2 = $this->postJson(route('api.scan.identifikasi'), [
+            'code' => 'usr_member_ret_test_456',
+            'context' => 'pengembalian',
+        ]);
+
+        $response2->assertOk()
             ->assertJsonPath('success', true)
             ->assertJsonPath('type', 'pengembalian_batch')
             ->assertJsonPath('data.totalBuku', 1)
             ->assertJsonPath('data.member.name', $this->member->name)
             ->assertJsonPath('data.daftarBuku.0.judul', $this->buku->judul);
+    }
+
+    public function test_petugas_tidak_dapat_memproses_pengembalian_jika_anggota_belum_booking_pengembalian(): void
+    {
+        $this->actingAs($this->petugas);
+
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => Carbon::now()->subDays(3)->toDateString(),
+            'batasKembali' => Carbon::now()->addDays(11)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        $detail = DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        // Pengembalian langsung ditolak jika belum Diajukan Kembali
+        $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
+            'idUserMember' => $this->member->id,
+            'detail_ids' => [$detail->id],
+            'kondisi' => [
+                $detail->id => 'Baik',
+            ],
+        ]);
+        $response->assertSessionHas('error');
+
+        // Pengembalian store ditolak jika belum Diajukan Kembali
+        $responseStore = $this->post(route('pengembalian.store'), [
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'idEksemplar' => $this->eksemplar->idEksemplar,
+            'idUserMember' => $this->member->id,
+            'kondisiBuku' => 'Baik',
+        ]);
+        $responseStore->assertSessionHas('error');
     }
 
     public function test_petugas_dapat_menyelesaikan_pengembalian_langsung_satu_buku_di_meja_sirkulasi(): void
@@ -271,7 +331,7 @@ class PetugasBarcodePengembalianTest extends TestCase
             'idBuku' => $this->buku->idBuku,
             'idEksemplar' => $this->eksemplar->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
@@ -333,7 +393,7 @@ class PetugasBarcodePengembalianTest extends TestCase
             'idBuku' => $this->buku->idBuku,
             'idEksemplar' => $this->eksemplar->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $detail2 = DetailPeminjaman::create([
@@ -341,7 +401,7 @@ class PetugasBarcodePengembalianTest extends TestCase
             'idBuku' => $buku2->idBuku,
             'idEksemplar' => $eksemplar2->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $response = $this->post(route('sirkulasi.pengembalian-langsung'), [
@@ -388,7 +448,7 @@ class PetugasBarcodePengembalianTest extends TestCase
             'idBuku' => $this->buku->idBuku,
             'idEksemplar' => $this->eksemplar->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $response = $this->post(route('sirkulasi.pengembalian-langsung'), [

@@ -182,7 +182,7 @@ class BukuEksemplarStokTest extends TestCase
             'idBuku' => $buku->idBuku,
             'idEksemplar' => $copy->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $copy->update(['status' => 'Dipinjam']);
@@ -419,7 +419,7 @@ class BukuEksemplarStokTest extends TestCase
             'idBuku' => $buku->idBuku,
             'idEksemplar' => $copy1->idEksemplar,
             'jumlah' => 1,
-            'statusBuku' => 'Dipinjam',
+            'statusBuku' => 'Diajukan Kembali',
         ]);
 
         $copy1->update(['status' => 'Dipinjam']);

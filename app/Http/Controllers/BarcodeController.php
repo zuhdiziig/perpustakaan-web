@@ -39,7 +39,7 @@ class BarcodeController extends Controller
             if ($selectedMember) {
                 $activeLoans = DetailPeminjaman::with(['buku.kategori', 'buku.barcode', 'eksemplar', 'peminjaman'])
                     ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $selectedMember->id))
-                    ->whereIn('statusBuku', ['Dipinjam', 'Diajukan Kembali'])
+                    ->where('statusBuku', 'Diajukan Kembali')
                     ->latest('id')
                     ->get();
             }
@@ -84,7 +84,7 @@ class BarcodeController extends Controller
                             $selectedMember = $memberCheck;
                             $activeLoans = DetailPeminjaman::with(['buku.kategori', 'buku.barcode', 'eksemplar', 'peminjaman'])
                                 ->whereHas('peminjaman', fn ($q) => $q->where('idUserMember', $selectedMember->id))
-                                ->where('statusBuku', 'Dipinjam')
+                                ->where('statusBuku', 'Diajukan Kembali')
                                 ->latest('id')
                                 ->get();
                         } else {
@@ -340,6 +340,10 @@ class BarcodeController extends Controller
 
                     if ($detail->statusBuku === 'Kembali') {
                         continue;
+                    }
+
+                    if ($detail->statusBuku !== 'Diajukan Kembali') {
+                        throw new \DomainException("Buku '{$detail->buku?->judul}' belum diajukan booking pengembalian oleh anggota {$member->name}. Anggota wajib melakukan proses booking pengembalian terlebih dahulu melalui akunnya.");
                     }
 
                     $peminjamanIds[$peminjaman->idPeminjaman] = $peminjaman;

@@ -191,7 +191,8 @@ class QrCodeSystemTest extends TestCase
         $this->assertEquals('Dipinjam', $copyA->status);
         $this->assertEquals('Dipinjam', $copyB->status);
 
-        // Kembalikan copy A
+        // Kembalikan copy A (setelah diajukan booking kembali)
+        $peminjamanA->details->first()->update(['statusBuku' => 'Diajukan Kembali']);
         $returnRes = $this->post(route('pengembalian.store'), [
             'idPeminjaman' => $peminjamanA->idPeminjaman,
             'idBuku' => $buku->idBuku,

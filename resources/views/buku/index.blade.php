@@ -1308,7 +1308,6 @@
                 <option value="Tersedia" {{ request('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
                 <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                 <option value="Dibooking" {{ request('status') === 'Dibooking' ? 'selected' : '' }}>Dibooking</option>
-                <option value="Hilang" {{ request('status') === 'Hilang' ? 'selected' : '' }}>Hilang</option>
             </select>
 
             <select name="kondisi" id="bukuKondisiSelect" class="filter-select">

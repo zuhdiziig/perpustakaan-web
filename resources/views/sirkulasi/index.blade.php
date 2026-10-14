@@ -601,7 +601,6 @@
                     <option value="Dipinjam" {{ $status === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                     <option value="Selesai" {{ $status === 'Selesai' ? 'selected' : '' }}>Selesai</option>
                     <option value="Booking" {{ $status === 'Booking' ? 'selected' : '' }}>Booking</option>
-                    <option value="Siap Diambil" {{ $status === 'Siap Diambil' ? 'selected' : '' }}>Siap Diambil</option>
                 </select>
             @endif
 
