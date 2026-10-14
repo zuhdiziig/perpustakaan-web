@@ -1269,15 +1269,15 @@
                             Tentang kami
                         </a>
 
-                        <a href="#">
+                        <a href="{{ route('panduan-peminjaman') }}">
                             Panduan peminjaman
                         </a>
 
-                        <a href="#">
+                        <a href="{{ route('kebijakan-privasi') }}">
                             Kebijakan privasi
                         </a>
 
-                        <a href="#">
+                        <a href="{{ route('syarat-layanan') }}">
                             Syarat layanan
                         </a>
                     </div>

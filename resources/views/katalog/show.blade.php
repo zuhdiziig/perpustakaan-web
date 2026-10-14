@@ -1323,8 +1323,9 @@
                     <li><a href="{{ route('katalog.index') }}">Katalog buku</a></li>
                     <li><a href="{{ route('register') }}">Keanggotaan</a></li>
                     <li><a href="{{ route('tentang') }}">Tentang kami</a></li>
-                    <li><a href="{{ route('katalog.index') }}">Panduan peminjaman</a></li>
-                    <li><a href="{{ route('home') }}">Kebijakan privasi · Syarat layanan</a></li>
+                    <li><a href="{{ route('panduan-peminjaman') }}">Panduan peminjaman</a></li>
+                    <li><a href="{{ route('kebijakan-privasi') }}">Kebijakan privasi</a></li>
+                    <li><a href="{{ route('syarat-layanan') }}">Syarat layanan</a></li>
                 </ul>
             </div>
 

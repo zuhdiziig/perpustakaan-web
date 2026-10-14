@@ -35,6 +35,18 @@ Route::get('/tentang', function () {
     return view('tentang');
 })->name('tentang');
 
+Route::get('/panduan-peminjaman', function () {
+    return view('panduan_peminjaman');
+})->name('panduan-peminjaman');
+
+Route::get('/kebijakan-privasi', function () {
+    return view('kebijakan_privasi');
+})->name('kebijakan-privasi');
+
+Route::get('/syarat-layanan', function () {
+    return view('syarat_layanan');
+})->name('syarat-layanan');
+
 /*
 |--------------------------------------------------------------------------
 | KATALOG BUKU PUBLIK (Bisa diakses Tamu & Semua Role)

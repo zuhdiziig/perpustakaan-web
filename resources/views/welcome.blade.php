@@ -1958,7 +1958,7 @@
                     <div class="cat-icon">
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M8 14s1.5 2 4 2 4-2 4-2"></path><line x1="9" y1="9" x2="9.01" y2="9"></line><line x1="15" y1="9" x2="15.01" y2="9"></line></svg>
                     </div>
-                    <span class="cat-name">Anak</span>
+                    <span class="cat-name">Romance</span>
                 </a>
 
                 <a href="{{ route('katalog.index', ['q' => 'Horror']) }}" class="cat-card scroll-reveal reveal-delay-7">
@@ -2069,9 +2069,9 @@
                         <li><a href="{{ route('katalog.index') }}">Katalog buku</a></li>
                         <li><a href="{{ route('register') }}">Keanggotaan</a></li>
                         <li><a href="{{ route('tentang') }}">Tentang kami</a></li>
-                        <li><a href="javascript:void(0)">Panduan peminjaman</a></li>
-                        <li><a href="javascript:void(0)">Kebijakan privasi</a></li>
-                        <li><a href="javascript:void(0)">Syarat layanan</a></li>
+                        <li><a href="{{ route('panduan-peminjaman') }}">Panduan peminjaman</a></li>
+                        <li><a href="{{ route('kebijakan-privasi') }}">Kebijakan privasi</a></li>
+                        <li><a href="{{ route('syarat-layanan') }}">Syarat layanan</a></li>
                     </ul>
                 </div>
 
