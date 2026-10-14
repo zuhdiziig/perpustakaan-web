@@ -195,129 +195,7 @@
             align-items: flex-start;
         }
 
-        /* --- SIDEBAR PANEL ANGGOTA --- */
-        .sidebar {
-            width: var(--sidebar-width);
-            flex-shrink: 0;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 20px 16px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            position: sticky;
-            top: 86px;
-        }
-
-        .sidebar-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-bottom: 14px;
-            border-bottom: 1px solid #f1f5f9;
-        }
-
-        .sidebar-header-icon {
-            width: 36px;
-            height: 36px;
-            background: #0f766e;
-            color: #ffffff;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .sidebar-header-text h3 {
-            font-size: 13.5px;
-            font-weight: 800;
-            color: var(--text-heading);
-            line-height: 1.2;
-            letter-spacing: -0.2px;
-        }
-
-        .sidebar-header-text span {
-            font-size: 11.5px;
-            color: var(--text-muted);
-        }
-
-        .sidebar-section-title {
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            color: #94a3b8;
-            padding: 0 10px;
-            margin-bottom: 6px;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            display: flex;
-            flex-direction: column;
-            gap: 3px;
-        }
-
-        .sidebar-link {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 12px;
-            border-radius: 10px;
-            font-size: 13.5px;
-            font-weight: 600;
-            color: #475569;
-            transition: all 0.15s ease;
-            position: relative;
-        }
-
-        .sidebar-link-content {
-            display: flex;
-            align-items: center;
-            gap: 11px;
-        }
-
-        .sidebar-link-icon {
-            width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #64748b;
-        }
-
-        .sidebar-link:hover {
-            background: #f8fafc;
-            color: var(--text-heading);
-        }
-
-        .sidebar-link:hover .sidebar-link-icon {
-            color: var(--brand-primary);
-        }
-
-        .sidebar-link.active {
-            background: #ccfbf1;
-            color: #0f766e;
-            font-weight: 700;
-        }
-
-        .sidebar-link.active .sidebar-link-icon {
-            color: #0f766e;
-        }
-
-        .sidebar-link.active::after {
-            content: '';
-            position: absolute;
-            right: 8px;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 4px;
-            height: 18px;
-            background: #0f766e;
-            border-radius: 2px;
-        }
+        /* Sidebar styles are managed via layouts.partials.sidebar_styles */
 
         /* --- USER CARD AT SIDEBAR BOTTOM --- */
         .sidebar-user {
@@ -465,7 +343,13 @@
         /* --- RESPONSIVE BREAKPOINTS --- */
         @media (max-width: 992px) {
             .mobile-toggle-btn {
-                display: flex;
+                display: flex !important;
+                cursor: pointer !important;
+                touch-action: manipulation !important;
+            }
+
+            .mobile-toggle-btn svg {
+                pointer-events: none;
             }
 
             .topbar-nav {
@@ -488,24 +372,44 @@
             }
 
             .sidebar {
-                position: fixed;
-                top: 0;
-                left: 0;
-                bottom: 0;
-                height: 100vh;
-                z-index: 50;
-                border-radius: 0;
-                transform: translateX(-100%);
-                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-                overflow-y: auto;
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                bottom: 0 !important;
+                height: 100vh !important;
+                height: 100dvh !important;
+                width: min(280px, 80vw) !important;
+                max-width: 85vw !important;
+                background: #ffffff !important;
+                z-index: 10000 !important;
+                border-radius: 0 16px 16px 0 !important;
+                border: 1px solid var(--border-color, #e2e8f0) !important;
+                border-left: none !important;
+                box-shadow: 4px 0 24px rgba(15, 23, 42, 0.15) !important;
+                transform: translateX(-100%) !important;
+                transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                overflow-y: auto !important;
+                -webkit-overflow-scrolling: touch;
+                display: flex !important;
+                visibility: visible !important;
             }
 
             .sidebar.mobile-open {
-                transform: translateX(0);
+                transform: translateX(0) !important;
+            }
+
+            .sidebar-backdrop {
+                display: none;
+                position: fixed !important;
+                inset: 0 !important;
+                background: rgba(15, 23, 42, 0.45) !important;
+                z-index: 9999 !important;
+                backdrop-filter: blur(2px) !important;
+                -webkit-backdrop-filter: blur(2px) !important;
             }
 
             .sidebar-backdrop.show {
-                display: block;
+                display: block !important;
             }
         }
 
@@ -615,7 +519,7 @@
     <header class="topbar">
         <div class="topbar-container">
             <div style="display: flex; align-items: center; gap: 14px;">
-                <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi">
+                <button type="button" class="mobile-toggle-btn" id="sidebarToggle" aria-label="Buka menu navigasi" aria-controls="sidebarPanel" aria-expanded="false">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <line x1="3" y1="12" x2="21" y2="12"></line>
                         <line x1="3" y1="6" x2="21" y2="6"></line>

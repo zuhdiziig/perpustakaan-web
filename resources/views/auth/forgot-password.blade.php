@@ -31,6 +31,29 @@
             margin: 0 auto;
         }
 
+        /* Top Header Navbar Animation */
+        @keyframes navFadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes authFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Top Header Navbar */
         .top-navbar {
             background: #ffffff;
@@ -42,6 +65,7 @@
             justify-content: space-between;
             box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
             margin-bottom: 40px;
+            animation: navFadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .brand-logo {
@@ -156,6 +180,7 @@
         .hero-section {
             display: flex;
             flex-direction: column;
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .hero-image-wrapper {
@@ -197,6 +222,7 @@
             border-radius: 24px;
             padding: 42px 38px;
             box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.03);
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
         }
 
         .card-title {
@@ -388,6 +414,15 @@
 
             .banner-hero-img-box {
                 height: 200px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .top-navbar,
+            .hero-section,
+            .auth-card {
+                animation-duration: 0.45s !important;
+                transform: none !important;
             }
         }
     </style>

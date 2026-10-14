@@ -80,10 +80,37 @@
             flex: 1;
         }
 
+        @keyframes authFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes navFadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            animation: navFadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
         /* Hero Kiri */
         .hero-left {
             display: flex;
             flex-direction: column;
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
 
         .hero-img-box {
@@ -125,6 +152,16 @@
             padding: 40px 48px;
             box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.03);
             border: 1px solid #e2e8f0;
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .navbar,
+            .hero-left,
+            .card-auth {
+                animation-duration: 0.45s !important;
+                transform: none !important;
+            }
         }
 
         .form-title {

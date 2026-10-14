@@ -4,9 +4,23 @@
 
 @section('styles')
 <style>
-    /* --- BREADCRUMB & HEADER --- */
+    /* --- ANIMATIONS --- */
+    @keyframes adminFadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* --- BREADCRUMB & HEADER (FADE IN UP RINGAN) --- */
     .dashboard-header {
         margin-bottom: 22px;
+        animation: adminFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
     .breadcrumb {
@@ -32,7 +46,7 @@
         color: var(--text-muted);
     }
 
-    /* --- STATS GRID (4 COLS) --- */
+    /* --- STATS GRID (4 COLS) WITH STAGGER & HOVER LIFT --- */
     .stats-grid-4 {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
@@ -49,12 +63,23 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.15s, box-shadow 0.15s;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease;
+        animation: adminFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
+    /* Staggered entrance for stats */
+    .stats-grid-4 > .stat-box:nth-child(1) { animation-delay: 0.08s; }
+    .stats-grid-4 > .stat-box:nth-child(2) { animation-delay: 0.14s; }
+    .stats-grid-4 > .stat-box:nth-child(3) { animation-delay: 0.20s; }
+    .stats-grid-4 > .stat-box:nth-child(4) { animation-delay: 0.26s; }
+
     .stat-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px rgba(15, 118, 110, 0.05);
+        border-color: #cbd5e1;
     }
 
     .stat-icon {
@@ -102,7 +127,7 @@
         margin-bottom: 16px;
     }
 
-    /* --- MANAGEMENT GRID --- */
+    /* --- MANAGEMENT GRID WITH STAGGER & HOVER LIFT --- */
     .management-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
@@ -119,12 +144,22 @@
         display: flex;
         flex-direction: column;
         justify-content: space-between;
-        transition: transform 0.15s, box-shadow 0.15s;
+        transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.25s cubic-bezier(0.16, 1, 0.3, 1),
+                    border-color 0.2s ease;
+        animation: adminFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+        will-change: transform, opacity;
     }
 
+    /* Staggered entrance for panels */
+    .management-grid > .manage-card:nth-child(1) { animation-delay: 0.18s; }
+    .management-grid > .manage-card:nth-child(2) { animation-delay: 0.24s; }
+    .management-grid > .manage-card:nth-child(3) { animation-delay: 0.30s; }
+
     .manage-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 23, 42, 0.04);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px rgba(15, 118, 110, 0.05);
+        border-color: #cbd5e1;
     }
 
     .manage-icon {
@@ -162,11 +197,15 @@
         border-radius: 9px;
         text-align: center;
         display: block;
-        transition: background 0.15s;
+        transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+                    background-color 0.18s ease;
     }
 
     .btn-manage:hover {
         background: #115e59;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.25);
     }
 
     /* --- TABLE SECTION: TRANSAKSI TERBARU --- */
@@ -278,6 +317,7 @@
         color: #334155;
         border-bottom: 1px solid #f8fafc;
         vertical-align: middle;
+        transition: background-color 0.18s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     .custom-table tr:last-child td {
@@ -285,7 +325,7 @@
     }
 
     .custom-table tr:hover td {
-        background-color: #fbfcfd;
+        background-color: rgba(15, 118, 110, 0.045);
     }
 
     .td-judul-buku {

@@ -124,27 +124,24 @@
 
     .search-input-wrapper {
         position: relative;
-        flex: 1;
-        min-width: 240px;
-        max-width: 420px;
-    }
-
-    .search-input-wrapper svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
+        flex: 0 0 320px;
+        width: 320px;
+        min-width: 320px;
+        max-width: 320px;
     }
 
     .search-input {
         width: 100%;
-        padding: 9px 12px 9px 36px;
+        height: 38px;
+        padding: 0 36px 0 12px;
         border-radius: 8px;
         border: 1px solid var(--border-color, #e2e8f0);
         font-size: 13px;
         font-family: inherit;
+        background: #ffffff;
+        color: #0f172a;
         outline: none;
+        box-sizing: border-box;
         transition: border-color 0.15s, box-shadow 0.15s;
     }
 
@@ -153,8 +150,37 @@
         box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
+    .search-icon-btn {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        color: #0f766e;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+
+    .search-icon-btn:hover {
+        background: #f0fdfa;
+        color: #115e59;
+        transform: translateY(-50%) scale(1.08);
+    }
+
+    .search-icon-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
     .filter-select {
-        padding: 9px 12px;
+        height: 38px;
+        padding: 0 14px;
         border-radius: 8px;
         border: 1px solid var(--border-color, #e2e8f0);
         font-size: 13px;
@@ -163,14 +189,18 @@
         color: #334155;
         outline: none;
         cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .filter-select:focus {
         border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
     .btn-filter-submit {
-        padding: 9px 16px;
+        height: 38px;
+        padding: 0 16px;
         background: #0f766e;
         color: #ffffff;
         border-radius: 8px;
@@ -180,6 +210,8 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
+        border: none;
+        box-sizing: border-box;
         transition: background 0.15s;
     }
 
@@ -188,7 +220,8 @@
     }
 
     .btn-filter-reset {
-        padding: 9px 14px;
+        height: 38px;
+        padding: 0 14px;
         background: #f1f5f9;
         color: #475569;
         border-radius: 8px;
@@ -198,11 +231,15 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        transition: background 0.15s;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
     }
 
     .btn-filter-reset:hover {
         background: #e2e8f0;
+        color: #1e293b;
     }
 
     /* --- DATA TABLE CARD --- */
@@ -481,6 +518,13 @@
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
         }
+
+        .search-input-wrapper {
+            flex: 1 1 240px;
+            width: auto;
+            min-width: 200px;
+            max-width: 100%;
+        }
     }
 
     @media (max-width: 640px) {
@@ -493,8 +537,20 @@
             align-items: stretch;
         }
 
+        .filter-form {
+            width: 100%;
+        }
+
         .search-input-wrapper {
+            flex: 1 1 100%;
+            width: 100%;
+            min-width: 100%;
             max-width: 100%;
+        }
+
+        .filter-select {
+            flex: 1 1 100%;
+            width: 100%;
         }
     }
 </style>
@@ -556,7 +612,7 @@
     @endif
 
     <!-- SUMMARY STATS GRID -->
-    <div class="stats-grid">
+    <div class="stats-grid" id="memberStatsGrid">
         <div class="stat-card">
             <div class="stat-icon primary">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -602,46 +658,47 @@
 
     <!-- FILTER & SEARCH BAR -->
     <div class="filter-card">
-        <form action="{{ route('member.index') }}" method="GET" class="filter-form">
+        <form action="{{ route('member.index') }}" method="GET" class="filter-form" id="memberFilterForm">
             <div class="search-input-wrapper">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
                 <input type="text"
                        name="search"
+                       id="memberSearchInput"
                        class="search-input"
                        placeholder="Cari nama, email, telepon, alamat..."
-                       value="{{ request('search') }}">
+                       value="{{ request('search') }}"
+                       autocomplete="off">
+                <button type="submit"
+                        id="memberSearchBtn"
+                        class="search-icon-btn"
+                        title="Cari data anggota"
+                        aria-label="Cari data anggota">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
             </div>
 
-            <select name="status" class="filter-select">
+            <select name="status" id="memberStatusSelect" class="filter-select">
                 <option value="">Semua Status</option>
                 <option value="aktif" {{ request('status') === 'aktif' ? 'selected' : '' }}>Aktif Saja</option>
                 <option value="nonaktif" {{ request('status') === 'nonaktif' ? 'selected' : '' }}>Nonaktif Saja</option>
             </select>
 
-            <button type="submit" class="btn-filter-submit">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                Cari & Filter
-            </button>
-
-            @if(request()->filled('search') || request()->filled('status'))
-                <a href="{{ route('member.index') }}" class="btn-filter-reset">
+            <div id="memberResetWrapper" style="{{ (request()->filled('search') || request()->filled('status')) ? 'display: inline-flex;' : 'display: none;' }}">
+                <a href="{{ route('member.index') }}" id="memberResetBtn" class="btn-filter-reset">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                     Reset
                 </a>
-            @endif
+            </div>
         </form>
     </div>
 
     <!-- DATA TABLE CARD -->
-    <div class="table-card">
+    <div class="table-card" id="memberTableCard" style="transition: opacity 0.2s ease;">
         <div class="table-container">
             <table class="member-table">
                 <thead>
@@ -804,4 +861,160 @@
         </div>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('memberFilterForm');
+        const searchInput = document.getElementById('memberSearchInput');
+        const statusSelect = document.getElementById('memberStatusSelect');
+        const resetWrapper = document.getElementById('memberResetWrapper');
+        const tableCard = document.getElementById('memberTableCard');
+        const statsGrid = document.getElementById('memberStatsGrid');
+
+        let searchDebounceTimer = null;
+        let currentAbortController = null;
+
+        function buildFilterUrl() {
+            const url = new URL(form.action, window.location.origin);
+            const searchVal = searchInput ? searchInput.value.trim() : '';
+            const statusVal = statusSelect ? statusSelect.value : '';
+
+            if (searchVal) {
+                url.searchParams.set('search', searchVal);
+            }
+            if (statusVal) {
+                url.searchParams.set('status', statusVal);
+            }
+            return url.toString();
+        }
+
+        function updateResetButtonVisibility() {
+            const searchVal = searchInput ? searchInput.value.trim() : '';
+            const statusVal = statusSelect ? statusSelect.value : '';
+            if (resetWrapper) {
+                resetWrapper.style.display = (searchVal || statusVal) ? 'inline-flex' : 'none';
+            }
+        }
+
+        function fetchMemberData(url) {
+            if (currentAbortController) {
+                currentAbortController.abort();
+            }
+            currentAbortController = new AbortController();
+
+            if (tableCard) {
+                tableCard.style.opacity = '0.35';
+                tableCard.style.pointerEvents = 'none';
+            }
+            if (statsGrid) {
+                statsGrid.style.opacity = '0.7';
+            }
+
+            fetch(url, {
+                signal: currentAbortController.signal,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Network error: ' + response.status);
+                return response.text();
+            })
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                const newTableCard = doc.getElementById('memberTableCard');
+                if (newTableCard && tableCard) {
+                    tableCard.innerHTML = newTableCard.innerHTML;
+                }
+
+                const newStatsGrid = doc.getElementById('memberStatsGrid');
+                if (newStatsGrid && statsGrid) {
+                    statsGrid.innerHTML = newStatsGrid.innerHTML;
+                }
+
+                updateResetButtonVisibility();
+                window.history.pushState({ path: url }, '', url);
+                bindPaginationLinks();
+            })
+            .catch(err => {
+                if (err.name === 'AbortError') return;
+                console.warn('AJAX refresh gagal, memuat via submit form biasa:', err);
+                form.submit();
+            })
+            .finally(() => {
+                if (tableCard) {
+                    tableCard.style.opacity = '1';
+                    tableCard.style.pointerEvents = 'auto';
+                }
+                if (statsGrid) {
+                    statsGrid.style.opacity = '1';
+                }
+            });
+        }
+
+        function bindPaginationLinks() {
+            if (!tableCard) return;
+            const paginationLinks = tableCard.querySelectorAll('.pagination a, .table-footer a');
+            paginationLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    const href = link.getAttribute('href');
+                    if (href && !href.startsWith('#')) {
+                        e.preventDefault();
+                        fetchMemberData(href);
+                    }
+                });
+            });
+        }
+
+        // Auto refresh saat opsi dropdown status dipilih
+        if (statusSelect) {
+            statusSelect.addEventListener('change', function() {
+                clearTimeout(searchDebounceTimer);
+                updateResetButtonVisibility();
+                fetchMemberData(buildFilterUrl());
+            });
+        }
+
+        // Live search otomatis refresh tabel (debounce 350ms)
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchDebounceTimer);
+                updateResetButtonVisibility();
+                searchDebounceTimer = setTimeout(() => {
+                    fetchMemberData(buildFilterUrl());
+                }, 350);
+            });
+        }
+
+        // Cegah full-page submit saat tekan Enter
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(searchDebounceTimer);
+                fetchMemberData(buildFilterUrl());
+            });
+        }
+
+        // Event listener klik tombol reset
+        document.addEventListener('click', function(e) {
+            const resetBtn = e.target.closest('.btn-filter-reset');
+            if (resetBtn && resetBtn.getAttribute('href')) {
+                e.preventDefault();
+                if (searchInput) searchInput.value = '';
+                if (statusSelect) statusSelect.value = '';
+                updateResetButtonVisibility();
+                fetchMemberData(resetBtn.getAttribute('href'));
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            window.location.reload();
+        });
+
+        bindPaginationLinks();
+        updateResetButtonVisibility();
+    });
+</script>
 @endsection

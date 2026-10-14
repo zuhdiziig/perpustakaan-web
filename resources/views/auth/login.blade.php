@@ -49,7 +49,37 @@
             flex: 1;
         }
 
-        .hero-left { display: flex; flex-direction: column; }
+        @keyframes authFadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes navFadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .navbar {
+            animation: navFadeInDown 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+
+        .hero-left {
+            display: flex;
+            flex-direction: column;
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
         .hero-img-box {
             width: 100%;
             height: 380px;
@@ -70,6 +100,16 @@
             padding: 44px 48px;
             box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.03);
             border: 1px solid #e2e8f0;
+            animation: authFadeInUp 0.85s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .navbar,
+            .hero-left,
+            .card-auth {
+                animation-duration: 0.45s !important;
+                transform: none !important;
+            }
         }
         .form-title { font-size: 32px; font-weight: 800; color: #0f172a; margin-bottom: 8px; }
         .form-subtitle { font-size: 14px; color: #64748b; line-height: 1.5; margin-bottom: 30px; }

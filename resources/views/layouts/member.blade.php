@@ -656,6 +656,23 @@
 
                     });
 
+                document.addEventListener('click', function (event) {
+                    if (
+                        !mobileNav.contains(event.target) &&
+                        !mobileMenuButton.contains(event.target)
+                    ) {
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                        mobileNav.classList.remove('show');
+                    }
+                });
+
+                document.addEventListener('keydown', function (e) {
+                    if (e.key === 'Escape') {
+                        mobileMenuButton.setAttribute('aria-expanded', 'false');
+                        mobileNav.classList.remove('show');
+                    }
+                });
+
             }
 
         });

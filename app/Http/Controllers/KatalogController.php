@@ -32,7 +32,7 @@ class KatalogController extends Controller
         $kategoriId = $request->query('kategori');
         $status = $request->query('status');
         $lokasi = $request->query('lokasi', 'Perpustakaan Pusat');
-        $sort = $request->query('sort', 'judul_asc');
+        $sort = $request->filled('sort') ? (string) $request->query('sort') : 'judul_asc';
 
         $query = Buku::query()
             ->with(['kategori', 'barcode'])

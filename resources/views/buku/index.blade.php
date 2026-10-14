@@ -202,28 +202,24 @@
 
     .search-input-wrapper {
         position: relative;
-        flex: 1;
-        min-width: 220px;
-        max-width: 320px;
-    }
-
-    .search-input-wrapper svg {
-        position: absolute;
-        left: 12px;
-        top: 50%;
-        transform: translateY(-50%);
-        color: #94a3b8;
+        flex: 0 0 260px;
+        width: 260px;
+        min-width: 260px;
+        max-width: 260px;
     }
 
     .search-input {
         width: 100%;
-        padding: 9px 12px 9px 36px;
+        height: 38px;
+        padding: 0 36px 0 12px;
         border-radius: 8px;
         border: 1px solid var(--border-color, #e2e8f0);
         font-size: 13px;
         font-family: inherit;
         outline: none;
         transition: border-color 0.15s, box-shadow 0.15s;
+        background: #ffffff;
+        box-sizing: border-box;
     }
 
     .search-input:focus {
@@ -231,8 +227,37 @@
         box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
+    .search-icon-btn {
+        position: absolute;
+        right: 6px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+        color: #0f766e;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s ease;
+    }
+
+    .search-icon-btn:hover {
+        background: #f0fdfa;
+        color: #115e59;
+        transform: translateY(-50%) scale(1.08);
+    }
+
+    .search-icon-btn:active {
+        transform: translateY(-50%) scale(0.95);
+    }
+
     .filter-select {
-        padding: 9px 12px;
+        height: 38px;
+        padding: 0 12px;
         border-radius: 8px;
         border: 1px solid var(--border-color, #e2e8f0);
         font-size: 13px;
@@ -241,14 +266,18 @@
         color: #334155;
         outline: none;
         cursor: pointer;
+        box-sizing: border-box;
+        transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .filter-select:focus {
         border-color: #0f766e;
+        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
     }
 
     .btn-filter-submit {
-        padding: 9px 16px;
+        height: 38px;
+        padding: 0 16px;
         background: #0f766e;
         color: #ffffff;
         border-radius: 8px;
@@ -259,6 +288,7 @@
         align-items: center;
         gap: 6px;
         border: none;
+        box-sizing: border-box;
         transition: background 0.15s;
     }
 
@@ -267,7 +297,8 @@
     }
 
     .btn-filter-reset {
-        padding: 9px 14px;
+        height: 38px;
+        padding: 0 14px;
         background: #f1f5f9;
         color: #475569;
         border-radius: 8px;
@@ -277,11 +308,15 @@
         display: inline-flex;
         align-items: center;
         gap: 5px;
-        transition: background 0.15s;
+        box-sizing: border-box;
+        border: 1px solid transparent;
+        transition: background 0.15s, color 0.15s;
+        white-space: nowrap;
     }
 
     .btn-filter-reset:hover {
         background: #e2e8f0;
+        color: #1e293b;
     }
 
     /* --- DATA TABLE CARD --- */
@@ -320,24 +355,46 @@
     }
 
     .btn-toggle-all {
-        padding: 6px 12px;
+        padding: 6px 14px;
+        height: 34px;
         background: #ffffff;
         border: 1px solid #cbd5e1;
-        border-radius: 7px;
+        border-radius: 8px;
         font-size: 12px;
         font-weight: 600;
         color: #475569;
         cursor: pointer;
         display: inline-flex;
         align-items: center;
-        gap: 5px;
-        transition: all 0.15s;
+        gap: 6px;
+        transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+        user-select: none;
     }
 
     .btn-toggle-all:hover {
-        background: #f1f5f9;
+        background: #f8fafc;
         border-color: #94a3b8;
         color: #0f172a;
+    }
+
+    .btn-toggle-all.active {
+        background: #f0fdfa;
+        border-color: #0f766e;
+        color: #0f766e;
+        font-weight: 700;
+        box-shadow: 0 1px 3px rgba(15, 118, 110, 0.1);
+    }
+
+    .btn-toggle-all.active:hover {
+        background: #ccfbf1;
+        border-color: #0f766e;
+        color: #0f766e;
+    }
+
+    .btn-toggle-all svg {
+        transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        flex-shrink: 0;
     }
 
     .table-container {
@@ -938,6 +995,15 @@
         }
     }
 
+    @media (max-width: 992px) {
+        .search-input-wrapper {
+            flex: 1 1 240px;
+            width: auto;
+            min-width: 200px;
+            max-width: 100%;
+        }
+    }
+
     @media (max-width: 768px) {
         .stats-grid {
             grid-template-columns: repeat(2, 1fr);
@@ -948,14 +1014,31 @@
             align-items: stretch;
         }
 
+        .filter-form {
+            width: 100%;
+        }
+
         .search-input-wrapper {
+            flex: 1 1 100%;
+            width: 100%;
+            min-width: 100%;
             max-width: 100%;
+        }
+
+        .filter-select {
+            flex: 1 1 calc(50% - 5px);
+            min-width: 140px;
         }
     }
 
     @media (max-width: 480px) {
         .stats-grid {
             grid-template-columns: 1fr;
+        }
+
+        .filter-select {
+            flex: 1 1 100%;
+            width: 100%;
         }
     }
 </style>
@@ -1072,7 +1155,7 @@
     @endif
 
     <!-- SUMMARY STATS GRID: 5 INDIKATOR TERPADU -->
-    <div class="stats-grid">
+    <div class="stats-grid" id="bukuStatsGrid">
         <div class="stat-card">
             <div class="stat-icon primary">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1145,30 +1228,38 @@
 
     <!-- FILTER & SEARCH BAR -->
     <div class="filter-card">
-        <form action="{{ route('buku.index') }}" method="GET" class="filter-form">
+        <form action="{{ route('buku.index') }}" method="GET" class="filter-form" id="bukuFilterForm">
             @if(request()->boolean('perlu_restock'))
                 <input type="hidden" name="perlu_restock" value="1">
             @endif
 
             <div class="search-input-wrapper">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="11" cy="11" r="8"></circle>
-                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-                </svg>
                 <input type="text"
                        name="search"
+                       id="bukuSearchInput"
                        class="search-input"
                        placeholder="Cari judul, ID eksemplar, token..."
-                       value="{{ request('search') }}">
+                       value="{{ request('search') }}"
+                       autocomplete="off">
+                <button type="submit"
+                        id="bukuSearchBtn"
+                        class="search-icon-btn"
+                        title="Cari koleksi buku"
+                        aria-label="Cari koleksi buku">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
             </div>
 
-            <select name="lokasi" class="filter-select">
+            <select name="lokasi" id="bukuLokasiSelect" class="filter-select">
                 <option value="">Semua Lokasi</option>
                 <option value="Rak" {{ request('lokasi') === 'Rak' ? 'selected' : '' }}>Di Rak (Display)</option>
                 <option value="Gudang" {{ request('lokasi') === 'Gudang' ? 'selected' : '' }}>Di Gudang (Cadangan)</option>
             </select>
 
-            <select name="kategori" class="filter-select">
+            <select name="kategori" id="bukuKategoriSelect" class="filter-select">
                 <option value="">Semua Kategori</option>
                 @if(isset($kategoris))
                     @foreach ($kategoris as $kat)
@@ -1179,7 +1270,7 @@
                 @endif
             </select>
 
-            <select name="status" class="filter-select">
+            <select name="status" id="bukuStatusSelect" class="filter-select">
                 <option value="">Semua Status</option>
                 <option value="Tersedia" {{ request('status') === 'Tersedia' ? 'selected' : '' }}>Tersedia</option>
                 <option value="Dipinjam" {{ request('status') === 'Dipinjam' ? 'selected' : '' }}>Dipinjam</option>
@@ -1187,34 +1278,27 @@
                 <option value="Hilang" {{ request('status') === 'Hilang' ? 'selected' : '' }}>Hilang</option>
             </select>
 
-            <select name="kondisi" class="filter-select">
+            <select name="kondisi" id="bukuKondisiSelect" class="filter-select">
                 <option value="">Semua Kondisi</option>
                 <option value="Baik" {{ request('kondisi') === 'Baik' ? 'selected' : '' }}>Kondisi Baik</option>
                 <option value="Rusak" {{ request('kondisi') === 'Rusak' ? 'selected' : '' }}>Rusak</option>
                 <option value="Hilang" {{ request('kondisi') === 'Hilang' ? 'selected' : '' }}>Hilang</option>
             </select>
 
-            <button type="submit" class="btn-filter-submit">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>
-                Filter Eksemplar
-            </button>
-
-            @if(request()->filled('search') || request()->filled('kategori') || request()->filled('status') || request()->filled('kondisi') || request()->filled('lokasi') || request()->boolean('perlu_restock'))
-                <a href="{{ route('buku.index') }}" class="btn-filter-reset">
+            <div id="bukuResetWrapper" style="{{ (request()->filled('search') || request()->filled('kategori') || request()->filled('status') || request()->filled('kondisi') || request()->filled('lokasi') || request()->boolean('perlu_restock')) ? 'display: inline-flex;' : 'display: none;' }}">
+                <a href="{{ route('buku.index') }}" id="bukuResetBtn" class="btn-filter-reset">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
                         <line x1="6" y1="6" x2="18" y2="18"></line>
                     </svg>
                     Reset
                 </a>
-            @endif
+            </div>
         </form>
     </div>
 
     <!-- DATA TABLE CARD: DIKELOMPOKKAN PER JUDUL BUKU DENGAN ACCORDION / DROPDOWN EKSEMPLAR -->
-    <div class="table-card">
+    <div class="table-card" id="bukuTableCard" style="transition: opacity 0.2s ease;">
         <div class="table-toolbar-header">
             <div class="table-toolbar-title">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.2">
@@ -1224,17 +1308,11 @@
                 <span>Daftar Koleksi Judul Buku (1 Baris per Judul)</span>
             </div>
             <div class="table-toolbar-controls">
-                <button type="button" class="btn-toggle-all" onclick="toggleAllEksemplarRows(true)" title="Buka seluruh rincian eksemplar">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <button type="button" class="btn-toggle-all" id="btnToggleAllEksemplar" onclick="toggleAllEksemplarMaster()" title="Buka seluruh rincian eksemplar">
+                    <span id="toggleAllText">Buka Semua</span>
+                    <svg id="toggleAllIcon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                         <polyline points="6 9 12 15 18 9"></polyline>
                     </svg>
-                    Buka Semua
-                </button>
-                <button type="button" class="btn-toggle-all" onclick="toggleAllEksemplarRows(false)" title="Tutup seluruh rincian eksemplar">
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                        <polyline points="18 15 12 9 6 15"></polyline>
-                    </svg>
-                    Tutup Semua
                 </button>
             </div>
         </div>
@@ -1855,6 +1933,56 @@
             if (parentRow) parentRow.classList.remove('expanded-parent');
             removeOpenedRow(idBuku);
         }
+
+        syncMasterToggleButtonState();
+    }
+
+    function updateMasterToggleButton(isExpanded) {
+        const btn = document.getElementById('btnToggleAllEksemplar');
+        const textSpan = document.getElementById('toggleAllText');
+        const iconSvg = document.getElementById('toggleAllIcon');
+
+        if (!btn || !textSpan || !iconSvg) return;
+
+        if (isExpanded) {
+            textSpan.textContent = 'Tutup Semua';
+            btn.title = 'Tutup seluruh rincian eksemplar';
+            btn.classList.add('active');
+            iconSvg.style.transform = 'rotate(180deg)';
+        } else {
+            textSpan.textContent = 'Buka Semua';
+            btn.title = 'Buka seluruh rincian eksemplar';
+            btn.classList.remove('active');
+            iconSvg.style.transform = 'rotate(0deg)';
+        }
+    }
+
+    function syncMasterToggleButtonState() {
+        const rows = document.querySelectorAll('.eksemplar-detail-row');
+        if (rows.length === 0) return;
+
+        let openCount = 0;
+        rows.forEach(r => {
+            if (r.style.display === 'table-row') openCount++;
+        });
+
+        const isFullyExpanded = (openCount > 0 && openCount === rows.length);
+        updateMasterToggleButton(isFullyExpanded);
+    }
+
+    function toggleAllEksemplarMaster() {
+        const rows = document.querySelectorAll('.eksemplar-detail-row');
+        if (rows.length === 0) return;
+
+        let openCount = 0;
+        rows.forEach(r => {
+            if (r.style.display === 'table-row') openCount++;
+        });
+
+        // Jika belum semua terbuka, maka kita buka semua. Jika sudah semua terbuka, kita tutup semua.
+        const targetExpand = (openCount < rows.length);
+        toggleAllEksemplarRows(targetExpand);
+        updateMasterToggleButton(targetExpand);
     }
 
     function toggleAllEksemplarRows(expand) {
@@ -2125,7 +2253,7 @@
     }
 
     // Pulihkan accordion eksemplar yang sedang terbuka saat halaman dimuat ulang
-    document.addEventListener('DOMContentLoaded', function() {
+    function restoreOpenedRows() {
         document.querySelectorAll('.eksemplar-detail-row').forEach(function(row) {
             const idBuku = row.id.replace('eksemplar-row-', '');
             if (sessionStorage.getItem('open_eksemplar_' + idBuku) === '1') {
@@ -2137,6 +2265,185 @@
                 if (chevron) chevron.style.transform = 'rotate(180deg)';
                 if (parentRow) parentRow.classList.add('expanded-parent');
             }
+        });
+        syncMasterToggleButtonState();
+    }
+
+    let bukuSearchDebounceTimer = null;
+    let bukuAbortController = null;
+
+    function buildBukuFilterUrl() {
+        const form = document.getElementById('bukuFilterForm');
+        if (!form) return window.location.href;
+        const url = new URL(form.action, window.location.origin);
+        const searchVal = document.getElementById('bukuSearchInput')?.value.trim() || '';
+        const lokasiVal = document.getElementById('bukuLokasiSelect')?.value || '';
+        const kategoriVal = document.getElementById('bukuKategoriSelect')?.value || '';
+        const statusVal = document.getElementById('bukuStatusSelect')?.value || '';
+        const kondisiVal = document.getElementById('bukuKondisiSelect')?.value || '';
+        const restockInput = form.querySelector('input[name="perlu_restock"]');
+
+        if (searchVal) url.searchParams.set('search', searchVal);
+        if (lokasiVal) url.searchParams.set('lokasi', lokasiVal);
+        if (kategoriVal) url.searchParams.set('kategori', kategoriVal);
+        if (statusVal) url.searchParams.set('status', statusVal);
+        if (kondisiVal) url.searchParams.set('kondisi', kondisiVal);
+        if (restockInput && restockInput.value) url.searchParams.set('perlu_restock', restockInput.value);
+
+        return url.toString();
+    }
+
+    function updateBukuResetButtonVisibility() {
+        const searchVal = document.getElementById('bukuSearchInput')?.value.trim() || '';
+        const lokasiVal = document.getElementById('bukuLokasiSelect')?.value || '';
+        const kategoriVal = document.getElementById('bukuKategoriSelect')?.value || '';
+        const statusVal = document.getElementById('bukuStatusSelect')?.value || '';
+        const kondisiVal = document.getElementById('bukuKondisiSelect')?.value || '';
+        const resetWrapper = document.getElementById('bukuResetWrapper');
+
+        if (resetWrapper) {
+            const hasActiveFilter = Boolean(searchVal || lokasiVal || kategoriVal || statusVal || kondisiVal);
+            resetWrapper.style.display = hasActiveFilter ? 'inline-flex' : 'none';
+        }
+    }
+
+    function fetchBukuData(url) {
+        if (bukuAbortController) {
+            bukuAbortController.abort();
+        }
+        bukuAbortController = new AbortController();
+
+        const tableCard = document.getElementById('bukuTableCard');
+        const statsGrid = document.getElementById('bukuStatsGrid');
+
+        if (tableCard) {
+            tableCard.style.opacity = '0.35';
+            tableCard.style.pointerEvents = 'none';
+        }
+        if (statsGrid) {
+            statsGrid.style.opacity = '0.7';
+        }
+
+        fetch(url, {
+            signal: bukuAbortController.signal,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Network error: ' + response.status);
+            return response.text();
+        })
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+
+            const newTableCard = doc.getElementById('bukuTableCard');
+            if (newTableCard && tableCard) {
+                tableCard.innerHTML = newTableCard.innerHTML;
+            }
+
+            const newStatsGrid = doc.getElementById('bukuStatsGrid');
+            if (newStatsGrid && statsGrid) {
+                statsGrid.innerHTML = newStatsGrid.innerHTML;
+            }
+
+            updateBukuResetButtonVisibility();
+            window.history.pushState({ path: url }, '', url);
+
+            restoreOpenedRows();
+            bindBukuPaginationLinks();
+        })
+        .catch(err => {
+            if (err.name === 'AbortError') return;
+            console.warn('AJAX refresh gagal, memuat via submit form biasa:', err);
+            const form = document.getElementById('bukuFilterForm');
+            if (form) form.submit();
+        })
+        .finally(() => {
+            if (tableCard) {
+                tableCard.style.opacity = '1';
+                tableCard.style.pointerEvents = 'auto';
+            }
+            if (statsGrid) {
+                statsGrid.style.opacity = '1';
+            }
+        });
+    }
+
+    function bindBukuPaginationLinks() {
+        const tableCard = document.getElementById('bukuTableCard');
+        if (!tableCard) return;
+        const paginationLinks = tableCard.querySelectorAll('.pagination a, .table-footer a');
+        paginationLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                const href = link.getAttribute('href');
+                if (href && !href.startsWith('#')) {
+                    e.preventDefault();
+                    fetchBukuData(href);
+                }
+            });
+        });
+    }
+
+    // Inisialisasi Event Listener Live Search & Dropdowns
+    document.addEventListener('DOMContentLoaded', function() {
+        restoreOpenedRows();
+        bindBukuPaginationLinks();
+        updateBukuResetButtonVisibility();
+
+        const form = document.getElementById('bukuFilterForm');
+        const searchInput = document.getElementById('bukuSearchInput');
+
+        // Live search otomatis refresh tabel (debounce 350ms)
+        if (searchInput) {
+            searchInput.addEventListener('input', function() {
+                clearTimeout(bukuSearchDebounceTimer);
+                updateBukuResetButtonVisibility();
+                bukuSearchDebounceTimer = setTimeout(() => {
+                    fetchBukuData(buildBukuFilterUrl());
+                }, 350);
+            });
+        }
+
+        // Dropdown filter otomatis refresh tabel saat opsi dipilih
+        ['bukuLokasiSelect', 'bukuKategoriSelect', 'bukuStatusSelect', 'bukuKondisiSelect'].forEach(id => {
+            const select = document.getElementById(id);
+            if (select) {
+                select.addEventListener('change', function() {
+                    clearTimeout(bukuSearchDebounceTimer);
+                    updateBukuResetButtonVisibility();
+                    fetchBukuData(buildBukuFilterUrl());
+                });
+            }
+        });
+
+        // Form submit / klik tombol icon search / tekan Enter
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(bukuSearchDebounceTimer);
+                fetchBukuData(buildBukuFilterUrl());
+            });
+        }
+
+        // Klik tombol reset (termasuk reset di empty-state)
+        document.addEventListener('click', function(e) {
+            const resetBtn = e.target.closest('.btn-filter-reset');
+            if (resetBtn && resetBtn.getAttribute('href')) {
+                e.preventDefault();
+                if (searchInput) searchInput.value = '';
+                ['bukuLokasiSelect', 'bukuKategoriSelect', 'bukuStatusSelect', 'bukuKondisiSelect'].forEach(id => {
+                    const select = document.getElementById(id);
+                    if (select) select.value = '';
+                });
+                updateBukuResetButtonVisibility();
+                fetchBukuData(resetBtn.getAttribute('href'));
+            }
+        });
+
+        window.addEventListener('popstate', function() {
+            window.location.reload();
         });
     });
 </script>
