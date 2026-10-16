@@ -179,6 +179,86 @@
     .btn-booking-popup-ok:active {
         transform: translateY(0);
     }
+
+    /* Scoped Dark Mode Overrides */
+    [data-theme="dark"] .booking-popup-card {
+        background: #131d31 !important;
+        border: 1px solid #23314d !important;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+    }
+
+    [data-theme="dark"] .booking-popup-title {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .booking-popup-message {
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .booking-popup-close-x {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .booking-popup-close-x:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .booking-popup-icon-pulse {
+        background: rgba(20, 184, 166, 0.2) !important;
+    }
+
+    /* Scoped Van Gogh Theme Overrides */
+    [data-theme="van-gogh"] .booking-popup-card {
+        background: #132238 !important;
+        border: 1px solid #22446a !important;
+        box-shadow: 0 20px 50px rgba(13, 27, 42, 0.7) !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-title {
+        color: #f6f0df !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-message {
+        color: #d8e2ec !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-close-x {
+        background: #162c47 !important;
+        border: 1px solid #22446a !important;
+        color: #f6f0df !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-close-x:hover {
+        background: #1f3c60 !important;
+        color: #fcd34d !important;
+        border-color: #f59e0b !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-icon-pulse {
+        background: rgba(245, 158, 11, 0.25) !important;
+    }
+
+    [data-theme="van-gogh"] .booking-popup-icon-circle {
+        background: linear-gradient(135deg, #245b8f 0%, #1b456e 100%) !important;
+        color: #fcd34d !important;
+        border: 1px solid #f59e0b;
+        box-shadow: 0 8px 18px -4px rgba(245, 158, 11, 0.45) !important;
+    }
+
+    [data-theme="van-gogh"] .btn-booking-popup-ok {
+        background: #245b8f !important;
+        color: #ffffff !important;
+        border: 1px solid #316ba3 !important;
+        box-shadow: 0 4px 12px rgba(36, 91, 143, 0.4) !important;
+    }
+
+    [data-theme="van-gogh"] .btn-booking-popup-ok:hover {
+        background: #1b456e !important;
+        border-color: #f59e0b !important;
+        box-shadow: 0 6px 16px rgba(245, 158, 11, 0.35) !important;
+    }
 </style>
 
 <script>

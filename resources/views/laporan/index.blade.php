@@ -17,7 +17,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -27,7 +27,7 @@
     }
 
     .breadcrumb a {
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-decoration: none;
     }
 
@@ -71,7 +71,7 @@
     }
 
     .period-badge svg {
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         flex-shrink: 0;
     }
 
@@ -146,7 +146,7 @@
         height: 3px;
     }
 
-    .stat-box--teal::before { background: #0f766e; }
+    .stat-box--teal::before { background: var(--theme-accent, #0f766e); }
     .stat-box--emerald::before { background: #10b981; }
     .stat-box--amber::before { background: #f59e0b; }
     .stat-box--blue::before { background: #2563eb; }
@@ -168,7 +168,7 @@
         flex-shrink: 0;
     }
 
-    .stat-icon--teal { background: #ccfbf1; color: #0f766e; }
+    .stat-icon--teal { background: var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); }
     .stat-icon--emerald { background: #d1fae5; color: #059669; }
     .stat-icon--amber { background: #fef3c7; color: #d97706; }
     .stat-icon--blue { background: #dbeafe; color: #2563eb; }
@@ -225,7 +225,7 @@
     }
 
     .filter-card-title svg {
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
     }
 
     .filter-main-grid {
@@ -286,8 +286,8 @@
 
     .form-control-select:focus,
     .form-control-date:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .filter-actions-wrap {
@@ -298,7 +298,7 @@
 
     .btn-apply-filter {
         padding: 9.5px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -313,7 +313,7 @@
     }
 
     .btn-apply-filter:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-reset-filter {
@@ -383,9 +383,9 @@
     }
 
     .preset-btn.active {
-        background: #ccfbf1;
-        border-color: #99f6e4;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        border-color: var(--theme-border, #99f6e4);
+        color: var(--theme-accent, #0f766e);
         font-weight: 700;
     }
 
@@ -430,9 +430,9 @@
         font-weight: 700;
         padding: 4px 10px;
         border-radius: 9999px;
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #ccfbf1);
     }
 
     .table-container {
@@ -478,7 +478,7 @@
 
     .trx-id {
         font-weight: 800;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         letter-spacing: 0.3px;
     }
 
@@ -510,7 +510,7 @@
         width: 5px;
         height: 5px;
         border-radius: 50%;
-        background: #0f766e;
+        background: var(--theme-accent, #0f766e);
         flex-shrink: 0;
     }
 
@@ -860,7 +860,7 @@
             <div class="report-card">
                 <div class="report-card-header">
                     <h3 class="report-card-title">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                             <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                         </svg>

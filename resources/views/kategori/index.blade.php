@@ -16,7 +16,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -66,8 +66,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         flex-shrink: 0;
     }
 
@@ -136,13 +136,13 @@
     }
 
     .form-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .btn-create-submit {
         padding: 11px 22px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -154,7 +154,7 @@
     }
 
     .btn-create-submit:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     /* FILTER & SEARCH */
@@ -198,12 +198,12 @@
     }
 
     .search-input-field:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     .btn-filter-submit {
         padding: 9px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -257,8 +257,8 @@
         align-items: center;
         gap: 5px;
         padding: 4px 10px;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         border-radius: 20px;
         font-size: 12px;
         font-weight: 700;
@@ -274,7 +274,7 @@
     .btn-edit-action {
         padding: 6px 12px;
         background: #f1f5f9;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         border-radius: 8px;
         font-size: 12px;
         font-weight: 700;
@@ -284,8 +284,8 @@
     }
 
     .btn-edit-action:hover {
-        background: #ccfbf1;
-        border-color: #99f6e4;
+        background: var(--theme-accent-light, #ccfbf1);
+        border-color: var(--theme-border, #99f6e4);
     }
 
     .btn-delete-action {

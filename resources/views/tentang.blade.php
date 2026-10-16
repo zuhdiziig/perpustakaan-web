@@ -10,13 +10,40 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Open+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('data-lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
 
     @include('layouts.partials.sidebar_styles')
 
@@ -52,7 +79,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-page);
             color: var(--text-body);
             line-height: 1.6;
@@ -72,7 +99,7 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -189,9 +216,9 @@
             border-radius: 8px;
             align-items: center;
             justify-content: center;
-            color: #475569;
+            color: var(--text-heading);
             border: 1px solid var(--border-color);
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             cursor: pointer;
             transition: background 0.15s;
         }
@@ -206,9 +233,9 @@
             align-items: center;
             justify-content: center;
             padding: 8px 18px;
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
-            color: #0f766e;
+            color: var(--brand-primary);
             border-radius: 9px;
             font-size: 13.5px;
             font-weight: 700;
@@ -260,7 +287,7 @@
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(420px, 0.9fr);
 
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 18px;
 
@@ -369,7 +396,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
 
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
 
             border: 1px solid var(--border-color);
             border-radius: 16px;
@@ -443,7 +470,7 @@
         }
 
         .about-info-card.highlight {
-            background: #f0fdfa;
+            background: var(--theme-accent-light, #f0fdfa);
         }
 
         .about-section-title {
@@ -551,7 +578,7 @@
         ======================================== */
 
         .about-footer {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border-top: 1px solid var(--border-color);
         }
 
@@ -610,9 +637,9 @@
         .about-footer-bottom {
             padding-top: 18px;
 
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--border-color);
 
-            color: #94a3b8;
+            color: var(--text-muted);
             font-size: 10.5px;
         }
 
@@ -772,6 +799,271 @@
                 padding: 18px 16px;
             }
         }
+
+        /* ========================================
+           SCOPED THEME OVERRIDES FOR TENTANG
+        ======================================== */
+        /* 1. VAN GOGH (STARRY NIGHT) */
+        [data-theme="van-gogh"] .about-hero,
+        [data-theme="van-gogh"] .about-values,
+        [data-theme="van-gogh"] .about-info-card,
+        [data-theme="van-gogh"] .about-membership {
+            background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .about-value-card {
+            border-color: #1e3a5f !important;
+        }
+
+        [data-theme="van-gogh"] .about-value-icon {
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .about-hero-title,
+        [data-theme="van-gogh"] .about-value-title,
+        [data-theme="van-gogh"] .about-section-title,
+        [data-theme="van-gogh"] .about-membership-title {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .about-eyebrow {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .about-hero-description,
+        [data-theme="van-gogh"] .about-value-description,
+        [data-theme="van-gogh"] .about-service-list li,
+        [data-theme="van-gogh"] .about-contact-row,
+        [data-theme="van-gogh"] .about-contact-label,
+        [data-theme="van-gogh"] .about-info-note,
+        [data-theme="van-gogh"] .about-membership-text {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .about-hero-tagline,
+        [data-theme="van-gogh"] .about-contact-value {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .about-info-card.highlight {
+            background: linear-gradient(135deg, #182b42 0%, #101c2e 100%) !important;
+            border: 1px solid #2e4a6e !important;
+            border-left: 4px solid #f59e0b !important;
+        }
+
+        [data-theme="van-gogh"] .about-primary-button {
+            background: #245b8f !important;
+            color: #ffffff !important;
+            border: 1px solid #1e3a5f !important;
+            font-weight: 700 !important;
+        }
+
+        [data-theme="van-gogh"] .about-primary-button:hover {
+            background: #1b456e !important;
+            color: #fcd34d !important;
+            border-color: #f59e0b !important;
+        }
+
+        [data-theme="van-gogh"] .about-footer {
+            background: #0d1b2a !important;
+            border-top-color: #1e3a5f !important;
+        }
+
+        [data-theme="van-gogh"] .about-footer-bottom {
+            border-top-color: #1e3a5f !important;
+            color: #7892ab !important;
+        }
+
+        [data-theme="van-gogh"] .footer-brand-title,
+        [data-theme="van-gogh"] .footer-column-title {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .footer-brand-text,
+        [data-theme="van-gogh"] .footer-links a,
+        [data-theme="van-gogh"] .footer-address {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .footer-links a:hover {
+            color: #fcd34d !important;
+        }
+
+        /* 2. MIDNIGHT SLATE */
+        [data-theme="midnight-slate"] .about-hero,
+        [data-theme="midnight-slate"] .about-values,
+        [data-theme="midnight-slate"] .about-info-card,
+        [data-theme="midnight-slate"] .about-membership {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="midnight-slate"] .about-value-card {
+            border-color: #24354e !important;
+        }
+
+        [data-theme="midnight-slate"] .about-value-icon {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+            border: 1px solid #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .about-hero-title,
+        [data-theme="midnight-slate"] .about-value-title,
+        [data-theme="midnight-slate"] .about-section-title,
+        [data-theme="midnight-slate"] .about-membership-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .about-eyebrow {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .about-hero-description,
+        [data-theme="midnight-slate"] .about-value-description,
+        [data-theme="midnight-slate"] .about-service-list li,
+        [data-theme="midnight-slate"] .about-contact-row,
+        [data-theme="midnight-slate"] .about-contact-label,
+        [data-theme="midnight-slate"] .about-info-note,
+        [data-theme="midnight-slate"] .about-membership-text {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .about-info-card.highlight {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+            border-left: 4px solid #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .about-footer {
+            background: #0f172a !important;
+            border-top-color: #24354e !important;
+        }
+
+        [data-theme="midnight-slate"] .about-footer-bottom {
+            border-top-color: #24354e !important;
+            color: #64748b !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-brand-title,
+        [data-theme="midnight-slate"] .footer-column-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-brand-text,
+        [data-theme="midnight-slate"] .footer-links a,
+        [data-theme="midnight-slate"] .footer-address {
+            color: #94a3b8 !important;
+        }
+
+        /* 3. DARK MODE */
+        [data-theme="dark"] .about-hero,
+        [data-theme="dark"] .about-values,
+        [data-theme="dark"] .about-info-card,
+        [data-theme="dark"] .about-membership {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .about-value-card {
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .about-value-icon {
+            background: #042f2e !important;
+            color: #2dd4bf !important;
+            border: 1px solid #115e59 !important;
+        }
+
+        [data-theme="dark"] .about-hero-title,
+        [data-theme="dark"] .about-value-title,
+        [data-theme="dark"] .about-section-title,
+        [data-theme="dark"] .about-membership-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .about-eyebrow {
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .about-hero-description,
+        [data-theme="dark"] .about-value-description,
+        [data-theme="dark"] .about-service-list li,
+        [data-theme="dark"] .about-contact-row,
+        [data-theme="dark"] .about-contact-label,
+        [data-theme="dark"] .about-info-note,
+        [data-theme="dark"] .about-membership-text {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .about-info-card.highlight {
+            background: #042f2e !important;
+            border-color: #115e59 !important;
+            border-left: 4px solid #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .about-footer {
+            background: #0d1726 !important;
+            border-top-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .about-footer-bottom {
+            border-top-color: #23314d !important;
+            color: #64748b !important;
+        }
+
+        [data-theme="dark"] .footer-brand-title,
+        [data-theme="dark"] .footer-column-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .footer-brand-text,
+        [data-theme="dark"] .footer-links a,
+        [data-theme="dark"] .footer-address {
+            color: #94a3b8 !important;
+        }
+
+        /* 4. SOFT BLUSH */
+        [data-theme="soft-blush"] .about-hero,
+        [data-theme="soft-blush"] .about-values,
+        [data-theme="soft-blush"] .about-info-card,
+        [data-theme="soft-blush"] .about-membership {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+            box-shadow: 0 4px 16px rgba(184, 93, 119, 0.06) !important;
+        }
+
+        [data-theme="soft-blush"] .about-value-card {
+            border-color: #eedde2 !important;
+        }
+
+        [data-theme="soft-blush"] .about-hero-title,
+        [data-theme="soft-blush"] .about-value-title,
+        [data-theme="soft-blush"] .about-section-title,
+        [data-theme="soft-blush"] .about-membership-title {
+            color: #4a2835 !important;
+        }
+
+        [data-theme="soft-blush"] .about-eyebrow {
+            color: #b85d77 !important;
+        }
+
+        [data-theme="soft-blush"] .about-info-card.highlight {
+            background: #fdf2f5 !important;
+            border-color: #eedde2 !important;
+            border-left: 4px solid #b85d77 !important;
+        }
     </style>
 </head>
 
@@ -863,13 +1155,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Pengguna">
-                        @if(auth()->user()->foto ?? false)
-                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                        @else
-                            {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
-                        @endif
-                    </a>
+                    @include('layouts.partials.topbar_user_dropdown')
                 @else
                     <div class="guest-nav-actions" style="display: flex; align-items: center; gap: 8px;">
                         <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>

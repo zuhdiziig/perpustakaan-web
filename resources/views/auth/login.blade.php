@@ -7,8 +7,65 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                if (savedLang) document.documentElement.setAttribute('lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
     
     <style>
+        :root {
+            --theme-accent: #0f766e;
+            --theme-accent-hover: #0d5f58;
+            --theme-accent-shadow: rgba(15, 118, 110, 0.25);
+            --logo-text: #0f172a;
+        }
+
+        [data-theme="dark"] {
+            --theme-accent: #10b981;
+            --theme-accent-hover: #059669;
+            --theme-accent-shadow: rgba(16, 185, 129, 0.4);
+            --logo-text: #f8fafc;
+        }
+
+        [data-theme="soft-blush"] {
+            --theme-accent: #b85d77;
+            --theme-accent-hover: #9c4c64;
+            --theme-accent-shadow: rgba(184, 93, 119, 0.35);
+            --logo-text: #2e2528;
+        }
+
+        [data-theme="van-gogh"] {
+            --theme-accent: #245b8f;
+            --theme-accent-hover: #1b456e;
+            --theme-accent-shadow: rgba(233, 185, 73, 0.35);
+            --logo-text: #f6f0df;
+        }
+
+        [data-theme="midnight-slate"] {
+            --theme-accent: #2563eb;
+            --theme-accent-hover: #1d4ed8;
+            --theme-accent-shadow: rgba(37, 99, 235, 0.45);
+            --logo-text: #f8fafc;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
         body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; }
 
@@ -27,15 +84,20 @@
         .logo-icon {
             width: 36px;
             height: 36px;
-            background: linear-gradient(135deg, #28635a, #1d4d46);
+            background: var(--theme-accent, #0f766e) !important;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            box-shadow: 0 2px 6px rgba(35, 92, 84, 0.25);
+            color: #ffffff !important;
+            box-shadow: 0 2px 6px var(--theme-accent-shadow, rgba(15, 118, 110, 0.25)) !important;
+            transition: background 0.25s ease, box-shadow 0.25s ease, color 0.25s ease !important;
         }
-        .logo-text { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; color: #0f172a; }
+        .logo-icon svg {
+            color: #ffffff !important;
+            stroke: currentColor !important;
+        }
+        .logo-text { font-size: 19px; font-weight: 800; letter-spacing: 0.5px; color: var(--logo-text, #0f172a) !important; transition: color 0.25s ease !important; }
 
         /* Layout Utama 2 Kolom */
         .main-wrapper {
@@ -126,7 +188,7 @@
             outline: none;
             transition: all 0.2s;
         }
-        .form-input:focus { border-color: #235c54; box-shadow: 0 0 0 4px rgba(35, 92, 84, 0.12); }
+        .form-input:focus { border-color: var(--theme-accent, #0f766e); box-shadow: 0 0 0 4px var(--theme-accent-shadow, rgba(15, 118, 110, 0.15)); }
 
         .form-row-remember {
             display: flex;
@@ -137,14 +199,14 @@
             font-size: 13.5px;
         }
         .checkbox-label { display: flex; align-items: center; gap: 8px; color: #475569; cursor: pointer; }
-        .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: #235c54; }
+        .checkbox-label input[type="checkbox"] { width: 17px; height: 17px; accent-color: var(--theme-accent, #0f766e); }
         .forgot-link { color: #475569; text-decoration: none; font-weight: 600; }
-        .forgot-link:hover { color: #235c54; text-decoration: underline; }
+        .forgot-link:hover { color: var(--theme-accent, #0f766e); text-decoration: underline; }
 
         .btn-submit {
             width: 100%;
             padding: 14px;
-            background-color: #2e625a;
+            background-color: var(--theme-accent, #0f766e);
             color: white;
             border: none;
             border-radius: 12px;
@@ -153,12 +215,15 @@
             cursor: pointer;
             transition: all 0.2s;
             margin-bottom: 20px;
-            box-shadow: 0 4px 12px rgba(46, 98, 90, 0.25);
+            box-shadow: 0 4px 12px var(--theme-accent-shadow, rgba(15, 118, 110, 0.25));
         }
-        .btn-submit:hover { background-color: #234c46; }
+        .btn-submit:hover {
+            background-color: var(--theme-accent-hover, #0d5f58);
+            transform: translateY(-1px);
+        }
 
         .switch-auth-text { text-align: center; font-size: 13.5px; color: #64748b; margin-bottom: 28px; }
-        .switch-auth-text a { color: #235c54; font-weight: 700; text-decoration: none; }
+        .switch-auth-text a { color: var(--theme-accent, #0f766e); font-weight: 700; text-decoration: none; }
         .switch-auth-text a:hover { text-decoration: underline; }
 
         .card-notice {
@@ -194,6 +259,156 @@
             .form-title { font-size: 24px; }
             .form-subtitle { font-size: 13px; margin-bottom: 20px; }
             .form-row-remember { flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+        }
+
+        /* --- DARK THEME OVERRIDES --- */
+        [data-theme="dark"] body {
+            background-color: #0b1120 !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .navbar {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-theme="dark"] .logo-text,
+        [data-theme="dark"] .hero-title,
+        [data-theme="dark"] .form-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .hero-desc,
+        [data-theme="dark"] .form-subtitle,
+        [data-theme="dark"] .checkbox-label,
+        [data-theme="dark"] .forgot-link,
+        [data-theme="dark"] .form-footer {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .card-auth {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        [data-theme="dark"] .hero-img-box {
+            background-color: #1e293b !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .form-label {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .form-input {
+            background: #0b1220 !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .form-input:focus {
+            border-color: #14b8a6 !important;
+            box-shadow: 0 0 0 4px rgba(20, 184, 166, 0.16) !important;
+        }
+
+        [data-theme="dark"] .forgot-link:hover,
+        [data-theme="dark"] .form-footer a {
+            color: #2dd4bf !important;
+        }
+
+        /* Van Gogh Theme Overrides */
+        [data-theme="van-gogh"] body {
+            background-color: #0b1726 !important;
+            background-image: 
+                radial-gradient(circle at 82% 14%, rgba(245, 158, 11, 0.22) 0%, rgba(233, 185, 73, 0.08) 22%, transparent 45%),
+                radial-gradient(ellipse at 15% 25%, rgba(36, 91, 143, 0.35) 0%, rgba(16, 42, 67, 0.22) 35%, transparent 58%),
+                radial-gradient(circle at 50% 85%, rgba(27, 69, 110, 0.28) 0%, transparent 50%),
+                linear-gradient(140deg, #071320 0%, #0d1e33 40%, #153255 75%, #091522 100%) !important;
+            background-attachment: fixed !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .navbar {
+            background: linear-gradient(90deg, #0e1e33 0%, #10253f 50%, #0d1a2c 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        [data-theme="van-gogh"] .logo-icon {
+            background: radial-gradient(circle at 35% 35%, #2d6ca8 0%, #15375d 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.55) !important;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.4) !important;
+        }
+        [data-theme="van-gogh"] .logo-icon svg {
+            color: #fcd34d !important;
+            stroke: currentColor !important;
+        }
+        [data-theme="van-gogh"] .logo-text,
+        [data-theme="van-gogh"] .hero-title,
+        [data-theme="van-gogh"] .form-title {
+            color: #f6f0df !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="van-gogh"] .hero-desc,
+        [data-theme="van-gogh"] .form-subtitle,
+        [data-theme="van-gogh"] .checkbox-label,
+        [data-theme="van-gogh"] .forgot-link,
+        [data-theme="van-gogh"] .form-footer {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="van-gogh"] .card-auth {
+            background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2.5px solid #f59e0b !important;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(36, 91, 143, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .hero-img-box {
+            background-color: #10233b !important;
+            border: 2px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 8px 30px rgba(11, 23, 38, 0.8), 0 0 24px rgba(245, 158, 11, 0.3) !important;
+        }
+
+        [data-theme="van-gogh"] .form-label {
+            color: #f6f0df !important;
+            font-weight: 600 !important;
+        }
+
+        [data-theme="van-gogh"] .form-input {
+            background: #0d1b2a !important;
+            border: 1px solid #22446a !important;
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .form-input:focus {
+            border-color: #f59e0b !important;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .forgot-link:hover,
+        [data-theme="van-gogh"] .form-footer a {
+            color: #fcd34d !important;
+            font-weight: 700 !important;
+        }
+
+        [data-theme="van-gogh"] .btn-submit {
+            background: #245b8f !important;
+            border: 1px solid #3a7ebd !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(36, 91, 143, 0.4) !important;
+        }
+
+        [data-theme="van-gogh"] .btn-submit:hover {
+            background: #1b456e !important;
+            border-color: #f59e0b !important;
+            color: #f6f0df !important;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35) !important;
         }
     </style>
 </head>

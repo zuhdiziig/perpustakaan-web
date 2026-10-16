@@ -18,6 +18,8 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    @include('layouts.partials.sidebar_styles')
+
     @yield('styles')
 </head>
 
@@ -781,7 +783,7 @@
             border-radius: 11px;
 
             color: white;
-            background: var(--member-primary);
+            background: var(--theme-accent, var(--member-primary));
         }
 
 

@@ -10,9 +10,40 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Open+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('data-lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
     @include('layouts.partials.sidebar_styles')
 
     <style>
@@ -46,7 +77,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-page);
             color: var(--text-body);
             line-height: 1.6;
@@ -63,7 +94,7 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -394,7 +425,7 @@
         }
 
         .step-card {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 24px 22px;
@@ -461,7 +492,7 @@
         }
 
         .feature-card {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 22px;
             padding: 28px 26px;
@@ -579,7 +610,7 @@
         }
 
         .faq-item {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 16px;
             overflow: hidden;
@@ -626,7 +657,7 @@
             font-size: 13.5px;
             color: var(--text-body);
             line-height: 1.65;
-            background: #fafafc;
+            background: var(--theme-border-subtle, #fafafc);
         }
 
         .faq-item.open .faq-answer {
@@ -704,17 +735,195 @@
             text-align: center;
         }
 
-        @media (max-width: 900px) {
-            .about-footer-grid {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-            .hero-main-title {
-                font-size: 26px;
-            }
-            .page-hero-card {
-                padding: 30px 22px;
-            }
+        /* ========================================
+           SCOPED THEME OVERRIDES FOR PANDUAN PEMINJAMAN
+        ======================================== */
+        /* 1. VAN GOGH (STARRY NIGHT) */
+        [data-theme="van-gogh"] .page-hero-card {
+            background: linear-gradient(135deg, #102a43 0%, #16365c 55%, #0b1726 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        [data-theme="van-gogh"] .step-card,
+        [data-theme="van-gogh"] .feature-card,
+        [data-theme="van-gogh"] .faq-item {
+            background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .step-card-num {
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        }
+
+        [data-theme="van-gogh"] .step-card-tag {
+            background: rgba(245, 158, 11, 0.16) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.3) !important;
+        }
+
+        [data-theme="van-gogh"] .feature-card-icon {
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        }
+
+        [data-theme="van-gogh"] .feature-card-icon.amber {
+            background: rgba(245, 158, 11, 0.2) !important;
+            color: #fcd34d !important;
+            border-color: rgba(245, 158, 11, 0.5) !important;
+        }
+
+        [data-theme="van-gogh"] .feature-card-icon.blue {
+            background: rgba(36, 91, 143, 0.3) !important;
+            color: #93c5fd !important;
+            border-color: rgba(147, 197, 253, 0.4) !important;
+        }
+
+        [data-theme="van-gogh"] .faq-question {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .faq-question svg {
+            color: #f59e0b !important;
+        }
+
+        [data-theme="van-gogh"] .faq-answer {
+            background: #0d1a2c !important;
+            color: #9fb3c8 !important;
+            border-top-color: #1e3a5f !important;
+        }
+
+        [data-theme="van-gogh"] .step-card-title,
+        [data-theme="van-gogh"] .feature-card-title,
+        [data-theme="van-gogh"] .footer-brand-title,
+        [data-theme="van-gogh"] .footer-column-title {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .step-card-text,
+        [data-theme="van-gogh"] .feature-list li,
+        [data-theme="van-gogh"] .breadcrumb-nav,
+        [data-theme="van-gogh"] .breadcrumb-nav a,
+        [data-theme="van-gogh"] .footer-brand-tagline,
+        [data-theme="van-gogh"] .footer-links a,
+        [data-theme="van-gogh"] .footer-address {
+            color: #9fb3c8 !important;
+        }
+
+        /* 2. MIDNIGHT SLATE */
+        [data-theme="midnight-slate"] .page-hero-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+            border: 1px solid #334155 !important;
+        }
+
+        [data-theme="midnight-slate"] .step-card,
+        [data-theme="midnight-slate"] .feature-card,
+        [data-theme="midnight-slate"] .faq-item {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="midnight-slate"] .step-card-num,
+        [data-theme="midnight-slate"] .feature-card-icon {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+            border: 1px solid #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .step-card-tag {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .faq-question {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .faq-answer {
+            background: #0f172a !important;
+            color: #94a3b8 !important;
+            border-top-color: #24354e !important;
+        }
+
+        /* 3. DARK MODE */
+        [data-theme="dark"] .page-hero-card {
+            background: linear-gradient(135deg, #0f172a 0%, #042f2e 100%) !important;
+            border: 1px solid #115e59 !important;
+        }
+
+        [data-theme="dark"] .step-card,
+        [data-theme="dark"] .feature-card,
+        [data-theme="dark"] .faq-item {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .step-card-num,
+        [data-theme="dark"] .feature-card-icon {
+            background: #042f2e !important;
+            color: #2dd4bf !important;
+            border: 1px solid #115e59 !important;
+        }
+
+        [data-theme="dark"] .step-card-tag {
+            background: #042f2e !important;
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .faq-question {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .faq-answer {
+            background: #0d1726 !important;
+            color: #94a3b8 !important;
+            border-top-color: #23314d !important;
+        }
+
+        /* 4. SOFT BLUSH */
+        [data-theme="soft-blush"] .page-hero-card {
+            background: linear-gradient(135deg, #b85d77 0%, #8c3f55 100%) !important;
+            box-shadow: 0 16px 36px -10px rgba(184, 93, 119, 0.3) !important;
+        }
+
+        [data-theme="soft-blush"] .step-card,
+        [data-theme="soft-blush"] .feature-card,
+        [data-theme="soft-blush"] .faq-item {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+            box-shadow: 0 4px 16px rgba(184, 93, 119, 0.06) !important;
+        }
+
+        [data-theme="soft-blush"] .step-card-num,
+        [data-theme="soft-blush"] .feature-card-icon {
+            background: #fdf2f5 !important;
+            color: #b85d77 !important;
+            border-color: #f7d5df !important;
+        }
+
+        [data-theme="soft-blush"] .step-card-tag {
+            background: #fdf2f5 !important;
+            color: #b85d77 !important;
+        }
+
+        [data-theme="soft-blush"] .faq-question {
+            color: #4a2835 !important;
+        }
+
+        [data-theme="soft-blush"] .faq-answer {
+            background: #fff8fa !important;
+            color: #7a505f !important;
         }
     </style>
 </head>
@@ -802,13 +1011,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Pengguna">
-                        @if(auth()->user()->foto ?? false)
-                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                        @else
-                            {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
-                        @endif
-                    </a>
+                    @include('layouts.partials.topbar_user_dropdown')
                 @else
                     <div class="guest-nav-actions" style="display: flex; align-items: center; gap: 8px;">
                         <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>
@@ -1124,7 +1327,7 @@
         </section>
 
         {{-- CALL TO ACTION BAR --}}
-        <section style="background: #ffffff; border: 1.5px solid var(--border-color); border-radius: 22px; padding: 32px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
+        <section class="card cta-guide-card" style="background: var(--bg-card, #ffffff); border: 1.5px solid var(--border-color); border-radius: 22px; padding: 32px 30px; display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap;">
             <div>
                 <h3 style="font-size: 20px; font-weight: 800; color: var(--text-heading); margin-bottom: 4px;">Siap Memulai Petualangan Membacamu?</h3>
                 <p style="font-size: 13.5px; color: var(--text-muted);">Jelajahi ribuan koleksi buku fisik terbaik di katalog BOOKNEST hari ini.</p>

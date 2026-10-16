@@ -12,7 +12,7 @@
     .breadcrumb {
         font-size: 12px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -62,12 +62,13 @@
         width: 36px;
         height: 36px;
         border-radius: 9px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 14px;
+        transition: background 0.25s ease, color 0.25s ease;
     }
 
     .stat-label {
@@ -130,7 +131,7 @@
     .table-search-label {
         font-size: 13px;
         font-weight: 700;
-        color: #334155;
+        color: var(--text-heading, #334155);
         white-space: nowrap;
     }
 
@@ -138,17 +139,18 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #ffffff;
-        border: 1px solid var(--border-color);
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 9px;
         padding: 7px 12px;
-        width: 260px;
+        width: 280px;
+        max-width: 100%;
         transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .table-search-input-wrap:focus-within {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.1));
     }
 
     .table-search-input-wrap input {
@@ -162,8 +164,8 @@
 
     .btn-table-search {
         padding: 8px 18px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         border-radius: 9px;
@@ -171,7 +173,7 @@
     }
 
     .btn-table-search:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .table-card {
@@ -513,25 +515,24 @@
         <div class="section-header-row">
             <div>
                 <h3 class="section-title">Transaksi peminjaman</h3>
-                <div class="section-subtitle">
+                <div class="section-subtitle" id="trxSubtitleCount">
                     {{ $totalTransaksiAktif }} transaksi aktif · {{ $transaksi->count() }} terbaru ditampilkan
                 </div>
             </div>
 
-            <form action="{{ route('dashboard') }}" method="GET" class="table-search-form">
+            <form action="{{ route('dashboard') }}" method="GET" class="table-search-form" id="tableSearchForm" onsubmit="event.preventDefault();">
                 <span class="table-search-label">Cari Transaksi :</span>
                 <div class="table-search-input-wrap">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-icon-muted, #94a3b8); flex-shrink: 0;">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" name="q" value="{{ $kataKunci }}" placeholder="Cari buku atau anggota...">
+                    <input type="text" name="q" id="trxSearchInput" value="{{ $kataKunci }}" placeholder="Cari buku atau anggota..." autocomplete="off">
                 </div>
-                <button type="submit" class="btn-table-search">Cari</button>
             </form>
         </div>
 
-        <div class="table-card">
+        <div class="table-card" id="trxTableContainer">
             <table class="custom-table">
                 <thead>
                     <tr>
@@ -617,4 +618,104 @@
     </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let trxSearchDebounceTimer = null;
+        let trxSearchAbortController = null;
+
+        const trxSearchInput = document.getElementById('trxSearchInput');
+        const tableSearchForm = document.getElementById('tableSearchForm');
+        const trxTableContainer = document.getElementById('trxTableContainer');
+        const trxSubtitleCount = document.getElementById('trxSubtitleCount');
+
+        async function executeTrxLiveSearch(query) {
+            if (trxSearchAbortController) {
+                trxSearchAbortController.abort();
+            }
+            trxSearchAbortController = new AbortController();
+
+            if (trxTableContainer) {
+                trxTableContainer.style.opacity = '0.5';
+                trxTableContainer.style.pointerEvents = 'none';
+                trxTableContainer.style.transition = 'opacity 0.18s ease';
+            }
+
+            const url = new URL('{{ route('dashboard') }}', window.location.origin);
+            if (query && query.trim() !== '') {
+                url.searchParams.set('q', query.trim());
+            }
+
+            try {
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    },
+                    signal: trxSearchAbortController.signal
+                });
+
+                if (response.ok) {
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+
+                    const newTable = doc.getElementById('trxTableContainer');
+                    const newSubtitle = doc.getElementById('trxSubtitleCount');
+
+                    if (newTable && trxTableContainer) {
+                        trxTableContainer.innerHTML = newTable.innerHTML;
+                    }
+                    if (newSubtitle && trxSubtitleCount) {
+                        trxSubtitleCount.innerHTML = newSubtitle.innerHTML;
+                    }
+
+                    window.history.replaceState({}, '', url.toString());
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Trx live search error:', err);
+                }
+            } finally {
+                if (trxTableContainer) {
+                    trxTableContainer.style.opacity = '1';
+                    trxTableContainer.style.pointerEvents = '';
+                }
+            }
+        }
+
+        if (trxSearchInput) {
+            trxSearchInput.addEventListener('input', function(e) {
+                clearTimeout(trxSearchDebounceTimer);
+                const query = e.target.value;
+                trxSearchDebounceTimer = setTimeout(() => {
+                    executeTrxLiveSearch(query);
+                }, 220);
+            });
+        }
+
+        if (tableSearchForm) {
+            tableSearchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(trxSearchDebounceTimer);
+                const query = trxSearchInput ? trxSearchInput.value : '';
+                executeTrxLiveSearch(query);
+            });
+        }
+
+        // Tangkap klik Reset Pencarian agar realtime tanpa reload
+        document.addEventListener('click', function(e) {
+            const resetLink = e.target.closest('#trxTableContainer a[href*="dashboard"]');
+            if (resetLink && (!resetLink.search || resetLink.search === '')) {
+                e.preventDefault();
+                if (trxSearchInput) {
+                    trxSearchInput.value = '';
+                }
+                executeTrxLiveSearch('');
+            }
+        });
+    });
+</script>
 @endsection

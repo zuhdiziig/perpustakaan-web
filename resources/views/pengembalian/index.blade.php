@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Pengembalian</title>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('booknest_theme');
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
     <style>
         * { box-sizing: border-box; }
         html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
-        body { font-family: sans-serif; background: #f8fafc; }
+        body { font-family: sans-serif; background: #f8fafc; color: #1e293b; }
         .card { background: white; padding: 20px 16px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); width: 100%; max-width: 1050px; margin: auto; }
         .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .header h2 { margin: 0; font-size: 1.25rem; }
@@ -17,6 +23,18 @@
         th { background: #f1f5f9; }
         .btn { padding: 8px 14px; border-radius: 4px; text-decoration: none; font-size: 13px; font-weight: bold; display: inline-block; white-space: nowrap; }
         .btn-primary { background: #2563eb; color: white; }
+
+        /* Dark mode */
+        [data-theme="dark"] body { background: #0b1120; color: #cbd5e1; }
+        [data-theme="dark"] .card { background: #131d31; box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 1px solid #23314d; }
+        [data-theme="dark"] .header h2 { color: #f8fafc; }
+        [data-theme="dark"] th { background: #0b1220; color: #94a3b8; border-color: #23314d; }
+        [data-theme="dark"] td { border-color: #23314d; color: #cbd5e1; }
+        [data-theme="dark"] td strong { color: #f8fafc; }
+        [data-theme="dark"] a[href*="dashboard"] { color: #94a3b8 !important; }
+        [data-theme="dark"] a[href*="pengembalian"] { color: #60a5fa !important; }
+        [data-theme="dark"] span[style*="color: #dc2626"] { color: #f87171 !important; }
+        [data-theme="dark"] span[style*="color: #16a34a"] { color: #4ade80 !important; }
     </style>
 </head>
 <body>

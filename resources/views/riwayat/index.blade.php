@@ -101,8 +101,8 @@
     }
 
     .stat-icon-teal {
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
     }
 
     .stat-icon-amber {
@@ -141,7 +141,8 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 20px;
-        background: #f1f5f9;
+        background: var(--theme-surface, #f1f5f9);
+        border: 1px solid var(--border-color, #e2e8f0);
         padding: 5px;
         border-radius: 12px;
         width: fit-content;
@@ -154,7 +155,7 @@
         border-radius: 9px;
         font-size: 13px;
         font-weight: 700;
-        color: #64748b;
+        color: var(--text-muted, #64748b);
         text-decoration: none;
         transition: all 0.15s ease;
         white-space: nowrap;
@@ -168,8 +169,8 @@
     }
 
     .filter-tab-btn.active {
-        background: #ffffff;
-        color: #0f766e;
+        background: var(--theme-surface, #ffffff);
+        color: var(--theme-accent, #0f766e);
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
     }
 
@@ -183,14 +184,14 @@
     }
 
     .filter-tab-btn.active .filter-badge-count {
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
     }
 
     /* --- MAIN RIWAYAT CARD & TABLE --- */
     .riwayat-card {
-        background: #ffffff;
-        border: 1px solid var(--border-color);
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 16px;
         box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
         overflow: hidden;
@@ -198,7 +199,7 @@
 
     .riwayat-card-header {
         padding: 20px 24px;
-        border-bottom: 1px solid #f1f5f9;
+        border-bottom: 1px solid var(--border-color, #f1f5f9);
         display: flex;
         align-items: center;
         justify-content: space-between;
@@ -290,8 +291,8 @@
     .book-icon-box {
         width: 38px;
         height: 38px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         border-radius: 10px;
         display: flex;
         align-items: center;
@@ -375,8 +376,8 @@
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         padding: 6px 13px;
         border-radius: 8px;
         font-size: 12px;
@@ -386,9 +387,9 @@
     }
 
     .action-pay-qr:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
         transform: translateY(-1px);
-        color: #ffffff;
     }
 
     /* EMPTY STATE */
@@ -400,8 +401,8 @@
     .empty-state-icon {
         width: 64px;
         height: 64px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         border-radius: 20px;
         display: flex;
         align-items: center;
@@ -428,8 +429,8 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         padding: 10px 20px;
         border-radius: 10px;
         font-size: 13px;
@@ -439,8 +440,8 @@
     }
 
     .btn-explore-katalog:hover {
-        background: #115e59;
-        color: #ffffff;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     .btn-kembalikan-shortcut {
@@ -449,21 +450,21 @@
         gap: 6px;
         padding: 6px 12px;
         border-radius: 8px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 11.5px;
         font-weight: 700;
         text-decoration: none;
         transition: all 0.15s ease;
-        box-shadow: 0 1px 2px rgba(15, 118, 110, 0.2);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
         margin-top: 4px;
     }
 
     .btn-kembalikan-shortcut:hover {
-        background: #115e59;
-        color: #ffffff;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
         transform: translateY(-1px);
-        box-shadow: 0 3px 6px rgba(15, 118, 110, 0.25);
+        box-shadow: 0 3px 6px rgba(0, 0, 0, 0.2);
     }
 
     .pagination-footer {
@@ -492,6 +493,235 @@
             width: 100%;
             justify-content: center;
         }
+    }
+
+    /* ========================================================
+       SCOPED THEME OVERRIDES FOR RIWAYAT
+       ======================================================== */
+
+    /* 1. VAN GOGH */
+    [data-theme="van-gogh"] .filter-tabs-bar {
+        background: #0f2035 !important;
+        border: 1px solid #1e3a5f !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn {
+        color: #9fb3c8 !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn:hover {
+        color: #fcd34d !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn.active {
+        background: linear-gradient(135deg, #183354 0%, #112338 100%) !important;
+        color: #fcd34d !important;
+        border: 1px solid #f59e0b !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 8px rgba(245, 158, 11, 0.2) !important;
+    }
+
+    [data-theme="van-gogh"] .filter-badge-count {
+        background: #172c47 !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn.active .filter-badge-count {
+        background: #f59e0b !important;
+        color: #0b1726 !important;
+        font-weight: 800 !important;
+    }
+
+    [data-theme="van-gogh"] .riwayat-card {
+        background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+        border: 1px solid #1e3a5f !important;
+        border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    [data-theme="van-gogh"] .riwayat-card-header,
+    [data-theme="van-gogh"] .pagination-footer {
+        border-color: #1e3a5f !important;
+    }
+
+    [data-theme="van-gogh"] .riwayat-table th {
+        background: #0f2035 !important;
+        color: #f6f0df !important;
+        border-color: #1e3a5f !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="van-gogh"] .riwayat-table td {
+        border-color: #172c47 !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="van-gogh"] .stat-card {
+        background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+        border: 1px solid #1e3a5f !important;
+        border-top: 2px solid rgba(245, 158, 11, 0.35) !important;
+    }
+
+    [data-theme="van-gogh"] .stat-number {
+        color: #f6f0df !important;
+    }
+
+    [data-theme="van-gogh"] .stat-label {
+        color: #9fb3c8 !important;
+    }
+
+    [data-theme="van-gogh"] .stat-icon-box {
+        background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+        color: #fcd34d !important;
+        border: 1px solid rgba(245, 158, 11, 0.45) !important;
+        box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
+    }
+
+    /* 2. MIDNIGHT SLATE */
+    [data-theme="midnight-slate"] .filter-tabs-bar {
+        background: #0f172a !important;
+        border: 1px solid #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn:hover {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn.active {
+        background: #162238 !important;
+        color: #38bdf8 !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-badge-count {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn.active .filter-badge-count {
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="midnight-slate"] .riwayat-card {
+        background: #141f33 !important;
+        border-color: #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .riwayat-card-header,
+    [data-theme="midnight-slate"] .pagination-footer {
+        border-color: #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .riwayat-table th {
+        background: #0f172a !important;
+        color: #94a3b8 !important;
+        border-color: #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .riwayat-table td {
+        border-color: #24354e !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="midnight-slate"] .stat-card {
+        background: #141f33 !important;
+        border-color: #24354e !important;
+    }
+
+    /* 3. DARK MODE */
+    [data-theme="dark"] .filter-tabs-bar {
+        background: #0b1220 !important;
+        border: 1px solid #23314d !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn:hover {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn.active {
+        background: #1f2937 !important;
+        color: #10b981 !important;
+        border: 1px solid #10b981 !important;
+    }
+
+    [data-theme="dark"] .filter-badge-count {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn.active .filter-badge-count {
+        background: #10b981 !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .riwayat-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .riwayat-card-header,
+    [data-theme="dark"] .pagination-footer {
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .riwayat-table th {
+        background: #0b1220 !important;
+        color: #94a3b8 !important;
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .riwayat-table td {
+        border-color: #23314d !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .stat-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+    }
+
+    /* 4. SOFT BLUSH */
+    [data-theme="soft-blush"] .filter-tabs-bar {
+        background: #fdf2f5 !important;
+        border: 1px solid #eedde2 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn {
+        color: #826e75 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn.active {
+        background: #ffffff !important;
+        color: #b85d77 !important;
+        border: 1px solid #b85d77 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-badge-count {
+        background: #fae1e8 !important;
+        color: #b85d77 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn.active .filter-badge-count {
+        background: #b85d77 !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="soft-blush"] .riwayat-card {
+        background: #ffffff !important;
+        border-color: #eedde2 !important;
+    }
+
+    [data-theme="soft-blush"] .stat-card {
+        background: #ffffff !important;
+        border-color: #eedde2 !important;
     }
 </style>
 @endsection
@@ -603,7 +833,7 @@
 
         <div class="riwayat-card-header">
             <h3 class="riwayat-card-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                     <line x1="8" y1="6" x2="21" y2="6"></line>
                     <line x1="8" y1="12" x2="21" y2="12"></line>
                     <line x1="8" y1="18" x2="21" y2="18"></line>
@@ -753,7 +983,7 @@
                                 <td>
                                     @if (in_array($item->status, ['Booking', 'Siap Diambil']))
                                         <div style="display: flex; flex-direction: column; gap: 6px; align-items: flex-start;">
-                                            <a href="{{ route('member.kartu-saya') }}" target="_blank" class="action-pay-qr" style="background: #0f766e; text-decoration: none;" title="Tunjukkan QR Anggota ke petugas meja sirkulasi">
+                                            <a href="{{ route('member.kartu-saya') }}" target="_blank" class="action-pay-qr" style="background: var(--theme-btn-primary-bg, #0f766e); text-decoration: none;" title="Tunjukkan QR Anggota ke petugas meja sirkulasi">
                                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                                     <rect x="3" y="3" width="7" height="7"></rect>
                                                     <rect x="14" y="3" width="7" height="7"></rect>
@@ -764,12 +994,12 @@
                                             </a>
                                             <form method="POST" action="{{ route('peminjaman.booking.batal', $item->idPeminjaman) }}" onsubmit="return confirm('Apakah Anda yakin ingin membatalkan booking peminjaman ini? Eksemplar buku akan dikembalikan ke ketersediaan umum.');" style="margin: 0;">
                                                 @csrf
-                                                <button type="submit" style="background: #fff; border: 1.5px solid #f87171; color: #dc2626; padding: 4px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.background='#fee2e2'" onmouseout="this.style.background='#fff'">
+                                                <button type="submit" style="background: var(--bg-card, #ffffff); border: 1.5px solid #ef4444; color: #ef4444; padding: 4px 10px; border-radius: 7px; font-size: 11px; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; transition: all 0.15s;" onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">
                                                     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                                                     Batalkan Booking
                                                 </button>
                                             </form>
-                                            <span style="font-size: 11px; color: #64748b;">
+                                            <span style="font-size: 11px; color: var(--text-muted, #64748b);">
                                                 Tunjukkan ke Petugas
                                             </span>
                                         </div>
@@ -802,7 +1032,7 @@
                                             @endif
 
                                             @if ($latestRet)
-                                                <a href="{{ route('pengembalian.member.bukti', $latestRet->idPengembalian) }}" style="font-size: 12px; color: #0f766e; font-weight: 700; text-decoration: underline; margin-top: 2px;">
+                                                <a href="{{ route('pengembalian.member.bukti', $latestRet->idPengembalian) }}" style="font-size: 12px; color: var(--theme-accent, #0f766e); font-weight: 700; text-decoration: underline; margin-top: 2px;">
                                                     Lihat Resi &rarr;
                                                 </a>
                                             @endif

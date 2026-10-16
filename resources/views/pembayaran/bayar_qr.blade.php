@@ -312,6 +312,53 @@
         .qris-amount-large { font-size: 26px; }
         .qris-qr-box img { width: 180px; height: 180px; }
     }
+
+    /* Scoped Dark Mode Overrides for QRIS Payment */
+    [data-theme="dark"] .qris-main-heading,
+    [data-theme="dark"] .qris-title-center,
+    [data-theme="dark"] .qris-merchant-info,
+    [data-theme="dark"] .qris-amount-large,
+    [data-theme="dark"] .card-heading-title,
+    [data-theme="dark"] .kv-val,
+    [data-theme="dark"] .kv-item.total-row .kv-val {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .qris-main-subtitle,
+    [data-theme="dark"] .qris-expiry-info,
+    [data-theme="dark"] .kv-label,
+    [data-theme="dark"] .qris-breadcrumb .active-crumb {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .qris-card,
+    [data-theme="dark"] .rincian-card-box {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-theme="dark"] .qris-qr-box {
+        background: #ffffff !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .kv-item.total-row {
+        border-top-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .cara-bayar-box {
+        background: #042f2e !important;
+        border-color: #115e59 !important;
+    }
+
+    [data-theme="dark"] .cara-title {
+        color: #2dd4bf !important;
+    }
+
+    [data-theme="dark"] .cara-list {
+        color: #99f6e4 !important;
+    }
 </style>
 @endsection
 

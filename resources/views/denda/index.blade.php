@@ -17,7 +17,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -45,9 +45,9 @@
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #ccfbf1);
         padding: 8px 14px;
         border-radius: 10px;
         font-size: 13px;
@@ -92,7 +92,7 @@
     .stat-icon.danger { background: #fee2e2; color: #dc2626; }
     .stat-icon.success { background: #dcfce7; color: #16a34a; }
     .stat-icon.warning { background: #fef3c7; color: #d97706; }
-    .stat-icon.primary { background: #f0fdfa; color: #0f766e; }
+    .stat-icon.primary { background: var(--theme-accent-light, #f0fdfa); color: var(--theme-accent, #0f766e); }
 
     .stat-meta {
         display: flex;
@@ -187,8 +187,8 @@
     }
 
     .search-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .search-icon-btn {
@@ -201,7 +201,7 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -210,8 +210,8 @@
     }
 
     .search-icon-btn:hover {
-        background: #f0fdfa;
-        color: #115e59;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent-hover, #115e59);
         transform: translateY(-50%) scale(1.08);
     }
 
@@ -236,15 +236,15 @@
     }
 
     .filter-select:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .btn-filter-submit {
         height: 38px;
         padding: 0 16px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         border: none;
         border-radius: 8px;
         font-size: 13px;
@@ -258,7 +258,8 @@
     }
 
     .btn-filter-submit:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     .btn-filter-reset {
@@ -529,6 +530,51 @@
             flex: 1 1 100%;
             width: 100%;
         }
+    .denda-book-title {
+        font-weight: 600;
+        color: #1e293b;
+        max-width: 200px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .denda-reason-text {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #334155;
+        max-width: 220px;
+    }
+
+    .empty-denda-title {
+        font-weight: 700;
+        color: #334155;
+        font-size: 15px;
+    }
+
+    .empty-denda-desc {
+        font-size: 13px;
+        color: #64748b;
+        max-width: 400px;
+    }
+
+    /* Scoped Dark Mode Overrides for Denda Management */
+    [data-theme="dark"] .denda-book-title,
+    [data-theme="dark"] .empty-denda-title {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .denda-reason-text {
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .empty-denda-desc {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .empty-denda-icon {
+        background: rgba(20, 184, 166, 0.16) !important;
+        color: #2dd4bf !important;
     }
 </style>
 @endsection
@@ -724,7 +770,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-weight: 600; color: #1e293b; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $buku->judul ?? '-' }}">
+                                <div class="denda-book-title" title="{{ $buku->judul ?? '-' }}">
                                     {{ $buku->judul ?? 'Buku Perpustakaan' }}
                                 </div>
                                 <div style="font-size: 11.5px; color: #64748b; margin-top: 2px;">
@@ -732,7 +778,7 @@
                                 </div>
                             </td>
                             <td>
-                                <div style="font-size: 12.5px; font-weight: 600; color: #334155; max-width: 220px;">
+                                <div class="denda-reason-text">
                                     {{ $d->jenisDenda }}
                                 </div>
                             </td>
@@ -815,14 +861,14 @@
                         <tr>
                             <td colspan="8" style="text-align: center; padding: 48px 20px;">
                                 <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;">
-                                    <div style="width: 52px; height: 52px; border-radius: 50%; background: #f0fdfa; display: flex; align-items: center; justify-content: center; color: #0f766e;">
+                                    <div class="empty-denda-icon" style="width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                                         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                             <polyline points="22 4 12 14.01 9 11.01"></polyline>
                                         </svg>
                                     </div>
-                                    <div style="font-weight: 700; color: #334155; font-size: 15px;">Tidak Ada Tagihan Denda</div>
-                                    <div style="font-size: 13px; color: #64748b; max-width: 400px;">
+                                    <div class="empty-denda-title">Tidak Ada Tagihan Denda</div>
+                                    <div class="empty-denda-desc">
                                         @if(request()->filled('search') || request()->filled('status'))
                                             Tidak ada data tagihan denda yang cocok dengan kriteria pencarian Anda.
                                         @else

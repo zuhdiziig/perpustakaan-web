@@ -173,8 +173,8 @@
                 </div>
             </div>
         @empty
-            <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: white; border-radius: 8px; border: 1px dashed #cbd5e1; color: #64748b;">
-                <p style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: #334155;">Belum Ada Eksemplar Fisik</p>
+            <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; background: var(--bg-card, white); border-radius: 8px; border: 1px dashed var(--border-color, #cbd5e1); color: var(--text-muted, #64748b);">
+                <p style="font-size: 16px; font-weight: bold; margin-bottom: 6px; color: var(--text-heading, #334155);">Belum Ada Eksemplar Fisik</p>
                 <p style="font-size: 13px; margin: 0;">Buku ini saat ini memiliki stok 0 atau belum didaftarkan eksemplar fisiknya.</p>
             </div>
         @endforelse

@@ -85,6 +85,63 @@
             @media (prefers-reduced-motion: reduce) {
                 .member-feedback-toast, .member-feedback-toast.is-leaving { animation-duration: .01ms; }
             }
+
+            /* Dark Mode Overrides */
+            [data-theme="dark"] .member-feedback-toast {
+                background: #131d31 !important;
+                color: #f8fafc !important;
+                box-shadow: 0 14px 38px rgba(0, 0, 0, 0.45) !important;
+            }
+            [data-theme="dark"] .member-feedback-toast[data-status="success"] { border-color: rgba(52, 211, 153, 0.35) !important; }
+            [data-theme="dark"] .member-feedback-toast[data-status="error"] { border-color: rgba(248, 113, 113, 0.35) !important; }
+            [data-theme="dark"] .member-feedback-toast[data-status="info"] { border-color: rgba(96, 165, 250, 0.35) !important; }
+            [data-theme="dark"] .member-feedback-toast[data-status="success"] .member-feedback-toast-icon { background: rgba(34, 197, 94, 0.2) !important; color: #4ade80 !important; }
+            [data-theme="dark"] .member-feedback-toast[data-status="error"] .member-feedback-toast-icon { background: rgba(239, 68, 68, 0.2) !important; color: #f87171 !important; }
+            [data-theme="dark"] .member-feedback-toast[data-status="info"] .member-feedback-toast-icon { background: rgba(59, 130, 246, 0.2) !important; color: #60a5fa !important; }
+            [data-theme="dark"] .member-feedback-toast-close { color: #94a3b8 !important; }
+            [data-theme="dark"] .member-feedback-toast-close:hover { background: #1e293b !important; color: #f8fafc !important; }
+
+            /* Van Gogh Overrides */
+            [data-theme="van-gogh"] .member-feedback-toast {
+                background: #132238 !important;
+                color: #f6f0df !important;
+                border-color: #22446a !important;
+                box-shadow: 0 14px 38px rgba(13, 27, 42, 0.75) !important;
+            }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="success"] { border-color: rgba(52, 211, 153, 0.45) !important; }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="error"] { border-color: rgba(248, 113, 113, 0.45) !important; }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="info"] { border-color: rgba(245, 158, 11, 0.45) !important; }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="success"] .member-feedback-toast-icon { background: rgba(34, 197, 94, 0.22) !important; color: #4ade80 !important; }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="error"] .member-feedback-toast-icon { background: rgba(239, 68, 68, 0.22) !important; color: #f87171 !important; }
+            [data-theme="van-gogh"] .member-feedback-toast[data-status="info"] .member-feedback-toast-icon { background: rgba(245, 158, 11, 0.22) !important; color: #fcd34d !important; }
+            [data-theme="van-gogh"] .member-feedback-toast-close { color: #9fb3c8 !important; }
+            [data-theme="van-gogh"] .member-feedback-toast-close:hover { background: #162c47 !important; color: #f6f0df !important; }
+
+            /* Midnight Slate Overrides */
+            [data-theme="midnight-slate"] .member-feedback-toast {
+                background: #111d33 !important;
+                color: #f8fafc !important;
+                border-color: #1e3156 !important;
+                box-shadow: 0 14px 38px rgba(10, 16, 29, 0.65) !important;
+            }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="success"] { border-color: rgba(52, 211, 153, 0.4) !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="error"] { border-color: rgba(248, 113, 113, 0.4) !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="info"] { border-color: rgba(59, 130, 246, 0.4) !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="success"] .member-feedback-toast-icon { background: rgba(34, 197, 94, 0.2) !important; color: #4ade80 !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="error"] .member-feedback-toast-icon { background: rgba(239, 68, 68, 0.2) !important; color: #f87171 !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast[data-status="info"] .member-feedback-toast-icon { background: rgba(59, 130, 246, 0.2) !important; color: #60a5fa !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast-close { color: #94a3b8 !important; }
+            [data-theme="midnight-slate"] .member-feedback-toast-close:hover { background: #1c3055 !important; color: #f8fafc !important; }
+
+            /* Soft Blush Overrides */
+            [data-theme="soft-blush"] .member-feedback-toast {
+                background: #ffffff !important;
+                color: #4a2d3b !important;
+                border-color: #f3d5dd !important;
+                box-shadow: 0 14px 38px rgba(184, 93, 119, 0.15) !important;
+            }
+            [data-theme="soft-blush"] .member-feedback-toast-close { color: #8c6b78 !important; }
+            [data-theme="soft-blush"] .member-feedback-toast-close:hover { background: #fdf2f4 !important; color: #4a2d3b !important; }
         </style>
 
         <script>

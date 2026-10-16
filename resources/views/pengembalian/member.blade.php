@@ -145,8 +145,8 @@
     }
 
     .stat-icon-teal {
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
     }
 
     .stat-icon-rose {
@@ -175,7 +175,8 @@
         align-items: center;
         gap: 8px;
         margin-bottom: 20px;
-        background: #f1f5f9;
+        background: var(--theme-surface, #f1f5f9);
+        border: 1px solid var(--border-color, #e2e8f0);
         padding: 5px;
         border-radius: 12px;
         width: fit-content;
@@ -292,8 +293,8 @@
     }
 
     .data-table tbody tr.highlighted {
-        background: #f0fdfa;
-        box-shadow: inset 3px 0 0 #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        box-shadow: inset 3px 0 0 var(--theme-accent, #0f766e);
     }
 
     /* --- BADGES & LABELS --- */
@@ -320,8 +321,8 @@
         width: 38px;
         height: 38px;
         border-radius: 10px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -365,8 +366,8 @@
     }
 
     .badge-status.returned {
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
     }
 
     .fine-tag-danger {
@@ -412,20 +413,21 @@
         gap: 6px;
         padding: 7px 13px;
         border-radius: 8px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         border: none;
         cursor: pointer;
         transition: all 0.15s ease;
-        box-shadow: 0 1px 2px rgba(15, 118, 110, 0.2);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     .btn-return-action:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
         transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(15, 118, 110, 0.3);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
     .btn-ticket-action {
@@ -434,20 +436,20 @@
         gap: 6px;
         padding: 7px 13px;
         border-radius: 8px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         text-decoration: none;
         transition: all 0.15s ease;
-        box-shadow: 0 1px 2px rgba(15, 118, 110, 0.2);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
     }
 
     .btn-ticket-action:hover {
-        background: #115e59;
-        color: #ffffff;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
         transform: translateY(-1px);
-        box-shadow: 0 3px 8px rgba(15, 118, 110, 0.3);
+        box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
     }
 
     .btn-qr-desk {
@@ -477,18 +479,18 @@
         gap: 6px;
         padding: 6px 12px;
         border-radius: 8px;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         font-size: 12px;
         font-weight: 700;
         text-decoration: none;
-        border: 1px solid #99f6e4;
+        border: 1px solid var(--theme-accent-light, #99f6e4);
         transition: all 0.15s;
     }
 
     .btn-view-receipt:hover {
-        background: #ccfbf1;
-        color: #115e59;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent-hover, #115e59);
     }
 
     /* --- EMPTY STATE --- */
@@ -634,8 +636,8 @@
     }
 
     .form-select:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.15));
     }
 
     .checkbox-wrap {
@@ -724,7 +726,7 @@
     }
 
     .bulk-badge-count {
-        background: #0f766e;
+        background: var(--theme-accent, #0f766e);
         color: #ffffff;
         font-weight: 800;
         font-size: 13px;
@@ -742,7 +744,7 @@
         justify-content: center;
         line-height: 1;
         text-align: center;
-        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.4);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     }
 
     .bulk-bar-text {
@@ -762,8 +764,8 @@
     }
 
     .btn-bulk-submit {
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         border: none;
         border-radius: 10px;
         padding: 9px 18px;
@@ -774,18 +776,12 @@
         align-items: center;
         gap: 7px;
         transition: all 0.15s;
-        box-shadow: 0 4px 12px rgba(15, 118, 110, 0.35);
-    }
-        font-weight: 700;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        transition: all 0.15s;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     }
 
     .btn-bulk-submit:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
         transform: translateY(-1px);
     }
 
@@ -915,6 +911,123 @@
             grid-template-columns: 1fr;
         }
     }
+
+    /* ========================================================
+       SCOPED THEME OVERRIDES FOR PENGEMBALIAN
+       ======================================================== */
+    [data-theme="van-gogh"] .filter-tabs-bar {
+        background: #0f2035 !important;
+        border: 1px solid #1e3a5f !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn {
+        color: #9fb3c8 !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn:hover {
+        color: #fcd34d !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn.active {
+        background: linear-gradient(135deg, #183354 0%, #112338 100%) !important;
+        color: #fcd34d !important;
+        border: 1px solid #f59e0b !important;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4), 0 0 8px rgba(245, 158, 11, 0.2) !important;
+    }
+
+    [data-theme="van-gogh"] .filter-badge-count {
+        background: #172c47 !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="van-gogh"] .filter-tab-btn.active .filter-badge-count {
+        background: #f59e0b !important;
+        color: #0b1726 !important;
+        font-weight: 800 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tabs-bar {
+        background: #0f172a !important;
+        border: 1px solid #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn:hover {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn.active {
+        background: #162238 !important;
+        color: #38bdf8 !important;
+        border: 1px solid #38bdf8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-badge-count {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .filter-tab-btn.active .filter-badge-count {
+        background: #2563eb !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="dark"] .filter-tabs-bar {
+        background: #0b1220 !important;
+        border: 1px solid #23314d !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn:hover {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn.active {
+        background: #1f2937 !important;
+        color: #10b981 !important;
+        border: 1px solid #10b981 !important;
+    }
+
+    [data-theme="dark"] .filter-badge-count {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-tab-btn.active .filter-badge-count {
+        background: #10b981 !important;
+        color: #ffffff !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tabs-bar {
+        background: #fdf2f5 !important;
+        border: 1px solid #eedde2 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn {
+        color: #826e75 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn.active {
+        background: #ffffff !important;
+        color: #b85d77 !important;
+        border: 1px solid #b85d77 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-badge-count {
+        background: #fae1e8 !important;
+        color: #b85d77 !important;
+    }
+
+    [data-theme="soft-blush"] .filter-tab-btn.active .filter-badge-count {
+        background: #b85d77 !important;
+        color: #ffffff !important;
+    }
 </style>
 @endsection
 
@@ -925,7 +1038,7 @@
     <div class="pengembalian-header">
         <div class="pengembalian-title-group">
             <h1 class="pengembalian-heading">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                     <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
                     <path d="M21 3v5h-5"></path>
                     <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
@@ -1032,7 +1145,7 @@
         <div class="main-card">
             <div class="main-card-header" style="flex-wrap: wrap; gap: 12px;">
                 <h3 class="main-card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                         <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                         <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                     </svg>
@@ -1043,7 +1156,7 @@
                         $bukuBisaKembali = $pinjamanAktif->where('statusBuku', 'Dipinjam')->count();
                     @endphp
                     @if($bukuBisaKembali > 1)
-                        <button type="button" class="btn-return-action" onclick="openBatchReturnModalAll()" style="padding: 7px 14px; font-size: 12.5px; background: #0f766e;">
+                        <button type="button" class="btn-return-action" onclick="openBatchReturnModalAll()" style="padding: 7px 14px; font-size: 12.5px; background: var(--theme-accent, #0f766e);">
                             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
                                 <polyline points="9 11 12 14 22 4"></polyline>
                                 <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
@@ -1063,7 +1176,7 @@
                         <thead>
                             <tr>
                                 <th style="width: 44px; text-align: center;">
-                                    <input type="checkbox" id="checkAllBooks" onchange="toggleSelectAllBooks(this)" title="Pilih Semua Buku" style="cursor: pointer; width: 17px; height: 17px; accent-color: #0f766e;">
+                                    <input type="checkbox" id="checkAllBooks" onchange="toggleSelectAllBooks(this)" title="Pilih Semua Buku" style="cursor: pointer; width: 17px; height: 17px; accent-color: var(--theme-accent, #0f766e);">
                                 </th>
                                 <th style="width: 110px;">Kode TRX</th>
                                 <th>Detail Buku</th>
@@ -1091,7 +1204,7 @@
                                                    data-denda="{{ $item->isOverdue ? $item->estDenda : 0 }}"
                                                    data-haritelat="{{ $item->isOverdue ? $item->hariTerlambat : 0 }}"
                                                    onchange="handleRowCheckChange()" 
-                                                   style="cursor: pointer; width: 17px; height: 17px; accent-color: #0f766e;">
+                                                   style="cursor: pointer; width: 17px; height: 17px; accent-color: var(--theme-accent, #0f766e);">
                                         @else
                                             <span title="Buku sedang menunggu scan petugas di meja layanan" style="color: #cbd5e1; font-size: 16px;">—</span>
                                         @endif
@@ -1272,7 +1385,7 @@
         <div class="main-card">
             <div class="main-card-header">
                 <h3 class="main-card-title">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                         <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                         <polyline points="22 4 12 14.01 9 11.01"></polyline>
                     </svg>
@@ -1340,7 +1453,7 @@
 
                                     {{-- TGL KEMBALI --}}
                                     <td>
-                                        <span style="font-weight: 700; color: #0f766e;">
+                                        <span style="font-weight: 700; color: var(--theme-accent, #0f766e);">
                                             {{ $retLatest ? \Carbon\Carbon::parse($retLatest->tanggalKembali)->translatedFormat('d M Y') : \Carbon\Carbon::parse($itemTrx->updated_at)->translatedFormat('d M Y') }}
                                         </span>
                                         <div style="font-size: 11px; color: #64748b; margin-top: 2px;">
@@ -1366,7 +1479,7 @@
                                                 <span style="font-size: 12px; font-weight: 800; color: #dc2626;">
                                                     Rp {{ number_format($unpaidFine->jumlah, 0, ',', '.') }}
                                                 </span>
-                                                <a href="{{ route('bayar.qr', $unpaidFine->idDenda) }}" style="font-size: 11px; font-weight: 700; color: #0f766e; text-decoration: underline;">
+                                                <a href="{{ route('bayar.qr', $unpaidFine->idDenda) }}" style="font-size: 11px; font-weight: 700; color: var(--theme-accent, #0f766e); text-decoration: underline;">
                                                     Bayar QR Denda &rarr;
                                                 </a>
                                             </div>
@@ -1424,7 +1537,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <h3 class="modal-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
                     <rect x="14" y="14" width="7" height="7"></rect>
@@ -1501,7 +1614,7 @@
     <div class="modal-card">
         <div class="modal-header">
             <h3 class="modal-title">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                     <rect x="3" y="3" width="7" height="7"></rect>
                     <rect x="14" y="3" width="7" height="7"></rect>
                     <rect x="14" y="14" width="7" height="7"></rect>
@@ -1559,7 +1672,7 @@
         <div class="modal-header">
             <div>
                 <h3 class="modal-title">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: #0f766e;">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-accent, #0f766e);">
                         <polyline points="9 11 12 14 22 4"></polyline>
                         <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                     </svg>
@@ -1575,7 +1688,7 @@
         <form id="formBatchReturn" method="POST" action="{{ route('pengembalian.member.batch-store') }}">
             @csrf
             <div class="modal-body" style="max-height: 62vh; overflow-y: auto; padding: 20px;">
-                <div style="background: #f0fdfa; border: 1px solid #ccfbf1; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; color: #0f766e; display: flex; align-items: flex-start; gap: 10px;">
+                <div style="background: var(--theme-accent-light, #f0fdfa); border: 1px solid var(--theme-border, #ccfbf1); border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; color: var(--theme-accent, #0f766e); display: flex; align-items: flex-start; gap: 10px;">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="flex-shrink: 0; margin-top: 1px;">
                         <circle cx="12" cy="12" r="10"></circle>
                         <line x1="12" y1="16" x2="12" y2="12"></line>
