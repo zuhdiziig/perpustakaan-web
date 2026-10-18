@@ -4,10 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daftar Pembayaran Denda</title>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('booknest_theme');
+            if (theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+        })();
+    </script>
     <style>
         * { box-sizing: border-box; }
         html, body { overflow-x: hidden; width: 100%; max-width: 100%; margin: 0; padding: 15px; }
-        body { font-family: sans-serif; background: #f8fafc; }
+        body { font-family: sans-serif; background: #f8fafc; color: #1e293b; }
         .table-container { background: white; padding: 20px 16px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; max-width: 1050px; margin: auto; }
         .header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
         .header h2 { margin: 0; font-size: 1.25rem; }
@@ -22,6 +28,16 @@
         .btn-check { background: #3182ce; color: white; }
         .alert-success { background: #c6f6d5; color: #22543d; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; }
         .alert-error { background: #fed7d7; color: #742a2a; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 13px; }
+
+        /* Dark mode */
+        [data-theme="dark"] body { background: #0b1120; color: #cbd5e1; }
+        [data-theme="dark"] .table-container { background: #131d31; box-shadow: 0 4px 16px rgba(0,0,0,0.4); border: 1px solid #23314d; }
+        [data-theme="dark"] .header h2 { color: #f8fafc; }
+        [data-theme="dark"] th { background: #0b1220; color: #94a3b8; border-color: #23314d; }
+        [data-theme="dark"] td { border-color: #23314d; color: #cbd5e1; }
+        [data-theme="dark"] .badge-pending { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+        [data-theme="dark"] .badge-sukses { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+        [data-theme="dark"] a[href*="dashboard"] { color: #94a3b8 !important; }
     </style>
 </head>
 <body>

@@ -469,9 +469,89 @@
         }
 
         /* =========================
+           DARK MODE SUPPORT
+        ========================= */
+        [data-theme="dark"] body {
+            background: radial-gradient(circle at top, #0b1120 0%, #080d1a 50%, #030712 100%) !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .member-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 20px 45px rgba(0, 0, 0, 0.45) !important;
+        }
+
+        [data-theme="dark"] .member-avatar {
+            border-color: #131d31 !important;
+            background: #1e293b !important;
+            color: #60a5fa !important;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        [data-theme="dark"] .member-name {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .member-role {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .qr-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .qr-description {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .qr-wrapper {
+            background: #ffffff !important;
+            border-color: #334155 !important;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-theme="dark"] .member-info {
+            background: #0b1120 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .info-row {
+            border-bottom-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .info-label {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .info-value {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .scan-note {
+            background: #172554 !important;
+            border: 1px solid #1e40af !important;
+            color: #bfdbfe !important;
+        }
+
+        [data-theme="dark"] .btn-back {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .btn-back:hover {
+            background: #334155 !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] .member-footer {
+            color: #64748b !important;
+        }
+
+        /* =========================
            PRINT
         ========================= */
-
         @media print {
             @page {
                 size: auto;
@@ -481,7 +561,8 @@
             body {
                 min-height: auto;
                 padding: 0;
-                background: #ffffff;
+                background: #ffffff !important;
+                color: #172033 !important;
             }
 
             .member-page {
@@ -489,8 +570,17 @@
             }
 
             .member-card {
-                box-shadow: none;
-                border: 1px solid #cbd5e1;
+                box-shadow: none !important;
+                border: 1px solid #cbd5e1 !important;
+                background: #ffffff !important;
+            }
+
+            .member-name {
+                color: #172033 !important;
+            }
+
+            .info-value {
+                color: #334155 !important;
             }
 
             .actions {
@@ -502,6 +592,14 @@
             }
         }
     </style>
+    <script>
+        (function() {
+            var theme = localStorage.getItem('booknest_theme');
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+            }
+        })();
+    </script>
 </head>
 
 <body>

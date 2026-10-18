@@ -13,6 +13,37 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
 
     <style>
         :root {
@@ -30,6 +61,99 @@
             --bg-card: #ffffff;
             --radius-lg: 14px;
             --shadow-soft: 0 1px 2px rgba(15, 23, 42, 0.04), 0 4px 16px rgba(15, 23, 42, 0.04);
+        }
+
+        [data-theme="dark"] {
+            --brand-primary: #14b8a6;
+            --brand-primary-dark: #0d9488;
+            --brand-primary-light: rgba(20, 184, 166, 0.16);
+            --brand-mint: rgba(20, 184, 166, 0.12);
+            --brand-blue: #3b82f6;
+            --brand-blue-dark: #2563eb;
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #23314d;
+            --bg-page: #0b1120;
+            --bg-card: #131d31;
+            --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.35);
+        }
+
+        [data-theme="dark"] body {
+            background-color: #0b1120 !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .topbar {
+            background: rgba(11, 17, 32, 0.88) !important;
+            border-bottom-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .btn-user-badge {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .cover-card {
+            background: #1e293b !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .location-card {
+            background: rgba(20, 184, 166, 0.08) !important;
+            border-color: rgba(20, 184, 166, 0.25) !important;
+        }
+
+        [data-theme="dark"] .location-card p {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .spec-row + .spec-row {
+            border-top-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .loan-note {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .related-cover {
+            background: #1e293b !important;
+        }
+
+        [data-theme="dark"] .borrow-dialog {
+            background: #131d31 !important;
+            border: 1px solid #23314d !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .dialog-header {
+            border-bottom-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .dialog-close:hover {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .dialog-location {
+            background: rgba(20, 184, 166, 0.08) !important;
+            border-color: rgba(20, 184, 166, 0.25) !important;
+        }
+
+        [data-theme="dark"] .btn-dialog-cancel {
+            background: #1e293b !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .footer {
+            background: #080d1a !important;
+            border-top-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .footer-copyright {
+            border-top-color: #1e293b !important;
+            color: #64748b !important;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -923,6 +1047,190 @@
             40%, 80% { transform: translateX(4px); }
         }
         .btn-cart-shake { animation: btnCartShake 0.4s ease !important; }
+
+        /* --- DARK THEME OVERRIDES --- */
+        [data-theme="dark"] {
+            --brand-primary: #14b8a6;
+            --brand-primary-dark: #0d9488;
+            --brand-primary-light: rgba(20, 184, 166, 0.16);
+            --brand-mint: #042f2e;
+            --text-heading: #f8fafc;
+            --text-body: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #23314d;
+            --bg-page: #0b1120;
+            --bg-card: #131d31;
+        }
+
+        [data-theme="dark"] .topbar {
+            background: rgba(15, 23, 42, 0.88) !important;
+            border-bottom-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .topbar-brand {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .topbar-nav-link {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .topbar-nav-link:hover {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .topbar-nav-link.active {
+            background: rgba(20, 184, 166, 0.16) !important;
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .btn-user-badge {
+            background: #042f2e !important;
+            color: #2dd4bf !important;
+            border-color: #115e59 !important;
+        }
+
+        [data-theme="dark"] .cover-card {
+            background: #0f172a !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .spec-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .spec-row + .spec-row {
+            border-top-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .spec-row dt {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .spec-row dd {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .badge-status.tersedia {
+            background: rgba(34, 197, 94, 0.16) !important;
+            color: #4ade80 !important;
+        }
+
+        [data-theme="dark"] .badge-status.habis {
+            background: rgba(239, 68, 68, 0.16) !important;
+            color: #f87171 !important;
+        }
+
+        [data-theme="dark"] .location-card {
+            background: #042f2e !important;
+            border-color: #115e59 !important;
+        }
+
+        [data-theme="dark"] .location-card h3 {
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .location-card p {
+            color: #99f6e4 !important;
+        }
+
+        [data-theme="dark"] .about-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .about-card h2 {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .about-card p {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .related-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .related-cover {
+            background: #0f172a !important;
+        }
+
+        [data-theme="dark"] .related-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .related-author {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .related-meta {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .badge-rating {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .btn-add-cart:hover {
+            background: #042f2e !important;
+            border-color: #115e59 !important;
+        }
+
+        [data-theme="dark"] .footer {
+            background: #0b1220 !important;
+            border-top-color: #23314d !important;
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="van-gogh"] .footer {
+            background: #091522 !important;
+            border-top-color: #1e3a5f !important;
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .footer-heading,
+        [data-theme="van-gogh"] .footer-brand h3 {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .footer-links a,
+        [data-theme="van-gogh"] .footer-contact-item,
+        [data-theme="van-gogh"] .footer-copyright {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .footer-links a:hover {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="midnight-slate"] .footer {
+            background: #0b1329 !important;
+            border-top-color: #1e3156 !important;
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-heading,
+        [data-theme="midnight-slate"] .footer-brand h3 {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-links a,
+        [data-theme="midnight-slate"] .footer-contact-item,
+        [data-theme="midnight-slate"] .footer-copyright {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-links a:hover {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="soft-blush"] .footer {
+            background: #ffffff !important;
+            border-top-color: #eedde2 !important;
+            color: #826e75 !important;
+        }
     </style>
 
     @include('layouts.partials.sidebar_styles')
@@ -978,14 +1286,14 @@
                         @php
                             $jumlahKeranjang = count(session('keranjang_booking', []));
                         @endphp
-                        <a href="{{ route('keranjang.index') }}" id="topbarCartBtn" class="btn-user-badge" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="padding: 7px 12px; gap: 6px; position: relative; background: #f0fdfa; border: 1px solid #ccfbf1; color: #0f766e; text-decoration: none; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                        <a href="{{ route('keranjang.index') }}" id="topbarCartBtn" class="btn-user-badge" title="Keranjang Booking ({{ $jumlahKeranjang }} Buku)" style="padding: 7px 12px; gap: 6px; position: relative; background: var(--theme-accent-light, #f0fdfa); border: 1px solid var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); text-decoration: none; transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);">
                             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                 <circle cx="9" cy="21" r="1"></circle>
                                 <circle cx="20" cy="21" r="1"></circle>
                                 <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
                             </svg>
                             <span style="font-size: 13px; font-weight: 700;">Keranjang</span>
-                            <span id="topbarCartBadge" style="background: #0f766e; color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 9999px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); {{ $jumlahKeranjang > 0 ? 'display: inline-block;' : 'display: none;' }}">{{ $jumlahKeranjang }}</span>
+                            <span id="topbarCartBadge" style="background: var(--theme-accent, #0f766e); color: #ffffff; font-size: 10px; font-weight: 800; padding: 1px 6px; border-radius: 9999px; transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); {{ $jumlahKeranjang > 0 ? 'display: inline-block;' : 'display: none;' }}">{{ $jumlahKeranjang }}</span>
                         </a>
                     @endif
                     <a href="{{ route('dashboard') }}" class="btn-user-badge">
@@ -1103,7 +1411,7 @@
                             Kelola Data Buku
                         </a>
                     @elseif (auth()->check() && auth()->user()->role === 'petugas')
-                        <a href="{{ route('buku.index', ['search' => $buku->judul]) }}" id="btnLihatStok" class="btn-pinjam" style="background: #0f766e; display: inline-flex; align-items: center; gap: 8px;">
+                        <a href="{{ route('buku.index', ['search' => $buku->judul]) }}" id="btnLihatStok" class="btn-pinjam" style="background: var(--theme-accent, #0f766e); display: inline-flex; align-items: center; gap: 8px;">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                 <line x1="18" y1="20" x2="18" y2="10"></line>
                                 <line x1="12" y1="20" x2="12" y2="4"></line>
@@ -1122,14 +1430,14 @@
                                 $inCart = isset($cart[$buku->idBuku]);
                             @endphp
                             @if ($inCart)
-                                <a href="{{ route('keranjang.index') }}" class="btn-cart-added" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; border-radius: 8px; font-size: 13.5px; font-weight: 700; text-decoration: none;">
+                                <a href="{{ route('keranjang.index') }}" class="btn-cart-added" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); border: 1px solid var(--theme-accent-light, #99f6e4); border-radius: 8px; font-size: 13.5px; font-weight: 700; text-decoration: none;">
                                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
                                     Sudah di Keranjang
                                 </a>
                             @else
                                 <form action="{{ route('keranjang.tambah', $buku->idBuku) }}" method="POST" style="display: inline;" class="form-ajax-cart" id="formCartDetail">
                                     @csrf
-                                    <button type="submit" class="btn-add-cart" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ffffff; color: #0f766e; border: 1.5px solid #0f766e; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.15s;">
+                                    <button type="submit" class="btn-add-cart" style="display: inline-flex; align-items: center; gap: 6px; padding: 11px 18px; background: #ffffff; color: var(--theme-accent, #0f766e); border: 1.5px solid var(--theme-accent, #0f766e); border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer; transition: all 0.15s;">
                                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
                                         + Masukkan Keranjang
                                     </button>

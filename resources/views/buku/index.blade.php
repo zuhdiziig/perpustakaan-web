@@ -17,7 +17,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -153,7 +153,7 @@
         flex-shrink: 0;
     }
 
-    .stat-icon.primary { background: #f0fdfa; color: #0f766e; }
+    .stat-icon.primary { background: var(--theme-accent-light, #f0fdfa); color: var(--theme-accent, #0f766e); }
     .stat-icon.blue { background: #eff6ff; color: #2563eb; }
     .stat-icon.emerald { background: #ecfdf5; color: #059669; }
     .stat-icon.purple { background: #f5f3ff; color: #7c3aed; }
@@ -223,8 +223,8 @@
     }
 
     .search-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .search-icon-btn {
@@ -237,7 +237,7 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -246,8 +246,8 @@
     }
 
     .search-icon-btn:hover {
-        background: #f0fdfa;
-        color: #115e59;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent-hover, #115e59);
         transform: translateY(-50%) scale(1.08);
     }
 
@@ -271,15 +271,15 @@
     }
 
     .filter-select:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .btn-filter-submit {
         height: 38px;
         padding: 0 16px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         border-radius: 8px;
         font-size: 13px;
         font-weight: 700;
@@ -293,7 +293,8 @@
     }
 
     .btn-filter-submit:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     .btn-filter-reset {
@@ -379,17 +380,17 @@
     }
 
     .btn-toggle-all.active {
-        background: #f0fdfa;
-        border-color: #0f766e;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        border-color: var(--theme-accent, #0f766e);
+        color: var(--theme-accent, #0f766e);
         font-weight: 700;
-        box-shadow: 0 1px 3px rgba(15, 118, 110, 0.1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     }
 
     .btn-toggle-all.active:hover {
-        background: #ccfbf1;
-        border-color: #0f766e;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        border-color: var(--theme-accent, #0f766e);
+        color: var(--theme-accent, #0f766e);
     }
 
     .btn-toggle-all svg {
@@ -439,8 +440,8 @@
     }
 
     .main-book-row.expanded-parent td {
-        background-color: #f0fdfa !important;
-        border-bottom: 1px solid #ccfbf1;
+        background-color: var(--theme-accent-light, #f0fdfa) !important;
+        border-bottom: 1px solid var(--theme-border, #ccfbf1);
     }
 
     /* Book Info Cell */
@@ -494,9 +495,9 @@
         border-radius: 6px;
         font-size: 11.5px;
         font-weight: 600;
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #ccfbf1);
     }
 
     /* Summary Pills in Main Row */
@@ -532,8 +533,8 @@
     /* Dropdown / Expand Button */
     .btn-toggle-eksemplar {
         background: #ffffff;
-        color: #0f766e;
-        border: 1.5px solid #0f766e;
+        color: var(--theme-accent, #0f766e);
+        border: 1.5px solid var(--theme-accent, #0f766e);
         padding: 6px 12px;
         border-radius: 8px;
         font-size: 12px;
@@ -543,17 +544,17 @@
         align-items: center;
         gap: 6px;
         transition: all 0.15s ease;
-        box-shadow: 0 1px 2px rgba(15, 118, 110, 0.08);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
     }
 
     .btn-toggle-eksemplar:hover {
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     .btn-toggle-eksemplar.active {
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     /* Lokasi Badges: Rak vs Gudang */
@@ -692,7 +693,7 @@
     .eksemplar-panel {
         padding: 16px 20px 20px 20px;
         background: #f8fafc;
-        border-left: 4px solid #0f766e;
+        border-left: 4px solid var(--theme-accent, #0f766e);
     }
 
     .eksemplar-panel-header {
@@ -733,8 +734,8 @@
     .meta-tag.gudang { background: #e2e8f0; color: #475569; }
 
     .btn-panel-add-copy {
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         border: none;
         padding: 4px 10px;
         border-radius: 6px;
@@ -748,7 +749,8 @@
     }
 
     .btn-panel-add-copy:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
     }
 
     .eksemplar-subtable-wrapper {
@@ -800,9 +802,9 @@
     }
 
     .btn-action-manage {
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1.5px solid #99f6e4;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1.5px solid var(--theme-border, #99f6e4);
         padding: 4px 8px;
         border-radius: 6px;
         font-size: 11.5px;
@@ -815,8 +817,8 @@
     }
 
     .btn-action-manage:hover {
-        background: #ccfbf1;
-        border-color: #5eead4;
+        background: var(--theme-accent-light, #ccfbf1);
+        border-color: var(--theme-accent, #5eead4);
     }
 
     .btn-action-pajang {
@@ -924,7 +926,7 @@
 
     .btn-create-buku {
         padding: 10px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border-radius: 10px;
         font-size: 13.5px;
@@ -938,7 +940,7 @@
     }
 
     .btn-create-buku:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-1px);
     }
 
@@ -950,9 +952,9 @@
         border-radius: 10px;
         font-size: 12.5px;
         font-weight: 700;
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #ccfbf1);
     }
 
     .flash-alert {
@@ -1001,7 +1003,7 @@
         align-items: center;
         gap: 7px;
         padding: 8px 14px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border-radius: 9px;
         font-size: 12.5px;
@@ -1012,7 +1014,7 @@
     }
 
     .btn-export-excel:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         color: #ffffff;
         transform: translateY(-1px);
         box-shadow: 0 4px 6px rgba(15, 118, 110, 0.25);
@@ -1333,7 +1335,7 @@
     <div class="table-card" id="bukuTableCard" style="transition: opacity 0.2s ease;">
         <div class="table-toolbar-header">
             <div class="table-toolbar-title">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.2">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--theme-accent, #0f766e)" stroke-width="2.2">
                     <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                     <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                 </svg>
@@ -1407,7 +1409,7 @@
                                             <span>({{ $buku->tahunTerbit ?? '-' }})</span>
                                             @if(!empty($buku->rak))
                                                 <span>&bull;</span>
-                                                <span style="color: #0f766e; font-weight: 600;">Rak: {{ $buku->rak }}</span>
+                                                <span style="color: var(--theme-accent, #0f766e); font-weight: 600;">Rak: {{ $buku->rak }}</span>
                                             @endif
                                         </div>
                                         @if($isPerluRestock)
@@ -1521,7 +1523,7 @@
                                 <div class="eksemplar-panel">
                                     <div class="eksemplar-panel-header">
                                         <div class="eksemplar-panel-title">
-                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0f766e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                                            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="var(--theme-accent, #0f766e)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
                                                 <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
                                                 <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
                                             </svg>
@@ -1813,15 +1815,15 @@
 </div>
 
 {{-- MODAL KELOLA KONDISI & LOKASI EKSEMPLAR INDIVIDUAL --}}
-<div id="modalEditEksemplar" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px);">
-    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;" onclick="event.stopPropagation()">
+<div id="modalEditEksemplar" style="display: none; position: fixed; inset: 0; background: rgba(11, 23, 38, 0.65); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);">
+    <div class="modal-card modal-eksemplar-dialog" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); position: relative;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
             <div>
-                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Kelola Eksemplar Fisik</h3>
-                <p id="modalEksJudul" style="font-size: 13px; color: #64748b; margin: 0; word-break: break-word;">Judul Buku</p>
-                <div id="modalEksMeta" style="font-size: 12px; font-weight: 700; color: #0f766e; margin-top: 4px;">Eksemplar #1 (ID: 0)</div>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-heading, #0f172a); margin: 0 0 4px;">Kelola Eksemplar Fisik</h3>
+                <p id="modalEksJudul" style="font-size: 13px; color: var(--text-muted, #64748b); margin: 0; word-break: break-word;">Judul Buku</p>
+                <div id="modalEksMeta" style="font-size: 12px; font-weight: 700; color: var(--theme-accent, #0f766e); margin-top: 4px;">Eksemplar #1 (ID: 0)</div>
             </div>
-            <button type="button" onclick="closeModalEditEksemplar()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
+            <button type="button" onclick="closeModalEditEksemplar()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted, #94a3b8); line-height: 1;">&times;</button>
         </div>
 
         <form id="formEditEksemplar" action="" method="POST">
@@ -1829,23 +1831,23 @@
             @method('PATCH')
 
             <div style="margin-bottom: 14px;">
-                <label for="selectLokasiEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                <label for="selectLokasiEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading, #334155); margin-bottom: 6px;">
                     Lokasi Penempatan Fisik
                 </label>
-                <select name="lokasi" id="selectLokasiEksemplar" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
+                <select name="lokasi" id="selectLokasiEksemplar" class="form-control form-select" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color, #cbd5e1); border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--text-heading, #0f172a); background: var(--theme-surface, #fff);">
                     <option value="Rak">Rak (Display Terbuka)</option>
                     <option value="Gudang">Gudang (Cadangan / Penyimpanan)</option>
                 </select>
-                <span style="font-size: 11.5px; color: #64748b; margin-top: 4px; display: block;">
+                <span style="font-size: 11.5px; color: var(--text-muted, #64748b); margin-top: 4px; display: block;">
                     *Maksimal disarankan 1-2 buku per judul di rak display untuk menghemat kapasitas rak.
                 </span>
             </div>
 
             <div style="margin-bottom: 14px;">
-                <label for="selectKondisiEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                <label for="selectKondisiEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading, #334155); margin-bottom: 6px;">
                     Kondisi Fisik Eksemplar
                 </label>
-                <select name="kondisi" id="selectKondisiEksemplar" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
+                <select name="kondisi" id="selectKondisiEksemplar" class="form-control form-select" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color, #cbd5e1); border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--text-heading, #0f172a); background: var(--theme-surface, #fff);">
                     <option value="Baik">Baik (Bebas Kerusakan)</option>
                     <option value="Rusak">Rusak</option>
                     <option value="Hilang">Hilang</option>
@@ -1853,23 +1855,23 @@
             </div>
 
             <div style="margin-bottom: 20px;" id="groupStatusEksemplar">
-                <label for="selectStatusEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                <label for="selectStatusEksemplar" style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading, #334155); margin-bottom: 6px;">
                     Status Ketersediaan
                 </label>
-                <select name="status" id="selectStatusEksemplar" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
+                <select name="status" id="selectStatusEksemplar" class="form-control form-select" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color, #cbd5e1); border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--text-heading, #0f172a); background: var(--theme-surface, #fff);">
                     <option value="Tersedia">Tersedia</option>
                     <option value="Hilang">Hilang (Tidak Tersedia)</option>
                 </select>
-                <span id="loanWarningText" style="display: none; font-size: 11.5px; color: #b45309; margin-top: 5px;">
+                <span id="loanWarningText" style="display: none; font-size: 11.5px; color: #f59e0b; margin-top: 5px;">
                     *Eksemplar ini sedang dalam transaksi peminjaman/booking aktif. Status otomatis tersinkronisasi saat anggota menyelesaikan pengembalian.
                 </span>
             </div>
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeModalEditEksemplar()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
+                <button type="button" onclick="closeModalEditEksemplar()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid var(--border-color, #cbd5e1); background: var(--theme-btn-secondary-bg, #ffffff); color: var(--theme-btn-secondary-text, #475569); cursor: pointer;">
                     Batal
                 </button>
-                <button type="submit" style="padding: 10px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; background: #0f766e; color: #ffffff; cursor: pointer;">
+                <button type="submit" style="padding: 10px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; background: var(--theme-btn-primary-bg, #0f766e); color: #ffffff; cursor: pointer;">
                     Simpan Perubahan
                 </button>
             </div>
@@ -1879,21 +1881,21 @@
 
 {{-- MODAL TAMBAH EKSEMPLAR BARU (ADMIN) --}}
 @if (auth()->user()->role === 'admin')
-<div id="modalTambahEksemplar" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.45); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(2px);">
-    <div style="background: #ffffff; border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative;" onclick="event.stopPropagation()">
+<div id="modalTambahEksemplar" style="display: none; position: fixed; inset: 0; background: rgba(11, 23, 38, 0.65); z-index: 100; align-items: center; justify-content: center; padding: 16px; backdrop-filter: blur(4px);">
+    <div class="modal-card modal-eksemplar-dialog" style="background: var(--bg-card, #ffffff); border: 1px solid var(--border-color, #cbd5e1); border-radius: 16px; width: 100%; max-width: 440px; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.3); position: relative;" onclick="event.stopPropagation()">
         <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
             <div>
-                <h3 style="font-size: 17px; font-weight: 800; color: #0f172a; margin: 0 0 4px;">Tambah Eksemplar Fisik</h3>
-                <p id="modalTambahJudul" style="font-size: 13px; color: #64748b; margin: 0; word-break: break-word;">Judul Buku</p>
+                <h3 style="font-size: 17px; font-weight: 800; color: var(--text-heading, #0f172a); margin: 0 0 4px;">Tambah Eksemplar Fisik</h3>
+                <p id="modalTambahJudul" style="font-size: 13px; color: var(--text-muted, #64748b); margin: 0; word-break: break-word;">Judul Buku</p>
             </div>
-            <button type="button" onclick="closeModalTambahEksemplar()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; line-height: 1;">&times;</button>
+            <button type="button" onclick="closeModalTambahEksemplar()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted, #94a3b8); line-height: 1;">&times;</button>
         </div>
 
         <form id="formTambahEksemplar" action="" method="POST">
             @csrf
 
             <div style="margin-bottom: 14px;">
-                <label for="inputJumlahTambah" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                <label for="inputJumlahTambah" style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading, #334155); margin-bottom: 6px;">
                     Jumlah Eksemplar Fisik Ditambahkan
                 </label>
                 <input type="number"
@@ -1904,17 +1906,17 @@
                        value="1"
                        class="form-control"
                        required
-                       style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 14px; font-weight: 700; color: #0f172a;">
-                <span style="font-size: 11.5px; color: #64748b; margin-top: 4px; display: block;">
+                       style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color, #cbd5e1); border-radius: 9px; font-size: 14px; font-weight: 700; color: var(--text-heading, #0f172a); background: var(--theme-surface, #fff);">
+                <span style="font-size: 11.5px; color: var(--text-muted, #64748b); margin-top: 4px; display: block;">
                     *Setiap eksemplar akan mendapatkan ID dan nomor unik otomatis secara berurutan.
                 </span>
             </div>
 
             <div style="margin-bottom: 20px;">
-                <label for="selectLokasiTambah" style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">
+                <label for="selectLokasiTambah" style="display: block; font-size: 13px; font-weight: 700; color: var(--text-heading, #334155); margin-bottom: 6px;">
                     Penempatan Fisik
                 </label>
-                <select name="lokasi" id="selectLokasiTambah" style="width: 100%; padding: 10px 14px; border: 1.5px solid #cbd5e1; border-radius: 9px; font-size: 13.5px; font-weight: 600; color: #0f172a; background: #fff;">
+                <select name="lokasi" id="selectLokasiTambah" class="form-control form-select" style="width: 100%; padding: 10px 14px; border: 1.5px solid var(--border-color, #cbd5e1); border-radius: 9px; font-size: 13.5px; font-weight: 600; color: var(--text-heading, #0f172a); background: var(--theme-surface, #fff);">
                     <option value="">Otomatis (Maks. 2 di Rak Display, sisanya Gudang)</option>
                     <option value="Rak">Tempatkan di Rak (Display)</option>
                     <option value="Gudang">Simpan di Gudang (Cadangan)</option>
@@ -1924,10 +1926,10 @@
             <input type="hidden" name="kondisi" value="Baik">
 
             <div style="display: flex; justify-content: flex-end; gap: 10px;">
-                <button type="button" onclick="closeModalTambahEksemplar()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; cursor: pointer;">
+                <button type="button" onclick="closeModalTambahEksemplar()" style="padding: 10px 18px; border-radius: 9px; font-size: 13px; font-weight: 700; border: 1px solid var(--border-color, #cbd5e1); background: var(--theme-btn-secondary-bg, #ffffff); color: var(--theme-btn-secondary-text, #475569); cursor: pointer;">
                     Batal
                 </button>
-                <button type="submit" style="padding: 10px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; background: #0f766e; color: #ffffff; cursor: pointer;">
+                <button type="submit" style="padding: 10px 20px; border-radius: 9px; font-size: 13px; font-weight: 700; border: none; background: var(--theme-btn-primary-bg, #0f766e); color: #ffffff; cursor: pointer;">
                     + Simpan Eksemplar
                 </button>
             </div>
@@ -2126,7 +2128,7 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            background: ${isSuccess ? '#0f766e' : '#b91c1c'};
+            background: ${isSuccess ? 'var(--theme-btn-primary-bg, #0f766e)' : '#b91c1c'};
             color: #ffffff;
             padding: 12px 18px;
             border-radius: 10px;

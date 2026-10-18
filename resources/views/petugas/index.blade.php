@@ -16,7 +16,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -42,7 +42,7 @@
 
     .btn-add-petugas {
         padding: 10px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border-radius: 10px;
         font-size: 13.5px;
@@ -55,7 +55,7 @@
     }
 
     .btn-add-petugas:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     /* STATS */
@@ -84,8 +84,8 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         flex-shrink: 0;
     }
 
@@ -148,12 +148,12 @@
     }
 
     .search-input-field:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     .btn-filter-submit {
         padding: 9px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -227,8 +227,8 @@
         width: 38px;
         height: 38px;
         border-radius: 50%;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         font-weight: 800;
         display: flex;
         align-items: center;
@@ -246,8 +246,8 @@
         border-radius: 6px;
         font-size: 11px;
         font-weight: 700;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
     }
 
     .action-group {
@@ -260,7 +260,7 @@
     .btn-edit-action {
         padding: 6px 12px;
         background: #f1f5f9;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         border-radius: 8px;
         font-size: 12px;
         font-weight: 700;
@@ -270,8 +270,8 @@
     }
 
     .btn-edit-action:hover {
-        background: #ccfbf1;
-        border-color: #99f6e4;
+        background: var(--theme-accent-light, #ccfbf1);
+        border-color: var(--theme-border, #99f6e4);
     }
 
     .btn-delete-action {
@@ -289,6 +289,53 @@
     .btn-delete-action:hover {
         background: #dc2626;
         color: #ffffff;
+    }
+
+    .petugas-table-name {
+        color: var(--text-heading, #0f172a);
+        font-size: 13.5px;
+        font-weight: 700;
+    }
+
+    .petugas-table-id {
+        font-size: 11px;
+        color: var(--text-muted, #64748b);
+    }
+
+    .petugas-table-email {
+        font-weight: 600;
+        color: var(--text-heading, #334155);
+    }
+
+    .petugas-table-phone {
+        font-size: 11.5px;
+        color: var(--text-muted, #64748b);
+        margin-top: 1px;
+    }
+
+    .petugas-table-address {
+        color: var(--text-muted, #64748b);
+        max-width: 240px;
+    }
+
+    [data-theme="dark"] .petugas-table-name {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .petugas-table-id {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .petugas-table-email {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .petugas-table-phone {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .petugas-table-address {
+        color: #94a3b8 !important;
     }
 
     @media (max-width: 900px) {
@@ -413,16 +460,16 @@
                                         @endif
                                     </div>
                                     <div>
-                                        <strong style="color: #0f172a; font-size: 13.5px;">{{ $p->name }}</strong>
-                                        <div style="font-size: 11px; color: #64748b;">ID: #PTG-{{ str_pad($p->id, 4, '0', STR_PAD_LEFT) }}</div>
+                                        <div class="petugas-table-name">{{ $p->name }}</div>
+                                        <div class="petugas-table-id">ID: #PTG-{{ str_pad($p->id, 4, '0', STR_PAD_LEFT) }}</div>
                                     </div>
                                 </div>
                             </td>
                             <td>
-                                <div style="font-weight: 600; color: #334155;">{{ $p->email }}</div>
-                                <div style="font-size: 11.5px; color: #64748b;">{{ $p->noTelepon ?: 'Belum diatur' }}</div>
+                                <div class="petugas-table-email">{{ $p->email }}</div>
+                                <div class="petugas-table-phone">{{ $p->noTelepon ?: 'Belum diatur' }}</div>
                             </td>
-                            <td style="color: #64748b; max-width: 240px;">
+                            <td class="petugas-table-address">
                                 {{ $p->alamat ?: '-' }}
                             </td>
                             <td>
@@ -460,9 +507,9 @@
         </div>
 
         @if ($petugas->hasPages())
-            <div style="padding: 16px 20px; border-top: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: #ffffff; border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
-                <div style="font-size: 13px; color: #64748b;">
-                    Menampilkan <strong>{{ $petugas->firstItem() ?? 0 }}</strong> - <strong>{{ $petugas->lastItem() ?? 0 }}</strong> dari <strong>{{ $petugas->total() }}</strong> petugas
+            <div style="padding: 16px 20px; border-top: 1px solid var(--border-color, #e2e8f0); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; background: var(--bg-card, #ffffff); border-bottom-left-radius: 16px; border-bottom-right-radius: 16px;">
+                <div style="font-size: 13px; color: var(--text-muted, #64748b);">
+                    Menampilkan <strong style="color: var(--text-heading, #0f172a);">{{ $petugas->firstItem() ?? 0 }}</strong> - <strong style="color: var(--text-heading, #0f172a);">{{ $petugas->lastItem() ?? 0 }}</strong> dari <strong style="color: var(--text-heading, #0f172a);">{{ $petugas->total() }}</strong> petugas
                 </div>
                 <div>
                     {{ $petugas->links() }}

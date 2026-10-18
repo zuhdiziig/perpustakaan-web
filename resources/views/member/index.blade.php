@@ -17,7 +17,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -76,7 +76,7 @@
         flex-shrink: 0;
     }
 
-    .stat-icon.primary { background: #f0fdfa; color: #0f766e; }
+    .stat-icon.primary { background: var(--theme-accent-light, #f0fdfa); color: var(--theme-accent, #0f766e); }
     .stat-icon.success { background: #dcfce7; color: #166534; }
     .stat-icon.danger { background: #fee2e2; color: #991b1b; }
     .stat-icon.purple { background: #f3e8ff; color: #7e22ce; }
@@ -146,8 +146,8 @@
     }
 
     .search-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .search-icon-btn {
@@ -160,7 +160,7 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -169,8 +169,8 @@
     }
 
     .search-icon-btn:hover {
-        background: #f0fdfa;
-        color: #115e59;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-50%) scale(1.08);
     }
 
@@ -194,14 +194,14 @@
     }
 
     .filter-select:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .btn-filter-submit {
         height: 38px;
         padding: 0 16px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border-radius: 8px;
         font-size: 13px;
@@ -216,7 +216,7 @@
     }
 
     .btn-filter-submit:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-filter-reset {
@@ -298,7 +298,7 @@
         width: 38px;
         height: 38px;
         border-radius: 10px;
-        background: linear-gradient(135deg, #0f766e 0%, #14b8a6 100%);
+        background: linear-gradient(135deg, var(--theme-btn-primary-bg, #0f766e) 0%, var(--theme-accent, #14b8a6) 100%);
         color: #ffffff;
         font-size: 13px;
         font-weight: 800;
@@ -306,7 +306,7 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        box-shadow: 0 2px 5px rgba(15, 118, 110, 0.15);
+        box-shadow: 0 2px 5px var(--theme-accent-light, rgba(15, 118, 110, 0.15));
     }
 
     .member-info-name {
@@ -323,6 +323,39 @@
         align-items: center;
         gap: 4px;
         margin-top: 1px;
+    }
+
+    .member-contact-phone {
+        font-weight: 600;
+        color: var(--text-heading, #1e293b);
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .member-contact-phone svg {
+        color: var(--theme-accent, #0f766e);
+    }
+
+    .member-contact-address {
+        font-size: 12px;
+        color: var(--text-muted, #64748b);
+        max-width: 250px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    [data-theme="dark"] .member-contact-phone {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .member-contact-phone svg {
+        color: #2dd4bf !important;
+    }
+
+    [data-theme="dark"] .member-contact-address {
+        color: #94a3b8 !important;
     }
 
     /* Badges */
@@ -364,9 +397,9 @@
     }
 
     .btn-action-qr {
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #99f6e4;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #99f6e4);
         padding: 6px 11px;
         border-radius: 7px;
         font-size: 12px;
@@ -379,9 +412,9 @@
     }
 
     .btn-action-qr:hover {
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
-        border-color: #0f766e;
+        border-color: var(--theme-btn-primary-bg, #0f766e);
     }
 
     .btn-action-edit {
@@ -454,7 +487,7 @@
 
     .btn-create-member {
         padding: 10px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border-radius: 10px;
         font-size: 13.5px;
@@ -468,7 +501,7 @@
     }
 
     .btn-create-member:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-1px);
     }
 
@@ -480,9 +513,9 @@
         border-radius: 10px;
         font-size: 12.5px;
         font-weight: 700;
-        background: #f0fdfa;
-        color: #0f766e;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
+        border: 1px solid var(--theme-border, #ccfbf1);
     }
 
     /* Flash Alerts */
@@ -736,13 +769,13 @@
                             </td>
                             <td>
                                 <div style="display: flex; flex-direction: column; gap: 3px;">
-                                    <div style="font-weight: 600; color: #1e293b; display: flex; align-items: center; gap: 5px;">
-                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #0f766e;">
+                                    <div class="member-contact-phone">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                             <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
                                         </svg>
                                         {{ $m->noTelepon ?? '-' }}
                                     </div>
-                                    <div style="font-size: 12px; color: #64748b; max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="{{ $m->alamat }}">
+                                    <div class="member-contact-address" title="{{ $m->alamat }}">
                                         {{ $m->alamat ?? '-' }}
                                     </div>
                                 </div>

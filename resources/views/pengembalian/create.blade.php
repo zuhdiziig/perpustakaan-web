@@ -117,7 +117,7 @@
     .btn-scan-action {
         width: 100%;
         padding: 12px 18px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -128,7 +128,7 @@
     }
 
     .btn-scan-action:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-scan-action.active {
@@ -159,7 +159,7 @@
     .btn-confirm-return {
         width: 100%;
         padding: 13px 20px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -171,7 +171,7 @@
     }
 
     .btn-confirm-return:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-confirm-return:disabled {
@@ -195,7 +195,7 @@
     }
 
     .input-code-manual:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     /* Status Badge */
@@ -262,7 +262,7 @@
     }
 
     .select-kondisi:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     .fine-calc-box {
@@ -437,8 +437,8 @@
         width: 40px;
         height: 40px;
         border-radius: 10px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -501,13 +501,13 @@
         font-weight: 600;
         cursor: pointer;
         border: none;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         transition: background 0.15s ease;
     }
 
     .btn-modal-confirm:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     @keyframes fadeIn {
@@ -740,7 +740,7 @@
                     <option value="Rusak" {{ ($initialDetail->kondisi_laporan ?? '') === 'Rusak' ? 'selected' : '' }}>Rusak (Denda 100% Harga Buku)</option>
                     <option value="Hilang" {{ ($initialDetail->kondisi_laporan ?? '') === 'Hilang' ? 'selected' : '' }}>Hilang (Denda 100% Harga Buku)</option>
                 </select>
-                <p id="lockNoticeKondisi" style="display: {{ $isInitialLocked ? 'block' : 'none' }}; font-size: 12px; color: #0f766e; margin-top: 6px; font-weight: 600;">
+                <p id="lockNoticeKondisi" style="display: {{ $isInitialLocked ? 'block' : 'none' }}; font-size: 12px; color: var(--theme-accent, #0f766e); margin-top: 6px; font-weight: 600;">
                     ✓ Anggota telah menyelesaikan pembayaran denda secara online sebesar Rp {{ number_format($initialDenda->jumlah ?? 0, 0, ',', '.') }}. Kondisi buku terkunci sesuai verifikasi sistem.
                 </p>
 
@@ -797,10 +797,10 @@
                 <div class="card-panel" style="margin-bottom: 20px;">
                     <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 14px; flex-wrap: wrap; gap: 8px;">
                         <div>
-                            <span style="font-size: 11px; font-weight: 800; color: #0f766e; text-transform: uppercase; letter-spacing: 0.5px;">Tiket Pengembalian Sekaligus</span>
+                            <span style="font-size: 11px; font-weight: 800; color: var(--theme-accent, #0f766e); text-transform: uppercase; letter-spacing: 0.5px;">Tiket Pengembalian Sekaligus</span>
                             <h2 class="card-title-xl" id="batchDispKode" style="margin-top: 2px;">{{ $batchDetails ? ($batchDetails->first()->kode_batch_kembali ?? '-') : '-' }}</h2>
                         </div>
-                        <span id="batchDispPillCount" style="padding: 6px 12px; background: #ccfbf1; color: #0f766e; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                        <span id="batchDispPillCount" style="padding: 6px 12px; background: var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); border-radius: 20px; font-size: 12px; font-weight: 700;">
                             {{ $batchDetails ? $batchDetails->count() : 0 }} Buku Sekaligus
                         </span>
                     </div>

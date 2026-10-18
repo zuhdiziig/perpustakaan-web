@@ -252,6 +252,46 @@
         .receipt-brand-meta { text-align: left; }
     }
 
+    /* Scoped Dark Mode Overrides for Screen View */
+    @media screen {
+        [data-theme="dark"] .nota-main-heading,
+        [data-theme="dark"] .receipt-section-title,
+        [data-theme="dark"] .r-val,
+        [data-theme="dark"] .total-val {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .nota-main-subtitle,
+        [data-theme="dark"] .r-label,
+        [data-theme="dark"] .total-label,
+        [data-theme="dark"] .receipt-brand-address,
+        [data-theme="dark"] .receipt-brand-contact,
+        [data-theme="dark"] .receipt-footer-notes,
+        [data-theme="dark"] .nota-breadcrumb .active-crumb {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .nota-receipt-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+        }
+
+        [data-theme="dark"] .receipt-header,
+        [data-theme="dark"] .receipt-divider {
+            border-color: #23314d !important;
+            background: #23314d !important;
+        }
+
+        [data-theme="dark"] .receipt-brand-slogan {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .r-val.mono {
+            color: #38bdf8 !important;
+        }
+    }
+
     /* --- PRINT STYLES --- */
     @media print {
         @page {

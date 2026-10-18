@@ -11,7 +11,7 @@
     .circ-breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -114,12 +114,12 @@
         justify-content: center;
         gap: 8px;
         border: none;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
     }
 
     .btn-toggle-scan:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-toggle-scan.active {
@@ -143,13 +143,13 @@
     }
 
     .input-manual:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.15);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.15));
     }
 
     .btn-submit-manual {
         padding: 10px 16px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 10px;
@@ -176,8 +176,8 @@
         width: 48px;
         height: 48px;
         border-radius: 50%;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         font-size: 18px;
         font-weight: 800;
         display: flex;
@@ -253,8 +253,8 @@
     }
 
     .circ-tab-btn.active {
-        color: #0f766e;
-        border-bottom-color: #0f766e;
+        color: var(--theme-accent, #0f766e);
+        border-bottom-color: var(--theme-accent, #0f766e);
     }
 
     /* Book Search Tab */
@@ -275,8 +275,8 @@
     }
 
     .search-book-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .search-icon-svg {
@@ -309,8 +309,8 @@
     }
 
     .book-item-card:hover {
-        border-color: #0f766e;
-        box-shadow: 0 2px 8px rgba(15, 118, 110, 0.08);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 2px 8px var(--theme-accent-light, rgba(15, 118, 110, 0.08));
     }
 
     .book-cover-thumb {
@@ -380,9 +380,9 @@
         border-radius: 8px;
         font-size: 12px;
         font-weight: 700;
-        border: 1px solid #0f766e;
-        background: #f0fdfa;
-        color: #0f766e;
+        border: 1px solid var(--theme-accent, #0f766e);
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         cursor: pointer;
         transition: all 0.15s;
         white-space: nowrap;
@@ -401,7 +401,7 @@
     }
 
     .btn-pick-book:hover:not(:disabled) {
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
     }
 
@@ -460,7 +460,7 @@
     .btn-submit-loan {
         width: 100%;
         padding: 13px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 12px;
@@ -476,7 +476,7 @@
     }
 
     .btn-submit-loan:hover:not(:disabled) {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     /* Return List */
@@ -504,7 +504,7 @@
 
     .btn-submit-batch-return {
         padding: 9px 16px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 8px;
@@ -523,7 +523,7 @@
     }
 
     .btn-submit-batch-return:hover:not(:disabled) {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .select-kondisi {
@@ -537,7 +537,7 @@
     }
 
     .select-kondisi:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
         outline: none;
     }
 
@@ -569,7 +569,7 @@
 
     .btn-return-action {
         padding: 7px 12px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         border: none;
         border-radius: 8px;
@@ -581,7 +581,7 @@
     }
 
     .btn-return-action:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .empty-state-notice {
@@ -643,10 +643,10 @@
 
     {{-- Tampilan Rincian Data Booking Jika Ditemukan --}}
     @if (!empty($booking))
-        <div style="border: 2px solid #0f766e; background: #f0fdf4; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(15, 118, 110, 0.08);">
+        <div style="border: 2px solid var(--theme-accent, #0f766e); background: var(--theme-accent-light, #f0fdf4); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px var(--theme-accent-light, rgba(15, 118, 110, 0.08));">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px;">
                 <div>
-                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #ccfbf1; color: #0f766e; padding: 4px 10px; border-radius: 6px;">
+                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); padding: 4px 10px; border-radius: 6px;">
                         🎫 Tiket Booking Online
                     </span>
                     <h3 style="margin: 8px 0 0 0; color: #0f172a; font-size: 20px; font-weight: 800;">{{ $booking->kode_booking }}</h3>
@@ -667,7 +667,7 @@
                 </div>
                 <div>
                     <span style="color: #64748b; font-size: 11.5px; font-weight: 700; display: block; text-transform: uppercase;">Lokasi Rak Fisik</span>
-                    <strong style="color: #0f766e;">📍 {{ $buku?->rak ?? 'Rak Utama' }}</strong>
+                    <strong style="color: var(--theme-accent, #0f766e);">📍 {{ $buku?->rak ?? 'Rak Utama' }}</strong>
                 </div>
                 <div>
                     <span style="color: #64748b; font-size: 11.5px; font-weight: 700; display: block; text-transform: uppercase;">Metode Pengambilan</span>
@@ -678,7 +678,7 @@
             <div style="margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px;">
                 <form method="POST" action="{{ route('petugas.booking.serah-terima', $booking->idPeminjaman) }}" style="flex: 2; min-width: 200px; margin: 0;" onsubmit="return confirm('Konfirmasi serah terima buku kepada {{ $booking->member?->name }}? Transaksi akan beralih menjadi Dipinjam (30 hari).');">
                     @csrf
-                    <button type="submit" style="width: 100%; padding: 12px; background: #0f766e; color: white; border: none; border-radius: 9px; font-weight: 700; font-size: 13.5px; cursor: pointer;">
+                    <button type="submit" style="width: 100%; padding: 12px; background: var(--theme-btn-primary-bg, #0f766e); color: white; border: none; border-radius: 9px; font-weight: 700; font-size: 13.5px; cursor: pointer;">
                         🤝 Serah Terima Buku (Konfirmasi Selesai)
                     </button>
                 </form>
@@ -692,7 +692,7 @@
                     </form>
                 @endif
 
-                <a href="{{ route('peminjaman.booking.tiket', $booking->idPeminjaman) }}" target="_blank" style="flex: 1; min-width: 140px; text-align: center; background: #ffffff; color: #475569; border: 1px solid #cbd5e1; padding: 12px; border-radius: 9px; text-decoration: none; font-size: 13.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                <a href="{{ route('peminjaman.booking.tiket', $booking->idPeminjaman) }}" target="_blank" style="flex: 1; min-width: 140px; text-align: center; background: var(--theme-btn-secondary-bg, #ffffff); color: var(--theme-btn-secondary-text, #475569); border: 1px solid var(--theme-btn-secondary-border, #cbd5e1); padding: 12px; border-radius: 9px; text-decoration: none; font-size: 13.5px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
                     🔍 Buka Tiket QR
                 </a>
             </div>
@@ -701,13 +701,13 @@
 
     {{-- Tampilan Rincian Data Buku Jika Ditemukan via Barcode Fisik --}}
     @if (!empty($buku) && empty($booking))
-        <div style="border: 1px solid #cbd5e1; background: #ffffff; border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);">
+        <div class="card scan-result-card" style="border: 1px solid var(--border-color, #cbd5e1); background: var(--bg-card, #ffffff); border-radius: 16px; padding: 20px; margin-bottom: 24px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);">
             <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
                 <div>
-                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: #f1f5f9; color: #475569; padding: 4px 10px; border-radius: 6px;">
+                    <span style="font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; background: var(--theme-border-subtle, #f1f5f9); color: var(--text-muted, #475569); padding: 4px 10px; border-radius: 6px;">
                         📖 Detail Barcode Buku Fisik
                     </span>
-                    <h3 style="margin: 8px 0 0 0; color: #0f172a; font-size: 19px; font-weight: 800;">{{ $buku->judul }}</h3>
+                    <h3 style="margin: 8px 0 0 0; color: var(--text-heading, #0f172a); font-size: 19px; font-weight: 800;">{{ $buku->judul }}</h3>
                 </div>
                 <span style="padding: 4px 12px; border-radius: 20px; font-size: 12.5px; font-weight: 700; background: {{ $buku->stok > 0 ? '#dcfce7' : '#fee2e2' }}; color: {{ $buku->stok > 0 ? '#166534' : '#991b1b' }};">
                     {{ $buku->stok > 0 ? 'Tersedia (' . $buku->stok . ' eks)' : 'Stok Habis' }}
@@ -718,7 +718,7 @@
                 <div><span style="color: #64748b;">Kode Barcode:</span> <code>{{ $buku->barcode?->kodeBarcode ?? ('BK-'.$buku->idBuku) }}</code></div>
                 <div><span style="color: #64748b;">Penulis:</span> <strong>{{ $buku->penulis }}</strong></div>
                 <div><span style="color: #64748b;">Kategori:</span> <strong>{{ $buku->kategori?->namaKategori ?? 'Umum' }}</strong></div>
-                <div><span style="color: #64748b;">Rak Fisik:</span> <strong style="color: #0f766e;">{{ $buku->rak ?? '-' }}</strong></div>
+                <div><span style="color: #64748b;">Rak Fisik:</span> <strong style="color: var(--theme-accent, #0f766e);">{{ $buku->rak ?? '-' }}</strong></div>
                 <div><span style="color: #64748b;">Harga Penggantian:</span> <strong>Rp {{ number_format($buku->harga, 0, ',', '.') }}</strong></div>
             </div>
 
@@ -824,7 +824,7 @@
                 <!-- STATE BELUM PILIH ANGGOTA -->
                 <div id="unselectedMemberNotice" style="display: {{ $selectedMember ? 'none' : 'block' }};">
                     <div class="empty-state-notice">
-                        <div style="width: 56px; height: 56px; border-radius: 50%; background: #f0fdfa; color: #0f766e; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
+                        <div style="width: 56px; height: 56px; border-radius: 50%; background: var(--theme-accent-light, #f0fdfa); color: var(--theme-accent, #0f766e); display: flex; align-items: center; justify-content: center; margin: 0 auto 14px;">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="3" y="3" width="7" height="7"></rect>
                                 <rect x="14" y="3" width="7" height="7"></rect>
@@ -858,7 +858,7 @@
                     <div class="tray-box">
                         <div class="tray-title">
                             <span>Buku yang Dipilih untuk Dipinjam:</span>
-                            <span id="trayCountText" style="color: #0f766e;">0 / 3 Buku</span>
+                            <span id="trayCountText" style="color: var(--theme-accent, #0f766e);">0 / 3 Buku</span>
                         </div>
                         <div class="tray-items-list" id="trayItemsList">
                             <div style="font-size: 12.5px; color: #94a3b8; text-align: center; padding: 12px;">
@@ -937,7 +937,7 @@
                                 <div class="return-toolbar">
                                     <div class="return-toolbar-left">
                                         <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-                                            <input type="checkbox" id="checkSelectAllReturns" onchange="toggleSelectAllReturns(this)" style="width: 16px; height: 16px; accent-color: #0f766e; cursor: pointer;">
+                                            <input type="checkbox" id="checkSelectAllReturns" onchange="toggleSelectAllReturns(this)" style="width: 16px; height: 16px; accent-color: var(--theme-accent, #0f766e); cursor: pointer;">
                                             <span>Pilih Semua Buku</span>
                                         </label>
                                         <span id="labelSelectedReturnsCount" style="color: #64748b; font-size: 12px; font-weight: 500;">
@@ -975,7 +975,7 @@
                                             @endphp
                                             <tr id="loanRow-{{ $al->id }}" data-detail-id="{{ $al->id }}" data-code="{{ strtolower($kodeBarcode) }}">
                                                 <td style="text-align: center;">
-                                                    <input type="checkbox" name="detail_ids[]" value="{{ $al->id }}" class="checkbox-return-item" onchange="updateReturnSelectionUI()" style="width: 16px; height: 16px; accent-color: #0f766e; cursor: pointer;">
+                                                    <input type="checkbox" name="detail_ids[]" value="{{ $al->id }}" class="checkbox-return-item" onchange="updateReturnSelectionUI()" style="width: 16px; height: 16px; accent-color: var(--theme-accent, #0f766e); cursor: pointer;">
                                                 </td>
                                                 <td>
                                                     <div style="font-weight: 700; color: #0f172a;">{{ $al->buku->judul }}</div>
@@ -1350,7 +1350,7 @@
             <div class="return-toolbar">
                 <div class="return-toolbar-left">
                     <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; user-select: none;">
-                        <input type="checkbox" id="checkSelectAllReturns" onchange="toggleSelectAllReturns(this)" style="width: 16px; height: 16px; accent-color: #0f766e; cursor: pointer;">
+                        <input type="checkbox" id="checkSelectAllReturns" onchange="toggleSelectAllReturns(this)" style="width: 16px; height: 16px; accent-color: var(--theme-accent, #0f766e); cursor: pointer;">
                         <span>Pilih Semua Buku</span>
                     </label>
                     <span id="labelSelectedReturnsCount" style="color: #64748b; font-size: 12px; font-weight: 500;">
@@ -1387,7 +1387,7 @@
             html += `
                 <tr id="loanRow-${l.idDetail}" data-detail-id="${l.idDetail}" data-code="${codeClean}">
                     <td style="text-align: center;">
-                        <input type="checkbox" name="detail_ids[]" value="${l.idDetail}" class="checkbox-return-item" onchange="updateReturnSelectionUI()" style="width: 16px; height: 16px; accent-color: #0f766e; cursor: pointer;">
+                        <input type="checkbox" name="detail_ids[]" value="${l.idDetail}" class="checkbox-return-item" onchange="updateReturnSelectionUI()" style="width: 16px; height: 16px; accent-color: var(--theme-accent, #0f766e); cursor: pointer;">
                     </td>
                     <td>
                         <div style="font-weight: 700; color: #0f172a;">${l.judul}</div>

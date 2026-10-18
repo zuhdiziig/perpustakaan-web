@@ -54,7 +54,7 @@
         gap: 8px;
         padding: 9px 16px;
         border-radius: 10px;
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         font-size: 13px;
         font-weight: 700;
@@ -64,7 +64,7 @@
     }
 
     .btn-action-primary:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-1px);
         box-shadow: 0 4px 10px rgba(15, 118, 110, 0.25);
     }
@@ -120,7 +120,7 @@
     }
 
     .stat-icon-amber { background: #fef3c7; color: #b45309; }
-    .stat-icon-teal { background: #ccfbf1; color: #0f766e; }
+    .stat-icon-teal { background: var(--theme-accent-light, #ccfbf1); color: var(--theme-accent, #0f766e); }
     .stat-icon-emerald { background: #dcfce7; color: #15803d; }
     .stat-icon-blue { background: #dbeafe; color: #1e40af; }
 
@@ -177,7 +177,7 @@
 
     .nav-pill-btn.active {
         background: #ffffff;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
     }
 
@@ -212,8 +212,8 @@
     }
 
     .search-input:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .search-icon-btn {
@@ -226,7 +226,7 @@
         width: 28px;
         height: 28px;
         border-radius: 6px;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         cursor: pointer;
         display: flex;
         align-items: center;
@@ -235,8 +235,8 @@
     }
 
     .search-icon-btn:hover {
-        background: #f0fdfa;
-        color: #115e59;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-50%) scale(1.08);
     }
 
@@ -261,8 +261,8 @@
     }
 
     .filter-select:focus {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.12));
     }
 
     .btn-filter-reset {
@@ -346,8 +346,8 @@
         font-family: monospace;
         font-size: 12px;
         font-weight: 700;
-        color: #0f766e;
-        background: #ccfbf1;
+        color: var(--theme-accent, #0f766e);
+        background: var(--theme-accent-light, #ccfbf1);
         padding: 3px 8px;
         border-radius: 6px;
         display: inline-block;
@@ -403,7 +403,7 @@
         padding: 6px 12px;
         border-radius: 8px;
         background: #f1f5f9;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         font-weight: 700;
         font-size: 12px;
         text-decoration: none;
@@ -411,8 +411,8 @@
     }
 
     .btn-detail-link:hover {
-        background: #ccfbf1;
-        color: #115e59;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-btn-primary-hover, #115e59);
     }
 
     .pagination-footer {
@@ -464,6 +464,203 @@
             width: 100%;
             justify-content: space-between;
         }
+    }
+
+    .petugas-meta-name {
+        font-weight: 600;
+        color: #475569;
+    }
+
+    /* --- DARK THEME OVERRIDES --- */
+    [data-theme="dark"] .sirkulasi-heading {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .sirkulasi-subtitle {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .stat-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-theme="dark"] .stat-number {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .stat-label {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .filter-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .nav-pills-sirkulasi {
+        background: #0b1220 !important;
+        border: 1px solid #23314d !important;
+    }
+
+    [data-theme="dark"] .nav-pill-btn {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .nav-pill-btn:hover {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .nav-pill-btn.active {
+        background: #1e293b !important;
+        color: var(--theme-accent, #2dd4bf) !important;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4) !important;
+    }
+
+    [data-theme="dark"] .nav-pill-btn span:last-child {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .search-input {
+        background: #0b1220 !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .search-input:focus {
+        border-color: var(--theme-accent, #14b8a6) !important;
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(20, 184, 166, 0.2)) !important;
+    }
+
+    [data-theme="dark"] .search-input::placeholder {
+        color: #64748b !important;
+    }
+
+    [data-theme="dark"] .search-icon-btn {
+        color: var(--theme-accent, #2dd4bf) !important;
+    }
+
+    [data-theme="dark"] .search-icon-btn:hover {
+        background: #1e293b !important;
+        color: var(--theme-accent, #5eead4) !important;
+    }
+
+    [data-theme="dark"] .filter-select {
+        background: #0b1220 !important;
+        border-color: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .filter-select:focus {
+        border-color: var(--theme-accent, #14b8a6) !important;
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(20, 184, 166, 0.2)) !important;
+    }
+
+    [data-theme="dark"] .btn-filter-reset {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .btn-filter-reset:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+        border-color: #475569 !important;
+    }
+
+    [data-theme="dark"] .btn-action-secondary {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .btn-action-secondary:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+        border-color: #475569 !important;
+    }
+
+    [data-theme="dark"] .table-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-theme="dark"] .sirkulasi-table th {
+        background: #0b1220 !important;
+        color: #94a3b8 !important;
+        border-bottom-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .sirkulasi-table td {
+        border-bottom-color: #23314d !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .sirkulasi-table tr:hover td {
+        background: #172339 !important;
+    }
+
+    /* Nama Peminjam & Nama Buku */
+    [data-theme="dark"] .user-meta-name {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .user-meta-sub {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .book-list-item {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .book-list-item span {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="dark"] .petugas-meta-name,
+    [data-theme="dark"] .sirkulasi-table td div[style*="color: #475569"] {
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .trx-badge {
+        background: var(--theme-accent-light, rgba(20, 184, 166, 0.16)) !important;
+        color: var(--theme-accent, #2dd4bf) !important;
+        border: 1px solid var(--theme-border, rgba(20, 184, 166, 0.3)) !important;
+    }
+
+    [data-theme="dark"] .ret-badge {
+        background: rgba(59, 130, 246, 0.16) !important;
+        color: #93c5fd !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+    }
+
+    [data-theme="dark"] .btn-detail-link {
+        background: #1e293b !important;
+        color: var(--theme-accent, #2dd4bf) !important;
+        border: 1px solid #334155 !important;
+    }
+
+    [data-theme="dark"] .btn-detail-link:hover {
+        background: #042f2e !important;
+        color: var(--theme-accent, #5eead4) !important;
+        border-color: var(--theme-accent, #14b8a6) !important;
+    }
+
+    [data-theme="dark"] .pagination-footer {
+        background: #131d31 !important;
+        border-top-color: #23314d !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .pagination-footer strong {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .empty-state {
+        color: #94a3b8 !important;
     }
 </style>
 @endsection
@@ -652,7 +849,7 @@
                                     <div class="user-meta-sub">{{ $item->member->email ?? '-' }}</div>
                                 </td>
                                 <td>
-                                    <div style="font-weight: 600; color: #475569;">{{ $item->petugas->name ?? '-' }}</div>
+                                    <div class="petugas-meta-name">{{ $item->petugas->name ?? '-' }}</div>
                                 </td>
                                 <td>
                                     @foreach($item->details as $d)
@@ -749,7 +946,7 @@
                                     <div class="user-meta-sub">{{ $ret->peminjaman->member->email ?? '-' }}</div>
                                 </td>
                                 <td>
-                                    <div style="font-weight: 600; color: #475569;">{{ $ret->petugas->name ?? '-' }}</div>
+                                    <div class="petugas-meta-name">{{ $ret->petugas->name ?? '-' }}</div>
                                 </td>
                                 <td>
                                     @php

@@ -26,7 +26,7 @@
     .breadcrumb {
         font-size: 12px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -48,8 +48,8 @@
 
     /* --- WELCOME BANNER (FADE IN UP RINGAN) --- */
     .welcome-banner {
-        background: #ccfbf1;
-        border: 1px solid #99f6e4;
+        background: var(--theme-accent-light, #ccfbf1);
+        border: 1px solid var(--theme-border, #99f6e4);
         border-radius: 18px;
         padding: 24px 28px;
         display: flex;
@@ -59,38 +59,41 @@
         margin-bottom: 22px;
         animation: memberFadeInUp 0.55s cubic-bezier(0.16, 1, 0.3, 1) 0.08s both;
         will-change: transform, opacity;
-        transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.24s cubic-bezier(0.16, 1, 0.3, 1), background 0.25s ease, border-color 0.25s ease;
     }
 
     .welcome-banner:hover {
-        box-shadow: 0 8px 24px -4px rgba(15, 118, 110, 0.12);
+        box-shadow: 0 8px 24px -4px var(--theme-accent-shadow, rgba(15, 118, 110, 0.12));
     }
 
     .welcome-title {
         font-size: 20px;
         font-weight: 800;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         margin-bottom: 6px;
         letter-spacing: -0.3px;
+        transition: color 0.25s ease;
     }
 
     .welcome-meta {
         font-size: 13px;
         font-weight: 600;
-        color: #134e4a;
+        color: var(--theme-text, #134e4a);
         margin-bottom: 3px;
+        transition: color 0.25s ease;
     }
 
     .welcome-desc {
         font-size: 13px;
-        color: #115e59;
+        color: var(--theme-muted, #115e59);
+        transition: color 0.25s ease;
     }
 
     /* Hover Lift for CTA */
     .btn-cari-buku {
         padding: 10px 22px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 13.5px;
         font-weight: 700;
         border-radius: 10px;
@@ -103,9 +106,9 @@
     }
 
     .btn-cari-buku:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.25);
+        box-shadow: 0 6px 16px var(--theme-accent-shadow, rgba(15, 118, 110, 0.25));
     }
 
     /* --- STATS GRID (4 COLS) WITH STAGGER --- */
@@ -141,7 +144,7 @@
     /* Hover Lift */
     .stat-box:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px rgba(15, 118, 110, 0.05);
+        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px var(--theme-accent-shadow, rgba(15, 118, 110, 0.05));
         border-color: #cbd5e1;
     }
 
@@ -149,12 +152,13 @@
         width: 36px;
         height: 36px;
         border-radius: 9px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 14px;
+        transition: background 0.25s ease, color 0.25s ease;
     }
 
     .stat-label {
@@ -261,7 +265,7 @@
     .table-search-label {
         font-size: 13px;
         font-weight: 700;
-        color: #334155;
+        color: var(--text-heading, #334155);
         white-space: nowrap;
     }
 
@@ -269,17 +273,18 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #ffffff;
-        border: 1px solid var(--border-color);
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 9px;
         padding: 7px 12px;
-        width: 250px;
+        width: 280px;
+        max-width: 100%;
         transition: border-color 0.15s, box-shadow 0.15s;
     }
 
     .table-search-input-wrap:focus-within {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.1));
     }
 
     .table-search-input-wrap input {
@@ -293,8 +298,8 @@
 
     .btn-table-search {
         padding: 8px 18px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         border-radius: 9px;
@@ -302,7 +307,7 @@
     }
 
     .btn-table-search:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .table-card {
@@ -446,7 +451,7 @@
     }
 
     .rekomendasi-card {
-        background: #ffffff;
+        background: var(--bg-card, #ffffff);
         border: 1px solid var(--border-color);
         border-radius: 16px;
         padding: 14px;
@@ -469,7 +474,7 @@
         height: 190px;
         border-radius: 12px;
         overflow: hidden;
-        background: #f1f5f9;
+        background: var(--theme-border-subtle, #f1f5f9);
         margin-bottom: 12px;
         position: relative;
     }
@@ -549,18 +554,18 @@
         align-items: center;
         gap: 12px;
         font-size: 11.5px;
-        color: #64748b;
+        color: var(--text-muted, #64748b);
         margin-bottom: 14px;
         padding-top: 4px;
-        border-top: 1px solid #f8fafc;
+        border-top: 1px solid var(--theme-border-subtle, #f8fafc);
     }
 
     .btn-pinjam-buku {
         margin-top: auto;
         width: 100%;
         padding: 9px 12px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         border-radius: 9px;
@@ -572,9 +577,9 @@
     }
 
     .btn-pinjam-buku:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28);
+        box-shadow: 0 6px 16px var(--theme-accent-shadow, rgba(15, 118, 110, 0.28));
     }
 
     /* --- RESPONSIVE --- */
@@ -662,7 +667,7 @@
             <div class="welcome-meta">Keanggotaan aktif · {{ $member->kode_anggota }}</div>
             <p class="welcome-desc">
                 @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam'])
-                    <span style="color: #fef08a; font-weight: 600;">⚠️ Anda telah meminjam {{ $statistik['sedangDipinjam'] }} dari {{ $statistik['batasPinjam'] }} buku (Batas Maksimal). Kembalikan buku untuk meminjam buku lain.</span>
+                    <span style="color: var(--vg-text-gold, #fcd34d); font-weight: 700;">⚠️ Anda telah meminjam {{ $statistik['sedangDipinjam'] }} dari {{ $statistik['batasPinjam'] }} buku (Batas Maksimal). Kembalikan buku untuk meminjam buku lain.</span>
                 @else
                     Masih ada cerita baru yang menunggumu. Sisa kuota peminjaman Anda: <strong>{{ max(0, $statistik['batasPinjam'] - $statistik['sedangDipinjam']) }} buku</strong>.
                 @endif
@@ -670,7 +675,7 @@
         </div>
 
         @if($statistik['sedangDipinjam'] >= $statistik['batasPinjam'])
-            <a href="{{ route('pengembalian.member') }}" class="btn-cari-buku" style="background: #ffffff; color: #b91c1c;">
+            <a href="{{ route('pengembalian.member') }}" class="btn-cari-buku" style="background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4);">
                 Kembalikan Buku
             </a>
         @else
@@ -806,25 +811,24 @@
         <div class="section-header-row">
             <div>
                 <h3 class="section-title">Peminjaman & riwayat</h3>
-                <div class="section-subtitle">
+                <div class="section-subtitle" id="trxSubtitleCount">
                     {{ $transaksi->count() }} transaksi ditampilkan
                 </div>
             </div>
 
-            <form action="{{ route('dashboard') }}" method="GET" class="table-search-form">
+            <form action="{{ route('dashboard') }}" method="GET" class="table-search-form" id="tableSearchForm" onsubmit="event.preventDefault();">
                 <span class="table-search-label">Cari Transaksi :</span>
                 <div class="table-search-input-wrap">
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: var(--theme-icon-muted, #94a3b8); flex-shrink: 0;">
                         <circle cx="11" cy="11" r="8"></circle>
                         <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
-                    <input type="text" name="q" value="{{ $kataKunci }}" placeholder="Cari buku atau kode...">
+                    <input type="text" name="q" id="trxSearchInput" value="{{ $kataKunci }}" placeholder="Cari buku atau kode..." autocomplete="off">
                 </div>
-                <button type="submit" class="btn-table-search">Cari</button>
             </form>
         </div>
 
-        <div class="table-card">
+        <div class="table-card" id="trxTableContainer">
             <table class="custom-table">
                 <thead>
                     <tr>
@@ -938,7 +942,7 @@
                     </a>
                 </div>
             @empty
-                <div style="grid-column: 1 / -1; background: #ffffff; border: 1px solid var(--border-color); border-radius: 14px; padding: 36px 20px; text-align: center; color: #94a3b8;">
+                <div class="empty-state-card" style="grid-column: 1 / -1; background: var(--bg-card, #ffffff); border: 1px solid var(--border-color); border-radius: 14px; padding: 36px 20px; text-align: center; color: var(--text-muted, #94a3b8);">
                     Koleksi buku rekomendasi sedang disiapkan untukmu.
                 </div>
             @endforelse
@@ -946,4 +950,104 @@
     </div>
 
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        let trxSearchDebounceTimer = null;
+        let trxSearchAbortController = null;
+
+        const trxSearchInput = document.getElementById('trxSearchInput');
+        const tableSearchForm = document.getElementById('tableSearchForm');
+        const trxTableContainer = document.getElementById('trxTableContainer');
+        const trxSubtitleCount = document.getElementById('trxSubtitleCount');
+
+        async function executeTrxLiveSearch(query) {
+            if (trxSearchAbortController) {
+                trxSearchAbortController.abort();
+            }
+            trxSearchAbortController = new AbortController();
+
+            if (trxTableContainer) {
+                trxTableContainer.style.opacity = '0.5';
+                trxTableContainer.style.pointerEvents = 'none';
+                trxTableContainer.style.transition = 'opacity 0.18s ease';
+            }
+
+            const url = new URL('{{ route('dashboard') }}', window.location.origin);
+            if (query && query.trim() !== '') {
+                url.searchParams.set('q', query.trim());
+            }
+
+            try {
+                const response = await fetch(url.toString(), {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'text/html'
+                    },
+                    signal: trxSearchAbortController.signal
+                });
+
+                if (response.ok) {
+                    const htmlText = await response.text();
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(htmlText, 'text/html');
+
+                    const newTable = doc.getElementById('trxTableContainer');
+                    const newSubtitle = doc.getElementById('trxSubtitleCount');
+
+                    if (newTable && trxTableContainer) {
+                        trxTableContainer.innerHTML = newTable.innerHTML;
+                    }
+                    if (newSubtitle && trxSubtitleCount) {
+                        trxSubtitleCount.innerHTML = newSubtitle.innerHTML;
+                    }
+
+                    window.history.replaceState({}, '', url.toString());
+                }
+            } catch (err) {
+                if (err.name !== 'AbortError') {
+                    console.error('Trx live search error:', err);
+                }
+            } finally {
+                if (trxTableContainer) {
+                    trxTableContainer.style.opacity = '1';
+                    trxTableContainer.style.pointerEvents = '';
+                }
+            }
+        }
+
+        if (trxSearchInput) {
+            trxSearchInput.addEventListener('input', function(e) {
+                clearTimeout(trxSearchDebounceTimer);
+                const query = e.target.value;
+                trxSearchDebounceTimer = setTimeout(() => {
+                    executeTrxLiveSearch(query);
+                }, 220);
+            });
+        }
+
+        if (tableSearchForm) {
+            tableSearchForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                clearTimeout(trxSearchDebounceTimer);
+                const query = trxSearchInput ? trxSearchInput.value : '';
+                executeTrxLiveSearch(query);
+            });
+        }
+
+        // Tangkap klik Reset Pencarian agar realtime tanpa reload
+        document.addEventListener('click', function(e) {
+            const resetLink = e.target.closest('#trxTableContainer a[href*="dashboard"]');
+            if (resetLink && (!resetLink.search || resetLink.search === '')) {
+                e.preventDefault();
+                if (trxSearchInput) {
+                    trxSearchInput.value = '';
+                }
+                executeTrxLiveSearch('');
+            }
+        });
+    });
+</script>
 @endsection

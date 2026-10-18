@@ -10,9 +10,40 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Open+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('data-lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
     @include('layouts.partials.sidebar_styles')
 
     <style>
@@ -46,7 +77,7 @@
         }
 
         body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg-page);
             color: var(--text-body);
             line-height: 1.6;
@@ -63,7 +94,7 @@
             position: sticky;
             top: 0;
             z-index: 40;
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border-bottom: 1px solid var(--border-color);
         }
 
@@ -330,7 +361,7 @@
         }
 
         .principle-card {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 20px;
             padding: 24px 22px;
@@ -377,7 +408,7 @@
         }
 
         .policy-card {
-            background: #ffffff;
+            background: var(--bg-card, #ffffff);
             border: 1px solid var(--border-color);
             border-radius: 22px;
             padding: 30px 28px;
@@ -443,13 +474,13 @@
         }
 
         .policy-highlight-note {
-            background: #f8fafc;
-            border-left: 4px solid #0f766e;
+            background: var(--theme-border-subtle, #f8fafc);
+            border-left: 4px solid var(--brand-primary, #0f766e);
             padding: 14px 18px;
             border-radius: 0 12px 12px 0;
             margin-top: 14px;
             font-size: 13px;
-            color: #334155;
+            color: var(--text-body, #334155);
             line-height: 1.6;
         }
 
@@ -522,17 +553,204 @@
             text-align: center;
         }
 
-        @media (max-width: 900px) {
-            .about-footer-grid {
-                grid-template-columns: 1fr;
-                gap: 24px;
-            }
-            .hero-main-title {
-                font-size: 26px;
-            }
-            .page-hero-card {
-                padding: 30px 22px;
-            }
+        /* ========================================
+           SCOPED THEME OVERRIDES FOR KEBIJAKAN PRIVASI
+        ======================================== */
+        /* 1. VAN GOGH (STARRY NIGHT) */
+        [data-theme="van-gogh"] .page-hero-card {
+            background: linear-gradient(135deg, #102a43 0%, #16365c 55%, #0b1726 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.6) !important;
+        }
+
+        [data-theme="van-gogh"] .principle-card,
+        [data-theme="van-gogh"] .policy-card {
+            background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .principle-icon-wrap {
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .policy-article-header {
+            border-color: #1e3a5f !important;
+        }
+
+        [data-theme="van-gogh"] .policy-number-badge {
+            background: #1e3a5f !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.3) !important;
+        }
+
+        [data-theme="van-gogh"] .principle-title,
+        [data-theme="van-gogh"] .policy-article-title,
+        [data-theme="van-gogh"] .footer-brand-title,
+        [data-theme="van-gogh"] .footer-column-title {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .principle-text,
+        [data-theme="van-gogh"] .policy-content-body,
+        [data-theme="van-gogh"] .policy-point-list li,
+        [data-theme="van-gogh"] .breadcrumb-nav,
+        [data-theme="van-gogh"] .breadcrumb-nav a,
+        [data-theme="van-gogh"] .footer-brand-tagline,
+        [data-theme="van-gogh"] .footer-links a,
+        [data-theme="van-gogh"] .footer-address {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .policy-highlight-note {
+            background: #0d1b2a !important;
+            border-left-color: #f59e0b !important;
+            color: #e2e8f0 !important;
+            border-top: 1px solid #1e3a5f !important;
+            border-right: 1px solid #1e3a5f !important;
+            border-bottom: 1px solid #1e3a5f !important;
+        }
+
+        /* 2. MIDNIGHT SLATE */
+        [data-theme="midnight-slate"] .page-hero-card {
+            background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%) !important;
+            border: 1px solid #334155 !important;
+        }
+
+        [data-theme="midnight-slate"] .principle-card,
+        [data-theme="midnight-slate"] .policy-card {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="midnight-slate"] .principle-icon-wrap {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+            border: 1px solid #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .policy-article-header {
+            border-color: #24354e !important;
+        }
+
+        [data-theme="midnight-slate"] .policy-number-badge {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .principle-title,
+        [data-theme="midnight-slate"] .policy-article-title,
+        [data-theme="midnight-slate"] .footer-brand-title,
+        [data-theme="midnight-slate"] .footer-column-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .principle-text,
+        [data-theme="midnight-slate"] .policy-content-body,
+        [data-theme="midnight-slate"] .policy-point-list li,
+        [data-theme="midnight-slate"] .footer-brand-tagline,
+        [data-theme="midnight-slate"] .footer-links a,
+        [data-theme="midnight-slate"] .footer-address {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .policy-highlight-note {
+            background: #1e293b !important;
+            border-left-color: #38bdf8 !important;
+            color: #e2e8f0 !important;
+            border: 1px solid #24354e !important;
+            border-left: 4px solid #38bdf8 !important;
+        }
+
+        /* 3. DARK MODE */
+        [data-theme="dark"] .page-hero-card {
+            background: linear-gradient(135deg, #0f172a 0%, #042f2e 100%) !important;
+            border: 1px solid #115e59 !important;
+        }
+
+        [data-theme="dark"] .principle-card,
+        [data-theme="dark"] .policy-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .principle-icon-wrap {
+            background: #042f2e !important;
+            color: #2dd4bf !important;
+            border: 1px solid #115e59 !important;
+        }
+
+        [data-theme="dark"] .policy-article-header {
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .policy-number-badge {
+            background: #1e293b !important;
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .principle-title,
+        [data-theme="dark"] .policy-article-title,
+        [data-theme="dark"] .footer-brand-title,
+        [data-theme="dark"] .footer-column-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .principle-text,
+        [data-theme="dark"] .policy-content-body,
+        [data-theme="dark"] .policy-point-list li,
+        [data-theme="dark"] .footer-brand-tagline,
+        [data-theme="dark"] .footer-links a,
+        [data-theme="dark"] .footer-address {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .policy-highlight-note {
+            background: #0f1d2e !important;
+            border-left-color: #2dd4bf !important;
+            color: #cbd5e1 !important;
+            border: 1px solid #23314d !important;
+            border-left: 4px solid #2dd4bf !important;
+        }
+
+        /* 4. SOFT BLUSH */
+        [data-theme="soft-blush"] .page-hero-card {
+            background: linear-gradient(135deg, #b85d77 0%, #8c3f55 100%) !important;
+            box-shadow: 0 16px 36px -10px rgba(184, 93, 119, 0.3) !important;
+        }
+
+        [data-theme="soft-blush"] .principle-card,
+        [data-theme="soft-blush"] .policy-card {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+            box-shadow: 0 4px 16px rgba(184, 93, 119, 0.06) !important;
+        }
+
+        [data-theme="soft-blush"] .principle-icon-wrap {
+            background: #fdf2f5 !important;
+            color: #b85d77 !important;
+            border-color: #f7d5df !important;
+        }
+
+        [data-theme="soft-blush"] .principle-title,
+        [data-theme="soft-blush"] .policy-article-title {
+            color: #4a2835 !important;
+        }
+
+        [data-theme="soft-blush"] .policy-highlight-note {
+            background: #fdf2f5 !important;
+            border-left-color: #b85d77 !important;
+            color: #4a2835 !important;
         }
     </style>
 </head>
@@ -620,13 +838,7 @@
                         </a>
                     @endif
 
-                    <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Pengguna">
-                        @if(auth()->user()->foto ?? false)
-                            <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                        @else
-                            {{ auth()->user()->inisial ?? strtoupper(substr(auth()->user()->name ?? 'US', 0, 2)) }}
-                        @endif
-                    </a>
+                    @include('layouts.partials.topbar_user_dropdown')
                 @else
                     <div class="guest-nav-actions" style="display: flex; align-items: center; gap: 8px;">
                         <a href="{{ route('login') }}" class="btn-auth-login">Masuk</a>

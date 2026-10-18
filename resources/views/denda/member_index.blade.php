@@ -21,7 +21,7 @@
     }
 
     .denda-breadcrumb .brand-crumb {
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-decoration: none;
     }
 
@@ -83,8 +83,8 @@
         width: 44px;
         height: 44px;
         border-radius: 12px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -137,8 +137,8 @@
     }
 
     .figma-table-container {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 16px;
         overflow-x: auto;
         -webkit-overflow-scrolling: touch;
@@ -234,8 +234,8 @@
 
     /* Left Card: Rincian Keterlambatan */
     .rincian-card {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 16px;
         padding: 24px;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
@@ -292,13 +292,13 @@
 
     /* Right Card: Total Pembayaran */
     .bayar-card {
-        background: #f0fdfa;
-        border: 1px solid #ccfbf1;
+        background: var(--theme-accent-light, #f0fdfa);
+        border: 1px solid var(--theme-border, #ccfbf1);
         border-radius: 16px;
         padding: 26px;
         display: flex;
         flex-direction: column;
-        box-shadow: 0 1px 3px rgba(15, 118, 110, 0.03);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
     }
 
     .bayar-card-title {
@@ -336,8 +336,8 @@
         justify-content: center;
         width: 100%;
         padding: 13px 20px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 14px;
         font-weight: 700;
         text-decoration: none;
@@ -345,12 +345,13 @@
         transition: all 0.15s ease;
         border: none;
         cursor: pointer;
-        box-shadow: 0 2px 4px rgba(15, 118, 110, 0.15);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
     }
 
     .btn-bayar-denda:hover {
-        background: #115e59;
-        box-shadow: 0 4px 8px rgba(15, 118, 110, 0.25);
+        background: var(--theme-btn-primary-hover, #115e59);
+        color: var(--theme-btn-primary-text, #ffffff);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     }
 
     .btn-bayar-denda.disabled {
@@ -384,6 +385,258 @@
         .bayar-card, .rincian-card {
             padding: 18px 14px;
         }
+    }
+
+    /* ========================================================
+       SCOPED THEME OVERRIDES FOR MEMBER DENDA
+       ======================================================== */
+
+    /* 1. DARK MODE */
+    [data-theme="dark"] .denda-main-heading,
+    [data-theme="dark"] .stat-number,
+    [data-theme="dark"] .section-headline,
+    [data-theme="dark"] .book-title-cell,
+    [data-theme="dark"] .card-block-title,
+    [data-theme="dark"] .rincian-value,
+    [data-theme="dark"] .bayar-total-nominal {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .denda-main-subtitle,
+    [data-theme="dark"] .stat-caption,
+    [data-theme="dark"] .stat-note,
+    [data-theme="dark"] .section-meta-text,
+    [data-theme="dark"] .rincian-label,
+    [data-theme="dark"] .denda-breadcrumb .active-crumb {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .stat-box,
+    [data-theme="dark"] .figma-table-container,
+    [data-theme="dark"] .rincian-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-theme="dark"] .figma-table th {
+        background: #0b1220 !important;
+        color: #94a3b8 !important;
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .figma-table td,
+    [data-theme="dark"] .rincian-item {
+        border-color: #23314d !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .figma-table tr.clickable-row:hover {
+        background-color: #172339 !important;
+    }
+
+    [data-theme="dark"] .figma-table tr.active-selected-row {
+        background-color: rgba(20, 184, 166, 0.16) !important;
+    }
+
+    [data-theme="dark"] .bayar-card {
+        background: #042f2e !important;
+        border-color: #115e59 !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25) !important;
+    }
+
+    [data-theme="dark"] .bayar-card-title {
+        color: #2dd4bf !important;
+    }
+
+    [data-theme="dark"] .bayar-disclaimer {
+        color: #99f6e4 !important;
+    }
+
+    [data-theme="dark"] .btn-bayar-denda.disabled {
+        background: #1e293b !important;
+        color: #64748b !important;
+    }
+
+    /* 2. VAN GOGH (STARRY NIGHT) */
+    [data-theme="van-gogh"] .denda-main-heading,
+    [data-theme="van-gogh"] .stat-number,
+    [data-theme="van-gogh"] .section-headline,
+    [data-theme="van-gogh"] .book-title-cell,
+    [data-theme="van-gogh"] .card-block-title,
+    [data-theme="van-gogh"] .rincian-value,
+    [data-theme="van-gogh"] .bayar-total-nominal {
+        color: #f6f0df !important;
+    }
+
+    [data-theme="van-gogh"] .denda-main-subtitle,
+    [data-theme="van-gogh"] .stat-caption,
+    [data-theme="van-gogh"] .stat-note,
+    [data-theme="van-gogh"] .section-meta-text,
+    [data-theme="van-gogh"] .rincian-label,
+    [data-theme="van-gogh"] .denda-breadcrumb .active-crumb {
+        color: #9fb3c8 !important;
+    }
+
+    [data-theme="van-gogh"] .stat-box,
+    [data-theme="van-gogh"] .figma-table-container,
+    [data-theme="van-gogh"] .rincian-card {
+        background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+        border: 1px solid #1e3a5f !important;
+        border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 1px rgba(245, 158, 11, 0.15) !important;
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="van-gogh"] .figma-table th {
+        background: #0f2035 !important;
+        color: #f6f0df !important;
+        border-color: #1e3a5f !important;
+        font-weight: 700 !important;
+    }
+
+    [data-theme="van-gogh"] .figma-table td,
+    [data-theme="van-gogh"] .rincian-item {
+        border-color: #172c47 !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="van-gogh"] .figma-table tr.clickable-row:hover {
+        background-color: #193354 !important;
+    }
+
+    [data-theme="van-gogh"] .figma-table tr.active-selected-row {
+        background-color: rgba(36, 91, 143, 0.35) !important;
+    }
+
+    [data-theme="van-gogh"] .bayar-card {
+        background: linear-gradient(135deg, #182b42 0%, #101c2e 100%) !important;
+        border: 1px solid #2e4a6e !important;
+        border-left: 4px solid #f59e0b !important;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.45) !important;
+    }
+
+    [data-theme="van-gogh"] .bayar-card-title {
+        color: #fcd34d !important;
+        text-shadow: 0 0 12px rgba(245, 158, 11, 0.3) !important;
+    }
+
+    [data-theme="van-gogh"] .bayar-disclaimer {
+        color: #9fb3c8 !important;
+    }
+
+    [data-theme="van-gogh"] .btn-bayar-denda.disabled {
+        background: #172c47 !important;
+        color: #7892ab !important;
+        border-color: #22446a !important;
+    }
+
+    /* 3. MIDNIGHT SLATE */
+    [data-theme="midnight-slate"] .denda-main-heading,
+    [data-theme="midnight-slate"] .stat-number,
+    [data-theme="midnight-slate"] .section-headline,
+    [data-theme="midnight-slate"] .book-title-cell,
+    [data-theme="midnight-slate"] .card-block-title,
+    [data-theme="midnight-slate"] .rincian-value,
+    [data-theme="midnight-slate"] .bayar-total-nominal {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="midnight-slate"] .denda-main-subtitle,
+    [data-theme="midnight-slate"] .stat-caption,
+    [data-theme="midnight-slate"] .stat-note,
+    [data-theme="midnight-slate"] .section-meta-text,
+    [data-theme="midnight-slate"] .rincian-label,
+    [data-theme="midnight-slate"] .denda-breadcrumb .active-crumb {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .stat-box,
+    [data-theme="midnight-slate"] .figma-table-container,
+    [data-theme="midnight-slate"] .rincian-card {
+        background: #141f33 !important;
+        border-color: #24354e !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        color: #e2e8f0 !important;
+    }
+
+    [data-theme="midnight-slate"] .figma-table th {
+        background: #0f172a !important;
+        color: #94a3b8 !important;
+        border-color: #24354e !important;
+    }
+
+    [data-theme="midnight-slate"] .figma-table td,
+    [data-theme="midnight-slate"] .rincian-item {
+        border-color: #24354e !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="midnight-slate"] .figma-table tr.clickable-row:hover {
+        background-color: #1e2c42 !important;
+    }
+
+    [data-theme="midnight-slate"] .figma-table tr.active-selected-row {
+        background-color: rgba(56, 189, 248, 0.16) !important;
+    }
+
+    [data-theme="midnight-slate"] .bayar-card {
+        background: #141f33 !important;
+        border-color: #24354e !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+    }
+
+    [data-theme="midnight-slate"] .bayar-card-title {
+        color: #38bdf8 !important;
+    }
+
+    [data-theme="midnight-slate"] .bayar-disclaimer {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="midnight-slate"] .btn-bayar-denda.disabled {
+        background: #1e293b !important;
+        color: #64748b !important;
+    }
+
+    /* 4. SOFT BLUSH */
+    [data-theme="soft-blush"] .stat-box,
+    [data-theme="soft-blush"] .figma-table-container,
+    [data-theme="soft-blush"] .rincian-card {
+        background: #ffffff !important;
+        border-color: #eedde2 !important;
+        box-shadow: 0 4px 16px rgba(184, 93, 119, 0.06) !important;
+    }
+
+    [data-theme="soft-blush"] .figma-table th {
+        background: #fdf2f5 !important;
+        color: #826e75 !important;
+        border-color: #eedde2 !important;
+    }
+
+    [data-theme="soft-blush"] .figma-table td,
+    [data-theme="soft-blush"] .rincian-item {
+        border-color: #f7e8ec !important;
+        color: #4a2835 !important;
+    }
+
+    [data-theme="soft-blush"] .bayar-card {
+        background: #fdf2f5 !important;
+        border-color: #eedde2 !important;
+        box-shadow: 0 4px 16px rgba(184, 93, 119, 0.08) !important;
+    }
+
+    [data-theme="soft-blush"] .bayar-card-title {
+        color: #b85d77 !important;
+    }
+
+    [data-theme="soft-blush"] .bayar-disclaimer {
+        color: #826e75 !important;
+    }
+
+    [data-theme="soft-blush"] .btn-bayar-denda.disabled {
+        background: #eedde2 !important;
+        color: #826e75 !important;
     }
 </style>
 @endsection
@@ -543,7 +796,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" style="text-align: center; color: #94a3b8; padding: 40px 20px;">
+                            <td colspan="5" style="text-align: center; color: var(--text-muted, #94a3b8); padding: 40px 20px; background: transparent;">
                                 Belum ada riwayat keterlambatan atau tagihan denda.
                             </td>
                         </tr>

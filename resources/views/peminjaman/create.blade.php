@@ -393,7 +393,7 @@
         height: 38px;
         border-radius: 8px;
         background: #dcfce7;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
@@ -1051,7 +1051,7 @@
                         ' · Status: ',
                         { tag: 'span', text: state.booking.status, style: { color: state.booking.status === 'Siap Diambil' ? '#166534' : '#b45309' } },
                         { tag: 'br' },
-                        { tag: 'span', text: 'Tekan tombol konfirmasi di bawah untuk menyelesaikan serah terima buku secara instan (30 hari aktif).', style: { display: 'inline-block', marginTop: '5px', fontSize: '12px', color: '#0f766e', fontWeight: '600' } },
+                        { tag: 'span', text: 'Tekan tombol konfirmasi di bawah untuk menyelesaikan serah terima buku secara instan (30 hari aktif).', style: { display: 'inline-block', marginTop: '5px', fontSize: '12px', color: 'var(--theme-accent, #0f766e)', fontWeight: '600' } },
                     ]);
                     badgeContainer.style.display = 'block';
                     badgeContainer.style.borderColor = '';
@@ -1060,7 +1060,7 @@
                     badgeText.textContent = `Tiket Booking: ${state.booking.status}`;
                     btnKonfirmasi.disabled = false;
                     btnKonfirmasi.textContent = `🤝 Konfirmasi Serah Terima (${totalBukuBooking} Buku)`;
-                    btnKonfirmasi.style.background = '#0f766e';
+                    btnKonfirmasi.style.background = 'var(--theme-btn-primary-bg, #0f766e)';
                     formPeminjaman.action = `/peminjaman/booking/${state.booking.idPeminjaman}/serah-terima`;
                 }
             } else if (state.member && state.buku) {

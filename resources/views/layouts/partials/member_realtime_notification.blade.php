@@ -221,6 +221,179 @@
         color: #ffffff;
         transform: translateY(-1px);
     }
+
+    /* Scoped Dark Mode Overrides for Real-time Modal */
+    [data-theme="dark"] .member-realtime-modal {
+        background: #131d31 !important;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px #23314d !important;
+    }
+
+    [data-theme="dark"] .member-realtime-title {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .member-realtime-desc {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .member-realtime-info {
+        background: #0b1220 !important;
+        border-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .member-realtime-row .val {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .member-realtime-row .val.highlight {
+        color: #2dd4bf !important;
+    }
+
+    [data-theme="dark"] .member-realtime-books-list {
+        color: #cbd5e1 !important;
+        border-top-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .member-realtime-close {
+        background: #1e293b !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .member-realtime-close:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .member-realtime-countdown-box {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .member-realtime-countdown-box b {
+        color: #2dd4bf !important;
+    }
+
+    /* Scoped Van Gogh Theme Overrides for Real-time Modal */
+    [data-theme="van-gogh"] .member-realtime-modal {
+        background: #132238 !important;
+        box-shadow: 0 25px 60px rgba(13, 27, 42, 0.75), 0 0 0 1px #22446a !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-title {
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-desc {
+        color: #d8e2ec !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-info {
+        background: #0d1b2a !important;
+        border-color: #22446a !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-row .label {
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-row .val {
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-row .val.highlight {
+        color: #fcd34d !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-books-list {
+        color: #d8e2ec !important;
+        border-top-color: #22446a !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-close {
+        background: #162c47 !important;
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-close:hover {
+        background: #1f3c60 !important;
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-countdown-box {
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-countdown-box b {
+        color: #fcd34d !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-badge {
+        background: rgba(245, 158, 11, 0.18) !important;
+        color: #fcd34d !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-badge .dot {
+        background: #f59e0b !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-btn-primary {
+        background: #245b8f !important;
+        color: #ffffff !important;
+        border: 1px solid #316ba3 !important;
+        box-shadow: 0 4px 14px rgba(36, 91, 143, 0.45) !important;
+    }
+    [data-theme="van-gogh"] .member-realtime-btn-primary:hover {
+        background: #1b456e !important;
+    }
+
+    /* Scoped Midnight Slate Overrides for Real-time Modal */
+    [data-theme="midnight-slate"] .member-realtime-modal {
+        background: #111d33 !important;
+        box-shadow: 0 25px 60px rgba(10, 16, 29, 0.7), 0 0 0 1px #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-title {
+        color: #f8fafc !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-desc {
+        color: #94a3b8 !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-info {
+        background: #0c1527 !important;
+        border-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-row .val {
+        color: #f8fafc !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-row .val.highlight {
+        color: #60a5fa !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-books-list {
+        color: #cbd5e1 !important;
+        border-top-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-close {
+        background: #162744 !important;
+        color: #94a3b8 !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-close:hover {
+        background: #1c3055 !important;
+        color: #f8fafc !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-countdown-box b {
+        color: #60a5fa !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-btn-primary {
+        background: #2563eb !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.4) !important;
+    }
+    [data-theme="midnight-slate"] .member-realtime-btn-primary:hover {
+        background: #1d4ed8 !important;
+    }
+
+    /* Scoped Soft Blush Overrides for Real-time Modal */
+    [data-theme="soft-blush"] .member-realtime-modal {
+        background: #ffffff !important;
+        box-shadow: 0 25px 60px rgba(184, 93, 119, 0.2), 0 0 0 1px #f3d5dd !important;
+    }
+    [data-theme="soft-blush"] .member-realtime-title {
+        color: #4a2d3b !important;
+    }
+    [data-theme="soft-blush"] .member-realtime-info {
+        background: #fdf8f9 !important;
+        border-color: #f3d5dd !important;
+    }
+    [data-theme="soft-blush"] .member-realtime-btn-primary {
+        background: #b85d77 !important;
+        box-shadow: 0 4px 14px rgba(184, 93, 119, 0.35) !important;
+    }
+    [data-theme="soft-blush"] .member-realtime-btn-primary:hover {
+        background: #9d4860 !important;
+    }
 </style>
 
 {{-- HTML Modal --}}

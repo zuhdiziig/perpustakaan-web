@@ -9,16 +9,47 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Open+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <script>
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('lang', savedLang);
+            } catch (e) {}
+        })();
+    </script>
 
     <style>
         :root {
-            --brand-primary: #0f766e;
-            --brand-primary-dark: #115e59;
-            --brand-primary-light: #ccfbf1;
-            --brand-accent: #14b8a6;
+            --brand-primary: var(--theme-accent, #0f766e);
+            --brand-primary-dark: var(--theme-accent-hover, #115e59);
+            --brand-primary-light: var(--theme-accent-light, #ccfbf1);
+            --brand-accent: var(--theme-accent, #14b8a6);
             --text-heading: #0f172a;
             --text-body: #334155;
             --text-muted: #64748b;
@@ -92,7 +123,7 @@
         .topbar-brand-icon {
             width: 36px;
             height: 36px;
-            background: #0f766e;
+            background: var(--brand-primary);
             color: #ffffff;
             border-radius: 8px;
             display: flex;
@@ -124,9 +155,9 @@
 
         .topbar-nav-link.active {
             background: var(--brand-primary-light);
-            color: #0f766e;
+            color: var(--brand-primary);
             font-weight: 700;
-            box-shadow: 0 2px 8px rgba(15, 118, 110, 0.12);
+            box-shadow: 0 2px 8px var(--theme-accent-shadow, rgba(15, 118, 110, 0.12));
         }
 
         .topbar-right {
@@ -158,8 +189,8 @@
             width: 38px;
             height: 38px;
             border-radius: 50%;
-            background: #ccfbf1;
-            color: #0f766e;
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -219,8 +250,8 @@
             width: 36px;
             height: 36px;
             border-radius: 50%;
-            background: #ccfbf1;
-            color: #0f766e;
+            background: var(--brand-primary-light);
+            color: var(--brand-primary);
             font-size: 12.5px;
             font-weight: 800;
             display: flex;
@@ -477,9 +508,9 @@
 
         .custom-page-btn.active,
         .page-btn.active {
-            background: #0f766e;
-            color: #ffffff;
-            border-color: #0f766e;
+            background: var(--theme-accent, #0f766e) !important;
+            color: #ffffff !important;
+            border-color: var(--theme-accent, #0f766e) !important;
             font-weight: 800;
             cursor: default;
         }
@@ -546,7 +577,7 @@
                 <a href="{{ route('katalog.index') }}" class="topbar-nav-link {{ request()->routeIs('katalog.*') ? 'active' : '' }}">
                     Katalog
                 </a>
-                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard', 'profile.*', 'peminjaman.ajukan*', 'peminjaman.sukses*', 'denda.*', 'bayar.*', 'pembayaran.nota') ? 'active' : '' }}">
+                <a href="{{ route('dashboard') }}" class="topbar-nav-link {{ request()->routeIs('dashboard') ? 'active' : '' }}">
                     Dasbor
                 </a>
                 <a href="{{ route('tentang') }}" class="topbar-nav-link {{ request()->routeIs('tentang') ? 'active' : '' }}">
@@ -580,13 +611,7 @@
                     </svg>
                 </button>
 
-                <a href="{{ route('profile.edit') }}" class="topbar-user-badge" title="Profil Anggota">
-                    @if(auth()->user()->foto ?? false)
-                        <img src="{{ asset('storage/' . auth()->user()->foto) }}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">
-                    @else
-                        {{ auth()->user()->inisial ?? 'RP' }}
-                    @endif
-                </a>
+                @include('layouts.partials.topbar_user_dropdown')
             </div>
         </div>
     </header>

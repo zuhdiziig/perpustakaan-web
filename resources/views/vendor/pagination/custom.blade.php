@@ -43,11 +43,11 @@
 
         .custom-page-btn.active,
         .page-btn.active {
-            background: #0f766e !important;
+            background: var(--theme-accent, #0f766e) !important;
             color: #ffffff !important;
-            border-color: #0f766e !important;
+            border-color: var(--theme-accent, #0f766e) !important;
             font-weight: 800 !important;
-            box-shadow: 0 3px 8px rgba(15, 118, 110, 0.28) !important;
+            box-shadow: 0 3px 8px var(--theme-accent-shadow, rgba(15, 118, 110, 0.28)) !important;
             cursor: default !important;
         }
 
@@ -75,7 +75,158 @@
             font-size: 14px !important;
             font-weight: 800 !important;
             letter-spacing: 1px !important;
-            user-select: none !important;
+        }
+
+        /* Dark Mode Overrides for Pagination */
+        [data-theme="dark"] .custom-page-btn,
+        [data-theme="dark"] .page-btn {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #cbd5e1 !important;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+        }
+
+        [data-theme="dark"] .custom-page-btn svg,
+        [data-theme="dark"] .page-btn svg {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active),
+        [data-theme="dark"] .page-btn:hover:not(.disabled):not(:disabled):not(.active) {
+            background: #334155 !important;
+            border-color: #475569 !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .custom-page-btn.active,
+        [data-theme="dark"] .page-btn.active {
+            background: #10b981 !important;
+            border-color: #34d399 !important;
+            color: #ffffff !important;
+            box-shadow: 0 3px 8px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        [data-theme="dark"] .custom-page-btn.disabled,
+        [data-theme="dark"] .custom-page-btn:disabled,
+        [data-theme="dark"] .page-btn.disabled,
+        [data-theme="dark"] .page-btn:disabled {
+            background: #0f172a !important;
+            border-color: #1e293b !important;
+            color: #475569 !important;
+            opacity: 0.5 !important;
+        }
+
+        [data-theme="dark"] .custom-page-btn.disabled svg,
+        [data-theme="dark"] .page-btn.disabled svg {
+            color: #475569 !important;
+        }
+
+        [data-theme="dark"] .custom-page-dots,
+        [data-theme="dark"] .page-dots {
+            color: #64748b !important;
+        }
+
+        /* Soft Blush Overrides for Pagination */
+        [data-theme="soft-blush"] .custom-page-btn,
+        [data-theme="soft-blush"] .page-btn {
+            background: #ffffff !important;
+            border-color: #fce7ed !important;
+            color: #4a2d37 !important;
+        }
+        [data-theme="soft-blush"] .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active),
+        [data-theme="soft-blush"] .page-btn:hover:not(.disabled):not(:disabled):not(.active) {
+            background: #fff5f8 !important;
+            border-color: #f4cdd9 !important;
+            color: #b85d77 !important;
+        }
+        [data-theme="soft-blush"] .custom-page-btn.active,
+        [data-theme="soft-blush"] .page-btn.active {
+            background: #b85d77 !important;
+            border-color: #b85d77 !important;
+            color: #ffffff !important;
+            box-shadow: 0 3px 8px rgba(184, 93, 119, 0.35) !important;
+        }
+
+        /* Midnight Slate Overrides for Pagination */
+        [data-theme="midnight-slate"] .custom-page-btn,
+        [data-theme="midnight-slate"] .page-btn {
+            background: #111d33 !important;
+            border-color: #1e3156 !important;
+            color: #e2e8f0 !important;
+        }
+        [data-theme="midnight-slate"] .custom-page-btn svg,
+        [data-theme="midnight-slate"] .page-btn svg {
+            color: #94a3b8 !important;
+        }
+        [data-theme="midnight-slate"] .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active),
+        [data-theme="midnight-slate"] .page-btn:hover:not(.disabled):not(:disabled):not(.active) {
+            background: #1e293b !important;
+            border-color: #3b82f6 !important;
+            color: #60a5fa !important;
+        }
+        [data-theme="midnight-slate"] .custom-page-btn.active,
+        [data-theme="midnight-slate"] .page-btn.active {
+            background: #2563eb !important;
+            border-color: #3b82f6 !important;
+            color: #ffffff !important;
+            box-shadow: 0 3px 8px rgba(37, 99, 235, 0.4) !important;
+        }
+        [data-theme="midnight-slate"] .custom-page-btn.disabled,
+        [data-theme="midnight-slate"] .custom-page-btn:disabled,
+        [data-theme="midnight-slate"] .page-btn.disabled,
+        [data-theme="midnight-slate"] .page-btn:disabled {
+            background: #090f1d !important;
+            border-color: #17243c !important;
+            color: #475569 !important;
+        }
+        [data-theme="midnight-slate"] .custom-page-dots,
+        [data-theme="midnight-slate"] .page-dots {
+            color: #64748b !important;
+        }
+
+        /* Van Gogh Overrides for Pagination */
+        [data-theme="van-gogh"] .custom-page-btn,
+        [data-theme="van-gogh"] .page-btn {
+            background: #132238 !important;
+            border-color: #22446a !important;
+            color: #f6f0df !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn svg,
+        [data-theme="van-gogh"] .page-btn svg {
+            color: #9fb3c8 !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active),
+        [data-theme="van-gogh"] .page-btn:hover:not(.disabled):not(:disabled):not(.active) {
+            background: #1f3c60 !important;
+            border-color: #f59e0b !important;
+            color: #fcd34d !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn:hover:not(.disabled):not(:disabled):not(.active) svg,
+        [data-theme="van-gogh"] .page-btn:hover:not(.disabled):not(:disabled):not(.active) svg {
+            color: #fcd34d !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn.active,
+        [data-theme="van-gogh"] .page-btn.active {
+            background: #245b8f !important;
+            border-color: #f59e0b !important;
+            color: #ffffff !important;
+            box-shadow: 0 3px 8px rgba(245, 158, 11, 0.4) !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn.disabled,
+        [data-theme="van-gogh"] .custom-page-btn:disabled,
+        [data-theme="van-gogh"] .page-btn.disabled,
+        [data-theme="van-gogh"] .page-btn:disabled {
+            background: #0d1b2a !important;
+            border-color: #1a3454 !important;
+            color: #475569 !important;
+        }
+        [data-theme="van-gogh"] .custom-page-btn.disabled svg,
+        [data-theme="van-gogh"] .page-btn.disabled svg {
+            color: #475569 !important;
+        }
+        [data-theme="van-gogh"] .custom-page-dots,
+        [data-theme="van-gogh"] .page-dots {
+            color: #9fb3c8 !important;
         }
     </style>
 

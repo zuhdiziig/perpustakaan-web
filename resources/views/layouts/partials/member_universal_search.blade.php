@@ -122,7 +122,7 @@
     }
 
     .search-input-icon {
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         flex-shrink: 0;
     }
 
@@ -218,11 +218,11 @@
     }
 
     .search-tab-pill.active {
-        background: #0f766e !important;
+        background: var(--theme-accent, #0f766e) !important;
         color: #ffffff !important;
-        border-color: #0f766e !important;
+        border-color: var(--theme-accent, #0f766e) !important;
         font-weight: 700 !important;
-        box-shadow: 0 2px 6px rgba(15, 118, 110, 0.2) !important;
+        box-shadow: 0 2px 6px var(--theme-accent-shadow, rgba(15, 118, 110, 0.2)) !important;
     }
 
     .universal-search-body {
@@ -241,8 +241,8 @@
         width: 52px;
         height: 52px;
         border-radius: 16px;
-        background: #f0fdfa;
-        color: #0f766e;
+        background: var(--theme-accent-light, #f0fdfa);
+        color: var(--theme-accent, #0f766e);
         display: inline-flex;
         align-items: center;
         justify-content: center;
@@ -277,7 +277,7 @@
         width: 26px;
         height: 26px;
         border: 3px solid #e2e8f0;
-        border-top-color: #0f766e;
+        border-top-color: var(--theme-accent, #0f766e);
         border-radius: 50%;
         margin: 0 auto;
         animation: spin 0.7s linear infinite;
@@ -380,6 +380,258 @@
 
     .footer-katalog-link:hover {
         text-decoration: underline;
+    }
+
+    /* Scoped Dark Mode Overrides for Universal Search */
+    [data-theme="dark"] .universal-search-card {
+        background: #131d31 !important;
+        border-color: #23314d !important;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6) !important;
+    }
+
+    [data-theme="dark"] .universal-search-input-wrap {
+        background: #0f172a !important;
+        border-bottom-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .universal-search-input {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .universal-search-input::placeholder {
+        color: #64748b !important;
+    }
+
+    [data-theme="dark"] .search-btn-clear,
+    [data-theme="dark"] .search-btn-close-kbd {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .universal-search-tabs {
+        background: #0b1220 !important;
+        border-bottom-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .search-tab-pill {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+        border-color: #334155 !important;
+    }
+
+    [data-theme="dark"] .search-tab-pill:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .search-tab-pill.active {
+        background: #10b981 !important;
+        color: #ffffff !important;
+        border-color: #34d399 !important;
+        box-shadow: 0 2px 8px rgba(16, 185, 129, 0.4) !important;
+    }
+
+    [data-theme="dark"] .search-empty-icon {
+        background: rgba(16, 185, 129, 0.16) !important;
+        color: #34d399 !important;
+    }
+
+    [data-theme="dark"] .quick-suggestion-chips button {
+        background: #1e293b !important;
+        border-color: #334155 !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .quick-suggestion-chips button:hover {
+        background: #334155 !important;
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .search-item-link:hover {
+        background: #172339 !important;
+    }
+
+    [data-theme="dark"] .search-item-title {
+        color: #f8fafc !important;
+    }
+
+    [data-theme="dark"] .search-item-sub {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .search-cat-title {
+        color: #94a3b8 !important;
+    }
+
+    [data-theme="dark"] .universal-search-footer {
+        background: #0f172a !important;
+        border-top-color: #23314d !important;
+    }
+
+    [data-theme="dark"] .universal-search-footer kbd {
+        background: #1e293b !important;
+        color: #cbd5e1 !important;
+    }
+
+    [data-theme="dark"] .footer-katalog-link {
+        color: #34d399 !important;
+    }
+
+    /* Soft Blush Overrides */
+    [data-theme="soft-blush"] .search-tab-pill.active {
+        background: #b85d77 !important;
+        border-color: #b85d77 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(184, 93, 119, 0.35) !important;
+    }
+    [data-theme="soft-blush"] .search-empty-icon {
+        background: #fce7ed !important;
+        color: #b85d77 !important;
+    }
+    [data-theme="soft-blush"] .footer-katalog-link {
+        color: #b85d77 !important;
+    }
+
+    /* Midnight Slate Overrides */
+    [data-theme="midnight-slate"] .universal-search-card {
+        background: #111d33 !important;
+        border-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .universal-search-input-wrap {
+        background: #0c1527 !important;
+        border-bottom-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .universal-search-input {
+        color: #f8fafc !important;
+    }
+    [data-theme="midnight-slate"] .universal-search-tabs {
+        background: #080e1b !important;
+        border-bottom-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .search-tab-pill {
+        background: #13223d !important;
+        color: #cbd5e1 !important;
+        border-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .search-tab-pill:hover {
+        background: #1c3055 !important;
+        color: #ffffff !important;
+    }
+    [data-theme="midnight-slate"] .search-tab-pill.active {
+        background: #2563eb !important;
+        border-color: #3b82f6 !important;
+        color: #ffffff !important;
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4) !important;
+    }
+    [data-theme="midnight-slate"] .search-empty-icon {
+        background: rgba(37, 99, 235, 0.16) !important;
+        color: #60a5fa !important;
+    }
+    [data-theme="midnight-slate"] .quick-suggestion-chips button {
+        background: #13223d !important;
+        border-color: #1e3156 !important;
+        color: #cbd5e1 !important;
+    }
+    [data-theme="midnight-slate"] .search-item-link:hover {
+        background: #162744 !important;
+    }
+    [data-theme="midnight-slate"] .search-item-title {
+        color: #f8fafc !important;
+    }
+    [data-theme="midnight-slate"] .universal-search-footer {
+        background: #0c1527 !important;
+        border-top-color: #1e3156 !important;
+    }
+    [data-theme="midnight-slate"] .footer-katalog-link {
+        color: #60a5fa !important;
+    }
+
+    /* Van Gogh Overrides */
+    [data-theme="van-gogh"] .universal-search-card {
+        background: #132238 !important;
+        border-color: #22446a !important;
+        box-shadow: 0 25px 60px rgba(13, 27, 42, 0.75) !important;
+    }
+    [data-theme="van-gogh"] .universal-search-input-wrap {
+        background: #0d1b2a !important;
+        border-bottom-color: #22446a !important;
+    }
+    [data-theme="van-gogh"] .universal-search-input {
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .universal-search-input::placeholder {
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .search-btn-clear,
+    [data-theme="van-gogh"] .search-btn-close-kbd {
+        background: #162c47 !important;
+        border-color: #22446a !important;
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .universal-search-tabs {
+        background: #0a1522 !important;
+        border-bottom-color: #22446a !important;
+    }
+    [data-theme="van-gogh"] .search-tab-pill {
+        background: #162c47 !important;
+        color: #d8e2ec !important;
+        border-color: #22446a !important;
+    }
+    [data-theme="van-gogh"] .search-tab-pill:hover {
+        background: #1f3c60 !important;
+        color: #f6f0df !important;
+        border-color: #f59e0b !important;
+    }
+    [data-theme="van-gogh"] .search-tab-pill.active {
+        background: #245b8f !important;
+        border-color: #f59e0b !important;
+        color: #f6f0df !important;
+        box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35) !important;
+    }
+    [data-theme="van-gogh"] .search-empty-icon {
+        background: rgba(245, 158, 11, 0.16) !important;
+        color: #fcd34d !important;
+    }
+    [data-theme="van-gogh"] .quick-suggestion-chips button {
+        background: #162c47 !important;
+        border-color: #22446a !important;
+        color: #d8e2ec !important;
+    }
+    [data-theme="van-gogh"] .quick-suggestion-chips button:hover {
+        background: #1f3c60 !important;
+        color: #f6f0df !important;
+        border-color: #f59e0b !important;
+    }
+    [data-theme="van-gogh"] .search-item-link:hover {
+        background: #162c47 !important;
+    }
+    [data-theme="van-gogh"] .search-item-title {
+        color: #f6f0df !important;
+    }
+    [data-theme="van-gogh"] .search-item-sub {
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .search-cat-title {
+        color: #fcd34d !important;
+    }
+    [data-theme="van-gogh"] .universal-search-footer {
+        background: #0d1b2a !important;
+        border-top-color: #22446a !important;
+        color: #9fb3c8 !important;
+    }
+    [data-theme="van-gogh"] .universal-search-footer kbd {
+        background: #162c47 !important;
+        color: #f6f0df !important;
+        border: 1px solid #22446a !important;
+    }
+    [data-theme="van-gogh"] .footer-katalog-link {
+        color: #fcd34d !important;
+        font-weight: 600 !important;
+    }
+    [data-theme="van-gogh"] .footer-katalog-link:hover {
+        color: #fde68a !important;
+        text-decoration: underline !important;
     }
 </style>
 

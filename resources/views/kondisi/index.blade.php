@@ -16,7 +16,7 @@
     .breadcrumb {
         font-size: 11.5px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -117,7 +117,7 @@
     }
 
     .filter-input:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     .filter-icon {
@@ -140,11 +140,11 @@
     }
 
     .filter-select:focus {
-        border-color: #0f766e;
+        border-color: var(--theme-accent, #0f766e);
     }
 
     .btn-filter {
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         padding: 9px 18px;
         border-radius: 10px;
@@ -159,7 +159,7 @@
     }
 
     .btn-filter:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .btn-reset {
@@ -260,7 +260,7 @@
     }
 
     .btn-action {
-        background: #0f766e;
+        background: var(--theme-btn-primary-bg, #0f766e);
         color: #ffffff;
         padding: 6px 14px;
         border-radius: 8px;
@@ -274,7 +274,7 @@
     }
 
     .btn-action:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
         color: #ffffff;
     }
 

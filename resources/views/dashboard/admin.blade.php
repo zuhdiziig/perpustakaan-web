@@ -26,7 +26,7 @@
     .breadcrumb {
         font-size: 12px;
         font-weight: 700;
-        color: #0f766e;
+        color: var(--theme-accent, #0f766e);
         text-transform: uppercase;
         letter-spacing: 0.6px;
         margin-bottom: 6px;
@@ -78,7 +78,7 @@
 
     .stat-box:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px rgba(15, 118, 110, 0.05);
+        box-shadow: 0 12px 24px -4px rgba(15, 23, 42, 0.07), 0 4px 10px -2px var(--theme-accent-shadow, rgba(15, 118, 110, 0.05));
         border-color: #cbd5e1;
     }
 
@@ -86,12 +86,13 @@
         width: 36px;
         height: 36px;
         border-radius: 9px;
-        background: #ccfbf1;
-        color: #0f766e;
+        background: var(--theme-accent-light, #ccfbf1);
+        color: var(--theme-accent, #0f766e);
         display: flex;
         align-items: center;
         justify-content: center;
         margin-bottom: 14px;
+        transition: background 0.25s ease, color 0.25s ease;
     }
 
     .stat-label {
@@ -244,7 +245,7 @@
     .table-search-label {
         font-size: 13px;
         font-weight: 700;
-        color: #334155;
+        color: var(--text-heading, #334155);
         white-space: nowrap;
     }
 
@@ -252,8 +253,8 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        background: #ffffff;
-        border: 1px solid var(--border-color);
+        background: var(--bg-card, #ffffff);
+        border: 1px solid var(--border-color, #e2e8f0);
         border-radius: 9px;
         padding: 7px 12px;
         width: 260px;
@@ -261,8 +262,8 @@
     }
 
     .table-search-input-wrap:focus-within {
-        border-color: #0f766e;
-        box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+        border-color: var(--theme-accent, #0f766e);
+        box-shadow: 0 0 0 3px var(--theme-accent-light, rgba(15, 118, 110, 0.1));
     }
 
     .table-search-input-wrap input {
@@ -276,8 +277,8 @@
 
     .btn-table-search {
         padding: 8px 18px;
-        background: #0f766e;
-        color: #ffffff;
+        background: var(--theme-btn-primary-bg, #0f766e);
+        color: var(--theme-btn-primary-text, #ffffff);
         font-size: 12.5px;
         font-weight: 700;
         border-radius: 9px;
@@ -285,7 +286,7 @@
     }
 
     .btn-table-search:hover {
-        background: #115e59;
+        background: var(--theme-btn-primary-hover, #115e59);
     }
 
     .table-card {

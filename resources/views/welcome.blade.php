@@ -7,12 +7,41 @@
     <!-- Google Font: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Lato:wght@400;700&family=Open+Sans:wght@400;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
     <script>
         document.documentElement.classList.add('js-ready');
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
+        (function () {
+            try {
+                var prefs = null;
+                try {
+                    var raw = localStorage.getItem('booknest_preferences');
+                    if (raw) prefs = JSON.parse(raw);
+                } catch (e) {}
+
+                var themeChoice = (prefs && prefs.theme) ? prefs.theme : (localStorage.getItem('booknest_theme') || 'light');
+                var effectiveTheme = themeChoice;
+                if (themeChoice === 'system') {
+                    effectiveTheme = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+                }
+                document.documentElement.setAttribute('data-theme', effectiveTheme);
+                document.documentElement.setAttribute('data-theme-choice', themeChoice);
+
+                var savedFont = (prefs && prefs.font) ? prefs.font : (localStorage.getItem('booknest_font') || 'Inter');
+                document.documentElement.setAttribute('data-font', savedFont);
+
+                var savedSize = (prefs && prefs.fontSize) ? prefs.fontSize : (localStorage.getItem('booknest_font_size') || 'normal');
+                document.documentElement.setAttribute('data-font-size', savedSize);
+
+                var savedOpening = (prefs && prefs.opening) ? prefs.opening : (localStorage.getItem('booknest_opening') || 'soft-mint-glow');
+                document.documentElement.setAttribute('data-opening', savedOpening);
+
+                var savedLang = (prefs && prefs.lang) ? prefs.lang : (localStorage.getItem('booknest_lang') || 'id');
+                document.documentElement.setAttribute('lang', savedLang);
+            } catch (e) {}
+        })();
     </script>
 
     <style>
@@ -787,9 +816,10 @@
             height: 340px;
             border-radius: 18px;
             overflow: hidden;
-            background: #183d37;
+            background: var(--opening-photo-glow, #183d37);
             position: relative;
             box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.14), 0 6px 14px -4px rgba(15, 23, 42, 0.06);
+            border: 1px solid var(--opening-photo-border, rgba(0, 0, 0, 0.05));
         }
 
         /* 1. Dramatic Wipe Curtain Overlay */
@@ -797,7 +827,7 @@
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, #183d37 0%, #2e625a 100%);
+            background: var(--opening-photo-overlay, linear-gradient(135deg, #183d37 0%, #2e625a 100%));
             z-index: 2;
             transform: translateX(0%);
             animation: heroWipeCurtain 1.6s cubic-bezier(0.77, 0, 0.175, 1) 0.85s forwards;
@@ -1184,6 +1214,236 @@
             will-change: transform;
         }
 
+        /* --- CEWEK BANGET OPENING CONCEPTS --- */
+        /* 1. Coquette Blush (Default Cewek) */
+        .intro-curtain.intro-curtain--coquette-blush {
+            background: linear-gradient(135deg, #ffd1dc 0%, #fff0f5 45%, #fce4ec 75%, #f8bbd0 100%);
+        }
+        .intro-curtain.intro-curtain--coquette-blush .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(244, 143, 177, 0.35), 0 0 24px rgba(255, 192, 203, 0.7);
+            color: #ad1457;
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(244, 143, 177, 0.5);
+        }
+        .intro-curtain.intro-curtain--coquette-blush .intro-logo-text,
+        .intro-curtain.intro-curtain--coquette-blush .intro-tagline {
+            color: #880e4f;
+        }
+        .intro-curtain.intro-curtain--coquette-blush .intro-wipe-bar {
+            background: linear-gradient(90deg, #f48fb1, #f8bbd0, #fce4ec, #e0a96d);
+        }
+
+        /* 2. Fairy Dream */
+        .intro-curtain.intro-curtain--fairy-dream {
+            background: linear-gradient(135deg, #e9d5ff 0%, #f5d0fe 35%, #fed7aa 70%, #ede9fe 100%);
+        }
+        .intro-curtain.intro-curtain--fairy-dream .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(192, 132, 252, 0.35), 0 0 24px rgba(244, 114, 182, 0.6);
+            color: #6b21a8;
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(192, 132, 252, 0.5);
+        }
+        .intro-curtain.intro-curtain--fairy-dream .intro-logo-text,
+        .intro-curtain.intro-curtain--fairy-dream .intro-tagline {
+            color: #581c87;
+        }
+        .intro-curtain.intro-curtain--fairy-dream .intro-wipe-bar {
+            background: linear-gradient(90deg, #c084fc, #f472b6, #e9d5ff, #ffffff);
+        }
+
+        /* 3. Sakura Bloom */
+        .intro-curtain.intro-curtain--sakura-bloom,
+        .intro-curtain.intro-curtain--pastel-playful {
+            background: linear-gradient(135deg, #fbcfe8 0%, #ffffff 40%, #ccfbf1 80%, #fce7f3 100%);
+        }
+        .intro-curtain.intro-curtain--sakura-bloom .intro-logo-icon,
+        .intro-curtain.intro-curtain--pastel-playful .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(244, 114, 182, 0.35), 0 0 24px rgba(153, 246, 228, 0.6);
+            color: #be185d;
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(251, 113, 133, 0.5);
+        }
+        .intro-curtain.intro-curtain--sakura-bloom .intro-logo-text,
+        .intro-curtain.intro-curtain--sakura-bloom .intro-tagline,
+        .intro-curtain.intro-curtain--pastel-playful .intro-logo-text,
+        .intro-curtain.intro-curtain--pastel-playful .intro-tagline {
+            color: #9d174d;
+        }
+        .intro-curtain.intro-curtain--sakura-bloom .intro-wipe-bar,
+        .intro-curtain.intro-curtain--pastel-playful .intro-wipe-bar {
+            background: linear-gradient(90deg, #f472b6, #fb7185, #99f6e4, #fbcfe8);
+        }
+
+        /* 4. Strawberry Milk */
+        .intro-curtain.intro-curtain--strawberry-milk,
+        .intro-curtain.intro-curtain--candy-gradient {
+            background: linear-gradient(135deg, #f43f5e 0%, #fb7185 35%, #fed7aa 70%, #fff1f2 100%);
+        }
+        .intro-curtain.intro-curtain--strawberry-milk .intro-logo-icon,
+        .intro-curtain.intro-curtain--candy-gradient .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(244, 63, 94, 0.4), 0 0 24px rgba(254, 215, 170, 0.7);
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .intro-curtain.intro-curtain--strawberry-milk .intro-logo-text,
+        .intro-curtain.intro-curtain--strawberry-milk .intro-tagline,
+        .intro-curtain.intro-curtain--candy-gradient .intro-logo-text,
+        .intro-curtain.intro-curtain--candy-gradient .intro-tagline {
+            color: #ffffff;
+        }
+        .intro-curtain.intro-curtain--strawberry-milk .intro-wipe-bar,
+        .intro-curtain.intro-curtain--candy-gradient .intro-wipe-bar {
+            background: linear-gradient(90deg, #ffffff, #fda4af, #f43f5e, #fed7aa);
+        }
+
+        /* 5. Pink Garden */
+        .intro-curtain.intro-curtain--pink-garden {
+            background: linear-gradient(135deg, #f472b6 0%, #fbcfe8 35%, #d1fae5 70%, #fef3c7 100%);
+        }
+        .intro-curtain.intro-curtain--pink-garden .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(236, 72, 153, 0.35), 0 0 24px rgba(110, 231, 183, 0.6);
+            color: #9d174d;
+            background: rgba(255, 255, 255, 0.85);
+            border-color: rgba(236, 72, 153, 0.4);
+        }
+        .intro-curtain.intro-curtain--pink-garden .intro-logo-text,
+        .intro-curtain.intro-curtain--pink-garden .intro-tagline {
+            color: #831843;
+        }
+        .intro-curtain.intro-curtain--pink-garden .intro-wipe-bar {
+            background: linear-gradient(90deg, #ec4899, #6ee7b7, #fde68a, #f472b6);
+        }
+
+        /* --- COWO BANGET OPENING CONCEPTS --- */
+        /* 6. Midnight Blue (Default Cowo) */
+        .intro-curtain.intro-curtain--midnight-blue,
+        .intro-curtain.intro-curtain--soft-mint-glow {
+            background: linear-gradient(145deg, #091223 0%, #0f1d3a 50%, #1e293b 100%);
+        }
+        .intro-curtain.intro-curtain--midnight-blue .intro-logo-icon,
+        .intro-curtain.intro-curtain--soft-mint-glow .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 24px rgba(59, 130, 246, 0.6);
+            color: #60a5fa;
+            background: rgba(30, 41, 59, 0.7);
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+        .intro-curtain.intro-curtain--midnight-blue .intro-logo-text,
+        .intro-curtain.intro-curtain--midnight-blue .intro-tagline,
+        .intro-curtain.intro-curtain--soft-mint-glow .intro-logo-text,
+        .intro-curtain.intro-curtain--soft-mint-glow .intro-tagline {
+            color: #f8fafc;
+        }
+        .intro-curtain.intro-curtain--midnight-blue .intro-wipe-bar,
+        .intro-curtain.intro-curtain--soft-mint-glow .intro-wipe-bar {
+            background: linear-gradient(90deg, #1d4ed8, #3b82f6, #60a5fa, #93c5fd);
+        }
+
+        /* 7. Cyber Neon */
+        .intro-curtain.intro-curtain--cyber-neon {
+            background: linear-gradient(145deg, #020617 0%, #082f49 50%, #0369a1 100%);
+        }
+        .intro-curtain.intro-curtain--cyber-neon .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 28px rgba(6, 182, 212, 0.8);
+            color: #22d3ee;
+            background: rgba(8, 47, 73, 0.8);
+            border-color: rgba(34, 211, 238, 0.6);
+        }
+        .intro-curtain.intro-curtain--cyber-neon .intro-logo-text,
+        .intro-curtain.intro-curtain--cyber-neon .intro-tagline {
+            color: #f0fdfa;
+        }
+        .intro-curtain.intro-curtain--cyber-neon .intro-wipe-bar {
+            background: linear-gradient(90deg, #06b6d4, #22d3ee, #67e8f9, #a5f3fc);
+        }
+
+        /* 8. Dark Steel */
+        .intro-curtain.intro-curtain--dark-steel {
+            background: linear-gradient(145deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+        }
+        .intro-curtain.intro-curtain--dark-steel .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(148, 163, 184, 0.5);
+            color: #e2e8f0;
+            background: rgba(30, 41, 59, 0.8);
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+        .intro-curtain.intro-curtain--dark-steel .intro-logo-text,
+        .intro-curtain.intro-curtain--dark-steel .intro-tagline {
+            color: #f8fafc;
+        }
+        .intro-curtain.intro-curtain--dark-steel .intro-wipe-bar {
+            background: linear-gradient(90deg, #64748b, #94a3b8, #cbd5e1, #f1f5f9);
+        }
+
+        /* 9. Forest Mode */
+        .intro-curtain.intro-curtain--forest-mode {
+            background: linear-gradient(145deg, #052e16 0%, #14532d 50%, #166534 100%);
+        }
+        .intro-curtain.intro-curtain--forest-mode .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 24px rgba(34, 197, 94, 0.6);
+            color: #86efac;
+            background: rgba(20, 83, 45, 0.8);
+            border-color: rgba(34, 197, 94, 0.4);
+        }
+        .intro-curtain.intro-curtain--forest-mode .intro-logo-text,
+        .intro-curtain.intro-curtain--forest-mode .intro-tagline {
+            color: #f0fdf4;
+        }
+        .intro-curtain.intro-curtain--forest-mode .intro-wipe-bar {
+            background: linear-gradient(90deg, #15803d, #22c55e, #86efac, #bbf7d0);
+        }
+
+        /* 10. Sunset Ember */
+        .intro-curtain.intro-curtain--sunset-ember {
+            background: linear-gradient(145deg, #451a03 0%, #7c2d12 50%, #9a3412 100%);
+        }
+        .intro-curtain.intro-curtain--sunset-ember .intro-logo-icon {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 0 24px rgba(249, 115, 22, 0.7);
+            color: #fdba74;
+            background: rgba(124, 45, 18, 0.8);
+            border-color: rgba(249, 115, 22, 0.5);
+        }
+        .intro-curtain.intro-curtain--sunset-ember .intro-logo-text,
+        .intro-curtain.intro-curtain--sunset-ember .intro-tagline {
+            color: #fff7ed;
+        }
+        .intro-curtain.intro-curtain--sunset-ember .intro-wipe-bar {
+            background: linear-gradient(90deg, #ea580c, #f97316, #fb923c, #fed7aa);
+        }
+
+        /* --- ARTISTIK OPENING CONCEPTS --- */
+        /* 11. Van Gogh — Starry Night */
+        .intro-curtain.intro-curtain--van-gogh-starry-night {
+            background: 
+                radial-gradient(circle at 78% 22%, rgba(245, 158, 11, 0.45) 0%, rgba(233, 185, 73, 0.18) 25%, transparent 55%),
+                radial-gradient(ellipse at 20% 70%, rgba(36, 91, 143, 0.45) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(16, 42, 67, 0.6) 0%, transparent 65%),
+                conic-gradient(from 215deg at 70% 30%, transparent 0deg, rgba(36, 91, 143, 0.2) 60deg, rgba(245, 158, 11, 0.15) 120deg, transparent 180deg),
+                linear-gradient(140deg, #071320 0%, #0d1e33 40%, #153255 75%, #091522 100%);
+            position: relative;
+        }
+        .intro-curtain.intro-curtain--van-gogh-starry-night .intro-logo-icon {
+            box-shadow: 0 8px 32px rgba(11, 23, 38, 0.8), 0 0 36px rgba(245, 158, 11, 0.65);
+            color: #fcd34d;
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #122c4d 100%);
+            border: 1.5px solid rgba(245, 158, 11, 0.75);
+        }
+        .intro-curtain.intro-curtain--van-gogh-starry-night .intro-logo-text {
+            color: #f6f0df;
+            font-weight: 800;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.6);
+        }
+        .intro-curtain.intro-curtain--van-gogh-starry-night .intro-tagline {
+            color: #fcd34d;
+            font-weight: 600;
+            text-shadow: 0 0 12px rgba(245, 158, 11, 0.35);
+        }
+        .intro-curtain.intro-curtain--van-gogh-starry-night .intro-wipe-bar {
+            background: linear-gradient(90deg, #1b456e, #245b8f 25%, #fcd34d 55%, #f59e0b 78%, #1b456e 100%);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.6);
+        }
+
         @keyframes introCurtainWipe {
             0% {
                 transform: translateY(0%);
@@ -1237,6 +1497,7 @@
             justify-content: center;
             color: #ffffff;
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 0 20px rgba(46, 98, 90, 0.5);
+            transition: box-shadow 0.3s ease;
         }
 
         .intro-logo-text {
@@ -1443,6 +1704,12 @@
             color: #2e625a;
         }
 
+        .footer-info-text {
+            font-size: 13px;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
         .footer-bottom {
             font-size: 12px;
             color: #94a3b8;
@@ -1643,6 +1910,1080 @@
                 margin-bottom: 24px;
             }
         }
+
+        /* --- DARK THEME OVERRIDES --- */
+        [data-theme="dark"] body {
+            background-color: #0b1120 !important;
+            color: #cbd5e1 !important;
+        }
+
+        /* 1. Main Titles & Headings */
+        [data-theme="dark"] .logo-text,
+        [data-theme="dark"] .hero-title,
+        [data-theme="dark"] .section-title,
+        [data-theme="dark"] .features-header h2,
+        [data-theme="dark"] .feature-title,
+        [data-theme="dark"] .cat-name,
+        [data-theme="dark"] .book-title,
+        [data-theme="dark"] .dropdown-name,
+        [data-theme="dark"] .footer-brand h4,
+        [data-theme="dark"] .footer-col h5,
+        [data-theme="dark"] .footer-col-title {
+            color: #f8fafc !important;
+        }
+
+        /* 2. Title Accent Underline */
+        [data-theme="dark"] .section-title::after {
+            background: linear-gradient(90deg, #2dd4bf 0%, #60a5fa 100%) !important;
+        }
+
+        /* 3. Hero Section Texts & Highlights */
+        [data-theme="dark"] .hero-tag {
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .hero-desc {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .hero-note {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .hero-note strong {
+            color: #34d399 !important;
+        }
+
+        [data-theme="dark"] .hero-img-container {
+            background: #111827 !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="dark"] .hero-img-container::before {
+            background: linear-gradient(135deg, #111827 0%, #1f2937 100%) !important;
+        }
+
+        [data-theme="dark"] .hero-img-caption {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .hero-img-caption strong {
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .hero-img-caption span {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .btn-search {
+            background: #10b981 !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="dark"] .btn-search:hover {
+            background: #059669 !important;
+        }
+
+        /* 4. Statistics Counter Numbers & Labels */
+        [data-theme="dark"] .stat-item h3,
+        [data-theme="dark"] .counter-number,
+        [data-theme="dark"] .stat-number {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .stat-item p,
+        [data-theme="dark"] .stat-desc {
+            color: #94a3b8 !important;
+        }
+
+        /* 5. Navigation & Profile Dropdown */
+        [data-theme="dark"] .nav-link-item {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .nav-link-item:hover {
+            color: #f8fafc !important;
+            background: #1e293b !important;
+        }
+
+        [data-theme="dark"] .btn-nav-login {
+            border-color: #334155 !important;
+            color: #2dd4bf !important;
+            background: transparent !important;
+        }
+
+        [data-theme="dark"] .btn-nav-dashboard {
+            background: #0f766e !important;
+            color: #ffffff !important;
+            box-shadow: 0 2px 10px rgba(15, 118, 110, 0.4) !important;
+        }
+
+        [data-theme="dark"] .btn-nav-dashboard:hover {
+            background: #14b8a6 !important;
+        }
+
+        [data-theme="dark"] .user-menu-btn {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .user-menu-btn:hover,
+        [data-theme="dark"] .user-menu-btn.active {
+            background: #24344d !important;
+            border-color: #14b8a6 !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-theme="dark"] .user-menu-name {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .user-chevron {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .role-badge--admin {
+            background: rgba(99, 102, 241, 0.18) !important;
+            color: #a5b4fc !important;
+            border-color: rgba(99, 102, 241, 0.35) !important;
+        }
+
+        [data-theme="dark"] .role-badge--petugas {
+            background: rgba(16, 185, 129, 0.18) !important;
+            color: #6ee7b7 !important;
+            border-color: rgba(16, 185, 129, 0.35) !important;
+        }
+
+        [data-theme="dark"] .role-badge--member {
+            background: rgba(20, 184, 166, 0.18) !important;
+            color: #5eead4 !important;
+            border-color: rgba(20, 184, 166, 0.35) !important;
+        }
+
+        [data-theme="dark"] .welcome-chip {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #6ee7b7 !important;
+            border-color: rgba(45, 212, 191, 0.3) !important;
+        }
+
+        [data-theme="dark"] .welcome-chip strong {
+            color: #a7f3d0 !important;
+        }
+
+        [data-theme="dark"] .user-dropdown-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="dark"] .user-dropdown-header {
+            background: #0f172a !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .user-dropdown-role-bar {
+            border-bottom-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .role-bar--admin {
+            background: rgba(99, 102, 241, 0.15) !important;
+            color: #a5b4fc !important;
+        }
+
+        [data-theme="dark"] .role-bar--petugas {
+            background: rgba(16, 185, 129, 0.15) !important;
+            color: #6ee7b7 !important;
+        }
+
+        [data-theme="dark"] .role-bar--member {
+            background: rgba(20, 184, 166, 0.15) !important;
+            color: #5eead4 !important;
+        }
+
+        [data-theme="dark"] .dropdown-section-title {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .dropdown-email {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item:hover {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .dropdown-item--danger {
+            color: #f87171 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item--danger svg {
+            color: #f87171 !important;
+        }
+
+        [data-theme="dark"] .dropdown-item--danger:hover {
+            background: rgba(239, 68, 68, 0.15) !important;
+            color: #fca5a5 !important;
+        }
+
+        [data-theme="dark"] .dropdown-divider {
+            background: #23314d !important;
+        }
+
+        /* 6. Buttons & Header Logo */
+        [data-theme="dark"] .logo-icon {
+            background: #10b981 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        [data-theme="dark"] .logo-text {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .btn-green {
+            background: #10b981 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4) !important;
+        }
+
+        [data-theme="dark"] .btn-green:hover {
+            background: #059669 !important;
+            box-shadow: 0 8px 22px rgba(16, 185, 129, 0.5) !important;
+        }
+
+        /* 7. Category Cards & Icons */
+        [data-theme="dark"] .cat-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="dark"] .cat-card:hover {
+            border-color: #14b8a6 !important;
+            background: #172339 !important;
+        }
+
+        [data-theme="dark"] .cat-icon {
+            color: #2dd4bf !important;
+        }
+
+        /* 8. Features Section */
+        [data-theme="dark"] .features-section {
+            border-top-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .features-header p {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .feature-card {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .feature-card:hover {
+            border-color: #14b8a6 !important;
+            background: #172339 !important;
+        }
+
+        [data-theme="dark"] .feature-icon-box {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .feature-card:hover .feature-icon-box {
+            background: rgba(20, 184, 166, 0.18) !important;
+            border-color: #14b8a6 !important;
+            color: #5eead4 !important;
+        }
+
+        [data-theme="dark"] .feature-desc {
+            color: #94a3b8 !important;
+        }
+
+        /* 9. CTA Banner */
+        [data-theme="dark"] .cta-banner {
+            background: linear-gradient(135deg, #0d2824 0%, #132435 100%) !important;
+            border-color: #1e3a47 !important;
+            box-shadow: 0 16px 36px rgba(0, 0, 0, 0.4) !important;
+        }
+
+        [data-theme="dark"] .cta-banner::before {
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(45, 212, 191, 0.15) 50%, rgba(255, 255, 255, 0) 100%) !important;
+        }
+
+        [data-theme="dark"] .cta-text h3 {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .cta-text p {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .btn-cta {
+            background: #14b8a6 !important;
+            color: #042f2e !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(20, 184, 166, 0.3) !important;
+        }
+
+        [data-theme="dark"] .btn-cta:hover {
+            background: #2dd4bf !important;
+            color: #02201e !important;
+            box-shadow: 0 6px 20px rgba(45, 212, 191, 0.45) !important;
+        }
+
+        /* 10. Search & Other Components */
+        [data-theme="dark"] .search-bar,
+        [data-theme="dark"] .stat-box {
+            background: #131d31 !important;
+            border-color: #23314d !important;
+        }
+
+        [data-theme="dark"] .search-bar input {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="dark"] .search-bar input::placeholder {
+            color: #64748b !important;
+        }
+
+        /* 11. Footer Section */
+        [data-theme="dark"] .footer {
+            background: #080d1a !important;
+            border-top-color: #1e293b !important;
+        }
+
+        [data-theme="dark"] .footer-brand p {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .footer-col a,
+        [data-theme="dark"] .footer-col span,
+        [data-theme="dark"] .footer-info-text,
+        [data-theme="dark"] .footer-link {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="dark"] .footer-col a:hover {
+            color: #2dd4bf !important;
+        }
+
+        [data-theme="dark"] .footer-bottom {
+            border-top-color: #1e293b !important;
+            color: #94a3b8 !important;
+        }
+
+        /* --- SOFT BLUSH THEME OVERRIDES --- */
+        [data-theme="soft-blush"] body {
+            background-color: #fdf8f9 !important;
+            color: #54444a !important;
+        }
+
+        [data-theme="soft-blush"] .logo-text,
+        [data-theme="soft-blush"] .hero-title,
+        [data-theme="soft-blush"] .section-title,
+        [data-theme="soft-blush"] .features-header h2,
+        [data-theme="soft-blush"] .feature-title,
+        [data-theme="soft-blush"] .cat-name,
+        [data-theme="soft-blush"] .book-title,
+        [data-theme="soft-blush"] .dropdown-name,
+        [data-theme="soft-blush"] .footer-brand h4,
+        [data-theme="soft-blush"] .footer-col h5,
+        [data-theme="soft-blush"] .footer-col-title {
+            color: #2e2528 !important;
+        }
+
+        [data-theme="soft-blush"] .section-title::after {
+            background: linear-gradient(90deg, #b85d77 0%, #e5989b 100%) !important;
+        }
+
+        [data-theme="soft-blush"] .hero-tag {
+            color: #b85d77 !important;
+        }
+
+        [data-theme="soft-blush"] .hero-img-container {
+            background: #fff8fa !important;
+            border: 1px solid rgba(184, 93, 119, 0.25) !important;
+            box-shadow: 0 16px 36px -10px rgba(184, 93, 119, 0.15), 0 0 20px rgba(184, 93, 119, 0.08) !important;
+        }
+
+        [data-theme="soft-blush"] .hero-img-container::before {
+            background: linear-gradient(135deg, #fcecee 0%, #b85d77 100%) !important;
+        }
+
+        [data-theme="soft-blush"] .hero-desc,
+        [data-theme="soft-blush"] .hero-note,
+        [data-theme="soft-blush"] .hero-img-caption {
+            color: #826e75 !important;
+        }
+
+        [data-theme="soft-blush"] .hero-img-caption strong {
+            color: #b85d77 !important;
+        }
+
+        [data-theme="soft-blush"] .welcome-chip {
+            background: #fdf2f5 !important;
+            color: #b85d77 !important;
+            border-color: #f7dbe3 !important;
+        }
+
+        [data-theme="soft-blush"] .welcome-chip-pulse {
+            background: #b85d77 !important;
+            box-shadow: 0 0 0 0 rgba(184, 93, 119, 0.7) !important;
+        }
+
+        [data-theme="soft-blush"] .btn-search {
+            background: #b85d77 !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="soft-blush"] .btn-search:hover {
+            background: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .cat-icon {
+            background: #fdf2f5 !important;
+            color: #b85d77 !important;
+        }
+
+        [data-theme="soft-blush"] .hero-note strong {
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .stat-item h3,
+        [data-theme="soft-blush"] .counter-number,
+        [data-theme="soft-blush"] .stat-number {
+            color: #2e2528 !important;
+        }
+
+        [data-theme="soft-blush"] .stat-item p,
+        [data-theme="soft-blush"] .stat-desc {
+            color: #826e75 !important;
+        }
+
+        [data-theme="soft-blush"] .nav-link-item {
+            color: #826e75 !important;
+        }
+
+        [data-theme="soft-blush"] .nav-link-item:hover {
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .btn-nav-login {
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .btn-nav-dashboard {
+            background: #fceef2 !important;
+            color: #9e4761 !important;
+            border-color: #eedde2 !important;
+        }
+
+        [data-theme="soft-blush"] .user-menu-btn {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+        }
+
+        [data-theme="soft-blush"] .user-menu-name {
+            color: #2e2528 !important;
+        }
+
+        [data-theme="soft-blush"] .user-dropdown-card {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+            box-shadow: 0 10px 25px rgba(184, 93, 119, 0.08) !important;
+        }
+
+        [data-theme="soft-blush"] .user-dropdown-header {
+            border-color: #f7ebee !important;
+        }
+
+        [data-theme="soft-blush"] .dropdown-email {
+            color: #826e75 !important;
+        }
+
+        [data-theme="soft-blush"] .user-dropdown-item {
+            color: #54444a !important;
+        }
+
+        [data-theme="soft-blush"] .user-dropdown-item:hover {
+            background: #fdf2f5 !important;
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .user-dropdown-divider {
+            background: #f7ebee !important;
+        }
+
+        [data-theme="soft-blush"] .btn-green {
+            background: #b85d77 !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="soft-blush"] .btn-green:hover {
+            background: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .btn-blue {
+            background: #ffffff !important;
+            color: #54444a !important;
+            border-color: #eedde2 !important;
+        }
+
+        [data-theme="soft-blush"] .btn-blue:hover {
+            background: #fdf2f5 !important;
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .cat-card,
+        [data-theme="soft-blush"] .book-card,
+        [data-theme="soft-blush"] .feature-card,
+        [data-theme="soft-blush"] .testimonial-card,
+        [data-theme="soft-blush"] .faq-item {
+            background: #ffffff !important;
+            border-color: #eedde2 !important;
+            box-shadow: 0 1px 3px rgba(184, 93, 119, 0.05) !important;
+        }
+
+        [data-theme="soft-blush"] .footer {
+            background: #ffffff !important;
+            border-top: 1px solid #eedde2 !important;
+        }
+
+        [data-theme="soft-blush"] .footer-brand p,
+        [data-theme="soft-blush"] .footer-col a,
+        [data-theme="soft-blush"] .footer-col span,
+        [data-theme="soft-blush"] .footer-link {
+            color: #826e75 !important;
+        }
+
+        [data-theme="soft-blush"] .footer-col a:hover {
+            color: #9e4761 !important;
+        }
+
+        [data-theme="soft-blush"] .logo-icon {
+            background: #b85d77 !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(184, 93, 119, 0.35) !important;
+        }
+
+        [data-theme="soft-blush"] .logo-text {
+            color: #2e2528 !important;
+        }
+
+        [data-theme="soft-blush"] .btn-cta {
+            background: #b85d77 !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(184, 93, 119, 0.35) !important;
+        }
+
+        [data-theme="soft-blush"] .btn-cta:hover {
+            background: #9e4761 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(184, 93, 119, 0.5) !important;
+        }
+
+        [data-theme="soft-blush"] .footer-bottom {
+            border-top-color: #f7ebee !important;
+            color: #826e75 !important;
+        }
+
+        /* --- MIDNIGHT SLATE THEME OVERRIDES --- */
+        [data-theme="midnight-slate"] body {
+            background-color: #0b1329 !important;
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="midnight-slate"] .logo-text,
+        [data-theme="midnight-slate"] .hero-title,
+        [data-theme="midnight-slate"] .section-title,
+        [data-theme="midnight-slate"] .features-header h2,
+        [data-theme="midnight-slate"] .feature-title,
+        [data-theme="midnight-slate"] .cat-name,
+        [data-theme="midnight-slate"] .book-title,
+        [data-theme="midnight-slate"] .dropdown-name,
+        [data-theme="midnight-slate"] .footer-brand h4,
+        [data-theme="midnight-slate"] .footer-col h5,
+        [data-theme="midnight-slate"] .footer-col-title {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .section-title::after {
+            background: linear-gradient(90deg, #38bdf8 0%, #3b82f6 100%) !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-tag {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-img-container {
+            background: #0f172a !important;
+            border: 1px solid rgba(56, 189, 248, 0.25) !important;
+            box-shadow: 0 16px 36px -10px rgba(0, 0, 0, 0.4), 0 0 20px rgba(56, 189, 248, 0.1) !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-img-container::before {
+            background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%) !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-desc,
+        [data-theme="midnight-slate"] .hero-note,
+        [data-theme="midnight-slate"] .hero-img-caption {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-img-caption strong {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .welcome-chip {
+            background: rgba(56, 189, 248, 0.12) !important;
+            color: #38bdf8 !important;
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        [data-theme="midnight-slate"] .welcome-chip-pulse {
+            background: #38bdf8 !important;
+            box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.7) !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-search {
+            background: #2563eb !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-search:hover {
+            background: #1d4ed8 !important;
+        }
+
+        [data-theme="midnight-slate"] .cat-icon {
+            background: #1e293b !important;
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .hero-note strong {
+            color: #60a5fa !important;
+        }
+
+        [data-theme="midnight-slate"] .stat-item h3,
+        [data-theme="midnight-slate"] .counter-number,
+        [data-theme="midnight-slate"] .stat-number {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .stat-item p,
+        [data-theme="midnight-slate"] .stat-desc {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .nav-link-item {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .nav-link-item:hover {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-nav-login {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-nav-dashboard {
+            background: rgba(56, 189, 248, 0.16) !important;
+            color: #38bdf8 !important;
+            border-color: rgba(56, 189, 248, 0.3) !important;
+        }
+
+        [data-theme="midnight-slate"] .user-menu-btn {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+        }
+
+        [data-theme="midnight-slate"] .user-menu-name {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .user-dropdown-card {
+            background: #101a2f !important;
+            border-color: #26354d !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="midnight-slate"] .user-dropdown-header {
+            border-color: #1c2a42 !important;
+        }
+
+        [data-theme="midnight-slate"] .dropdown-email {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .user-dropdown-item {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="midnight-slate"] .user-dropdown-item:hover {
+            background: #18263f !important;
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .user-dropdown-divider {
+            background: #1c2a42 !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-green {
+            background: #2563eb !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-green:hover {
+            background: #1d4ed8 !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-blue {
+            background: #141f33 !important;
+            color: #cbd5e1 !important;
+            border-color: #2b3b55 !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-blue:hover {
+            background: #1e2c45 !important;
+            color: #f8fafc !important;
+            border-color: #3b82f6 !important;
+        }
+
+        [data-theme="midnight-slate"] .cat-card,
+        [data-theme="midnight-slate"] .book-card,
+        [data-theme="midnight-slate"] .feature-card,
+        [data-theme="midnight-slate"] .testimonial-card,
+        [data-theme="midnight-slate"] .faq-item {
+            background: #141f33 !important;
+            border-color: #24354e !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+        }
+
+        [data-theme="midnight-slate"] .footer {
+            background: #0b1329 !important;
+            border-top: 1px solid #1e2c45 !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-brand p,
+        [data-theme="midnight-slate"] .footer-col a,
+        [data-theme="midnight-slate"] .footer-col span,
+        [data-theme="midnight-slate"] .footer-link {
+            color: #94a3b8 !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-col a:hover {
+            color: #38bdf8 !important;
+        }
+
+        [data-theme="midnight-slate"] .logo-icon {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.45) !important;
+        }
+
+        [data-theme="midnight-slate"] .logo-text {
+            color: #f8fafc !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-cta {
+            background: #2563eb !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        }
+
+        [data-theme="midnight-slate"] .btn-cta:hover {
+            background: #1d4ed8 !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.5) !important;
+        }
+
+        [data-theme="midnight-slate"] .footer-bottom {
+            border-top-color: #1e2c45 !important;
+            color: #94a3b8 !important;
+        }
+
+        /* --- THEME OVERRIDES: VAN GOGH (STARRY NIGHT) --- */
+        [data-theme="van-gogh"] body {
+            background-color: #0b1726 !important;
+            background-image: 
+                radial-gradient(circle at 82% 14%, rgba(245, 158, 11, 0.22) 0%, rgba(233, 185, 73, 0.08) 22%, transparent 45%),
+                radial-gradient(ellipse at 15% 25%, rgba(36, 91, 143, 0.35) 0%, rgba(16, 42, 67, 0.22) 35%, transparent 58%),
+                radial-gradient(ellipse at 85% 75%, rgba(26, 77, 107, 0.25) 0%, transparent 45%),
+                radial-gradient(circle at 45% 85%, rgba(27, 69, 110, 0.28) 0%, transparent 50%),
+                conic-gradient(from 215deg at 70% 30%, transparent 0deg, rgba(36, 91, 143, 0.12) 60deg, rgba(245, 158, 11, 0.07) 120deg, transparent 180deg) !important;
+            background-attachment: fixed !important;
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .logo-text,
+        [data-theme="van-gogh"] .hero-title,
+        [data-theme="van-gogh"] .section-title,
+        [data-theme="van-gogh"] .features-header h2,
+        [data-theme="van-gogh"] .feature-title,
+        [data-theme="van-gogh"] .cat-name,
+        [data-theme="van-gogh"] .book-title,
+        [data-theme="van-gogh"] .dropdown-name,
+        [data-theme="van-gogh"] .footer-brand h4,
+        [data-theme="van-gogh"] .footer-col h5,
+        [data-theme="van-gogh"] .footer-col-title {
+            color: #f6f0df !important;
+            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        [data-theme="van-gogh"] .section-title::after {
+            background: linear-gradient(90deg, #1b456e, #245b8f 25%, #fcd34d 55%, #f59e0b 78%, #1b456e 100%) !important;
+        }
+
+        [data-theme="van-gogh"] .hero-tag {
+            background: rgba(245, 158, 11, 0.18) !important;
+            color: #fcd34d !important;
+            border-color: rgba(245, 158, 11, 0.45) !important;
+            font-weight: 700 !important;
+        }
+
+        [data-theme="van-gogh"] .hero-img-container {
+            border: 2px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 16px 40px -10px rgba(11, 23, 38, 0.85), 0 0 32px rgba(245, 158, 11, 0.35) !important;
+        }
+
+        [data-theme="van-gogh"] .hero-img-container::before {
+            background: linear-gradient(135deg, rgba(16, 42, 67, 0.88) 0%, rgba(36, 91, 143, 0.5) 100%) !important;
+        }
+
+        [data-theme="van-gogh"] .hero-desc,
+        [data-theme="van-gogh"] .hero-note,
+        [data-theme="van-gogh"] .hero-img-caption {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="van-gogh"] .hero-img-caption strong {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .welcome-chip {
+            background: rgba(16, 32, 53, 0.95) !important;
+            border-color: #22446a !important;
+            color: #f6f0df !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5) !important;
+        }
+
+        [data-theme="van-gogh"] .welcome-chip-pulse {
+            background-color: #f59e0b !important;
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7) !important;
+        }
+
+        [data-theme="van-gogh"] .btn-search {
+            background: #245b8f !important;
+            color: #ffffff !important;
+            border-color: #316ba3 !important;
+        }
+
+        [data-theme="van-gogh"] .btn-search:hover {
+            background: #1b456e !important;
+            border-color: #f59e0b !important;
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .cat-icon {
+            background: radial-gradient(circle at 35% 35%, #2a639b 0%, #16365c 100%) !important;
+            color: #fcd34d !important;
+            border: 1px solid rgba(245, 158, 11, 0.45) !important;
+            box-shadow: 0 2px 10px rgba(245, 158, 11, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .hero-note strong {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .stat-item h3,
+        [data-theme="van-gogh"] .counter-number,
+        [data-theme="van-gogh"] .stat-number {
+            color: #fcd34d !important;
+            text-shadow: 0 0 14px rgba(245, 158, 11, 0.35);
+        }
+
+        [data-theme="van-gogh"] .stat-item p,
+        [data-theme="van-gogh"] .stat-desc {
+            color: #cbd5e1 !important;
+        }
+
+        [data-theme="van-gogh"] .nav-link-item {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .nav-link-item:hover {
+            color: #fcd34d !important;
+            background: #193354 !important;
+        }
+
+        [data-theme="van-gogh"] .btn-nav-login {
+            color: #e2e8f0 !important;
+            border-color: #22446a !important;
+            background: #132238 !important;
+        }
+
+        [data-theme="van-gogh"] .btn-nav-login:hover {
+            border-color: #f59e0b !important;
+            color: #fcd34d !important;
+            background: #193354 !important;
+        }
+
+        [data-theme="van-gogh"] .btn-nav-dashboard {
+            background: #245b8f !important;
+            color: #ffffff !important;
+            box-shadow: 0 4px 14px rgba(36, 91, 143, 0.4) !important;
+        }
+
+        [data-theme="van-gogh"] .btn-nav-dashboard:hover {
+            background: #1b456e !important;
+            border-color: #f59e0b !important;
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .role-badge {
+            background: rgba(245, 158, 11, 0.18) !important;
+            color: #fcd34d !important;
+            border-color: rgba(245, 158, 11, 0.45) !important;
+            font-weight: 600 !important;
+        }
+
+        [data-theme="van-gogh"] .user-menu-btn {
+            background: #132238 !important;
+            border-color: #22446a !important;
+        }
+
+        [data-theme="van-gogh"] .user-menu-name {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .user-dropdown-card {
+            background: linear-gradient(180deg, #132238 0%, #0d1b2a 100%) !important;
+            border: 1px solid #22446a !important;
+            border-top: 2px solid #f59e0b !important;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.7), 0 0 16px rgba(36, 91, 143, 0.3) !important;
+        }
+
+        [data-theme="van-gogh"] .user-dropdown-header {
+            border-color: #22446a !important;
+        }
+
+        [data-theme="van-gogh"] .dropdown-email {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .user-dropdown-item {
+            color: #e2e8f0 !important;
+        }
+
+        [data-theme="van-gogh"] .user-dropdown-item:hover {
+            background: #193354 !important;
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .user-dropdown-divider {
+            background: #22446a !important;
+        }
+
+        [data-theme="van-gogh"] .btn-green {
+            background: #245b8f !important;
+            color: #ffffff !important;
+        }
+
+        [data-theme="van-gogh"] .btn-green:hover {
+            background: #1b456e !important;
+            border-color: #f59e0b !important;
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .btn-blue {
+            background: #132238 !important;
+            color: #e2e8f0 !important;
+            border-color: #22446a !important;
+        }
+
+        [data-theme="van-gogh"] .btn-blue:hover {
+            background: #193354 !important;
+            color: #fcd34d !important;
+            border-color: #f59e0b !important;
+        }
+
+        [data-theme="van-gogh"] .cat-card,
+        [data-theme="van-gogh"] .book-card,
+        [data-theme="van-gogh"] .feature-card,
+        [data-theme="van-gogh"] .testimonial-card,
+        [data-theme="van-gogh"] .faq-item {
+            background: linear-gradient(180deg, #14243b 0%, #101c2e 100%) !important;
+            border: 1px solid #1e3a5f !important;
+            border-top: 2px solid rgba(245, 158, 11, 0.4) !important;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45), 0 0 1px rgba(245, 158, 11, 0.15) !important;
+        }
+
+        [data-theme="van-gogh"] .cat-card:hover,
+        [data-theme="van-gogh"] .book-card:hover,
+        [data-theme="van-gogh"] .feature-card:hover {
+            border-color: rgba(245, 158, 11, 0.6) !important;
+            box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.6), 0 0 16px rgba(245, 158, 11, 0.25) !important;
+        }
+
+        [data-theme="van-gogh"] .footer {
+            background: #091522 !important;
+            border-top: 1px solid #1e3a5f !important;
+        }
+
+        [data-theme="van-gogh"] .footer-brand p,
+        [data-theme="van-gogh"] .footer-col a,
+        [data-theme="van-gogh"] .footer-col span,
+        [data-theme="van-gogh"] .footer-link {
+            color: #9fb3c8 !important;
+        }
+
+        [data-theme="van-gogh"] .footer-col a:hover {
+            color: #fcd34d !important;
+        }
+
+        [data-theme="van-gogh"] .logo-icon {
+            background: radial-gradient(circle at 35% 35%, #2d6ca8 0%, #15375d 100%) !important;
+            color: #fcd34d !important;
+            box-shadow: 0 0 16px rgba(245, 158, 11, 0.4), inset 0 0 8px rgba(245, 158, 11, 0.2) !important;
+            border: 1px solid rgba(245, 158, 11, 0.5) !important;
+        }
+
+        [data-theme="van-gogh"] .logo-text {
+            color: #f6f0df !important;
+        }
+
+        [data-theme="van-gogh"] .btn-cta {
+            background: #245b8f !important;
+            color: #ffffff !important;
+            font-weight: 800 !important;
+            border: 1px solid #3a7ebd !important;
+            box-shadow: 0 4px 14px rgba(36, 91, 143, 0.4) !important;
+        }
+
+        [data-theme="van-gogh"] .btn-cta:hover {
+            background: #1b456e !important;
+            color: #f6f0df !important;
+            border-color: #f59e0b !important;
+            box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35) !important;
+        }
+
+        [data-theme="van-gogh"] .footer-bottom {
+            border-top-color: #1e3a5f !important;
+            color: #9fb3c8 !important;
+        }
     </style>
 </head>
 <body>
@@ -1667,6 +3008,20 @@
             <p class="intro-tagline">Ruang Pengetahuan Terbuka</p>
         </div>
     </div>
+    <script>
+        (function () {
+            try {
+                var curtain = document.getElementById('introCurtain');
+                if (curtain) {
+                    var op = document.documentElement.getAttribute('data-opening') || 'coquette-blush';
+                    if (op === 'soft-mint-glow') op = 'midnight-blue';
+                    else if (op === 'pastel-playful') op = 'sakura-bloom';
+                    else if (op === 'candy-gradient') op = 'strawberry-milk';
+                    curtain.classList.add('intro-curtain--' + op);
+                }
+            } catch (e) {}
+        })();
+    </script>
 
     <!-- NAVBAR ATAS -->
     <header class="container">
@@ -2078,9 +3433,9 @@
                 <div class="footer-col">
                     <h5>Kunjungi perpustakaan</h5>
                     <ul>
-                        <li><span style="font-size: 13px; color: #64748b;">Jl. Merdeka No. 12, Bandung</span></li>
-                        <li><span style="font-size: 13px; color: #64748b;">Senin–Sabtu, 08.00–17.00 WIB</span></li>
-                        <li><span style="font-size: 13px; color: #64748b;">halo@booknest.id · (022) 420 1234</span></li>
+                        <li><span class="footer-info-text">Jl. Merdeka No. 12, Bandung</span></li>
+                        <li><span class="footer-info-text">Senin–Sabtu, 08.00–17.00 WIB</span></li>
+                        <li><span class="footer-info-text">halo@booknest.id · (022) 420 1234</span></li>
                     </ul>
                 </div>
             </div>
