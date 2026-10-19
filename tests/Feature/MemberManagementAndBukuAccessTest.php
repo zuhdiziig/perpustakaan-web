@@ -3,7 +3,11 @@
 namespace Tests\Feature;
 
 use App\Models\Buku;
+use App\Models\Denda;
+use App\Models\DetailPeminjaman;
 use App\Models\Kategori;
+use App\Models\Peminjaman;
+use App\Models\Pengembalian;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -66,9 +70,10 @@ class MemberManagementAndBukuAccessTest extends TestCase
         $response->assertDontSee('Integritas Data & Pencegahan Kecurangan', false);
         $response->assertDontSee('Kartu Digital');
         $response->assertDontSee('Tambah Anggota Baru');
-        // Tombol aksi ubah atau toggle nonaktifkan tidak boleh terlihat oleh petugas
+        // Tombol aksi ubah, toggle nonaktifkan, atau hapus akun tidak boleh terlihat oleh petugas
         $response->assertDontSee(route('member.edit', $this->member->id));
         $response->assertDontSee(route('member.toggle-status', $this->member->id));
+        $response->assertDontSee('title="Hapus Akun Anggota"', false);
     }
 
     public function test_petugas_is_forbidden_from_editing_or_toggling_member_data(): void
@@ -86,6 +91,7 @@ class MemberManagementAndBukuAccessTest extends TestCase
         ])->assertForbidden();
 
         $this->patch(route('member.toggle-status', $this->member->id))->assertForbidden();
+        $this->delete(route('member.destroy', $this->member->id))->assertForbidden();
 
         // Verifikasi data di database tetap utuh
         $this->assertDatabaseHas('users', [
@@ -251,6 +257,127 @@ class MemberManagementAndBukuAccessTest extends TestCase
             'email' => 'memberbaru@example.com',
             'role' => 'member',
             'status' => 'aktif',
+        ]);
+    }
+
+    public function test_admin_sees_delete_button_on_member_index(): void
+    {
+        $response = $this->actingAs($this->admin)->get(route('member.index'));
+
+        $response->assertOk();
+        $response->assertSee(route('member.destroy', $this->member->id));
+        $response->assertSee('title="Hapus Akun Anggota"', false);
+    }
+
+    public function test_admin_can_delete_member_account_successfully(): void
+    {
+        $memberToDelete = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+            'name' => 'Member Akan Dihapus',
+            'email' => 'hapus@example.com',
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('member.destroy', $memberToDelete->id));
+
+        $response->assertRedirect(route('member.index'));
+        $response->assertSessionHas('success');
+        $this->assertDatabaseMissing('users', [
+            'id' => $memberToDelete->id,
+        ]);
+    }
+
+    public function test_admin_cannot_delete_member_with_active_loans(): void
+    {
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => now()->toDateString(),
+            'batasKembali' => now()->addDays(7)->toDateString(),
+            'status' => 'Dipinjam',
+            'totalBuku' => 1,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'jumlah' => 1,
+            'statusBuku' => 'Dipinjam',
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('member.destroy', $this->member->id));
+
+        $response->assertRedirect(route('member.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('users', [
+            'id' => $this->member->id,
+        ]);
+    }
+
+    public function test_admin_cannot_delete_member_with_unpaid_fines(): void
+    {
+        $peminjaman = Peminjaman::create([
+            'idUserMember' => $this->member->id,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalPinjam' => now()->subDays(10)->toDateString(),
+            'batasKembali' => now()->subDays(3)->toDateString(),
+            'status' => 'Kembali',
+            'totalBuku' => 1,
+        ]);
+
+        DetailPeminjaman::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idBuku' => $this->buku->idBuku,
+            'jumlah' => 1,
+            'statusBuku' => 'Kembali',
+        ]);
+
+        $pengembalian = Pengembalian::create([
+            'idPeminjaman' => $peminjaman->idPeminjaman,
+            'idUserPetugas' => $this->petugas->id,
+            'tanggalKembali' => now()->toDateString(),
+            'kondisiBuku' => 'Baik',
+        ]);
+
+        Denda::create([
+            'idPengembalian' => $pengembalian->idPengembalian,
+            'jenisDenda' => 'Keterlambatan',
+            'jumlah' => 5000,
+            'status' => 'Belum Dibayar',
+        ]);
+
+        $response = $this->actingAs($this->admin)->delete(route('member.destroy', $this->member->id));
+
+        $response->assertRedirect(route('member.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('users', [
+            'id' => $this->member->id,
+        ]);
+    }
+
+    public function test_regular_member_is_forbidden_from_deleting_member_account(): void
+    {
+        $otherMember = User::factory()->create([
+            'role' => 'member',
+            'status' => 'aktif',
+        ]);
+
+        $response = $this->actingAs($this->member)->delete(route('member.destroy', $otherMember->id));
+
+        $response->assertForbidden();
+        $this->assertDatabaseHas('users', [
+            'id' => $otherMember->id,
+        ]);
+    }
+
+    public function test_admin_cannot_delete_own_account(): void
+    {
+        $response = $this->actingAs($this->admin)->delete(route('member.destroy', $this->admin->id));
+
+        $response->assertRedirect(route('member.index'));
+        $response->assertSessionHas('error');
+        $this->assertDatabaseHas('users', [
+            'id' => $this->admin->id,
         ]);
     }
 }

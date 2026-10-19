@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class PetugasController extends Controller
 {
@@ -104,12 +105,27 @@ class PetugasController extends Controller
         return redirect()->route('petugas.index')->with('success', 'Data petugas berhasil diperbarui.');
     }
 
-    // Hapus data petugas
+    // Hapus data akun petugas (Khusus Admin)
     public function destroy($id)
     {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang berwenang menghapus akun petugas.');
+        }
+
+        if ((int) $id === (int) auth()->id()) {
+            return redirect()->route('petugas.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
         $petugas = User::where('role', 'petugas')->findOrFail($id);
+
+        // Hapus foto profil dari storage jika ada
+        if ($petugas->foto && Storage::disk('public')->exists($petugas->foto)) {
+            Storage::disk('public')->delete($petugas->foto);
+        }
+
+        $namaPetugas = $petugas->name;
         $petugas->delete();
 
-        return redirect()->route('petugas.index')->with('success', 'Data petugas berhasil dihapus.');
+        return redirect()->route('petugas.index')->with('success', "Data petugas {$namaPetugas} berhasil dihapus.");
     }
 }

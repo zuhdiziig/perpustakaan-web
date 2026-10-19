@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Denda;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class MemberController extends Controller
 {
@@ -139,5 +141,50 @@ class MemberController extends Controller
         $pesan = $member->status === 'aktif' ? 'Member berhasil diaktifkan kembali.' : 'Member berhasil dinonaktifkan.';
 
         return redirect()->route('member.index')->with('success', $pesan);
+    }
+
+    // Hapus data akun member secara permanen (Khusus Admin)
+    public function destroy($id)
+    {
+        if (auth()->user()->role !== 'admin') {
+            abort(403, 'Akses Ditolak: Hanya Administrator yang berwenang menghapus akun anggota.');
+        }
+
+        if ((int) $id === (int) auth()->id()) {
+            return redirect()->route('member.index')->with('error', 'Anda tidak dapat menghapus akun Anda sendiri.');
+        }
+
+        $member = User::where('role', 'member')->findOrFail($id);
+
+        // Cek tanggungan peminjaman aktif atau booking
+        $jumlahBukuAktif = $member->jumlahBukuAktif();
+        if ($jumlahBukuAktif > 0) {
+            return redirect()->route('member.index')->with('error', "Tidak dapat menghapus akun {$member->name}. Anggota ini masih memiliki {$jumlahBukuAktif} buku yang sedang dipinjam atau dibooking.");
+        }
+
+        // Cek tanggungan denda belum dibayar / lunas
+        $memilikiDendaBelumLunas = Denda::where('status', '!=', 'Lunas')
+            ->where(function ($query) use ($id) {
+                $query->whereHas('pengembalian.peminjaman', function ($q) use ($id) {
+                    $q->where('idUserMember', $id);
+                })->orWhereHas('details.peminjaman', function ($q) use ($id) {
+                    $q->where('idUserMember', $id);
+                });
+            })
+            ->exists();
+
+        if ($memilikiDendaBelumLunas) {
+            return redirect()->route('member.index')->with('error', "Tidak dapat menghapus akun {$member->name}. Anggota ini masih memiliki tanggungan denda yang belum lunas.");
+        }
+
+        // Hapus foto profil dari storage jika ada
+        if ($member->foto && Storage::disk('public')->exists($member->foto)) {
+            Storage::disk('public')->delete($member->foto);
+        }
+
+        $namaMember = $member->name;
+        $member->delete();
+
+        return redirect()->route('member.index')->with('success', "Akun anggota {$namaMember} berhasil dihapus dari sistem.");
     }
 }

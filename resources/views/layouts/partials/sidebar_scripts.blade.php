@@ -53,7 +53,7 @@
             'nav.other': 'Lainnya',
             'nav.reports': 'Laporan',
             'nav.settings': 'Pengaturan',
-            'nav.fines': 'Kelola Denda',
+            'nav.fines': 'Kelola ' + 'Denda',
             'nav.my_fines': 'Denda',
             'nav.inventory': 'Inventory Buku',
             'nav.history': 'Riwayat',

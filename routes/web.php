@@ -270,6 +270,10 @@ Route::middleware('auth')->group(function () {
         // Mutasi Master Data Buku (Tambah, Edit, Hapus)
         Route::resource('buku', BukuController::class)
             ->except(['index', 'show']);
+
+        // Hapus Akun Anggota (Eksklusif Hak Akses Admin)
+        Route::delete('/member/{id}', [MemberController::class, 'destroy'])
+            ->name('member.destroy');
     });
 
     /*
