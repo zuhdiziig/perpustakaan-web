@@ -67,6 +67,10 @@ class PengembalianMemberTest extends TestCase
         $response->assertSee('Pengembalian Buku');
         $response->assertSee('Pemrograman Web Modern');
         $response->assertSee('Daftar Buku Sedang Dipinjam yang Perlu Dikembalikan');
+        $response->assertSee('Saya sudah menyetujui');
+        $response->assertSee(route('syarat-layanan'));
+        $response->assertSee('persyaratan dan layanan');
+        $response->assertDontSee('Saya memastikan telah menyiapkan buku fisik ini untuk dikembalikan');
     }
 
     public function test_member_can_submit_return_and_is_redirected_to_return_ticket(): void

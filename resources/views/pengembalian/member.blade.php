@@ -658,6 +658,32 @@
         cursor: pointer;
     }
 
+    .checkbox-wrap a {
+        color: #15803d;
+        font-weight: 700;
+        text-decoration: underline;
+        transition: color 0.15s;
+    }
+
+    .checkbox-wrap a:hover {
+        color: #166534;
+        text-decoration: underline;
+    }
+
+    [data-theme="dark"] .checkbox-wrap {
+        background: rgba(22, 101, 52, 0.2);
+        border-color: rgba(34, 197, 94, 0.3);
+        color: #86efac;
+    }
+
+    [data-theme="dark"] .checkbox-wrap a {
+        color: #4ade80;
+    }
+
+    [data-theme="dark"] .checkbox-wrap a:hover {
+        color: #86efac;
+    }
+
     .qr-card-center {
         text-align: center;
         padding: 10px 0;
@@ -1588,7 +1614,7 @@
                 <div class="checkbox-wrap">
                     <input type="checkbox" name="konfirmasi" id="checkConfirm" required>
                     <label for="checkConfirm">
-                        Saya memastikan telah menyiapkan buku fisik ini untuk dikembalikan dan akan menunjukkan QR Code tiket ke petugas di meja sirkulasi.
+                        Saya sudah menyetujui <a href="{{ route('syarat-layanan') }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">persyaratan dan layanan</a> yang berlaku.
                     </label>
                 </div>
             </div>
@@ -1732,7 +1758,7 @@
                 <div class="checkbox-wrap">
                     <input type="checkbox" name="konfirmasi" id="checkBatchConfirm" required>
                     <label for="checkBatchConfirm">
-                        Saya memastikan telah menyiapkan seluruh buku yang dipilih dan bersedia menunjukkan tiket QR pengembalian bersama ke petugas sirkulasi.
+                        Saya sudah menyetujui <a href="{{ route('syarat-layanan') }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();">persyaratan dan layanan</a> yang berlaku.
                     </label>
                 </div>
             </div>
